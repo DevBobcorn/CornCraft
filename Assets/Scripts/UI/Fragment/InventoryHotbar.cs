@@ -31,11 +31,11 @@ namespace CraftSharp.UI
         {
             if (selectedSlot)
             {
-                selectedSlot.DeselectSlot();
+                selectedSlot.SlotPointerExit();
             }
 
             selectedSlot = itemSlots[slot];
-            selectedSlot.SelectSlot();
+            selectedSlot.SlotPointerEnter();
         }
 
         public void Start()

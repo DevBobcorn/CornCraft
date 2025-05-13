@@ -174,7 +174,7 @@ MonoBehaviour:
   itemMeshFilter: {fileID: 4811868574071064193}
   itemMeshRenderer: {fileID: 6061594878036035745}
   slotCenterRef: {fileID: 7578773966599338794}
-  selectedSprite: {fileID: 21300000, guid: 80b1666e635a0c54893225c057849245, type: 3}
+  hoveredSprite: {fileID: 21300000, guid: 80b1666e635a0c54893225c057849245, type: 3}
   draggedSprite: {fileID: 21300000, guid: 41d0db0f11f33dd4c908cc48774f213a, type: 3}
   keyHintText: {fileID: 0}
   placeholderImage: {fileID: 4358019779645494858}
@@ -201,7 +201,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 455464636642461461}
           m_TargetAssemblyTypeName: CraftSharp.UI.InventoryItemSlot, CraftSharp.App
-          m_MethodName: SelectSlot
+          m_MethodName: SlotPointerEnter
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -217,7 +217,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 455464636642461461}
           m_TargetAssemblyTypeName: CraftSharp.UI.InventoryItemSlot, CraftSharp.App
-          m_MethodName: DeselectSlot
+          m_MethodName: SlotPointerExit
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}

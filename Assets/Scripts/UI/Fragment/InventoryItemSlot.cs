@@ -21,7 +21,7 @@ namespace CraftSharp.UI
         [SerializeField] private MeshFilter itemMeshFilter;
         [SerializeField] private MeshRenderer itemMeshRenderer;
         [SerializeField] private Transform slotCenterRef;
-        [SerializeField] private Sprite selectedSprite, draggedSprite;
+        [SerializeField] private Sprite hoveredSprite, draggedSprite;
         [SerializeField] private TMP_Text keyHintText;
         [SerializeField] private Image placeholderImage;
         [SerializeField] private Image slotImage;
@@ -48,7 +48,7 @@ namespace CraftSharp.UI
             set
             {
                 dragged = value;
-                slotImage.overrideSprite = dragged ? draggedSprite : selected ? selectedSprite : null;
+                slotImage.overrideSprite = dragged ? draggedSprite : selected ? hoveredSprite : null;
             }
         }
 
@@ -145,10 +145,10 @@ namespace CraftSharp.UI
             slotCenterRef.transform.localScale = new Vector3(scale, scale, scale) * fullItemScale;
         }
 
-        public void SelectSlot()
+        public void SlotPointerEnter()
         {
             selected = true;
-            slotImage.overrideSprite = Dragged ? draggedSprite : selectedSprite;
+            slotImage.overrideSprite = Dragged ? draggedSprite : hoveredSprite;
             
             if (_slotAnimator) // For hotbar slots
                 _slotAnimator.SetBool(SELECTED_HASH, true);
@@ -160,10 +160,10 @@ namespace CraftSharp.UI
             }
             
             cursorTextHandler?.Invoke(cursorText);
-            selectHandler?.Invoke();
+            hoverHandler?.Invoke();
         }
 
-        public void DeselectSlot()
+        public void SlotPointerExit()
         {
             selected = false;
             slotImage.overrideSprite = Dragged ? draggedSprite : null;
@@ -188,7 +188,7 @@ namespace CraftSharp.UI
         
         private Action<PointerEventData.InputButton> pointerUpHandler;
         private Action<PointerEventData.InputButton> pointerDownHandler;
-        private Action selectHandler;
+        private Action hoverHandler;
 
         public void SetPointerUpHandler(Action<PointerEventData.InputButton> handler)
         {
@@ -200,9 +200,9 @@ namespace CraftSharp.UI
             pointerDownHandler = handler;
         }
         
-        public void SetSelectHandler(Action handler)
+        public void SetHoverHandler(Action handler)
         {
-            selectHandler = handler;
+            hoverHandler = handler;
         }
         
         public void SlotPointerDown(BaseEventData data)

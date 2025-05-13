@@ -283,7 +283,7 @@ namespace CraftSharp.UI
                 draggedSlots.Clear();
             });
             
-            slot.SetSelectHandler(() =>
+            slot.SetHoverHandler(() =>
             {
                 if (!game) return;
                 
@@ -601,7 +601,7 @@ namespace CraftSharp.UI
             {
                 slot.UpdateItemStack(null);
                 slot.SetCursorTextHandler(null);
-                slot.SetSelectHandler(null);
+                slot.SetHoverHandler(null);
                 slot.SetPointerDownHandler(null);
                 slot.SetPointerUpHandler(null);
             }
