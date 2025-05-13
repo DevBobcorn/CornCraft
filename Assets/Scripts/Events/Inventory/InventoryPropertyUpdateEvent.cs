@@ -4,9 +4,9 @@ namespace CraftSharp.Event
     {
         public int InventoryId { get; }
         public int Property { get; }
-        public int Value { get; }
+        public short Value { get; }
 
-        public InventoryPropertyUpdateEvent(int inventoryId, int property, int value)
+        public InventoryPropertyUpdateEvent(int inventoryId, int property, short value)
         {
             InventoryId = inventoryId;
             Property = property;

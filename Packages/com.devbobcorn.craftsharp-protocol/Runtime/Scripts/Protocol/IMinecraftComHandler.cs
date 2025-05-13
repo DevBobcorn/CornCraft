@@ -268,13 +268,13 @@ namespace CraftSharp.Protocol
         void OnTimeUpdate(long worldAge, long timeOfDay);
 
         /// <summary>
-        /// When received inventory properties from server.
+        /// When received inventory property from server.
         /// 
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="propertyId">Property Id</param>
         /// <param name="propertyValue">Property Value</param>
-        public void OnInventoryProperties(byte inventoryId, short propertyId, short propertyValue);
+        public void OnInventoryProperty(byte inventoryId, short propertyId, short propertyValue);
 
         /// <summary>
         /// Called when inventory items have been received

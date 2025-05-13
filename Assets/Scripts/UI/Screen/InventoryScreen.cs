@@ -9,6 +9,7 @@ using TMPro;
 
 using CraftSharp.Event;
 using CraftSharp.Inventory;
+using System.Linq;
 
 namespace CraftSharp.UI
 {
@@ -40,6 +41,8 @@ namespace CraftSharp.UI
         private readonly List<(string, string, SpriteType, Image)> currentFilledSprites = new();
         // (flipbook_timer, sprite_type, sprite_image)
         private readonly List<(SpriteType.FlipbookTimer, SpriteType, Image)> currentFlipbookSprites = new();
+        // (predicate_type, predicate, inventory_fragment)
+        private readonly List<(InventoryType.PredicateType, InventoryPropertyPredicate, MonoBehaviour)> propertyDependents = new();
 
         private bool isActive = false;
 
@@ -367,29 +370,33 @@ namespace CraftSharp.UI
             foreach (var spriteInfo in layoutInfo.SpriteInfo)
             {
                 var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
-                CreateSprite(parent, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
+                var sprite = CreateSprite(parent, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
                     spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty);
+                RegisterPropertyDependent(spriteInfo, sprite);
             }
 
             // Populate layout labels
             foreach (var labelInfo in layoutInfo.LabelInfo)
             {
-                CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width,
+                var label = CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width,
                     labelInfo.Alignment, labelInfo.TextTranslationKey);
+                RegisterPropertyDependent(labelInfo, label);
             }
 
             // Populate layout inputs
             foreach (var (inputId, inputInfo) in layoutInfo.InputInfo)
             {
-                CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
+                var input = CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
                     inputInfo.Width, inputInfo.PlaceholderTranslationKey);
+                RegisterPropertyDependent(inputInfo, input);
             }
 
             // Populate layout buttons
             foreach (var (buttonId, buttonInfo) in layoutInfo.ButtonInfo)
             {
-                CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
+                var button = CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
                     buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo);
+                RegisterPropertyDependent(buttonInfo, button);
             }
 
             if (createSlots)
@@ -397,8 +404,9 @@ namespace CraftSharp.UI
                 // Populate layout slots
                 foreach (var (slotId, slotInfo) in layoutInfo.SlotInfo)
                 {
-                    CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.PreviewItemStack,
+                    var slot = CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.PreviewItemStack,
                         slotInfo.PlaceholderTypeId, $"Slot [{slotId}] (Nested)");
+                    RegisterPropertyDependent(slotInfo, slot);
                 }
             }
         }
@@ -499,6 +507,53 @@ namespace CraftSharp.UI
             return spriteImage;
         }
 
+        private void RegisterPropertyDependent(InventoryType.InventoryFragmentInfo fragmentInfo, MonoBehaviour inventoryFragment)
+        {
+            foreach (var (predicateType, predicate) in fragmentInfo.Predicates)
+            {
+                propertyDependents.Add((predicateType, predicate, inventoryFragment));
+            }
+        }
+
+        private void UpdatePredicateDependents()
+        {
+            var propertyNames = activeInventoryData.Type.PropertyNames;
+            var propertyTable = activeInventoryData.Properties.ToDictionary(
+                x => propertyNames[x.Key], x => x.Value);
+
+            foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
+            {
+                var predicateResult = predicate.Check(propertyTable);
+
+                switch (predicateType)
+                {
+                    case InventoryType.PredicateType.Visible:
+                        inventoryFragment.gameObject.SetActive(predicateResult);
+                        break;
+                    case InventoryType.PredicateType.Enabled:
+                        if (inventoryFragment is InventoryInteractable inventoryInteractable1)
+                        {
+                            inventoryInteractable1.Enabled = predicateResult;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Cannot set enabled status for inventory fragment {inventoryFragment.gameObject.name}!");
+                        }
+                        break;
+                    case InventoryType.PredicateType.Selected:
+                        if (inventoryFragment is InventoryInteractable inventoryInteractable2)
+                        {
+                            inventoryInteractable2.Selected = predicateResult;
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Cannot set enabled status for inventory fragment {inventoryFragment.gameObject.name}!");
+                        }
+                        break;
+                }
+            }
+        }
+
         public override bool IsActive
         {
             set {
@@ -560,6 +615,7 @@ namespace CraftSharp.UI
             currentSlots.Clear();
             currentFilledSprites.Clear();
             currentFlipbookSprites.Clear();
+            propertyDependents.Clear();
 
             activeInventoryId = -1;
             activeInventoryData = null;
@@ -635,7 +691,10 @@ namespace CraftSharp.UI
                 {
                     var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, "unnamed");
                     
-                    //Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
+                    Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
+
+                    // Update property-dependent fragments
+                    UpdatePredicateDependents();
                     
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)

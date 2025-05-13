@@ -1848,7 +1848,7 @@ namespace CraftSharp.Protocol.Handlers
                         var inventoryId = DataTypes.ReadNextByte(packetData);
                         var propertyId = DataTypes.ReadNextShort(packetData);
                         var propertyValue = DataTypes.ReadNextShort(packetData);
-                        handler.OnInventoryProperties(inventoryId, propertyId, propertyValue);
+                        handler.OnInventoryProperty(inventoryId, propertyId, propertyValue);
                     }
                     break;
                 case PacketTypesIn.SetSlot:

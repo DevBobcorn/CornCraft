@@ -70,7 +70,7 @@ namespace CraftSharp.Inventory
             Dictionary<int, InventorySlotInfo> SlotInfo,
             Dictionary<int, InventoryInputInfo> InputInfo,
             List<InventoryLabelInfo> LabelInfo,
-            Dictionary<int, InventoryButtonInfo> ButtonInfo)
+            Dictionary<int, InventoryButtonInfo> ButtonInfo) : InventoryFragmentInfo
         {
             public List<InventorySpriteInfo> SpriteInfo { get; } = SpriteInfo;
             public Dictionary<int, InventorySlotInfo> SlotInfo { get; } = SlotInfo;
@@ -120,12 +120,46 @@ namespace CraftSharp.Inventory
                     spriteInfo.AddRange(val.DataArray.Select(InventorySpriteInfo.FromJson));
                 }
 
-                return new(spriteInfo, slotInfo, inputInfo, labelInfo, buttonInfo);
+                var layoutInfo = new InventoryLayoutInfo(spriteInfo, slotInfo, inputInfo, labelInfo, buttonInfo);
+                layoutInfo.ReadPredicates(data);
+
+                return layoutInfo;
+            }
+        }
+
+        public enum PredicateType
+        {
+            Visible,
+            Enabled,
+            Selected
+        }
+
+        public record InventoryFragmentInfo
+        {
+            public readonly Dictionary<PredicateType, InventoryPropertyPredicate> Predicates = new();
+
+            protected void ReadPredicates(Json.JSONData data)
+            {
+                if (data.Properties.TryGetValue("visible_predicate", out var predicate))
+                {
+                    Predicates.Add(PredicateType.Visible,
+                        InventoryPropertyPredicate.FromString(predicate.StringValue));
+                }
+                if (data.Properties.TryGetValue("enabled_predicate", out predicate))
+                {
+                    Predicates.Add(PredicateType.Enabled,
+                        InventoryPropertyPredicate.FromString(predicate.StringValue));
+                }
+                if (data.Properties.TryGetValue("selected_predicate", out predicate))
+                {
+                    Predicates.Add(PredicateType.Selected,
+                        InventoryPropertyPredicate.FromString(predicate.StringValue));
+                }
             }
         }
 
         public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type,
-            ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId)
+            ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -160,12 +194,16 @@ namespace CraftSharp.Inventory
                 ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
                     ResourceLocation.FromString(val.StringValue) : null;
 
-                return new(x, y, type, previewItem, placeholderTypeId);
+                var slotInfo = new InventorySlotInfo(x, y, type, previewItem, placeholderTypeId);
+                slotInfo.ReadPredicates(data);
+
+                return slotInfo;
             }
         }
         
-        public record InventorySpriteInfo(float PosX, float PosY, float Width, float Height,
-            ResourceLocation TypeId, string CurFillProperty = null, string MaxFillProperty = null)
+        public record InventorySpriteInfo(float PosX, float PosY, float Width,
+            float Height, ResourceLocation TypeId, string CurFillProperty = null,
+            string MaxFillProperty = null) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -189,7 +227,7 @@ namespace CraftSharp.Inventory
                 var h = data.Properties.TryGetValue("height", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
 
-                var spriteInfo = new InventoryType.InventorySpriteInfo(x, y, w, h, typeId);
+                var spriteInfo = new InventorySpriteInfo(x, y, w, h, typeId);
 
                 if (data.Properties.TryGetValue("cur_value_property", out val))
                     spriteInfo.CurFillProperty = val.StringValue;
@@ -197,11 +235,14 @@ namespace CraftSharp.Inventory
                 if (data.Properties.TryGetValue("max_value_property", out val))
                     spriteInfo.MaxFillProperty = val.StringValue;
                 
+                spriteInfo.ReadPredicates(data);
+                
                 return spriteInfo;
             }
         }
 
-        public record InventoryInputInfo(float PosX, float PosY, float Width, string PlaceholderTranslationKey)
+        public record InventoryInputInfo(float PosX, float PosY, float Width,
+            string PlaceholderTranslationKey) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -220,7 +261,10 @@ namespace CraftSharp.Inventory
                 var w = data.Properties.TryGetValue("width", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 5;
                 
-                return new(x, y, w, translationKey);
+                var inputInfo = new InventoryInputInfo(x, y, w, translationKey);
+                inputInfo.ReadPredicates(data);
+
+                return inputInfo;
             }
         }
 
@@ -240,7 +284,8 @@ namespace CraftSharp.Inventory
             };
         }
 
-        public record InventoryLabelInfo(float PosX, float PosY, float Width, LabelAlignment Alignment, string TextTranslationKey)
+        public record InventoryLabelInfo(float PosX, float PosY, float Width,
+            LabelAlignment Alignment, string TextTranslationKey) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -262,11 +307,15 @@ namespace CraftSharp.Inventory
                 var alignment = data.Properties.TryGetValue("alignment", out val) ?
                     GetLabelAlignment(val.StringValue) : LabelAlignment.Left;
                 
-                return new(x, y, w, alignment, translationKey);
+                var labelInfo = new InventoryLabelInfo(x, y, w, alignment, translationKey);
+                labelInfo.ReadPredicates(data);
+
+                return labelInfo;
             }
         }
 
-        public record InventoryButtonInfo(float PosX, float PosY, float Width, float Height, InventoryLayoutInfo LayoutInfo)
+        public record InventoryButtonInfo(float PosX, float PosY, float Width,
+            float Height, InventoryLayoutInfo LayoutInfo) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -287,7 +336,10 @@ namespace CraftSharp.Inventory
                 var h = data.Properties.TryGetValue("height", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
                 
-                return new InventoryButtonInfo(x, y, w, h, buttonLayout);
+                var buttonInfo = new InventoryButtonInfo(x, y, w, h, buttonLayout);
+                buttonInfo.ReadPredicates(data);
+
+                return buttonInfo;
             }
         }
 

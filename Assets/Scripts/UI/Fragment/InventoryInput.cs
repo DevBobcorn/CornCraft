@@ -4,7 +4,7 @@ using TMPro;
 namespace CraftSharp.UI
 {
     [RequireComponent(typeof (TMP_InputField))]
-    public class InventoryInput : MonoBehaviour
+    public class InventoryInput : InventoryInteractable
     {
         [SerializeField] private TMP_InputField inputField;
         [SerializeField] private TMP_Text placeholderText;

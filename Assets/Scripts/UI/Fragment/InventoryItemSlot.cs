@@ -12,7 +12,7 @@ using CraftSharp.Protocol;
 
 namespace CraftSharp.UI
 {
-    public class InventoryItemSlot : MonoBehaviour
+    public class InventoryItemSlot : InventoryInteractable
     {
         private static readonly int SELECTED_HASH = Animator.StringToHash("Selected");
 
@@ -32,14 +32,12 @@ namespace CraftSharp.UI
         [SerializeField] private float fullItemScale = 60F;
 
         private Animator _slotAnimator;
-        private string _slotCursorText = string.Empty;
 
         #nullable enable
 
         // Use null for empty items
         private ItemStack? itemStack = null;
         private bool hasVisibleItem = false;
-        private bool cursorTextDirty = false;
 
         private bool selected = false;
         private bool dragged = false;
@@ -74,19 +72,19 @@ namespace CraftSharp.UI
                 ShowPlaceholderImage();
         }
 
-        private void UpdateCursorText()
+        protected override void UpdateCursorText()
         {
             cursorTextDirty = false;
 
             // Update item cursor text
             if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)
             {
-                _slotCursorText = string.Empty;
+                cursorText = string.Empty;
             }
             else
             {
                 // Block items might use block translation key
-                _slotCursorText = ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
+                cursorText = ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
                     translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block"));
                 
                 // TODO: Also check item enchantments
@@ -102,11 +100,11 @@ namespace CraftSharp.UI
                         _ => string.Empty
                     };
                     // Make sure TMP color tag is closed
-                    _slotCursorText = TMPConverter.MC2TMP($"{colorPrefix}{_slotCursorText}");
+                    cursorText = TMPConverter.MC2TMP($"{colorPrefix}{cursorText}");
                 }
                 
                 if (itemStack.Lores is not null && itemStack.Lores.Length > 0)
-                    _slotCursorText += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
+                    cursorText += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
             }
         }
 
@@ -161,7 +159,7 @@ namespace CraftSharp.UI
                 UpdateCursorText();
             }
             
-            cursorTextHandler?.Invoke(_slotCursorText);
+            cursorTextHandler?.Invoke(cursorText);
             selectHandler?.Invoke();
         }
 
@@ -190,7 +188,6 @@ namespace CraftSharp.UI
         
         private Action<PointerEventData.InputButton> pointerUpHandler;
         private Action<PointerEventData.InputButton> pointerDownHandler;
-        private Action<string> cursorTextHandler;
         private Action selectHandler;
 
         public void SetPointerUpHandler(Action<PointerEventData.InputButton> handler)
@@ -201,11 +198,6 @@ namespace CraftSharp.UI
         public void SetPointerDownHandler(Action<PointerEventData.InputButton> handler)
         {
             pointerDownHandler = handler;
-        }
-
-        public void SetCursorTextHandler(Action<string> handler)
-        {
-            cursorTextHandler = handler;
         }
         
         public void SetSelectHandler(Action handler)

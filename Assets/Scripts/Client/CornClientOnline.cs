@@ -1837,14 +1837,14 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// When received inventory properties from server.
+        /// When received inventory property from server.
         /// Used for Furnaces, Enchanting Table, Beacon, Brewing stand, Stone cutter, Loom and Lectern
         /// More info about: https://wiki.vg/Protocol#Set_Inventory_Property
         /// </summary>
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="propertyId">Property Id</param>
         /// <param name="propertyValue">Property Value</param>
-        public void OnInventoryProperties(byte inventoryId, short propertyId, short propertyValue)
+        public void OnInventoryProperty(byte inventoryId, short propertyId, short propertyValue)
         {
             if (!inventories.TryGetValue(inventoryId, out var inventory))
                 return;
