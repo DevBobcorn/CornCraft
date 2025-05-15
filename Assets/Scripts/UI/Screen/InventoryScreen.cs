@@ -515,12 +515,8 @@ namespace CraftSharp.UI
             }
         }
 
-        private void UpdatePredicateDependents()
+        private void UpdatePredicateDependents(Dictionary<string, short> propertyTable)
         {
-            var propertyNames = activeInventoryData.Type.PropertyNames;
-            var propertyTable = activeInventoryData.Properties.ToDictionary(
-                x => propertyNames[x.Key], x => x.Value);
-
             foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
             {
                 var predicateResult = predicate.Check(propertyTable);
@@ -693,8 +689,50 @@ namespace CraftSharp.UI
                     
                     Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
 
+                    var propertyNames = activeInventoryData.Type.PropertyNames;
+                    var propertyTable = activeInventoryData.Properties.ToDictionary(
+                        x => propertyNames[x.Key], x => x.Value);
+
+                    // Update property-dependent properties
+                    if (activeInventoryData.Type.TypeId == InventoryType.BEACON_ID)
+                    {
+                        ResourceLocation SPEED_ID = new("speed");
+                        ResourceLocation HASTE_ID = new("haste");
+                        ResourceLocation RESISTANCE_ID = new("resistance");
+                        ResourceLocation JUMP_BOOST_ID = new("jump_boost");
+                        ResourceLocation STRENGTH_ID = new("strength");
+                        ResourceLocation REGENERATION_ID = new("regeneration");
+
+                        if (propertyName == "first_potion_effect")
+                        {
+                            var firstEffect = MobEffectPalette.INSTANCE.GetByNumId(e.Value);
+                            //Debug.Log($"First effect: {firstEffect.GetDescription()}");
+                            short firstIndex = -1;
+                            if (firstEffect.MobEffectId == SPEED_ID) firstIndex = 0;
+                            else if (firstEffect.MobEffectId == HASTE_ID) firstIndex = 1;
+                            else if (firstEffect.MobEffectId == RESISTANCE_ID) firstIndex = 2;
+                            else if (firstEffect.MobEffectId == JUMP_BOOST_ID) firstIndex = 3;
+                            else if (firstEffect.MobEffectId == STRENGTH_ID) firstIndex = 4;
+
+                            SetDependentProperty(propertyTable, "first_potion_effect_index", firstIndex);
+                        }
+
+                        if (propertyName == "second_potion_effect")
+                        {
+                            var secondEffect = MobEffectPalette.INSTANCE.GetByNumId(e.Value);
+                            //Debug.Log($"Second effect: {secondEffect.GetDescription()}");
+                            short secondIndex = -1;
+                            if (secondEffect.MobEffectId == REGENERATION_ID) secondIndex = 0;
+                            else if (secondEffect.MobEffectId == SPEED_ID || secondEffect.MobEffectId == HASTE_ID ||
+                                secondEffect.MobEffectId == RESISTANCE_ID || secondEffect.MobEffectId == JUMP_BOOST_ID ||
+                                secondEffect.MobEffectId == STRENGTH_ID) secondIndex = 1;
+
+                            SetDependentProperty(propertyTable, "second_potion_effect_index", secondIndex);
+                        }
+                    }
+
                     // Update property-dependent fragments
-                    UpdatePredicateDependents();
+                    UpdatePredicateDependents(propertyTable);
                     
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)
@@ -720,6 +758,14 @@ namespace CraftSharp.UI
                 else // Not current inventory
                 {
                     Debug.LogWarning($"Invalid inventory id: {e.InventoryId}, property {e.Property}");
+                }
+
+                return;
+
+                void SetDependentProperty(Dictionary<string, short> propertyTable, string propertyName, short propertyValue)
+                {
+                    propertyTable[propertyName] = propertyValue;
+                    Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
                 }
             };
             

@@ -150,6 +150,11 @@ namespace CraftSharp
             Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
+            // Load mob effects
+            loadFlag.Finished = false;
+            Task.Run(() => MobEffectPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+
             // Load block entity definitions AFTER block/blockstate definitions are loaded
             loadFlag.Finished = false;
             Task.Run(() => BlockEntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
