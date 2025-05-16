@@ -95,7 +95,7 @@ namespace CraftSharp.Inventory
 
                 if (!CheckOperator(op, propVal, targetValue))
                 {
-
+                    return false;
                 }
             }
 
