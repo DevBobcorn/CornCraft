@@ -103,7 +103,7 @@
         ],
         "slots": {
             "0": {
-                "type_id": "corncraft:beacon_activation_item",
+                "type_id": "minecraft:beacon_activation_item",
                 "pos_x": 6,
                 "pos_y": 0
             },
@@ -155,10 +155,14 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:gui_mob_effect_speed",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "power_level>0",
+                "selected_predicate": "first_potion_effect_index=0"
             },
             "1": {
                 "pos_x": 2,
@@ -166,10 +170,14 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:gui_mob_effect_haste",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "power_level>0",
+                "selected_predicate": "first_potion_effect_index=1"
             },
             "2": {
                 "pos_x": 1,
@@ -177,10 +185,14 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:gui_mob_effect_resistance",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "power_level>1",
+                "selected_predicate": "first_potion_effect_index=2"
             },
             "3": {
                 "pos_x": 2,
@@ -188,10 +200,14 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:gui_mob_effect_jump_boost",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "power_level>1",
+                "selected_predicate": "first_potion_effect_index=3"
             },
             "4": {
                 "pos_x": 1.5,
@@ -199,10 +215,14 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:gui_mob_effect_strength",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "power_level>2",
+                "selected_predicate": "first_potion_effect_index=4"
             },
             "5": {
                 "pos_x": 6,
@@ -210,21 +230,31 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:gui_mob_effect_regeneration",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "power_level>3",
+                "selected_predicate": "second_potion_effect_index=0"
             },
             "6": {
                 "pos_x": 7,
                 "pos_y": 2,
                 "sprites": [
                     {
-                        "type_id": "corncraft:gui_mob_effect_regeneration",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "type_id": "corncraft:gui_mob_effect_level_up",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "flipbook_index_property": "first_potion_effect_index"
                     }
-                ]
+                ],
+                "visible_predicate": "first_potion_effect_index>=0",
+                "enabled_predicate": "power_level>3",
+                "selected_predicate": "second_potion_effect_index=1"
             },
             "7": {
                 "pos_x": 7,
@@ -232,10 +262,13 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:check",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
-                ]
+                ],
+                "enabled_predicate": "activation_item_ready=1"
             },
             "8": {
                 "pos_x": 8,
@@ -243,8 +276,10 @@
                 "sprites": [
                     {
                         "type_id": "corncraft:cross",
-                        "pos_x": 0,
-                        "pos_y": 0
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
                     }
                 ]
             }
@@ -265,6 +300,14 @@
                 "translation_key": "block.minecraft.beacon.secondary"
             }
         ],
+        "properties": {
+            "0": "power_level",
+            "1": "first_potion_effect",
+            "2": "second_potion_effect",
+            "-1": "activation_item_ready",
+            "-2": "first_potion_effect_index",
+            "-3": "second_potion_effect_index"
+        },
         "work_panel_height": 6
     },
     "minecraft:blast_furnace": {
