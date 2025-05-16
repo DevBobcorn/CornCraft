@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -9,7 +10,6 @@ using TMPro;
 
 using CraftSharp.Event;
 using CraftSharp.Inventory;
-using System.Linq;
 
 namespace CraftSharp.UI
 {
@@ -32,6 +32,8 @@ namespace CraftSharp.UI
         [SerializeField] private InventoryItemSlot[] backpackSlots;
         [SerializeField] private InventoryItemSlot[] hotbarSlots;
         [SerializeField] private float inventorySlotSize = 90F;
+        
+        [SerializeField] private TMP_Text propertyPreviewText;
 
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
         private readonly Dictionary<int, InventoryInput> currentInputs = new();
@@ -48,6 +50,7 @@ namespace CraftSharp.UI
 
         private int activeInventoryId = -1; // -1 for none
         private InventoryData activeInventoryData = null;
+        private readonly Dictionary<string, short> propertyTable = new();
         
 #nullable enable
 
@@ -105,7 +108,7 @@ namespace CraftSharp.UI
                 
                 CreateSlot(workPanel, i, slotPos.x, slotPos.y, inventoryType.GetInventorySlotPreviewItem(i),
                     inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
-                    $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i)}]");
+                    $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i).TypeId}]");
             }
             
             var workMainStart = inventoryType.PrependSlotCount;
@@ -164,7 +167,7 @@ namespace CraftSharp.UI
                 
                 CreateSlot(workPanel, i, slotPos.x, slotPos.y, inventoryType.GetInventorySlotPreviewItem(i),
                     inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
-                    $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i)}]");
+                    $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i).TypeId}]");
             }
 
             // Initialize cursor slot
@@ -270,6 +273,7 @@ namespace CraftSharp.UI
                         _ => throw new ArgumentOutOfRangeException()
                     };
                     game.DoInventoryAction(activeInventoryId, slotId, action);
+                    cursorTextPanel.gameObject.SetActive(false);
                 }
                 
                 pointerIsDown = false;
@@ -327,6 +331,7 @@ namespace CraftSharp.UI
                             _ => throw new ArgumentOutOfRangeException()
                         };
                         game.DoInventoryAction(activeInventoryId, dragStartSlot, action);
+                        cursorTextPanel.gameObject.SetActive(false);
                     }
                     
                     if (dragging && !draggedSlots.Contains(slotId) && slotType.MaxCount == int.MaxValue &&
@@ -387,7 +392,7 @@ namespace CraftSharp.UI
             foreach (var (inputId, inputInfo) in layoutInfo.InputInfo)
             {
                 var input = CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
-                    inputInfo.Width, inputInfo.PlaceholderTranslationKey);
+                    inputInfo.Width, inputInfo.PlaceholderTranslationKey, $"Input [{inputId}]");
                 RegisterPropertyDependent(inputInfo, input);
             }
 
@@ -395,7 +400,7 @@ namespace CraftSharp.UI
             foreach (var (buttonId, buttonInfo) in layoutInfo.ButtonInfo)
             {
                 var button = CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
-                    buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo);
+                    buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo, $"Button [{buttonId}]");
                 RegisterPropertyDependent(buttonInfo, button);
             }
 
@@ -433,12 +438,14 @@ namespace CraftSharp.UI
             return labelText;
         }
 
-        private InventoryInput CreateInput(RectTransform parent, int inputId, float x, float y, float w, string translationKey)
+        private InventoryInput CreateInput(RectTransform parent, int inputId, float x, float y, float w,
+                string translationKey, string inputName)
         {
             var inputObj = Instantiate(inventoryInputPrefab, parent);
             var input = inputObj.GetComponent<InventoryInput>();
             var rectTransform = inputObj.GetComponent<RectTransform>();
 
+            inputObj.name = inputName;
             rectTransform.anchoredPosition =
                 new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
@@ -450,12 +457,14 @@ namespace CraftSharp.UI
             return input;
         }
 
-        private InventoryButton CreateButton(RectTransform parent, int buttonId, float x, float y, float w, float h, InventoryType.InventoryLayoutInfo layoutInfo)
+        private InventoryButton CreateButton(RectTransform parent, int buttonId, float x, float y, float w, float h,
+                InventoryType.InventoryLayoutInfo layoutInfo, string buttonName)
         {
             var buttonObj = Instantiate(inventoryButtonPrefab, parent);
             var button = buttonObj.GetComponent<InventoryButton>();
             var rectTransform = buttonObj.GetComponent<RectTransform>();
 
+            buttonObj.name = buttonName;
             rectTransform.anchoredPosition =
                 new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
@@ -515,11 +524,13 @@ namespace CraftSharp.UI
             }
         }
 
-        private void UpdatePredicateDependents(Dictionary<string, short> propertyTable)
+        private void UpdatePredicateDependents()
         {
             foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
             {
                 var predicateResult = predicate.Check(propertyTable);
+                
+                Debug.Log($"Set {predicateType} status of {inventoryFragment.gameObject.name} to {predicateResult}");
 
                 switch (predicateType)
                 {
@@ -545,6 +556,9 @@ namespace CraftSharp.UI
                         {
                             Debug.LogWarning($"Cannot set enabled status for inventory fragment {inventoryFragment.gameObject.name}!");
                         }
+                        break;
+                    default:
+                        Debug.LogWarning($"Cannot set unknown status {predicateType} for inventory fragment {inventoryFragment.gameObject.name}!");
                         break;
                 }
             }
@@ -612,6 +626,12 @@ namespace CraftSharp.UI
             currentFilledSprites.Clear();
             currentFlipbookSprites.Clear();
             propertyDependents.Clear();
+            propertyTable.Clear();
+
+            if (propertyPreviewText)
+            {
+                propertyPreviewText.text = string.Empty;
+            }
 
             activeInventoryId = -1;
             activeInventoryData = null;
@@ -690,10 +710,9 @@ namespace CraftSharp.UI
                     Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
 
                     var propertyNames = activeInventoryData.Type.PropertyNames;
-                    var propertyTable = activeInventoryData.Properties.ToDictionary(
-                        x => propertyNames[x.Key], x => x.Value);
+                    propertyTable[propertyNames[e.Property]] = e.Value;
 
-                    // Update property-dependent properties
+                    // Update pseudo properties
                     if (activeInventoryData.Type.TypeId == InventoryType.BEACON_ID)
                     {
                         ResourceLocation SPEED_ID = new("speed");
@@ -714,7 +733,7 @@ namespace CraftSharp.UI
                             else if (firstEffect.MobEffectId == JUMP_BOOST_ID) firstIndex = 3;
                             else if (firstEffect.MobEffectId == STRENGTH_ID) firstIndex = 4;
 
-                            SetDependentProperty(propertyTable, "first_potion_effect_index", firstIndex);
+                            SetPseudoProperty("first_potion_effect_index", firstIndex);
                         }
 
                         if (propertyName == "second_potion_effect")
@@ -727,12 +746,18 @@ namespace CraftSharp.UI
                                 secondEffect.MobEffectId == RESISTANCE_ID || secondEffect.MobEffectId == JUMP_BOOST_ID ||
                                 secondEffect.MobEffectId == STRENGTH_ID) secondIndex = 1;
 
-                            SetDependentProperty(propertyTable, "second_potion_effect_index", secondIndex);
+                            SetPseudoProperty("second_potion_effect_index", secondIndex);
                         }
                     }
 
                     // Update property-dependent fragments
-                    UpdatePredicateDependents(propertyTable);
+                    UpdatePredicateDependents();
+                    
+                    // Update property preview text (if present)
+                    if (propertyPreviewText)
+                    {
+                        propertyPreviewText.text = string.Join('\n', propertyTable.Select(x => $"{x.Key}: {x.Value, 3}"));
+                    }
                     
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)
@@ -762,7 +787,7 @@ namespace CraftSharp.UI
 
                 return;
 
-                void SetDependentProperty(Dictionary<string, short> propertyTable, string propertyName, short propertyValue)
+                void SetPseudoProperty(string propertyName, short propertyValue)
                 {
                     propertyTable[propertyName] = propertyValue;
                     Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
@@ -772,6 +797,12 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(slotUpdateCallback);
             EventManager.Instance.Register(itemsUpdateCallback);
             EventManager.Instance.Register(propertyUpdateCallback);
+
+            // Clear property preview text
+            if (propertyPreviewText)
+            {
+                propertyPreviewText.text = string.Empty;
+            }
         }
 
         public override void UpdateScreen()

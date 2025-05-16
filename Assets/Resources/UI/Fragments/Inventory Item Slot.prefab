@@ -176,6 +176,7 @@ MonoBehaviour:
   slotCenterRef: {fileID: 7578773966599338794}
   hoveredSprite: {fileID: 21300000, guid: 80b1666e635a0c54893225c057849245, type: 3}
   draggedSprite: {fileID: 21300000, guid: 41d0db0f11f33dd4c908cc48774f213a, type: 3}
+  disabledSprite: {fileID: 21300000, guid: d753fe259174e43499cea3886c3fbc9a, type: 3}
   keyHintText: {fileID: 0}
   placeholderImage: {fileID: 4358019779645494858}
   slotImage: {fileID: 2725278365976862297}

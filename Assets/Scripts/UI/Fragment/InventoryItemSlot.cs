@@ -21,7 +21,9 @@ namespace CraftSharp.UI
         [SerializeField] private MeshFilter itemMeshFilter;
         [SerializeField] private MeshRenderer itemMeshRenderer;
         [SerializeField] private Transform slotCenterRef;
-        [SerializeField] private Sprite hoveredSprite, draggedSprite;
+        [SerializeField] private Sprite hoveredSprite;
+        [SerializeField] private Sprite draggedSprite;
+        [SerializeField] private Sprite disabledSprite;
         [SerializeField] private TMP_Text keyHintText;
         [SerializeField] private Image placeholderImage;
         [SerializeField] private Image slotImage;
@@ -39,7 +41,7 @@ namespace CraftSharp.UI
         private ItemStack? itemStack = null;
         private bool hasVisibleItem = false;
 
-        private bool selected = false;
+        private bool hovered = false;
         private bool dragged = false;
 
         public bool Dragged
@@ -48,7 +50,17 @@ namespace CraftSharp.UI
             set
             {
                 dragged = value;
-                slotImage.overrideSprite = dragged ? draggedSprite : selected ? hoveredSprite : null;
+                slotImage.overrideSprite = _enabled ? dragged ? draggedSprite : hovered || _selected ? hoveredSprite : null : disabledSprite;
+            }
+        }
+
+        public override bool Selected
+        {
+            get => _selected;
+            set
+            {
+                _selected = value;
+                slotImage.overrideSprite = _enabled ? dragged ? draggedSprite : hovered || _selected ? hoveredSprite : null : disabledSprite;
             }
         }
 
@@ -147,8 +159,8 @@ namespace CraftSharp.UI
 
         public void SlotPointerEnter()
         {
-            selected = true;
-            slotImage.overrideSprite = Dragged ? draggedSprite : hoveredSprite;
+            hovered = true;
+            slotImage.overrideSprite = Enabled ? Dragged || Selected ? draggedSprite : hoveredSprite : disabledSprite;
             
             if (_slotAnimator) // For hotbar slots
                 _slotAnimator.SetBool(SELECTED_HASH, true);
@@ -165,8 +177,8 @@ namespace CraftSharp.UI
 
         public void SlotPointerExit()
         {
-            selected = false;
-            slotImage.overrideSprite = Dragged ? draggedSprite : null;
+            hovered = false;
+            slotImage.overrideSprite = Enabled ? Dragged || Selected ? draggedSprite : null : disabledSprite;
             
             if (_slotAnimator)
                 _slotAnimator.SetBool(SELECTED_HASH, false);

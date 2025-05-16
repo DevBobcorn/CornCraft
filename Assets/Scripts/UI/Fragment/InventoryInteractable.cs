@@ -5,8 +5,11 @@ namespace CraftSharp.UI
 {
     public class InventoryInteractable : MonoBehaviour
     {
-        public bool Enabled { get; set; }
-        public bool Selected { get; set; }
+        protected bool _enabled = true;
+        public virtual bool Enabled { get => _enabled; set => _enabled = value; }
+        
+        protected bool _selected;
+        public virtual bool Selected { get => _selected; set => _selected = value; }
         
         protected Action<string> cursorTextHandler;
         

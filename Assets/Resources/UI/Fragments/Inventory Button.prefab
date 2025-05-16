@@ -134,3 +134,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   button: {fileID: 303635176917562386}
+  selectedSprite: {fileID: 21300000, guid: f8aa899461ebb6a41b40b90cb76320ec, type: 3}
+  disabledSprite: {fileID: 21300000, guid: 1d1e0c680196c1d429a80dfa57734dd0, type: 3}
