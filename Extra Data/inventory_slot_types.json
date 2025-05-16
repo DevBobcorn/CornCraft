@@ -27,6 +27,7 @@
         "place_predicate": "id=minecraft:saddle"
     },
     "minecraft:beacon_activation_item": {
+        "max_count": 1,
         "place_predicate": "id=minecraft:iron_ingot|minecraft:gold_ingot|minecraft:emerald|minecraft:diamond|minecraft:netherite_ingot"
     },
     "minecraft:brewing_bottle_item": {
