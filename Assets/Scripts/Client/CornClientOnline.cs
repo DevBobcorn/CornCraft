@@ -1330,6 +1330,17 @@ namespace CraftSharp
         {
             return InvokeRequired ? InvokeOnNetMainThread(() => DoAnimation(playerAnimation)) : handler!.SendAnimation(playerAnimation, clientEntity.Id);
         }
+        
+        /// <summary>
+        /// Set beacon effects
+        /// </summary>
+        /// <param name="primary">Primary effect num id</param>
+        /// <param name="secondary">Secondary effect num id</param>
+        /// <returns>TRUE if effects successfully set</returns>
+        public override bool SetBeaconEffects(int primary, int secondary)
+        {
+            return InvokeRequired ? InvokeOnNetMainThread(() => SetBeaconEffects(primary, secondary)) : handler!.SendBeaconEffects(primary, secondary);
+        }
 
         /// <summary>
         /// Close the specified inventory

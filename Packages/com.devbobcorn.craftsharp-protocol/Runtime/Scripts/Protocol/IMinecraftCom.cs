@@ -194,6 +194,14 @@ namespace CraftSharp.Protocol
         /// <param name="playerId">Player Entity Id</param>
         /// <returns>TRUE if item given successfully</returns>
         bool SendAnimation(int animation, int playerId);
+        
+        /// <summary>
+        /// Set beacon effects
+        /// </summary>
+        /// <param name="primary">Primary effect num id</param>
+        /// <param name="secondary">Secondary effect num id</param>
+        /// <returns>TRUE if effects successfully sent</returns>
+        bool SendBeaconEffects(int primary, int secondary);
 
         /// <summary>
         /// Send a close inventory packet to the server

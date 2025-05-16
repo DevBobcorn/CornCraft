@@ -37,7 +37,7 @@ namespace CraftSharp
 
         private void Start()
         {
-            if (CornApp.CurrentClient == null) // In case where the client wasn't properly assigned before
+            if (!CornApp.CurrentClient) // In case where the client wasn't properly assigned before
             {
                 CornApp.SetCurrentClient(this);
 
@@ -407,6 +407,17 @@ namespace CraftSharp
         /// <param name="playerAnimation">0 for left arm, 1 for right arm</param>
         /// <returns>TRUE if animation successfully done</returns>
         public override bool DoAnimation(int playerAnimation)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Set beacon effects
+        /// </summary>
+        /// <param name="primary">Primary effect num id</param>
+        /// <param name="secondary">Secondary effect num id</param>
+        /// <returns>TRUE if effects successfully set</returns>
+        public override bool SetBeaconEffects(int primary, int secondary)
         {
             return false;
         }

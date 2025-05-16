@@ -127,6 +127,16 @@
         "use_point_filter": false
     },
 
+    "corncraft:gui_mob_effect_level_up": {
+        "texture_id": "minecraft:mob_effect/speed",
+        "flipbook_texture_ids": [
+            "minecraft:mob_effect/speed",
+            "minecraft:mob_effect/haste",
+            "minecraft:mob_effect/resistance",
+            "minecraft:mob_effect/jump_boost",
+            "minecraft:mob_effect/strength"
+        ]
+    },
     "corncraft:gui_mob_effect_speed": {
         "texture_id": "minecraft:mob_effect/speed"
     },

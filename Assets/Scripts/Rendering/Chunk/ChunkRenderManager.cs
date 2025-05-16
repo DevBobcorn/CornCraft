@@ -773,7 +773,7 @@ namespace CraftSharp.Rendering
 
                 Loom.QueueOnMainThread(() =>
                 {
-                    if (chunkRender != null)
+                    if (chunkRender)
                     {
                         if (buildResult == ChunkBuildResult.Cancelled)
                         {

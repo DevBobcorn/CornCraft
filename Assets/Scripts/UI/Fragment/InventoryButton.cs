@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ namespace CraftSharp.UI
             set
             {
                 _enabled = value;
+                button.interactable = _enabled;
                 button.image.overrideSprite = _enabled ? _selected ? selectedSprite : null : disabledSprite;
             }
         }
@@ -28,6 +30,18 @@ namespace CraftSharp.UI
                 _selected = value;
                 button.image.overrideSprite = _enabled ? _selected ? selectedSprite : null : disabledSprite;
             }
+        }
+        
+        private Action clickHandler;
+        
+        public void SetClickHandler(Action handler)
+        {
+            clickHandler = handler;
+        }
+        
+        public void ButtonClick()
+        {
+            clickHandler?.Invoke();
         }
     }
 }

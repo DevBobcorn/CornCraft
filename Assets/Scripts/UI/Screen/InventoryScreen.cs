@@ -16,6 +16,13 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (CanvasGroup))]
     public class InventoryScreen : BaseScreen
     {
+        private static readonly ResourceLocation SPEED_ID = new("speed");
+        private static readonly ResourceLocation HASTE_ID = new("haste");
+        private static readonly ResourceLocation RESISTANCE_ID = new("resistance");
+        private static readonly ResourceLocation JUMP_BOOST_ID = new("jump_boost");
+        private static readonly ResourceLocation STRENGTH_ID = new("strength");
+        private static readonly ResourceLocation REGENERATION_ID = new("regeneration");
+        
         // UI controls and objects
         [SerializeField] private TMP_Text inventoryTitleText;
         [SerializeField] private Button closeButton;
@@ -41,8 +48,10 @@ namespace CraftSharp.UI
 
         // (cur_value_property, max_value_property, sprite_type, sprite_image)
         private readonly List<(string, string, SpriteType, Image)> currentFilledSprites = new();
+        // (flipbook_index_property, sprite_type, sprite_image)
+        private readonly List<(string, SpriteType, Image)> currentPropertyFlipbookSprites = new();
         // (flipbook_timer, sprite_type, sprite_image)
-        private readonly List<(SpriteType.FlipbookTimer, SpriteType, Image)> currentFlipbookSprites = new();
+        private readonly List<(SpriteType.FlipbookTimer, SpriteType, Image)> currentTimerFlipbookSprites = new();
         // (predicate_type, predicate, inventory_fragment)
         private readonly List<(InventoryType.PredicateType, InventoryPropertyPredicate, MonoBehaviour)> propertyDependents = new();
 
@@ -376,7 +385,7 @@ namespace CraftSharp.UI
             {
                 var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
                 var sprite = CreateSprite(parent, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
-                    spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty);
+                    spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty, spriteInfo.FlipIdxProperty);
                 RegisterPropertyDependent(spriteInfo, sprite);
             }
 
@@ -473,12 +482,19 @@ namespace CraftSharp.UI
             // Create nested layout
             CreateLayout(rectTransform, layoutInfo, true);
 
-            currentButtons[buttonId] = button;
+            SetupButton(buttonId, button);
 
             return button;
         }
 
-        private Image CreateSprite(RectTransform parent, float x, float y, float w, float h, SpriteType spriteType, string curFillProp, string maxFillProp)
+        private void SetupButton(int buttonId, InventoryButton button)
+        {
+            currentButtons[buttonId] = button;
+
+            button.SetClickHandler(() => HandleButtonClick(buttonId));
+        }
+        
+        private Image CreateSprite(RectTransform parent, float x, float y, float w, float h, SpriteType spriteType, string curFillProp, string maxFillProp, string flipIdxProp)
         {
             var spriteObj = Instantiate(inventorySpritePrefab, parent);
             var spriteImage = spriteObj.GetComponent<Image>();
@@ -509,8 +525,14 @@ namespace CraftSharp.UI
             }
             else if (spriteType.FlipbookSprites.Length > 0)
             {
-                // Add it to the list
-                currentFlipbookSprites.Add((new(), spriteType, spriteImage));
+                if (flipIdxProp is not null) // Use property to control flipbook frame
+                {
+                    currentPropertyFlipbookSprites.Add((flipIdxProp, spriteType, spriteImage));
+                }
+                else // Use a timer to control flipbook frame
+                {
+                    currentTimerFlipbookSprites.Add((new(), spriteType, spriteImage));
+                }
             }
 
             return spriteImage;
@@ -524,13 +546,125 @@ namespace CraftSharp.UI
             }
         }
 
+        private void HandleButtonClick(int buttonId)
+        {
+            // Handle button click TODO: Move to separate class
+            if (activeInventoryData.Type.TypeId == InventoryType.BEACON_ID)
+            {
+                if (buttonId is >= 0 and <= 4 &&
+                    propertyTable.TryGetValue("first_potion_effect", out var primaryId) &&
+                    propertyTable.TryGetValue("second_potion_effect_index", out var secondaryIdIndex))
+                {
+                    primaryId = buttonId switch
+                    {
+                        0 => (short) MobEffectPalette.INSTANCE.GetNumIdById(SPEED_ID),
+                        1 => (short) MobEffectPalette.INSTANCE.GetNumIdById(HASTE_ID),
+                        2 => (short) MobEffectPalette.INSTANCE.GetNumIdById(RESISTANCE_ID),
+                        3 => (short) MobEffectPalette.INSTANCE.GetNumIdById(JUMP_BOOST_ID),
+                        4 => (short) MobEffectPalette.INSTANCE.GetNumIdById(STRENGTH_ID),
+                        _ => primaryId
+                    };
+                    var propertyId = activeInventoryData.Type.PropertySlots["first_potion_effect"];
+                    EventManager.Instance.Broadcast(new InventoryPropertyUpdateEvent(activeInventoryId, propertyId, primaryId));
+                    
+                    if (secondaryIdIndex == 1) // Level-up button selected, also update secondary effect id
+                    {
+                        propertyId = activeInventoryData.Type.PropertySlots["second_potion_effect"];
+                        EventManager.Instance.Broadcast(new InventoryPropertyUpdateEvent(activeInventoryId, propertyId, primaryId));
+                    }
+                }
+                
+                if (buttonId is >= 5 and <= 6 &&
+                    propertyTable.TryGetValue("first_potion_effect", out primaryId) &&
+                    propertyTable.TryGetValue("second_potion_effect", out var secondaryId))
+                {
+                    secondaryId = buttonId switch
+                    {
+                        5 => (short) MobEffectPalette.INSTANCE.GetNumIdById(REGENERATION_ID),
+                        6 => primaryId, // Level-up primary effect
+                        _ => secondaryId
+                    };
+                    var propertyId = activeInventoryData.Type.PropertySlots["second_potion_effect"];
+                    EventManager.Instance.Broadcast(new InventoryPropertyUpdateEvent(activeInventoryId, propertyId, secondaryId));
+                }
+
+                if (buttonId == 7 &&
+                    propertyTable.TryGetValue("first_potion_effect", out primaryId) &&
+                    propertyTable.TryGetValue("second_potion_effect", out secondaryId))
+                {
+                    var game = CornApp.CurrentClient;
+                    if (!game) return;
+                    
+                    game.SetBeaconEffects(primaryId, secondaryId);
+                    CloseInventory();
+                }
+
+                if (buttonId == 8)
+                {
+                    CloseInventory();
+                }
+            }
+        }
+
+        private void HandleSlotChange(int slotId, ItemStack itemStack)
+        {
+            // Handle slot change TODO: Move to separate class
+            if (activeInventoryData.Type.TypeId == InventoryType.BEACON_ID)
+            {
+                if (slotId == 0) // Beacon activation item slot
+                {
+                    SetPseudoProperty("activation_item_ready", itemStack is null ? (short) 0 : (short) 1);
+                    // Update property-dependent fragments
+                    UpdatePredicateDependents();
+                }
+            }
+        }
+        
+        private void SetPseudoProperty(string propertyName, short propertyValue)
+        {
+            propertyTable[propertyName] = propertyValue;
+            //Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
+        }
+
+        private void UpdatePseudoProperties(string propertyName, short value)
+        {
+            // Handle property change TODO: Move to separate class
+            if (activeInventoryData.Type.TypeId == InventoryType.BEACON_ID)
+            {
+                if (propertyName == "first_potion_effect")
+                {
+                    var firstEffect = MobEffectPalette.INSTANCE.GetByNumId(value);
+                    //Debug.Log($"First effect: {firstEffect.GetDescription()}");
+                    short firstIndex = -1;
+                    if (firstEffect.MobEffectId == SPEED_ID) firstIndex = 0;
+                    else if (firstEffect.MobEffectId == HASTE_ID) firstIndex = 1;
+                    else if (firstEffect.MobEffectId == RESISTANCE_ID) firstIndex = 2;
+                    else if (firstEffect.MobEffectId == JUMP_BOOST_ID) firstIndex = 3;
+                    else if (firstEffect.MobEffectId == STRENGTH_ID) firstIndex = 4;
+
+                    SetPseudoProperty("first_potion_effect_index", firstIndex);
+                }
+
+                if (propertyName == "second_potion_effect")
+                {
+                    var secondEffect = MobEffectPalette.INSTANCE.GetByNumId(value);
+                    //Debug.Log($"Second effect: {secondEffect.GetDescription()}");
+                    short secondIndex = -1;
+                    if (secondEffect.MobEffectId == REGENERATION_ID) secondIndex = 0;
+                    else if (secondEffect.MobEffectId == SPEED_ID || secondEffect.MobEffectId == HASTE_ID ||
+                             secondEffect.MobEffectId == RESISTANCE_ID || secondEffect.MobEffectId == JUMP_BOOST_ID ||
+                             secondEffect.MobEffectId == STRENGTH_ID) secondIndex = 1;
+
+                    SetPseudoProperty("second_potion_effect_index", secondIndex);
+                }
+            }
+        }
+
         private void UpdatePredicateDependents()
         {
             foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
             {
                 var predicateResult = predicate.Check(propertyTable);
-                
-                Debug.Log($"Set {predicateType} status of {inventoryFragment.gameObject.name} to {predicateResult}");
 
                 switch (predicateType)
                 {
@@ -561,6 +695,12 @@ namespace CraftSharp.UI
                         Debug.LogWarning($"Cannot set unknown status {predicateType} for inventory fragment {inventoryFragment.gameObject.name}!");
                         break;
                 }
+            }
+            
+            // Update property preview text (if present)
+            if (propertyPreviewText)
+            {
+                propertyPreviewText.text = string.Join('\n', propertyTable.Select(x => $"{x.Key}: {x.Value, 3}"));
             }
         }
 
@@ -606,7 +746,7 @@ namespace CraftSharp.UI
             
             client.ScreenControl.TryPopScreen();
             
-            // Clear all item slots
+            // Clear all item slots (which includes all backpack and hotbar slots which will be reused)
             foreach (var slot in currentSlots.Values)
             {
                 slot.UpdateItemStack(null);
@@ -616,7 +756,7 @@ namespace CraftSharp.UI
                 slot.SetPointerUpHandler(null);
             }
             
-            // Destroy all sprites and slots under work panel
+            // Destroy all controls under work panel
             foreach (Transform t in workPanel)
             {
                 Destroy(t.gameObject);
@@ -624,14 +764,10 @@ namespace CraftSharp.UI
             
             currentSlots.Clear();
             currentFilledSprites.Clear();
-            currentFlipbookSprites.Clear();
+            currentTimerFlipbookSprites.Clear();
+            currentPropertyFlipbookSprites.Clear();
             propertyDependents.Clear();
             propertyTable.Clear();
-
-            if (propertyPreviewText)
-            {
-                propertyPreviewText.text = string.Empty;
-            }
 
             activeInventoryId = -1;
             activeInventoryData = null;
@@ -652,6 +788,8 @@ namespace CraftSharp.UI
                     if (currentSlots.TryGetValue(e.Slot, out var slot))
                     {
                         slot.UpdateItemStack(e.ItemStack);
+                        // Handle change with custom logic
+                        HandleSlotChange(e.Slot, e.ItemStack);
                     }
                     else
                     {
@@ -687,6 +825,8 @@ namespace CraftSharp.UI
                         if (currentSlots.TryGetValue(slotId, out var slot))
                         {
                             slot.UpdateItemStack(itemStack);
+                            // Handle change with custom logic
+                            HandleSlotChange(slotId, itemStack);
                         }
                         else
                         {
@@ -707,57 +847,14 @@ namespace CraftSharp.UI
                 {
                     var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, "unnamed");
                     
-                    Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
-
-                    var propertyNames = activeInventoryData.Type.PropertyNames;
-                    propertyTable[propertyNames[e.Property]] = e.Value;
+                    //Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
+                    propertyTable[propertyName] = e.Value;
 
                     // Update pseudo properties
-                    if (activeInventoryData.Type.TypeId == InventoryType.BEACON_ID)
-                    {
-                        ResourceLocation SPEED_ID = new("speed");
-                        ResourceLocation HASTE_ID = new("haste");
-                        ResourceLocation RESISTANCE_ID = new("resistance");
-                        ResourceLocation JUMP_BOOST_ID = new("jump_boost");
-                        ResourceLocation STRENGTH_ID = new("strength");
-                        ResourceLocation REGENERATION_ID = new("regeneration");
-
-                        if (propertyName == "first_potion_effect")
-                        {
-                            var firstEffect = MobEffectPalette.INSTANCE.GetByNumId(e.Value);
-                            //Debug.Log($"First effect: {firstEffect.GetDescription()}");
-                            short firstIndex = -1;
-                            if (firstEffect.MobEffectId == SPEED_ID) firstIndex = 0;
-                            else if (firstEffect.MobEffectId == HASTE_ID) firstIndex = 1;
-                            else if (firstEffect.MobEffectId == RESISTANCE_ID) firstIndex = 2;
-                            else if (firstEffect.MobEffectId == JUMP_BOOST_ID) firstIndex = 3;
-                            else if (firstEffect.MobEffectId == STRENGTH_ID) firstIndex = 4;
-
-                            SetPseudoProperty("first_potion_effect_index", firstIndex);
-                        }
-
-                        if (propertyName == "second_potion_effect")
-                        {
-                            var secondEffect = MobEffectPalette.INSTANCE.GetByNumId(e.Value);
-                            //Debug.Log($"Second effect: {secondEffect.GetDescription()}");
-                            short secondIndex = -1;
-                            if (secondEffect.MobEffectId == REGENERATION_ID) secondIndex = 0;
-                            else if (secondEffect.MobEffectId == SPEED_ID || secondEffect.MobEffectId == HASTE_ID ||
-                                secondEffect.MobEffectId == RESISTANCE_ID || secondEffect.MobEffectId == JUMP_BOOST_ID ||
-                                secondEffect.MobEffectId == STRENGTH_ID) secondIndex = 1;
-
-                            SetPseudoProperty("second_potion_effect_index", secondIndex);
-                        }
-                    }
+                    UpdatePseudoProperties(propertyName, e.Value);
 
                     // Update property-dependent fragments
                     UpdatePredicateDependents();
-                    
-                    // Update property preview text (if present)
-                    if (propertyPreviewText)
-                    {
-                        propertyPreviewText.text = string.Join('\n', propertyTable.Select(x => $"{x.Key}: {x.Value, 3}"));
-                    }
                     
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)
@@ -783,14 +880,6 @@ namespace CraftSharp.UI
                 else // Not current inventory
                 {
                     Debug.LogWarning($"Invalid inventory id: {e.InventoryId}, property {e.Property}");
-                }
-
-                return;
-
-                void SetPseudoProperty(string propertyName, short propertyValue)
-                {
-                    propertyTable[propertyName] = propertyValue;
-                    Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
                 }
             };
             
@@ -826,9 +915,9 @@ namespace CraftSharp.UI
             // Don't modify z coordinate
             cursorRect.position = new Vector3(newPos.x, newPos.y, cursorRect.position.z);
 
-            if (currentFlipbookSprites.Count > 0) // Update flipbook sprites
+            if (currentTimerFlipbookSprites.Count > 0) // Update timer flipbook sprites
             {
-                foreach (var tuple in currentFlipbookSprites)
+                foreach (var tuple in currentTimerFlipbookSprites)
                 {
                     var (timer, spriteType, spriteImage) = tuple;
                     
@@ -840,6 +929,20 @@ namespace CraftSharp.UI
                     }
                     
                     spriteImage.overrideSprite = spriteType.FlipbookSprites[timer.Frame];
+                }
+            }
+
+            if (currentPropertyFlipbookSprites.Count > 0) // Update property flipbook sprites
+            {
+                foreach (var tuple in currentPropertyFlipbookSprites)
+                {
+                    var (propertyName, spriteType, spriteImage) = tuple;
+
+                    if (propertyTable.TryGetValue(propertyName, out var propertyValue) &&
+                        propertyValue >= 0 && propertyValue < spriteType.FlipbookSprites.Length)
+                    {
+                        spriteImage.overrideSprite = spriteType.FlipbookSprites[propertyValue];
+                    }
                 }
             }
         }

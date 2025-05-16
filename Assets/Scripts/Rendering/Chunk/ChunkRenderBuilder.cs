@@ -18,7 +18,7 @@ namespace CraftSharp.Rendering
         private static readonly int WATER_LAYER_INDEX = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int LAVA_LAYER_INDEX  = ChunkRender.TypeIndex(RenderType.SOLID);
 
-        private const int MOVEMENT_RADIUS = 3;
+        private const int MOVEMENT_RADIUS = 5;
         public const float MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
         public const float MOVEMENT_RADIUS_SQR_PLUS = (MOVEMENT_RADIUS + 0.5F) * (MOVEMENT_RADIUS + 0.5F);
         

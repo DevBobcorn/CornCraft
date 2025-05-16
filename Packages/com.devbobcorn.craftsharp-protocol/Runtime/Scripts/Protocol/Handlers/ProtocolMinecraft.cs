@@ -3720,6 +3720,21 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
+        public bool SendBeaconEffects(int primary, int secondary)
+        {
+            try
+            {
+                var packet = new List<byte>();
+                packet.AddRange(DataTypes.GetVarInt(primary));
+                packet.AddRange(DataTypes.GetVarInt(secondary));
+                SendPacket(PacketTypesOut.SetBeaconEffect, packet);
+                return true;
+            }
+            catch (SocketException) { return false; }
+            catch (System.IO.IOException) { return false; }
+            catch (ObjectDisposedException) { return false; }
+        }
+
         public bool SendUpdateSign(Location sign, string line1, string line2, string line3, string line4)
         {
             try

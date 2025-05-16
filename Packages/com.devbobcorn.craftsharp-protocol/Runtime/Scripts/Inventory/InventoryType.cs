@@ -203,7 +203,7 @@ namespace CraftSharp.Inventory
         
         public record InventorySpriteInfo(float PosX, float PosY, float Width,
             float Height, ResourceLocation TypeId, string CurFillProperty = null,
-            string MaxFillProperty = null) : InventoryFragmentInfo
+            string MaxFillProperty = null, string FlipIdxProperty = null) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
@@ -212,6 +212,7 @@ namespace CraftSharp.Inventory
             public ResourceLocation TypeId { get; } = TypeId;
             public string CurFillProperty { get; set; } = CurFillProperty;
             public string MaxFillProperty { get; set; } = MaxFillProperty;
+            public string FlipIdxProperty { get; set; } = FlipIdxProperty;
 
             public static InventorySpriteInfo FromJson(Json.JSONData data)
             {
@@ -234,6 +235,9 @@ namespace CraftSharp.Inventory
                 
                 if (data.Properties.TryGetValue("max_value_property", out val))
                     spriteInfo.MaxFillProperty = val.StringValue;
+                
+                if (data.Properties.TryGetValue("flipbook_index_property", out val))
+                    spriteInfo.FlipIdxProperty = val.StringValue;
                 
                 spriteInfo.ReadPredicates(data);
                 
