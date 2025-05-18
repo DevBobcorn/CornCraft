@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace CraftSharp.Inventory
 {
@@ -58,11 +59,8 @@ namespace CraftSharp.Inventory
         
         public static bool CheckStackable(ItemStack stackA, ItemStack stackB)
         {
-            /*
             return stackA.ItemType == stackB.ItemType &&
                    DictionaryUtil.DeepCompareDictionaries(stackA.NBT, stackB.NBT);
-            */
-            return stackA.ItemType == stackB.ItemType;
         }
 
         /// <summary>

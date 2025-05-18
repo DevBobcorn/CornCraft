@@ -29,6 +29,10 @@ namespace CraftSharp.Inventory
             IDictionary<TKey, TValue>? dict1,
             IDictionary<TKey, TValue>? dict2)
         {
+            // Empty dictionaries should be treated as null
+            if (dict1?.Count == 0) dict1 = null;
+            if (dict2?.Count == 0) dict2 = null;
+            
             // 1. Null checks
             if (dict1 == null && dict2 == null) return true;
             if (dict1 == null || dict2 == null) return false;
