@@ -1,5 +1,7 @@
 ﻿#nullable enable
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CraftSharp.Inventory
 {
@@ -56,8 +58,11 @@ namespace CraftSharp.Inventory
         
         public static bool CheckStackable(ItemStack stackA, ItemStack stackB)
         {
+            /*
             return stackA.ItemType == stackB.ItemType &&
                    DictionaryUtil.DeepCompareDictionaries(stackA.NBT, stackB.NBT);
+            */
+            return stackA.ItemType == stackB.ItemType;
         }
 
         /// <summary>
@@ -67,13 +72,60 @@ namespace CraftSharp.Inventory
         /// <returns>An array of slot Id</returns>
         public int[] SearchItem(Item itemType)
         {
-            var result = new List<int>();
-            foreach (var item in Items)
+            return (from x in Items where x.Value.ItemType == itemType select x.Key).ToArray();
+        }
+        
+        /// <summary>
+        /// Match an item stack in the inventory
+        /// </summary>
+        /// <param name="itemStack">The item stack to match</param>
+        /// <returns>An array of slot Id</returns>
+        public int[] MatchItemStack(ItemStack itemStack)
+        {
+            return (from x in Items where CheckStackable(x.Value, itemStack) select x.Key).ToArray();
+        }
+        
+        /// <summary>
+        /// Match an item stack in the inventory hotbar
+        /// </summary>
+        /// <param name="itemStack">The item stack to match</param>
+        /// <returns>Hotbar Slot Id if found, -1 if not</returns>
+        public short MatchItemStackInHotbar(ItemStack itemStack)
+        {
+            try
             {
-                if (item.Value.ItemType == itemType)
-                    result.Add(item.Key);
+                return (short) (Items.First(x => CheckStackable(x.Value, itemStack)).Key - GetFirstHotbarSlot());
             }
-            return result.ToArray();
+            catch (InvalidOperationException)
+            {
+                return -1;
+            }
+        }
+        
+        /// <summary>
+        /// Match an item stack in the inventory hotbar
+        /// </summary>
+        /// <param name="itemStack">The item stack to match</param>
+        /// <returns>(Hotbar + Backpack) Slot Id if found, -1 if not</returns>
+        public short MatchItemStackInHotbarAndBackpack(ItemStack itemStack)
+        {
+            // 0-8: Hotbar slots (slots are 36-44 in player inventory)
+            // 9-35: Backpack slots (slots are 9-35 in player inventory)
+            var hotbarStart = GetFirstHotbarSlot();
+            var backpackStart = GetFirstBackpackSlot();
+                
+            var range = Enumerable.Range(hotbarStart, 9)
+                .Concat(Enumerable.Range(backpackStart, 27)).ToArray();
+
+            for (short i = 0; i < 36; i++)
+            {
+                if (Items.TryGetValue(range[i], out var candidate) && CheckStackable(candidate, itemStack))
+                {
+                    return i;
+                }
+            }
+            
+            return -1;
         }
 
         /// <summary>
@@ -81,18 +133,39 @@ namespace CraftSharp.Inventory
         /// </summary>
         /// <returns>An array of slot Id</returns>
         /// <remarks>Also depending on the inventory type, some empty slots cannot be used e.g. armor slots. This might cause issues.</remarks>
-        public int[] GetEmptySlots()
+        public int[] GetEmptySlots(int start, int count)
         {
-            var result = new List<int>();
-            for (int i = 0; i < Type.SlotCount; i++)
+            return Enumerable.Range(start, count).Where(x => !Items.ContainsKey(x)).ToArray();
+        }
+        
+        /// <summary>
+        /// Get first empty hotbar slot, or first slot not containing an enchanted item, otherwise an empty slot in backpack
+        /// </summary>
+        /// <returns>Slot Id</returns>
+        /// <remarks>See https://minecraft.wiki/w/Java_Edition_protocol?oldid=2772660#Pick_Item</remarks>
+        public int GetSuitableSlotInHotbar(int currentHotbarSlot)
+        {
+            var hotbarStart = GetFirstHotbarSlot();
+            
+            var range = currentHotbarSlot == 0 ? Enumerable.Range(0, 9).ToList() :
+                Enumerable.Range(currentHotbarSlot, 9 - currentHotbarSlot)
+                    .Concat(Enumerable.Range(0, currentHotbarSlot)).ToList();
+
+            try // Try get first empty slot, starting from current slot
             {
-                result.Add(i);
+                return range.First(x => !Items.ContainsKey(hotbarStart + x));
             }
-            foreach (var item in Items)
+            catch (InvalidOperationException)
             {
-                result.Remove(item.Key);
+                try // Try get first slot not containing an enchanted item, starting from current slot
+                {
+                    return range.First(x => !Items[hotbarStart + x].IsEnchanted);
+                }
+                catch (InvalidOperationException)
+                {
+                    return currentHotbarSlot;
+                }
             }
-            return result.ToArray();
         }
 
         /// <summary>

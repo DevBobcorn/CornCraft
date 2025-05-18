@@ -3388,6 +3388,20 @@ namespace CraftSharp.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
+        
+        public bool SendPickItem(int slotToUse)
+        {
+            try
+            {
+                List<byte> packet = new();
+                packet.AddRange(DataTypes.GetVarInt(slotToUse));
+                SendPacket(PacketTypesOut.PickItem, packet);
+                return true;
+            }
+            catch (SocketException) { return false; }
+            catch (System.IO.IOException) { return false; }
+            catch (ObjectDisposedException) { return false; }
+        }
 
         public bool SendPlayerDigging(int status, BlockLoc blockLoc, Direction face, int sequenceId)
         {

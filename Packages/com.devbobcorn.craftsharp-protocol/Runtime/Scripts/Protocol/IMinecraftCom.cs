@@ -163,6 +163,13 @@ namespace CraftSharp.Protocol
         /// <param name="sequenceId">Sequence ID used for synchronization</param>
         /// <returns>True if packet was successfully sent</returns>
         bool SendUseItem(int hand, int sequenceId);
+        
+        /// <summary>
+        /// Send a pick item packet to the server
+        /// </summary>
+        /// <param name="slotToUse">Hotbar slot to use</param>
+        /// <returns>True if packet was successfully sent</returns>
+        bool SendPickItem(int slotToUse);
 
         /// <summary>
         /// Send a click inventory slot packet to the server

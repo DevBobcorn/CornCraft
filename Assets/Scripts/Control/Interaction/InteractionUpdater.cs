@@ -9,6 +9,7 @@ using CraftSharp.Event;
 using CraftSharp.Rendering;
 using System.IO;
 using System.Threading.Tasks;
+using CraftSharp.Protocol.Handlers;
 using CraftSharp.Resource;
 
 namespace CraftSharp.Control
@@ -494,9 +495,9 @@ namespace CraftSharp.Control
             {
                 playerController = curPlayerController;
 
-                curPlayerController.Actions.Interaction.ChargedAttack.performed += _ =>
+                playerController.Actions.Interaction.ChargedAttack.performed += _ =>
                 {
-                    var status = curPlayerController.Status;
+                    var status = playerController.Status;
 
                     if (currentActionType == ItemActionType.Sword)
                     {
@@ -510,25 +511,25 @@ namespace CraftSharp.Control
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
                             // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = curPlayerController.AbilityConfig.RangedBowAttack_Charged;
+                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
 
                             // Update player state
-                            curPlayerController.ChangeToState(PlayerStates.RANGED_AIM);
+                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
                         }
                     }
                     else // Check digging block
                     {
                         if (TargetBlockLoc is not null && TargetDirection is not null &&
-                            curClient.GameMode != GameMode.Creative)
+                            client.GameMode != GameMode.Creative)
                         {
-                            curPlayerController.ChangeToState(PlayerStates.DIGGING_AIM);
+                            playerController.ChangeToState(PlayerStates.DIGGING_AIM);
                         }
                     }
                 };
 
-                curPlayerController.Actions.Interaction.NormalAttack.performed += _ =>
+                playerController.Actions.Interaction.NormalAttack.performed += _ =>
                 {
-                    var status = curPlayerController.Status;
+                    var status = playerController.Status;
 
                     if (TargetBlockLoc is not null && TargetDirection is not null && instaBreakCooldown <= 0F)
                     {
@@ -541,16 +542,16 @@ namespace CraftSharp.Control
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
-                            if (curPlayerController.CurrentState != PlayerStates.MELEE)
+                            if (playerController.CurrentState != PlayerStates.MELEE)
                             {
                                 // Specify attack data to use
-                                status.AttackStatus.CurrentStagedAttack = curPlayerController.AbilityConfig.MeleeSwordAttack_Staged;
+                                status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
 
                                 // Update player state
-                                curPlayerController.ChangeToState(PlayerStates.MELEE);
+                                playerController.ChangeToState(PlayerStates.MELEE);
                             }
-                            else if (curPlayerController.CurrentState is MeleeState melee &&
-                                    curPlayerController.Status.AttackStatus.AttackCooldown <= 0F)
+                            else if (playerController.CurrentState is MeleeState melee &&
+                                    playerController.Status.AttackStatus.AttackCooldown <= 0F)
                             {
                                 melee.SetNextAttackFlag();
                             }
@@ -558,24 +559,24 @@ namespace CraftSharp.Control
                     }
                 };
 
-                curPlayerController.Actions.Interaction.UseChargedItem.performed += _ =>
+                playerController.Actions.Interaction.UseChargedItem.performed += _ =>
                 {
-                    var status = curPlayerController.Status;
+                    var status = playerController.Status;
 
                     if (currentActionType == ItemActionType.Bow)
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
                             // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = curPlayerController.AbilityConfig.RangedBowAttack_Charged;
+                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
 
                             // Update player state
-                            curPlayerController.ChangeToState(PlayerStates.RANGED_AIM);
+                            playerController.ChangeToState(PlayerStates.RANGED_AIM);
                         }
                     }
                 };
 
-                curPlayerController.Actions.Interaction.UseNormalItem.performed += _ =>
+                playerController.Actions.Interaction.UseNormalItem.performed += _ =>
                 {
                     if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
                     {
@@ -587,18 +588,18 @@ namespace CraftSharp.Control
                                 var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
 
                                 // Interact with target block
-                                PlaceBlock(curClient, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+                                PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
                             }
                         }
                         else if (currentActionType == ItemActionType.Block) // Check if holding a block item
                         {
                             if (placeBlockCooldown < 0F)
                             {
-                                var cameraYaw = curClient.GetCameraYaw();
-                                var cameraPitch = curClient.GetCameraPitch();
+                                var cameraYaw = client.GetCameraYaw();
+                                var cameraPitch = client.GetCameraPitch();
 
                                 var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
-                                var placeLoc = PlaceBlock(curClient, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+                                var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                                 inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
                                 var clickedTopHalf = inBlockLoc.Y >= 0.5;
@@ -610,13 +611,60 @@ namespace CraftSharp.Control
                     }
                     else
                     {
-                        curClient.UseItemOnMainHand();
+                        client.UseItemOnMainHand();
                     }
                 };
             
-                curPlayerController.Actions.Interaction.PickTargetItem.performed += _ =>
+                playerController.Actions.Interaction.PickTargetItem.performed += _ =>
                 {
-                    // TODO: Implement
+                    //if (client.GetProtocolVersion() < ProtocolMinecraft.MC_1_21_4_Version)
+                    if (TargetBlockLoc is not null)
+                    {
+                        var playerInventory = client.GetInventory(0);
+                        var block = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value);
+                        var itemToPick = ItemPalette.INSTANCE.GetItemForBlock(block.BlockId);
+                        var itemStackToPick = new ItemStack(itemToPick, 1);
+                        
+                        if (playerInventory is not null && itemToPick != Item.UNKNOWN)
+                        {
+                            var matchedHotbarSlot = playerInventory.MatchItemStackInHotbar(itemStackToPick);
+                            if (matchedHotbarSlot >= 0) // We already have this item in hotbar, just change our slot
+                            {
+                                client.ChangeHotbarSlot(matchedHotbarSlot);
+                            }
+                            else // Swap from backpack if we can find any, or get one if in Creative mode
+                            {
+                                var matchedBackpackSlot =
+                                    playerInventory.MatchItemStackInHotbarAndBackpack(itemStackToPick);
+                                
+                                if (matchedBackpackSlot >= 0) // Swap from backpack
+                                {
+                                    client.PickItem(matchedBackpackSlot);
+                                    //Debug.Log($"Slot to use for storing swaped item: {matchedBackpackSlot}, Swaped item: {itemToPick}");
+                                }
+                                else if (client.GameMode == GameMode.Creative) // Get one new, for free!
+                                {
+                                    var hotbarSlotToUse = playerInventory.GetSuitableSlotInHotbar(client.CurrentHotbarSlot);
+                                    var slotToUse = playerInventory.GetFirstHotbarSlot() + hotbarSlotToUse;
+                                    
+                                    var emptyBackpackAndHotbarSlots = playerInventory.GetEmptySlots(9, 36);
+                                    var oldItemStack = playerInventory.Items.GetValueOrDefault(slotToUse);
+                                    if (oldItemStack is not null && emptyBackpackAndHotbarSlots.Length > 0) // Put old item stack to somewhere else
+                                    {
+                                        client.DoCreativeGive(emptyBackpackAndHotbarSlots[0], oldItemStack.ItemType, oldItemStack.Count, oldItemStack.NBT);
+                                        //Debug.Log($"Slot to use for storing old item: {emptyBackpackAndHotbarSlots[0]}, Old item: {oldItemStack}");
+                                    }
+                                    
+                                    client.DoCreativeGive(slotToUse, itemToPick, itemStackToPick.Count, itemStackToPick.NBT);
+                                    client.ChangeHotbarSlot((short) hotbarSlotToUse);
+                                    EventManager.Instance.Broadcast(new HeldItemUpdateEvent(hotbarSlotToUse, true, itemStackToPick, itemToPick.ActionType));
+                                    
+                                    //Debug.Log($"Slot to use for storing picked item: {hotbarSlotToUse}, Picked item: {itemToPick}");
+                                }
+                            }
+                        }
+                    }
+                    // TODO: Implement for 1.21.4+
                 };
             }
         }

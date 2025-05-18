@@ -380,7 +380,7 @@ namespace CraftSharp.Control
                     ""name"": """",
                     ""id"": ""b43061e7-5980-407f-af3b-dd419465222a"",
                     ""path"": ""<Mouse>/middleButton"",
-                    ""interactions"": ""Tap"",
+                    ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Pick Target Item"",

@@ -187,7 +187,7 @@ namespace CraftSharp
         /// </summary>
         public override ItemStack? GetActiveItem()
         {
-            return GetInventory(0)?.GetHotbarItem(CurrentSlot);
+            return GetInventory(0)?.GetHotbarItem(CurrentHotbarSlot);
         }
 
         /// <summary>
@@ -366,6 +366,15 @@ namespace CraftSharp
         /// </summary>
         /// <returns>TRUE if the item was successfully used</returns>
         public override bool UseItemOnOffHand()
+        {
+            return false;
+        }
+        
+        /// <summary>
+        /// Pick item (middle click)
+        /// </summary>
+        /// <returns>TRUE if the item was successfully picked</returns>
+        public override bool PickItem(int slotToUse)
         {
             return false;
         }
@@ -615,11 +624,11 @@ namespace CraftSharp
         /// <param name="slot">Selected hotbar slot</param>
         public void DummyOnHeldItemChange(byte slot)
         {
-            CurrentSlot = slot;
+            CurrentHotbarSlot = slot;
             var newItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.Broadcast(
-                    new HeldItemUpdateEvent(CurrentSlot, true, newItem,
+                    new HeldItemUpdateEvent(CurrentHotbarSlot, true, newItem,
                     PlayerActionHelper.GetItemActionType(newItem)));
         }
 
@@ -673,8 +682,7 @@ namespace CraftSharp
                 {
                     if (item == null || item.IsEmpty)
                     {
-                        if (inventory2.Items.ContainsKey(slot))
-                            inventory2.Items.Remove(slot);
+                        inventory2.Items.Remove(slot);
                     }
                     else inventory2.Items[slot] = item;
 
@@ -684,7 +692,7 @@ namespace CraftSharp
                     {
                         EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, item));
 
-                        if (hotbarSlot == CurrentSlot) // The currently held item is updated
+                        if (hotbarSlot == CurrentHotbarSlot) // The currently held item is updated
                         {
                             EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
                                 hotbarSlot, false, item, PlayerActionHelper.GetItemActionType(item)));

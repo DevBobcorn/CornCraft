@@ -151,7 +151,7 @@ namespace CraftSharp
         }
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
-        protected byte CurrentSlot { get; set; } = 0;
+        public byte CurrentHotbarSlot { get; protected set; } = 0;
         public abstract bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate);
 
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
@@ -234,6 +234,7 @@ namespace CraftSharp
         public abstract void SendAutoCompleteRequest(string text);
         public abstract bool UseItemOnMainHand();
         public abstract bool UseItemOnOffHand();
+        public abstract bool PickItem(int slotToUse);
         public abstract void OpenPlayerInventory();
         public abstract bool DoInventoryAction(int inventoryId, int slot, InventoryActionType actionType);
         public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
@@ -250,7 +251,7 @@ namespace CraftSharp
 
         public bool ChangeHotbarSlotBy(short offset)
         {
-            var index = CurrentSlot + offset;
+            var index = CurrentHotbarSlot + offset;
             while (index < 0) index += 9;
 
             return ChangeHotbarSlot((short) (index % 9));
