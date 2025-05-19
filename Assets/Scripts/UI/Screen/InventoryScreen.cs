@@ -201,6 +201,12 @@ namespace CraftSharp.UI
 
             // Hide cursor text
             cursorTextPanel.gameObject.SetActive(false);
+            
+            // Clear property preview text
+            if (propertyPreviewText)
+            {
+                propertyPreviewText.text = string.Empty;
+            }
         }
 
         private InventoryItemSlot CreateSlot(RectTransform parent, int slotId, float x, float y, ItemStack previewItem,
@@ -361,21 +367,7 @@ namespace CraftSharp.UI
                 }
             });
 
-            slot.SetCursorTextHandler(str =>
-            {
-                if (!game) return;
-                var cursorHasItem = game.GetInventory(0)?.Items.ContainsKey(-1) ?? true;
-
-                if (string.IsNullOrEmpty(str) || cursorHasItem)
-                {
-                    cursorTextPanel.gameObject.SetActive(false);
-                }
-                else
-                {
-                    cursorText.text = str;
-                    cursorTextPanel.gameObject.SetActive(true);
-                }
-            });
+            slot.SetCursorTextHandler(UpdateCursorText);
         }
 
         private void CreateLayout(RectTransform parent, InventoryType.InventoryLayoutInfo layoutInfo, bool createSlots)
@@ -403,6 +395,11 @@ namespace CraftSharp.UI
                 var input = CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
                     inputInfo.Width, inputInfo.PlaceholderTranslationKey, $"Input [{inputId}]");
                 RegisterPropertyDependent(inputInfo, input);
+                if (inputInfo.HintTranslationKey is not null)
+                {
+                    input.HintTranslationKey = inputInfo.HintTranslationKey;
+                    input.MarkCursorTextDirty();
+                }
             }
 
             // Populate layout buttons
@@ -411,6 +408,11 @@ namespace CraftSharp.UI
                 var button = CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
                     buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo, $"Button [{buttonId}]");
                 RegisterPropertyDependent(buttonInfo, button);
+                if (buttonInfo.HintTranslationKey is not null)
+                {
+                    button.HintTranslationKey = buttonInfo.HintTranslationKey;
+                    button.MarkCursorTextDirty();
+                }
             }
 
             if (createSlots)
@@ -421,6 +423,11 @@ namespace CraftSharp.UI
                     var slot = CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.PreviewItemStack,
                         slotInfo.PlaceholderTypeId, $"Slot [{slotId}] (Nested)");
                     RegisterPropertyDependent(slotInfo, slot);
+                    if (slotInfo.HintTranslationKey is not null)
+                    {
+                        slot.HintTranslationKey = slotInfo.HintTranslationKey;
+                        slot.MarkCursorTextDirty();
+                    }
                 }
             }
         }
@@ -461,9 +468,16 @@ namespace CraftSharp.UI
 
             input.SetPlaceholderText(Translations.Get(translationKey));
 
-            currentInputs[inputId] = input;
+            SetupInput(inputId, input);
 
             return input;
+        }
+
+        private void SetupInput(int inputId, InventoryInput input)
+        {
+            currentInputs[inputId] = input;
+
+            input.SetCursorTextHandler(UpdateCursorText);
         }
 
         private InventoryButton CreateButton(RectTransform parent, int buttonId, float x, float y, float w, float h,
@@ -492,6 +506,8 @@ namespace CraftSharp.UI
             currentButtons[buttonId] = button;
 
             button.SetClickHandler(() => HandleButtonClick(buttonId));
+
+            button.SetCursorTextHandler(UpdateCursorText);
         }
         
         private Image CreateSprite(RectTransform parent, float x, float y, float w, float h, SpriteType spriteType, string curFillProp, string maxFillProp, string flipIdxProp)
@@ -546,6 +562,23 @@ namespace CraftSharp.UI
             }
         }
 
+        private void UpdateCursorText(string str)
+        {
+            var game = CornApp.CurrentClient;
+            if (!game) return;
+            var cursorHasItem = game.GetInventory(0)?.Items.ContainsKey(-1) ?? true;
+            
+            if (string.IsNullOrEmpty(str) || cursorHasItem)
+            {
+                cursorTextPanel.gameObject.SetActive(false);
+            }
+            else
+            {
+                cursorText.text = str;
+                cursorTextPanel.gameObject.SetActive(true);
+            }
+        }
+
         private void HandleButtonClick(int buttonId)
         {
             // Handle button click TODO: Move to separate class
@@ -562,6 +595,7 @@ namespace CraftSharp.UI
                         2 => (short) MobEffectPalette.INSTANCE.GetNumIdById(RESISTANCE_ID),
                         3 => (short) MobEffectPalette.INSTANCE.GetNumIdById(JUMP_BOOST_ID),
                         4 => (short) MobEffectPalette.INSTANCE.GetNumIdById(STRENGTH_ID),
+                        // ReSharper disable once UnreachableSwitchArmDueToIntegerAnalysis
                         _ => primaryId
                     };
                     var propertyId = activeInventoryData.Type.PropertySlots["first_potion_effect"];
@@ -582,6 +616,7 @@ namespace CraftSharp.UI
                     {
                         5 => (short) MobEffectPalette.INSTANCE.GetNumIdById(REGENERATION_ID),
                         6 => primaryId, // Level-up primary effect
+                        // ReSharper disable once UnreachableSwitchArmDueToIntegerAnalysis
                         _ => secondaryId
                     };
                     var propertyId = activeInventoryData.Type.PropertySlots["second_potion_effect"];
@@ -886,12 +921,6 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(slotUpdateCallback);
             EventManager.Instance.Register(itemsUpdateCallback);
             EventManager.Instance.Register(propertyUpdateCallback);
-
-            // Clear property preview text
-            if (propertyPreviewText)
-            {
-                propertyPreviewText.text = string.Empty;
-            }
         }
 
         public override void UpdateScreen()

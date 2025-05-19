@@ -88,6 +88,12 @@ namespace CraftSharp.UI
         {
             cursorTextDirty = false;
 
+            if (HintTranslationKey is not null)
+            {
+                cursorText = Translations.Get(HintTranslationKey);
+                return;
+            }
+
             // Update item cursor text
             if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)
             {
@@ -180,7 +186,7 @@ namespace CraftSharp.UI
             hovered = false;
             slotImage.overrideSprite = Enabled ? Dragged || Selected ? draggedSprite : null : disabledSprite;
             
-            if (_slotAnimator)
+            if (_slotAnimator) // For hotbar slots
                 _slotAnimator.SetBool(SELECTED_HASH, false);
             
             cursorTextHandler?.Invoke(string.Empty);
@@ -200,7 +206,6 @@ namespace CraftSharp.UI
         
         private Action<PointerEventData.InputButton> pointerUpHandler;
         private Action<PointerEventData.InputButton> pointerDownHandler;
-        private Action hoverHandler;
 
         public void SetPointerUpHandler(Action<PointerEventData.InputButton> handler)
         {
@@ -210,11 +215,6 @@ namespace CraftSharp.UI
         public void SetPointerDownHandler(Action<PointerEventData.InputButton> handler)
         {
             pointerDownHandler = handler;
-        }
-        
-        public void SetHoverHandler(Action handler)
-        {
-            hoverHandler = handler;
         }
         
         public void SlotPointerDown(BaseEventData data)

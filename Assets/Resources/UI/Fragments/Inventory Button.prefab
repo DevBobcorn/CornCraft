@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8279707115440704190}
   - component: {fileID: 303635176917562386}
   - component: {fileID: 6010396838963732815}
+  - component: {fileID: 8875059420040973933}
   m_Layer: 5
   m_Name: Inventory Button
   m_TagString: Untagged
@@ -148,3 +149,48 @@ MonoBehaviour:
   button: {fileID: 303635176917562386}
   selectedSprite: {fileID: 21300000, guid: f8aa899461ebb6a41b40b90cb76320ec, type: 3}
   disabledSprite: {fileID: 21300000, guid: 1d1e0c680196c1d429a80dfa57734dd0, type: 3}
+--- !u!114 &8875059420040973933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5928234479986686403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates:
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6010396838963732815}
+          m_TargetAssemblyTypeName: CraftSharp.UI.InventoryButton, CraftSharp.App
+          m_MethodName: ButtonPointerEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 6010396838963732815}
+          m_TargetAssemblyTypeName: CraftSharp.UI.InventoryButton, CraftSharp.App
+          m_MethodName: ButtonPointerExit
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -121,7 +122,7 @@ namespace CraftSharp.Inventory
                 }
 
                 var layoutInfo = new InventoryLayoutInfo(spriteInfo, slotInfo, inputInfo, labelInfo, buttonInfo);
-                layoutInfo.ReadPredicates(data);
+                layoutInfo.ReadBaseInfo(data);
 
                 return layoutInfo;
             }
@@ -137,8 +138,9 @@ namespace CraftSharp.Inventory
         public record InventoryFragmentInfo
         {
             public readonly Dictionary<PredicateType, InventoryPropertyPredicate> Predicates = new();
+            public string? HintTranslationKey { get; private set; }
 
-            protected void ReadPredicates(Json.JSONData data)
+            protected void ReadBaseInfo(Json.JSONData data)
             {
                 if (data.Properties.TryGetValue("visible_predicate", out var predicate))
                 {
@@ -155,16 +157,20 @@ namespace CraftSharp.Inventory
                     Predicates.Add(PredicateType.Selected,
                         InventoryPropertyPredicate.FromString(predicate.StringValue));
                 }
+                if (data.Properties.TryGetValue("hint_translation_key", out var val))
+                {
+                    HintTranslationKey = val.StringValue;
+                }
             }
         }
 
         public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type,
-            ItemStack PreviewItemStack, ResourceLocation? PlaceholderTypeId) : InventoryFragmentInfo
+            ItemStack? PreviewItemStack, ResourceLocation? PlaceholderTypeId) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
             public InventorySlotType Type { get; } = Type;
-            public ItemStack PreviewItemStack { get; } = PreviewItemStack;
+            public ItemStack? PreviewItemStack { get; } = PreviewItemStack;
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
 
             private static ItemStack ItemStackFromJson(Json.JSONData data)
@@ -188,31 +194,31 @@ namespace CraftSharp.Inventory
                 var y = data.Properties.TryGetValue("pos_y", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
 
-                ItemStack previewItem = data.Properties.TryGetValue("preview_item", out val)
+                ItemStack? previewItem = data.Properties.TryGetValue("preview_item", out val)
                                         ? ItemStackFromJson(val) : null;
                 
                 ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
                     ResourceLocation.FromString(val.StringValue) : null;
 
                 var slotInfo = new InventorySlotInfo(x, y, type, previewItem, placeholderTypeId);
-                slotInfo.ReadPredicates(data);
+                slotInfo.ReadBaseInfo(data);
 
                 return slotInfo;
             }
         }
         
         public record InventorySpriteInfo(float PosX, float PosY, float Width,
-            float Height, ResourceLocation TypeId, string CurFillProperty = null,
-            string MaxFillProperty = null, string FlipIdxProperty = null) : InventoryFragmentInfo
+            float Height, ResourceLocation TypeId, string? CurFillProperty = null,
+            string? MaxFillProperty = null, string? FlipIdxProperty = null) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
             public float Width { get; } = Width;
             public float Height { get; } = Height;
             public ResourceLocation TypeId { get; } = TypeId;
-            public string CurFillProperty { get; set; } = CurFillProperty;
-            public string MaxFillProperty { get; set; } = MaxFillProperty;
-            public string FlipIdxProperty { get; set; } = FlipIdxProperty;
+            public string? CurFillProperty { get; set; } = CurFillProperty;
+            public string? MaxFillProperty { get; set; } = MaxFillProperty;
+            public string? FlipIdxProperty { get; set; } = FlipIdxProperty;
 
             public static InventorySpriteInfo FromJson(Json.JSONData data)
             {
@@ -239,7 +245,7 @@ namespace CraftSharp.Inventory
                 if (data.Properties.TryGetValue("flipbook_index_property", out val))
                     spriteInfo.FlipIdxProperty = val.StringValue;
                 
-                spriteInfo.ReadPredicates(data);
+                spriteInfo.ReadBaseInfo(data);
                 
                 return spriteInfo;
             }
@@ -266,7 +272,7 @@ namespace CraftSharp.Inventory
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 5;
                 
                 var inputInfo = new InventoryInputInfo(x, y, w, translationKey);
-                inputInfo.ReadPredicates(data);
+                inputInfo.ReadBaseInfo(data);
 
                 return inputInfo;
             }
@@ -312,7 +318,7 @@ namespace CraftSharp.Inventory
                     GetLabelAlignment(val.StringValue) : LabelAlignment.Left;
                 
                 var labelInfo = new InventoryLabelInfo(x, y, w, alignment, translationKey);
-                labelInfo.ReadPredicates(data);
+                labelInfo.ReadBaseInfo(data);
 
                 return labelInfo;
             }
@@ -341,7 +347,7 @@ namespace CraftSharp.Inventory
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
                 
                 var buttonInfo = new InventoryButtonInfo(x, y, w, h, buttonLayout);
-                buttonInfo.ReadPredicates(data);
+                buttonInfo.ReadBaseInfo(data);
 
                 return buttonInfo;
             }
@@ -352,7 +358,7 @@ namespace CraftSharp.Inventory
             return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? new(info.PosX, info.PosY) : Vector2.zero;
         }
         
-        public ItemStack GetInventorySlotPreviewItem(int slot)
+        public ItemStack? GetInventorySlotPreviewItem(int slot)
         {
             return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info.PreviewItemStack : null;
         }

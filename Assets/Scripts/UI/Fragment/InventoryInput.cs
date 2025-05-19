@@ -9,9 +9,41 @@ namespace CraftSharp.UI
         [SerializeField] private TMP_InputField inputField;
         [SerializeField] private TMP_Text placeholderText;
 
+        protected override void UpdateCursorText()
+        {
+            cursorTextDirty = false;
+
+            if (HintTranslationKey is not null)
+            {
+                cursorText = Translations.Get(HintTranslationKey);
+            }
+        }
+
         public void SetPlaceholderText(string text)
         {
             placeholderText.text = text;
+        }
+
+        public void InputValueChanged(string text)
+        {
+            Debug.Log(text);
+        }
+
+        public void InputPointerEnter()
+        {
+            if (cursorTextDirty)
+            {
+                // Update only when needed
+                UpdateCursorText();
+            }
+            
+            cursorTextHandler?.Invoke(cursorText);
+            hoverHandler?.Invoke();
+        }
+
+        public void InputPointerExit()
+        {
+            cursorTextHandler?.Invoke(string.Empty);
         }
     }
 }

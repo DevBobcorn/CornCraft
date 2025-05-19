@@ -31,8 +31,22 @@ namespace CraftSharp.UI
                 button.image.overrideSprite = _enabled ? _selected ? selectedSprite : null : disabledSprite;
             }
         }
+
+        protected override void UpdateCursorText()
+        {
+            cursorTextDirty = false;
+
+            if (HintTranslationKey is not null)
+            {
+                cursorText = Translations.Get(HintTranslationKey);
+            }
+        }
+
+        #nullable enable
         
-        private Action clickHandler;
+        private Action? clickHandler;
+        
+        #nullable disable
         
         public void SetClickHandler(Action handler)
         {
@@ -42,6 +56,23 @@ namespace CraftSharp.UI
         public void ButtonClick()
         {
             clickHandler?.Invoke();
+        }
+
+        public void ButtonPointerEnter()
+        {
+            if (cursorTextDirty)
+            {
+                // Update only when needed
+                UpdateCursorText();
+            }
+            
+            cursorTextHandler?.Invoke(cursorText);
+            hoverHandler?.Invoke();
+        }
+
+        public void ButtonPointerExit()
+        {
+            cursorTextHandler?.Invoke(string.Empty);
         }
     }
 }
