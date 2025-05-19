@@ -166,7 +166,8 @@
                     }
                 ],
                 "enabled_predicate": "power_level>0",
-                "selected_predicate": "first_potion_effect_index=0"
+                "selected_predicate": "first_potion_effect_index=0",
+                "hint_translation_key": "effect.minecraft.speed"
             },
             "1": {
                 "pos_x": 2,
@@ -181,7 +182,8 @@
                     }
                 ],
                 "enabled_predicate": "power_level>0",
-                "selected_predicate": "first_potion_effect_index=1"
+                "selected_predicate": "first_potion_effect_index=1",
+                "hint_translation_key": "effect.minecraft.haste"
             },
             "2": {
                 "pos_x": 1,
@@ -196,7 +198,8 @@
                     }
                 ],
                 "enabled_predicate": "power_level>1",
-                "selected_predicate": "first_potion_effect_index=2"
+                "selected_predicate": "first_potion_effect_index=2",
+                "hint_translation_key": "effect.minecraft.resistance"
             },
             "3": {
                 "pos_x": 2,
@@ -211,7 +214,8 @@
                     }
                 ],
                 "enabled_predicate": "power_level>1",
-                "selected_predicate": "first_potion_effect_index=3"
+                "selected_predicate": "first_potion_effect_index=3",
+                "hint_translation_key": "effect.minecraft.jump_boost"
             },
             "4": {
                 "pos_x": 1.5,
@@ -226,7 +230,8 @@
                     }
                 ],
                 "enabled_predicate": "power_level>2",
-                "selected_predicate": "first_potion_effect_index=4"
+                "selected_predicate": "first_potion_effect_index=4",
+                "hint_translation_key": "effect.minecraft.strength"
             },
             "5": {
                 "pos_x": 6,
@@ -241,7 +246,8 @@
                     }
                 ],
                 "enabled_predicate": "power_level>3",
-                "selected_predicate": "second_potion_effect_index=0"
+                "selected_predicate": "second_potion_effect_index=0",
+                "hint_translation_key": "effect.minecraft.regeneration"
             },
             "6": {
                 "pos_x": 7,
@@ -258,7 +264,8 @@
                 ],
                 "visible_predicate": "first_potion_effect_index>=0",
                 "enabled_predicate": "power_level>3",
-                "selected_predicate": "second_potion_effect_index=1"
+                "selected_predicate": "second_potion_effect_index=1",
+                "hint_translation_key": "gameplay.ui.beacon_levelup"
             },
             "7": {
                 "pos_x": 7,
@@ -272,7 +279,8 @@
                         "height": 0.75
                     }
                 ],
-                "enabled_predicate": "activation_item_ready=1"
+                "enabled_predicate": "activation_item_ready=1",
+                "hint_translation_key": "gui.done"
             },
             "8": {
                 "pos_x": 8,
@@ -285,7 +293,8 @@
                         "width": 0.75,
                         "height": 0.75
                     }
-                ]
+                ],
+                "hint_translation_key": "gui.cancel"
             }
         },
         "labels": [
