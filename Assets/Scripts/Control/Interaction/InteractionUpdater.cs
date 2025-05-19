@@ -192,6 +192,8 @@ namespace CraftSharp.Control
             }
         }
 
+        private static readonly ResourceLocation COCOA_ID = new("cocoa");
+
         private void UpdateBlockPlacementPrediction(BlockLoc newBlockLoc, ResourceLocation blockId, Direction targetDirection, float cameraYaw, float cameraPitch, bool clickedTopHalf)
         {
             if (!client) return;
@@ -220,8 +222,37 @@ namespace CraftSharp.Control
                 // Make a copy of default property dictionary
                 .ToDictionary(entry => entry.Key, entry => entry.Value);
 
+            // See https://bugs.mojang.com/browse/MC/issues/MC-193943
+            // Bell & Cocoa: Don't invert
+            // Other blocks: Invert if wall-attached
+            bool invertFacing = true;
+            
+            if (propTable.ContainsKey("attachment")) // Used by bell
+            {
+                predicateProps["attachment"] = targetDirection switch
+                {
+                    Direction.Up => "floor",
+                    Direction.Down => "ceiling",
+                    _ => "single_wall" // 
+                };
+                invertFacing = false;
+            }
+            
+            if (propTable.ContainsKey("face"))
+            {
+                predicateProps["face"] = targetDirection switch
+                {
+                    Direction.Up => "floor",
+                    Direction.Down => "ceiling",
+                    _ => "wall"
+                };
+                invertFacing = targetDirection is not Direction.Up and not Direction.Down; // Invert if wall-attached
+            }
+
             if (propTable.TryGetValue("facing", out var possibleValues))
             {
+                if (blockId == COCOA_ID) invertFacing = false;
+                
                 if (possibleValues.Contains("up") && cameraPitch <= -44)
                 {
                     predicateProps["facing"] = "up";
@@ -232,16 +263,24 @@ namespace CraftSharp.Control
                 }
                 else
                 {
-                    predicateProps["facing"] = cameraYawDir switch
+                    predicateProps["facing"] = targetDirection switch
                     {
-                        Direction.North => "north",
-                        Direction.East => "east",
-                        Direction.South => "south",
-                        Direction.West => "west",
-                        _ => throw new InvalidDataException($"Undefined direction {targetDirection}!")
+                        Direction.North => invertFacing ? "north" : "south",
+                        Direction.East => invertFacing ? "east" : "west",
+                        Direction.South => invertFacing ? "south" : "north",
+                        Direction.West => invertFacing ? "west" : "east",
+                        _ => cameraYawDir switch
+                        {
+                            Direction.North => invertFacing ? "south" : "north",
+                            Direction.East => invertFacing ? "west" : "east",
+                            Direction.South => invertFacing ? "north" : "south",
+                            Direction.West => invertFacing ? "east" : "west",
+                            _ => throw new InvalidDataException($"Undefined direction {targetDirection}!")
+                        }
                     };
                 }
             }
+            
 
             if (propTable.TryGetValue("half", out possibleValues))
             {

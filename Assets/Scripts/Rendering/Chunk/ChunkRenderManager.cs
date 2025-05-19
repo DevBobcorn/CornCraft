@@ -1006,11 +1006,13 @@ namespace CraftSharp.Rendering
 
             blockPredictionCallback = e =>
             {
+                if (!client) return;
+                
                 // Make sure to set block from network thread
                 client.InvokeOnNetMainThread(() =>
                 {
                     var block = new Block((ushort) e.BlockStateId);
-                    Debug.Log($"Prediction: {e.BlockLoc} => {block}");
+                    //Debug.Log($"Prediction: {e.BlockLoc} => {block}");
 
                     SetBlock(e.BlockLoc, block, true);
                 });
