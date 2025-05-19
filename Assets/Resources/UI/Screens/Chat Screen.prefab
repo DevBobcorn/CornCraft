@@ -265,14 +265,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.392}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: eaa26866be8d2864aaf9ecb7b2caf132, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a561abf63b0e1574084308cac406fbda, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -375,7 +375,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 758e59608ede27142a2bad398a368a5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chatScrollRectTransform: {fileID: 1485062330468576613}
   chatInput: {fileID: 3918178822443755403}
   chatContentPanel: {fileID: 8403889242006478539}
   chatMessagePrefab: {fileID: 6585865202410765145, guid: d7f0c937280d3b34d9a81900a93b91c7, type: 3}
