@@ -3733,6 +3733,29 @@ namespace CraftSharp.Protocol.Handlers
             catch (System.IO.IOException) { return false; }
             catch (ObjectDisposedException) { return false; }
         }
+        
+        public bool SendRenameItem(string itemName)
+        {
+            try
+            {
+                List<byte> packet = new();
+                packet.AddRange(DataTypes.GetString(itemName.Length > 50 ? itemName[..50] : itemName));
+                SendPacket(PacketTypesOut.NameItem, packet);
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
+            catch (System.IO.IOException)
+            {
+                return false;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
+        }
 
         public bool SendBeaconEffects(int primary, int secondary)
         {
@@ -3860,29 +3883,6 @@ namespace CraftSharp.Protocol.Handlers
             }
 
             return false;
-        }
-
-        public bool SendRenameItem(string itemName)
-        {
-            try
-            {
-                List<byte> packet = new();
-                packet.AddRange(DataTypes.GetString(itemName.Length > 50 ? itemName[..50] : itemName));
-                SendPacket(PacketTypesOut.NameItem, packet);
-                return true;
-            }
-            catch (SocketException)
-            {
-                return false;
-            }
-            catch (System.IO.IOException)
-            {
-                return false;
-            }
-            catch (ObjectDisposedException)
-            {
-                return false;
-            }
         }
 
         public bool SendCookieResponse(string name, byte[]? data)

@@ -94,21 +94,27 @@ namespace CraftSharp.Protocol
         /// <returns>Returns the translated text</returns>
         public static string ParseText(string json, List<string>? links = null)
         {
-            return JSONData2String(Json.ParseJson(json), "", links);
+            var jsonData = Json.ParseJson(json);
+            return JSONData2String(jsonData, "", links);
         }
 
+        /// <summary>
+        /// The main function to convert text from MC 1.6+ JSON to MC 1.5.2 formatted text
+        /// </summary>
+        /// <param name="nbt">NBT dictionary</param>
+        /// <returns>Returns the translated text</returns>
         public static string ParseText(Dictionary<string, object> nbt)
         {
-            return NbtToString(nbt);
+            var jsonData = Json.Object2JSONData(nbt);
+            return JSONData2String(jsonData, "", null);
         }
 
         /// <summary>
         /// The main function to convert text from MC 1.9+ JSON to MC 1.5.2 formatted text
         /// </summary>
         /// <param name="message">Message received</param>
-        /// <param name="links">Optional container for links from JSON serialized text</param>
         /// <returns>Returns the translated text</returns>
-        public static string ParseSignedChat(ChatMessage message, List<string>? links = null)
+        public static string ParseSignedChat(ChatMessage message)
         {
             string sender = message.isSenderJson ? ParseText(message.displayName!) : message.displayName!;
             string content;
@@ -186,31 +192,39 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Get the classic color tag corresponding to a color name
         /// </summary>
-        /// <param name="colorname">Color Name</param>
+        /// <param name="colorName">Color Name</param>
         /// <returns>Color code</returns>
-        private static string Color2tag(string colorname)
+        private static string Color2tag(string colorName)
         {
-            switch (colorname.ToLower())
+            if (colorName.StartsWith("#")) // #RRGGBB format color code
             {
-                /* MC 1.7+ Name           MC 1.6 Name           Classic tag */
-                case "black":        /*  Blank if same  */      return "§0";
-                case "dark_blue":                               return "§1";
-                case "dark_green":                              return "§2";
-                case "dark_aqua":       case "dark_cyan":       return "§3";
-                case "dark_red":                                return "§4";
-                case "dark_purple":     case "dark_magenta":    return "§5";
-                case "gold":            case "dark_yellow":     return "§6";
-                case "gray":                                    return "§7";
-                case "dark_gray":                               return "§8";
-                case "blue":                                    return "§9";
-                case "green":                                   return "§a";
-                case "aqua":            case "cyan":            return "§b";
-                case "red":                                     return "§c";
-                case "light_purple":    case "magenta":         return "§d";
-                case "yellow":                                  return "§e";
-                case "white":                                   return "§f";
-                default: return "";
+                if (colorName.Length == 7)
+                    return $"§{colorName}";
+                
+                Debug.LogWarning($"Invalid color code {colorName}");
+                return string.Empty;
             }
+            
+            return colorName.ToLower() switch
+            {
+                "black"                         => "§0",
+                "dark_blue"                     => "§1",
+                "dark_green"                    => "§2",
+                "dark_aqua" or "dark_cyan"      => "§3",
+                "dark_red"                      => "§4",
+                "dark_purple" or "dark_magenta" => "§5",
+                "gold" or "dark_yellow"         => "§6",
+                "gray"                          => "§7",
+                "dark_gray"                     => "§8",
+                "blue"                          => "§9",
+                "green"                         => "§a",
+                "aqua" or "cyan"                => "§b",
+                "red"                           => "§c",
+                "light_purple" or "magenta"     => "§d",
+                "yellow"                        => "§e",
+                "white"                         => "§f",
+                _                               => string.Empty
+            };
         }
 
         /// <summary>
@@ -225,7 +239,7 @@ namespace CraftSharp.Protocol
         {
             translationRules.Clear(); // Clear loaded stuffs
 
-            // Small default dictionnary of translation rules
+            // Small default dictionary of translation rules
             translationRules["chat.type.admin"] = "[%s: %s]";
             translationRules["chat.type.announcement"] = "§d[%s] %s";
             translationRules["chat.type.emote"] = " * %s %s";
@@ -293,67 +307,87 @@ namespace CraftSharp.Protocol
         /// Format text using a specific formatting rule.
         /// Example : * %s %s + ["ORelio", "is doing something"] = * ORelio is doing something
         /// </summary>
-        /// <param name="rulename">Name of the rule, chosen by the server</param>
+        /// <param name="ruleName">Name of the rule, chosen by the server</param>
         /// <param name="usingData">Data to be used in the rule</param>
         /// <returns>Returns the formatted text according to the given data</returns>
-        public static string TranslateString(string rulename, List<string>? usingData = null)
+        public static string TranslateString(string ruleName, List<string>? usingData = null)
         {
-            if (translationRules.ContainsKey(rulename))
+            if (translationRules.ContainsKey(ruleName))
             {
                 if (usingData is not null)
-                    return InterpolateString(translationRules[rulename], usingData);
+                    return InterpolateString(translationRules[ruleName], usingData);
                 else
-                    return translationRules[rulename];
+                    return translationRules[ruleName];
                 
             }
             else
-                return usingData is null ? $"[{rulename}]" : $"[{rulename}] {string.Join(" ", usingData)}";
+                return usingData is null ? $"[{ruleName}]" : $"[{ruleName}] {string.Join(" ", usingData)}";
         }
 
         /// <summary>
         /// Format text using a specific formatting rule.
         /// Example : * %s %s + ["ORelio", "is doing something"] = * ORelio is doing something
         /// </summary>
-        /// <param name="rulename">Name of the rule, chosen by the server</param>
+        /// <param name="ruleName">Name of the rule, chosen by the server</param>
         /// <param name="translated">The formatted text according to the given data</param>
         /// <param name="usingData">Data to be used in the rule</param>
         /// <returns></returns>
-        public static bool TryTranslateString(string rulename, out string translated, List<string>? usingData = null)
+        public static bool TryTranslateString(string ruleName, out string translated, List<string>? usingData = null)
         {
-            if (translationRules.ContainsKey(rulename))
+            if (translationRules.ContainsKey(ruleName))
             {
-                if (usingData is not null)
-                    translated = InterpolateString(translationRules[rulename], usingData);
-                else
-                    translated = translationRules[rulename];
-                
+                translated = usingData is not null ? InterpolateString(translationRules[ruleName], usingData) : translationRules[ruleName];
+
                 return true;
             }
-            else
-            {
-                translated = string.Empty;
 
-                return false;
-            }
+            translated = string.Empty;
+
+            return false;
         }
 
+        private static readonly Dictionary<string, string> FormattingCodes = new() {
+            {"obfuscated",    "§k"},
+            {"bold",          "§l"},
+            {"strikethrough", "§m"},
+            {"underline",     "§n"},
+            {"italic",        "§o"}
+        };
+        
         /// <summary>
         /// Use a JSON Object to build the corresponding string
         /// </summary>
         /// <param name="data">JSON object to convert</param>
-        /// <param name="colorcode">Allow parent color code to affect child elements (set to "" for function init)</param>
+        /// <param name="formatting">Allow parent formatting codes to affect child elements (set to "" for function init)</param>
         /// <param name="links">Container for links from JSON serialized text</param>
         /// <returns>returns the Minecraft-formatted string</returns>
-        private static string JSONData2String(Json.JSONData data, string colorcode, List<string>? links)
+        private static string JSONData2String(Json.JSONData data, string formatting, List<string>? links)
         {
-            string extra_result = "";
+            string extraResult = "";
+            
             switch (data.Type)
             {
                 case Json.JSONData.DataType.Object:
-                    if (data.Properties.ContainsKey("color"))
+                    if (data.Properties.TryGetValue("color", out var val))
                     {
-                        colorcode = Color2tag(JSONData2String(data.Properties["color"], "", links));
+                        formatting = Color2tag(val.StringValue);
                     }
+                    
+                    foreach (var pair in FormattingCodes)
+                    {
+                        if (data.Properties.ContainsKey(pair.Key))
+                        {
+                            if (data.Properties[pair.Key].StringValue == "true")
+                            {
+                                formatting += pair.Value;
+                            }
+                            else if (data.Properties[pair.Key].StringValue == "false")
+                            {
+                                formatting = formatting.Replace(pair.Value, "");
+                            }
+                        }
+                    }
+                    
                     if (data.Properties.ContainsKey("clickEvent") && links != null)
                     {
                         Json.JSONData clickEvent = data.Properties["clickEvent"];
@@ -364,140 +398,49 @@ namespace CraftSharp.Protocol
                         {
                             links.Add(clickEvent.Properties["value"].StringValue);
                         }
-                     }
-                    if (data.Properties.ContainsKey("extra"))
-                    {
-                        Json.JSONData[] extras = data.Properties["extra"].DataArray.ToArray();
-                        foreach (Json.JSONData item in extras)
-                            extra_result = extra_result + JSONData2String(item, colorcode, links) + "§r";
                     }
-                    if (data.Properties.ContainsKey("text"))
+                    
+                    if (data.Properties.TryGetValue("extra", out val))
                     {
-                        return colorcode + JSONData2String(data.Properties["text"], colorcode, links) + extra_result;
+                        Json.JSONData[] extras = val.DataArray.ToArray();
+                        extraResult = extras.Aggregate(extraResult, (current, item) => current + JSONData2String(item, formatting, links) + "§r");
                     }
-                    else if (data.Properties.ContainsKey("translate"))
+                    
+                    if (data.Properties.TryGetValue("text", out val))
+                    {
+                        return formatting + JSONData2String(val, formatting, links) + extraResult;
+                    }
+                    
+                    if (data.Properties.TryGetValue(string.Empty, out val)) // Text field can be anonymous, do the same as above
+                    {
+                        return formatting + JSONData2String(val, formatting, links) + extraResult;
+                    }
+                    
+                    if (data.Properties.ContainsKey("translate"))
                     {
                         List<string> using_data = new List<string>();
                         if (data.Properties.ContainsKey("using") && !data.Properties.ContainsKey("with"))
                             data.Properties["with"] = data.Properties["using"];
-                        if (data.Properties.ContainsKey("with"))
+                        if (data.Properties.TryGetValue("with", out val))
                         {
-                            Json.JSONData[] array = data.Properties["with"].DataArray.ToArray();
-                            for (int i = 0; i < array.Length; i++)
-                            {
-                                using_data.Add(JSONData2String(array[i], colorcode, links));
-                            }
+                            Json.JSONData[] array = val.DataArray.ToArray();
+                            using_data.AddRange(array.Select(t => JSONData2String(t, formatting, links)));
                         }
-                        return colorcode + TranslateString(JSONData2String(data.Properties["translate"], "", links), using_data) + extra_result;
+                        return formatting + TranslateString(JSONData2String(data.Properties["translate"], "", links), using_data) + extraResult;
                     }
-                    else return extra_result;
+                    
+                    return extraResult;
 
                 case Json.JSONData.DataType.Array:
-                    string result = "";
-                    foreach (Json.JSONData item in data.DataArray)
-                    {
-                        result += JSONData2String(item, colorcode, links);
-                    }
+                    string result = data.DataArray.Aggregate(string.Empty,
+                        (current, item) => current + JSONData2String(item, formatting, links));
                     return result;
 
                 case Json.JSONData.DataType.String:
-                    return colorcode + data.StringValue;
+                    return formatting + data.StringValue;
             }
 
-            return "";
-        }
-
-        private static string NbtToString(Dictionary<string, object> nbt)
-        {
-            if (nbt.Count == 1 && nbt.TryGetValue("", out object? rootMessage))
-            {
-                // Nameless root tag
-                //return (string)rootMessage;
-                if (rootMessage is string rootString)
-                {
-                    return rootString;
-                }
-                else
-                {
-                    return rootMessage is null ? "<null>" : rootMessage.ToString();
-                }
-            }
-
-            string message = string.Empty;
-            string colorCode = string.Empty;
-            StringBuilder extraBuilder = new StringBuilder();
-            foreach (var kvp in nbt)
-            {
-                string key = kvp.Key;
-                object value = kvp.Value;
-
-                switch (key)
-                {
-                    case "text":
-                        {
-                            message = (string)value;
-                        }
-                        break;
-                    case "extra":
-                        {
-                            object[] extras = (object[])value;
-                            for (var i = 0; i < extras.Length; i++)
-                            {
-                                var extraDict = extras[i] switch
-                                {
-                                    int => new Dictionary<string, object> { { "text", $"{extras[i]}" } },
-                                    string => new Dictionary<string, object>
-                                {
-                                    { "text", (string)extras[i] }
-                                },
-                                    _ => (Dictionary<string, object>)extras[i]
-                                };
-
-                                extraBuilder.Append(NbtToString(extraDict) + "§r");
-                            }
-                        }
-                        break;
-                    case "translate":
-                        {
-                            if (nbt.TryGetValue("translate", out object translate))
-                            {
-                                var translateKey = (string)translate;
-                                List<string> translateString = new();
-                                if (nbt.TryGetValue("with", out object withComponent))
-                                {
-                                    var withs = (object[])withComponent;
-                                    for (var i = 0; i < withs.Length; i++)
-                                    {
-                                        var withDict = withs[i] switch
-                                        {
-                                            int => new Dictionary<string, object> { { "text", $"{withs[i]}" } },
-                                            string => new Dictionary<string, object>
-                                        {
-                                            { "text", (string)withs[i] }
-                                        },
-                                            _ => (Dictionary<string, object>)withs[i]
-                                        };
-
-                                        translateString.Add(NbtToString(withDict));
-                                    }
-                                }
-
-                                message = TranslateString(translateKey, translateString);
-                            }
-                        }
-                        break;
-                    case "color":
-                        {
-                            if (nbt.TryGetValue("color", out object color))
-                            {
-                                colorCode = Color2tag((string)color);
-                            }
-                        }
-                        break;
-                }
-            }
-
-            return colorCode + message + extraBuilder.ToString();
+            return string.Empty;
         }
     }
 }

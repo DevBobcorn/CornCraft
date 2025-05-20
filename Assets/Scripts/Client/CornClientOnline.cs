@@ -1756,7 +1756,7 @@ namespace CraftSharp
             {
                 if (!ProtocolSettings.ShowIllegalSignedChat && !message.isSystemChat && !(bool)message.isSignatureLegal!)
                     return;
-                messageText = ChatParser.ParseSignedChat(message, links);
+                messageText = ChatParser.ParseSignedChat(message);
 
                 if (message.isSystemChat)
                 {
