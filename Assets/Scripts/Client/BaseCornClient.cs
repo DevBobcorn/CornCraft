@@ -239,6 +239,7 @@ namespace CraftSharp
         public abstract bool DoInventoryAction(int inventoryId, int slot, InventoryActionType actionType);
         public abstract bool DoCreativeGive(int slot, Item itemType, int count, Dictionary<string, object>? nbt = null);
         public abstract bool DoAnimation(int playerAnimation);
+        public abstract bool SetAnvilRenameText(string newName);
         public abstract bool SetBeaconEffects(int primary, int secondary);
         public abstract bool CloseInventory(int inventoryId);
         public abstract bool ClearInventories();

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 
@@ -24,9 +25,20 @@ namespace CraftSharp.UI
             placeholderText.text = text;
         }
 
+        #nullable enable
+        
+        private Action<string>? valueChangeHandler;
+        
+        #nullable disable
+
+        public void SetValueChangeHandler(Action<string> handler)
+        {
+            valueChangeHandler = handler;
+        }
+
         public void InputValueChanged(string text)
         {
-            Debug.Log(text);
+            valueChangeHandler?.Invoke(text);
         }
 
         public void InputPointerEnter()

@@ -1341,6 +1341,16 @@ namespace CraftSharp
         }
         
         /// <summary>
+        /// Set anvil rename text
+        /// </summary>
+        /// <param name="newName">New name for item</param>
+        /// <returns>TRUE if new name successfully set</returns>
+        public override bool SetAnvilRenameText(string newName)
+        {
+            return InvokeRequired ? InvokeOnNetMainThread(() => SetAnvilRenameText(newName)) : handler!.SendRenameItem(newName);
+        }
+
+        /// <summary>
         /// Set beacon effects
         /// </summary>
         /// <param name="primary">Primary effect num id</param>

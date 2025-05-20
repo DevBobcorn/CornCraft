@@ -203,6 +203,13 @@ namespace CraftSharp.Protocol
         bool SendAnimation(int animation, int playerId);
         
         /// <summary>
+        /// Set anvil rename text
+        /// </summary>
+        /// <param name="itemName">New name for item</param>
+        /// <returns>TRUE if new name successfully set</returns>
+        bool SendRenameItem(string itemName);
+        
+        /// <summary>
         /// Set beacon effects
         /// </summary>
         /// <param name="primary">Primary effect num id</param>

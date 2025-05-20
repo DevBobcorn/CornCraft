@@ -477,6 +477,8 @@ namespace CraftSharp.UI
         {
             currentInputs[inputId] = input;
 
+            input.SetValueChangeHandler(str => HandleInputValueChange(inputId, str));
+
             input.SetCursorTextHandler(UpdateCursorText);
         }
 
@@ -637,6 +639,24 @@ namespace CraftSharp.UI
                 if (buttonId == 8)
                 {
                     CloseInventory();
+                }
+            }
+        }
+
+        private void HandleInputValueChange(int inputId, string text)
+        {
+            // Handle input value change TODO: Move to separate class
+            if (activeInventoryData.Type.TypeId == InventoryType.ANVIL_ID)
+            {
+                if (inputId == 0)
+                {
+                    if (text.Length <= 35)
+                    {
+                        var game = CornApp.CurrentClient;
+                        if (!game) return;
+
+                        game.SetAnvilRenameText(text);
+                    }
                 }
             }
         }
