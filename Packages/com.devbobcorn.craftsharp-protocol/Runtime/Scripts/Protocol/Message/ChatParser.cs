@@ -95,7 +95,8 @@ namespace CraftSharp.Protocol
         public static string ParseText(string json, List<string>? links = null)
         {
             var jsonData = Json.ParseJson(json);
-            return JSONData2String(jsonData, "", links);
+            Debug.Log(jsonData.ToJson());
+            return JSONData2String(jsonData, string.Empty, string.Empty, links);
         }
 
         /// <summary>
@@ -106,7 +107,8 @@ namespace CraftSharp.Protocol
         public static string ParseText(Dictionary<string, object> nbt)
         {
             var jsonData = Json.Object2JSONData(nbt);
-            return JSONData2String(jsonData, "", null);
+            Debug.Log(jsonData.ToJson());
+            return JSONData2String(jsonData, string.Empty, string.Empty, null);
         }
 
         /// <summary>
@@ -358,35 +360,62 @@ namespace CraftSharp.Protocol
         /// Use a JSON Object to build the corresponding string
         /// </summary>
         /// <param name="data">JSON object to convert</param>
-        /// <param name="formatting">Allow parent formatting codes to affect child elements (set to "" for function init)</param>
+        /// <param name="parentColorCode">Last parent color code before entering child scope</param>
+        /// <param name="parentFlags">Parent formatting flags</param>
         /// <param name="links">Container for links from JSON serialized text</param>
         /// <returns>returns the Minecraft-formatted string</returns>
-        private static string JSONData2String(Json.JSONData data, string formatting, List<string>? links)
+        private static string JSONData2String(Json.JSONData data, string parentColorCode, string parentFlags, List<string>? links)
         {
             string extraResult = "";
+            
+            // Use parent formatting as own formatting by default
+            string colorCode = parentColorCode;
+            string flags = parentFlags;
+
+            bool clearBeforePush = false;
+            bool clearBeforePop = false;
+            string pushFormatting = string.Empty;
+            string popFormatting = string.Empty;
             
             switch (data.Type)
             {
                 case Json.JSONData.DataType.Object:
+                    
                     if (data.Properties.TryGetValue("color", out var val))
                     {
-                        formatting = Color2tag(val.StringValue);
+                        colorCode = Color2tag(val.StringValue);
+                        if (colorCode != parentColorCode)
+                        {
+                            if (parentColorCode != string.Empty || parentFlags != string.Empty)
+                                clearBeforePush = true;
+                            clearBeforePop = true;
+                            // If color formatting is overriden, other formatting
+                            // are also cleared, so we use an assignment here.
+                            pushFormatting += colorCode;
+                        }
                     }
                     
                     foreach (var pair in FormattingCodes)
                     {
-                        if (data.Properties.ContainsKey(pair.Key))
+                        if (data.Properties.TryGetValue(pair.Key, out val))
                         {
-                            if (data.Properties[pair.Key].StringValue == "true")
+                            var enable = val.StringValue is "true" or "1";
+                            if (enable && !flags.Contains(pair.Value))
                             {
-                                formatting += pair.Value;
+                                clearBeforePop = true;
+                                flags += pair.Value; // Add this flag (clean before pop)
                             }
-                            else if (data.Properties[pair.Key].StringValue == "false")
+                            else if (!enable && flags.Contains(pair.Value))
                             {
-                                formatting = formatting.Replace(pair.Value, "");
+                                clearBeforePush = true;
+                                flags = flags.Replace(pair.Value, ""); // Remove this flag (clean before push)
                             }
                         }
                     }
+                    pushFormatting += flags;
+                    
+                    if (clearBeforePush) pushFormatting = $"§r{pushFormatting}";
+                    if (clearBeforePop) popFormatting = $"§r{parentColorCode}{parentFlags}";
                     
                     if (data.Properties.ContainsKey("clickEvent") && links != null)
                     {
@@ -400,44 +429,44 @@ namespace CraftSharp.Protocol
                         }
                     }
                     
-                    if (data.Properties.TryGetValue("extra", out val))
+                    if (data.Properties.TryGetValue("extra", out val)) // Nested text components
                     {
                         Json.JSONData[] extras = val.DataArray.ToArray();
-                        extraResult = extras.Aggregate(extraResult, (current, item) => current + JSONData2String(item, formatting, links) + "§r");
+                        extraResult = extras.Aggregate(extraResult, (current, item) => current + JSONData2String(item, colorCode, flags, links));
                     }
                     
                     if (data.Properties.TryGetValue("text", out val))
                     {
-                        return formatting + JSONData2String(val, formatting, links) + extraResult;
+                        return pushFormatting + JSONData2String(val, colorCode, flags, links) + extraResult + popFormatting;
                     }
                     
                     if (data.Properties.TryGetValue(string.Empty, out val)) // Text field can be anonymous, do the same as above
                     {
-                        return formatting + JSONData2String(val, formatting, links) + extraResult;
+                        return pushFormatting + JSONData2String(val, colorCode, flags, links) + extraResult + popFormatting;
                     }
                     
                     if (data.Properties.ContainsKey("translate"))
                     {
-                        List<string> using_data = new List<string>();
+                        List<string> usingData = new List<string>();
                         if (data.Properties.ContainsKey("using") && !data.Properties.ContainsKey("with"))
                             data.Properties["with"] = data.Properties["using"];
                         if (data.Properties.TryGetValue("with", out val))
                         {
                             Json.JSONData[] array = val.DataArray.ToArray();
-                            using_data.AddRange(array.Select(t => JSONData2String(t, formatting, links)));
+                            usingData.AddRange(array.Select(t => JSONData2String(t, colorCode, flags, links)));
                         }
-                        return formatting + TranslateString(JSONData2String(data.Properties["translate"], "", links), using_data) + extraResult;
+                        return pushFormatting + TranslateString(data.Properties["translate"].StringValue, usingData) + extraResult + popFormatting;
                     }
                     
                     return extraResult;
 
                 case Json.JSONData.DataType.Array:
                     string result = data.DataArray.Aggregate(string.Empty,
-                        (current, item) => current + JSONData2String(item, formatting, links));
-                    return result;
+                        (current, item) => current + JSONData2String(item, colorCode, flags, links));
+                    return pushFormatting + result + popFormatting;
 
                 case Json.JSONData.DataType.String:
-                    return formatting + data.StringValue;
+                    return pushFormatting + data.StringValue + popFormatting;
             }
 
             return string.Empty;
