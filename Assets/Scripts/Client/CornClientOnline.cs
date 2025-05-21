@@ -1993,8 +1993,6 @@ namespace CraftSharp
 
             if (dragging) return;
             
-            Debug.Log($"On inventory slot [{inventoryId}]/[{slot}]: {item}");
-            
             // Handle inventoryId -2 - Add item to player inventory without animation. State id should be ignored
             if (inventoryId == 254)
             {
