@@ -173,16 +173,6 @@ namespace CraftSharp.Inventory
             public ItemStack? PreviewItemStack { get; } = PreviewItemStack;
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
 
-            private static ItemStack ItemStackFromJson(Json.JSONData data)
-            {
-                var typeId = data.Properties.TryGetValue("item_id", out var val) ?
-                    ResourceLocation.FromString(val.StringValue) : ResourceLocation.INVALID;
-                var count = data.Properties.TryGetValue("count", out val) ?
-                    int.Parse(val.StringValue) : 1; // Count is 1 by default
-
-                return new ItemStack(ItemPalette.INSTANCE.GetById(typeId), count);
-            }
-
             public static InventorySlotInfo FromJson(Json.JSONData data)
             {
                 var typeId = data.Properties.TryGetValue("type_id", out var val) ?
@@ -195,7 +185,7 @@ namespace CraftSharp.Inventory
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
 
                 ItemStack? previewItem = data.Properties.TryGetValue("preview_item", out val)
-                                        ? ItemStackFromJson(val) : null;
+                                        ? ItemStack.FromJson(val) : null;
                 
                 ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
                     ResourceLocation.FromString(val.StringValue) : null;

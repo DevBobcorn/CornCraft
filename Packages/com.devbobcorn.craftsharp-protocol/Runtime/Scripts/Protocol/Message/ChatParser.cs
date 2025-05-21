@@ -317,14 +317,9 @@ namespace CraftSharp.Protocol
         {
             if (translationRules.ContainsKey(ruleName))
             {
-                if (usingData is not null)
-                    return InterpolateString(translationRules[ruleName], usingData);
-                else
-                    return translationRules[ruleName];
-                
+                return usingData is not null ? InterpolateString(translationRules[ruleName], usingData) : translationRules[ruleName];
             }
-            else
-                return usingData is null ? $"[{ruleName}]" : $"[{ruleName}] {string.Join(" ", usingData)}";
+            return usingData is null ? $"[{ruleName}]" : $"[{ruleName}] {string.Join(" ", usingData)}";
         }
 
         /// <summary>

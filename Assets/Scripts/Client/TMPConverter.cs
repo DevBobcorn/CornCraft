@@ -64,7 +64,7 @@ namespace CraftSharp
         /// </summary>
         public static string MC2TMP(string original)
         {
-            Debug.Log($"MC2TMP original: \"{original}\"");
+            //Debug.Log($"MC2TMP original: \"{original}\"");
             var processed = new StringBuilder();
 
             // lastColor: Color used to print last character

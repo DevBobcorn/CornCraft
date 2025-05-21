@@ -3,6 +3,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+using CraftSharp.Protocol;
+
 namespace CraftSharp.UI
 {
     public class ChatMessageInteractable : MonoBehaviour, IPointerClickHandler, IPointerMoveHandler, IPointerExitHandler
@@ -59,7 +61,15 @@ namespace CraftSharp.UI
             if (pointerActionIndex >= 0 && pointerActionIndex < messageActions.Length)
             {
                 var (_, _, hoverAction, hoverContents) = messageActions[pointerActionIndex];
-                cursorTextHandler?.Invoke($"{hoverAction}: {hoverContents}");
+                var displayText = hoverAction switch
+                {
+                    "show_text" => TMPConverter.MC2TMP(ChatParser.ParseText(hoverContents)),
+                    "show_item" => InventoryItemSlot.GetItemDisplayText(ItemStack.FromJson(Json.ParseJson(hoverContents))),
+                    
+                    _ => $"{hoverAction}: {hoverContents}"
+                };
+                
+                cursorTextHandler?.Invoke(displayText);
             }
             else
             {

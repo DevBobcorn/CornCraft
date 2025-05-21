@@ -84,6 +84,39 @@ namespace CraftSharp.UI
                 ShowPlaceholderImage();
         }
 
+        public static string GetItemDisplayText(ItemStack? itemStack)
+        {
+            if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)
+            {
+                return string.Empty;
+            }
+
+            // Block items might use block translation key
+            var text = ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
+                translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block"));
+                
+            // TODO: Also check item enchantments
+            var rarity = itemStack.ItemType.Rarity;
+                
+            if (rarity != ItemRarity.Common)
+            {
+                var colorPrefix = rarity switch
+                {
+                    ItemRarity.Uncommon => "§e", // Yellow
+                    ItemRarity.Rare => "§b", // Aqua
+                    ItemRarity.Epic => "§d", // Light Purple
+                    _ => string.Empty
+                };
+                // Make sure TMP color tag is closed
+                text = TMPConverter.MC2TMP($"{colorPrefix}{text}");
+            }
+                
+            if (itemStack.Lores is not null && itemStack.Lores.Length > 0)
+                text += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
+                
+            return text;
+        }
+
         protected override void UpdateCursorText()
         {
             cursorTextDirty = false;
@@ -95,35 +128,7 @@ namespace CraftSharp.UI
             }
 
             // Update item cursor text
-            if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)
-            {
-                cursorText = string.Empty;
-            }
-            else
-            {
-                // Block items might use block translation key
-                cursorText = ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
-                    translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block"));
-                
-                // TODO: Also check item enchantments
-                var rarity = itemStack.ItemType.Rarity;
-                
-                if (rarity != ItemRarity.Common)
-                {
-                    var colorPrefix = rarity switch
-                    {
-                        ItemRarity.Uncommon => "§e", // Yellow
-                        ItemRarity.Rare => "§b", // Aqua
-                        ItemRarity.Epic => "§d", // Light Purple
-                        _ => string.Empty
-                    };
-                    // Make sure TMP color tag is closed
-                    cursorText = TMPConverter.MC2TMP($"{colorPrefix}{cursorText}");
-                }
-                
-                if (itemStack.Lores is not null && itemStack.Lores.Length > 0)
-                    cursorText += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
-            }
+            cursorText = GetItemDisplayText(itemStack);
         }
 
         public void UpdateItemStack(ItemStack? newItemStack)
