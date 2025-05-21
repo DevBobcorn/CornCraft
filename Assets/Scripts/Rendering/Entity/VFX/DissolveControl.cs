@@ -7,6 +7,10 @@ namespace CraftSharp.Rendering
 {
     public class DissolveControl : MonoBehaviour
     {
+        private static readonly int MAIN_TEX = Shader.PropertyToID("_MainTex");
+        private static readonly int TEXTURE = Shader.PropertyToID("_Texture");
+        private static readonly int BASE_MAP = Shader.PropertyToID("_BaseMap");
+
         public Material dissolveMaterial;
         [NonSerialized] private readonly List<Renderer> m_Renderers = new();
         [NonSerialized] private readonly List<Material> m_DissolveMaterials = new();
@@ -21,21 +25,19 @@ namespace CraftSharp.Rendering
         {
             var created = new Material(dissolveMaterial);
 
-
             // Set main texture from original material
-            if (original.HasTexture("_MainTex"))
+            if (original.HasTexture(MAIN_TEX))
             {
-                created.SetTexture("_Texture", original.GetTexture("_MainTex"));
+                created.SetTexture(TEXTURE, original.GetTexture(MAIN_TEX));
             }
-            else if (original.HasTexture("_BaseMap"))
+            else if (original.HasTexture(BASE_MAP))
             {
-                created.SetTexture("_Texture", original.GetTexture("_BaseMap"));
+                created.SetTexture(TEXTURE, original.GetTexture(BASE_MAP));
             }
-            else if (original.HasTexture("_Texture"))
+            else if (original.HasTexture(TEXTURE))
             {
-                created.SetTexture("_Texture", original.GetTexture("_Texture"));
+                created.SetTexture(TEXTURE, original.GetTexture(TEXTURE));
             }
-
             
             return created;
         }
@@ -55,7 +57,7 @@ namespace CraftSharp.Rendering
 
             m_DissolveMaterials.Clear();
 
-            var orginal2created = new Dictionary<Material, Material>();
+            var original2created = new Dictionary<Material, Material>();
 
             foreach (var renderer in m_Renderers)
             {
@@ -63,14 +65,14 @@ namespace CraftSharp.Rendering
 
                 foreach (var original in renderer.materials)
                 {
-                    if (orginal2created.ContainsKey(original))
+                    if (original2created.TryGetValue(original, out var created))
                     {
-                        newMaterials.Add(orginal2created[original]);
+                        newMaterials.Add(created);
                     }
                     else
                     {
-                        var created = CreateDissolveMaterial(original);
-                        orginal2created.Add(original, created);
+                        created = CreateDissolveMaterial(original);
+                        original2created.Add(original, created);
 
                         newMaterials.Add(created);
                         m_DissolveMaterials.Add(created);

@@ -23,7 +23,7 @@ namespace CraftSharp.Rendering
                 {
                     EntityItemStack = item;
 
-                    if (itemMeshFilter != null && itemMeshRenderer != null)
+                    if (itemMeshFilter && itemMeshRenderer)
                     {
                         var result = ItemMeshBuilder.BuildItem(item, false);
 

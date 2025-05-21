@@ -10,6 +10,7 @@ namespace CraftSharp.UI
     [RequireComponent(typeof (Animator))]
     public class EntityNameUI : FloatingUI
     {
+        private static readonly int EXPIRED = Animator.StringToHash("Expired");
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private TMP_Text descriptionText;
         private Action destroyCallback;
@@ -18,14 +19,12 @@ namespace CraftSharp.UI
         {
             this.entityRender = entityRender;
 
-            if (nameText != null)
+            if (nameText)
             {
-                nameText.text = (entityRender.Name ?? entityRender.CustomName) ??
-                        ChatParser.TranslateString(entityRender.Type.TypeId.GetTranslationKey("entity"));
-
+                nameText.text = entityRender.GetDisplayName();
             }
 
-            if (descriptionText != null)
+            if (descriptionText)
             {
                 descriptionText.text = $"<{entityRender.Type.TypeId}>";
             }
@@ -34,7 +33,7 @@ namespace CraftSharp.UI
         public override void Destroy(Action callback)
         {
             var animator = GetComponent<Animator>();
-            animator.SetBool("Expired", true);
+            animator.SetBool(EXPIRED, true);
 
             // Store this for later invocation
             destroyCallback = callback;

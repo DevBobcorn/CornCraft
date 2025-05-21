@@ -35,7 +35,7 @@ namespace CraftSharp.Rendering
             // Get player animator
             entityAnimator = visualObj.GetComponent<Animator>();
             // Apply overridden animator controller
-            animatorOverrideController = new AnimatorOverrideController(entityAnimator.runtimeAnimatorController);
+            animatorOverrideController = new AnimatorOverrideController(entityAnimator!.runtimeAnimatorController);
             entityAnimator.runtimeAnimatorController = animatorOverrideController;
 
             // Add and initialize player widgets
@@ -51,7 +51,7 @@ namespace CraftSharp.Rendering
 
         public override Transform SetupCameraRef()
         {
-            if (playerRenderWidget != null)
+            if (playerRenderWidget)
             {
                 var pos = playerRenderWidget.m_CameraRefPos;
 
@@ -63,12 +63,7 @@ namespace CraftSharp.Rendering
 
         public Vector2 GetClimbOverOffset()
         {
-            if (playerRenderWidget != null)
-            {
-                return playerRenderWidget.m_ClimbOverOffset;
-            }
-
-            return Vector2.zero;
+            return playerRenderWidget ? playerRenderWidget.m_ClimbOverOffset : Vector2.zero;
         }
 
         public override void Unload()
@@ -87,9 +82,9 @@ namespace CraftSharp.Rendering
             renderWidget.Unload();
 
             // Self destruction
-            if (this != null)
+            if (this)
             {
-                Destroy(this.gameObject);
+                Destroy(gameObject);
             }
         }
 
@@ -132,9 +127,9 @@ namespace CraftSharp.Rendering
         }
 
         #nullable enable
-        public override Dictionary<string, string>? GetControlVariables()
+        protected override Dictionary<string, string> GetControlVariables()
         {
-            return new Dictionary<string, string>()
+            return new Dictionary<string, string>
             {
                 ["player_skin"] = $"skin:{UUID}"
             };

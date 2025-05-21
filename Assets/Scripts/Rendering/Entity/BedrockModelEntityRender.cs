@@ -35,7 +35,7 @@ namespace CraftSharp.Rendering
         private readonly MoScope scope = new(new MoLangRuntime());
         private readonly MoLangEnvironment env = new();
 
-        private string GetImagePathFromFileName(string name)
+        private static string GetImagePathFromFileName(string name)
         {
             // Image could be either tga or png
             if (File.Exists($"{name}.png"))
@@ -73,13 +73,11 @@ namespace CraftSharp.Rendering
             var geometryName = entityDefinition.GeometryNames.First().Value;
             gameObject.name += $" ({geometryName})";
 
-            if (!entityResManager.EntityGeometries.ContainsKey(geometryName))
+            if (!entityResManager.EntityGeometries.TryGetValue(geometryName, out geometry))
             {
                 // TODO: Debug.LogWarning($"Entity geometry [{geometryName}] not loaded!");
                 return;
             }
-
-            geometry = entityResManager.EntityGeometries[geometryName];
 
             foreach (var tex in entityDefinition.TexturePaths)
             {
@@ -155,9 +153,9 @@ namespace CraftSharp.Rendering
 
                 if (bone.ParentName is not null) // Set parent transform
                 {
-                    if (boneObjects.ContainsKey(bone.ParentName))
+                    if (boneObjects.TryGetValue(bone.ParentName, out var boneObj))
                     {
-                        boneTransform.SetParent(boneObjects[bone.ParentName].transform, false);
+                        boneTransform.SetParent(boneObj.transform, false);
                         boneTransform.localPosition = (bone.Pivot - geometry.Bones[bone.ParentName].Pivot) / 16F;
                         boneTransform.localRotation = Rotations.RotationFromEulersXYZ(bone.Rotation);
                     }
@@ -177,18 +175,9 @@ namespace CraftSharp.Rendering
             AnimationNames = entityDefinition.AnimationNames.Select(x => $"{x.Key} ({x.Value})").ToArray();
             animations = entityDefinition.AnimationNames.Select(x => 
                     {
-                        EntityAnimation? anim;
+                        var anim = entityResManager.EntityAnimations.GetValueOrDefault(x.Value);
 
-                        if (entityResManager.EntityAnimations.ContainsKey(x.Value))
-                        {
-                            anim = entityResManager.EntityAnimations[x.Value];
-                        }
-                        else
-                        {
-                            anim = null;
-                            // TODO: Debug.LogWarning($"Animation [{x.Value}] not loaded!");
-                        }
-
+                        // TODO: Debug.LogWarning($"Animation [{x.Value}] not loaded!");
                         return anim; 
                     }).ToArray();
         }
@@ -197,7 +186,7 @@ namespace CraftSharp.Rendering
         {
             if (index >= 0 && index < TextureNames.Length)
             {
-                if (currentMaterial != null)
+                if (currentMaterial)
                 {
                     currentMaterial.mainTexture = textures[TextureNames[index]];
                 }
@@ -217,10 +206,8 @@ namespace CraftSharp.Rendering
 
                 return currentAnimation;
             }
-            else
-            {
-                throw new System.Exception($"Invalid animation index: {index}");
-            }
+
+            throw new System.Exception($"Invalid animation index: {index}");
         }
 
         public override void UpdateAnimation(float time)

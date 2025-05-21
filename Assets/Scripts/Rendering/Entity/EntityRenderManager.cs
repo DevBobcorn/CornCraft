@@ -70,10 +70,7 @@ namespace CraftSharp.Rendering
         /// <returns>Entity render with the id. Null if not present</returns>
         public EntityRender? GetEntityRender(int entityId)
         {
-            if (entityRenders.ContainsKey(entityId))
-                return entityRenders[entityId];
-            
-            return null;
+            return entityRenders.GetValueOrDefault(entityId);
         }
 
         /// <summary>
@@ -86,39 +83,26 @@ namespace CraftSharp.Rendering
             // destroy this entity first
             if (entityRenders.ContainsKey(entity.Id))
             {
-                if (entityRenders[entity.Id] != null)
+                if (entityRenders[entity.Id])
                 {
                     entityRenders[entity.Id].Unload();
                 }
                 
                 entityRenders.Remove(entity.Id);
-
-                if (nearbyEntities.ContainsKey(entity.Id))
-                {
-                    nearbyEntities.Remove(entity.Id);
-                }
+                nearbyEntities.Remove(entity.Id);
             }
 
-            GameObject? entityPrefab;
+            var entityPrefab = entity.Type.TypeId == EntityType.PLAYER_ID ?
+                serverPlayerPrefab : GetPrefabForType(entity.Type.TypeId);
 
-            if (entity.Type.TypeId == EntityType.PLAYER_ID) // TODO Apply right model
+            if (entityPrefab)
             {
-                entityPrefab = serverPlayerPrefab;
-            }
-            else
-            {
-                entityPrefab = GetPrefabForType(entity.Type.TypeId);
-            }
-
-            if (entityPrefab != null)
-            {
-                var entityObj    = GameObject.Instantiate(entityPrefab);
+                var entityObj = Instantiate(entityPrefab, transform, true);
                 var entityRender = entityObj!.GetComponent<EntityRender>();
 
                 entityRenders.Add(entity.Id, entityRender);
 
                 entityObj.name = $"{entity.Id} {entity.Type}";
-                entityObj.transform.parent = transform;
 
                 // Initialize the entity
                 entityRender.Initialize(entity, _worldOriginOffset);
@@ -137,11 +121,7 @@ namespace CraftSharp.Rendering
                     entityRenders[id].Unload();
                     entityRenders.Remove(id);
                 }
-
-                if (nearbyEntities.ContainsKey(id))
-                {
-                    nearbyEntities.Remove(id);
-                }
+                nearbyEntities.Remove(id);
             }
         }
 
@@ -152,10 +132,10 @@ namespace CraftSharp.Rendering
         /// <param name="delta">Location delta</param>
         public void MoveEntityRender(int entityId, Location delta)
         {
-            if (entityRenders.ContainsKey(entityId))
+            if (entityRenders.TryGetValue(entityId, out var render))
             {
                 // Delta value, world origin offset doesn't apply
-                entityRenders[entityId].Position.Value += CoordConvert.MC2UnityDelta(delta);
+                render.Position.Value += CoordConvert.MC2UnityDelta(delta);
             }
         }
 
@@ -163,13 +143,13 @@ namespace CraftSharp.Rendering
         /// Set velocity for an entity render to given value
         /// </summary>
         /// <param name="entityId">Numeral id of the entity to set velocity for</param>
-        /// <param name="delta">Location delta</param>
+        /// <param name="velocity">New velocity</param>
         public void SetEntityRenderVelocity(int entityId, float3 velocity)
         {
-            if (entityRenders.ContainsKey(entityId))
+            if (entityRenders.TryGetValue(entityId, out var render))
             {
                 // Velocity value, world origin offset doesn't apply
-                entityRenders[entityId].SetReceivedVelocity(velocity.zyx);
+                render.SetReceivedVelocity(velocity.zyx);
             }
         }
 
@@ -180,9 +160,9 @@ namespace CraftSharp.Rendering
         /// <param name="location">New location</param>
         public void TeleportEntityRender(int entityId, Location location)
         {
-            if (entityRenders.ContainsKey(entityId))
+            if (entityRenders.TryGetValue(entityId, out var render))
             {
-                entityRenders[entityId].Position.Value = CoordConvert.MC2Unity(_worldOriginOffset, location);
+                render.Position.Value = CoordConvert.MC2Unity(_worldOriginOffset, location);
             }
         }
 
@@ -208,9 +188,9 @@ namespace CraftSharp.Rendering
         /// <param name="headYaw">Byte angle, conversion required</param>
         public void RotateEntityRenderHead(int entityId, byte headYaw)
         {
-            if (entityRenders.ContainsKey(entityId))
+            if (entityRenders.TryGetValue(entityId, out var render))
             {
-                entityRenders[entityId].HeadYaw.Value = EntityData.GetHeadYawFromByte(headYaw);
+                render.HeadYaw.Value = EntityData.GetHeadYawFromByte(headYaw);
             }
         }
 
@@ -251,7 +231,7 @@ namespace CraftSharp.Rendering
                 {
                     var render = GetEntityRender(pair.Key);
 
-                    if (render!.Type!.ContainsItem) // Not a valid target
+                    if (render!.Type.ContainsItem) // Not a valid target
                         continue;
 
                     var pos = render.transform.position;
@@ -308,7 +288,7 @@ namespace CraftSharp.Rendering
 
             foreach (var prefabItem in entityPrefabs)
             {
-                if (prefabItem.Value == null)
+                if (!prefabItem.Value)
                 {
                     Debug.LogWarning($"Prefab for entity type {prefabItem.Key} is not assigned!");
                 }            
@@ -319,13 +299,13 @@ namespace CraftSharp.Rendering
         {
             var client = CornApp.CurrentClient;
 
-            if (client == null) // Game is not ready, cancel update
+            if (!client) // Game is not ready, cancel update
                 return;
 
             foreach (var render in entityRenders.Values)
             {
                 // Call managed update
-                render.ManagedUpdate(client!.GetTickMilSec());
+                render.ManagedUpdate(client.GetTickMilSec());
 
                 // Update entities around the player
                 float dist = (render.transform.position - client.GetPosition()).sqrMagnitude;

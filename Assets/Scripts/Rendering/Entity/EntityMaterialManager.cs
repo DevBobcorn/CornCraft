@@ -13,14 +13,15 @@ namespace CraftSharp.Rendering
 {
     public class EntityMaterialManager : MonoBehaviour
     {
+        private static readonly int BASE_MAP = Shader.PropertyToID("_BaseMap");
         [SerializeField] private Color m_EntityBaseColor = new(220F / 255F, 220F / 255F, 220F / 255F);
         public Color EntityBaseColor => m_EntityBaseColor;
-        [SerializeField] private Material m_EnityDissolveMaterial;
-        public Material EnityDissolveMaterial => m_EnityDissolveMaterial;
-        [SerializeField] private string m_EnityDissolveMaterialTextureName = "_Texture";
-        public string EnityDissolveMaterialTextureName => m_EnityDissolveMaterialTextureName;
-        [SerializeField] private string m_EnityDissolveMaterialColorName = "_Colour";
-        public string EnityDissolveMaterialColorName => m_EnityDissolveMaterialColorName;
+        [SerializeField] private Material m_EntityDissolveMaterial;
+        public Material EntityDissolveMaterial => m_EntityDissolveMaterial;
+        [SerializeField] private string m_EntityDissolveMaterialTextureName = "_Texture";
+        public string EntityDissolveMaterialTextureName => m_EntityDissolveMaterialTextureName;
+        [SerializeField] private string m_EntityDissolveMaterialColorName = "_Colour";
+        public string EntityDissolveMaterialColorName => m_EntityDissolveMaterialColorName;
 
         public Material BedrockEntitySolid;
         public Material BedrockEntityCutout;
@@ -44,12 +45,12 @@ namespace CraftSharp.Rendering
         /// <param name="renderType">Render type of this material</param>
         /// <param name="textureId">Texture identifier</param>
         /// <param name="defaultMaterial">The material template to be used if this material is not yet present in table</param>
+        /// <param name="callback">Callback to be invoked after applying the material</param>
         public void ApplyMaterial(EntityRenderType renderType, ResourceLocation textureId, Material defaultMaterial, Action<Material> callback)
         {
             if (!EntityMaterials[renderType].ContainsKey(textureId))
             {
-                var resManager = ResourcePackManager.Instance;
-                // This entry is not present, instanciate it
+                // This entry is not present, instantiate it
                 //Debug.Log($"Creating entity material {textureId} ({renderType})");
 
                 ApplyTextureOrSkin(textureId, tex =>
@@ -62,7 +63,7 @@ namespace CraftSharp.Rendering
                         color = EntityBaseColor
                     };
 
-                    matInstance.SetTexture("_BaseMap", tex);
+                    matInstance.SetTexture(BASE_MAP, tex);
 
                     EntityMaterials[renderType].Add(textureId, matInstance);
                     callback.Invoke(matInstance);
@@ -78,6 +79,7 @@ namespace CraftSharp.Rendering
         /// Get a texture with given id, or load it if not present.
         /// </summary>
         /// <param name="textureId">Texture identifier</param>
+        /// <param name="callback">Callback to be invoked after applying the texture</param>
         public void ApplyTextureOrSkin(ResourceLocation textureId, Action<Texture2D> callback)
         {
             var resManager = ResourcePackManager.Instance;
@@ -210,14 +212,15 @@ namespace CraftSharp.Rendering
                 yield break;
                 // Don't use callback
             }
-            else if (!playerUUID2TextureInfo.ContainsKey(playerUUID))
+            
+            if (!playerUUID2TextureInfo.TryGetValue(playerUUID, out var info))
             {
                 texInfo = new PlayerTextureInfo();
                 yield return RequestPlayerSkinInfo(playerUUID, texInfo);
             }
             else
             {
-                texInfo = playerUUID2TextureInfo[playerUUID];
+                texInfo = info;
             }
 
             if (!texInfo.Failed)
@@ -260,7 +263,7 @@ namespace CraftSharp.Rendering
                             }
                         };
 
-                        // Copy original parts and fill expanded area with tranparency
+                        // Copy original parts and fill expanded area with transparency
                         for (int y = 0; y < tex.height; y++)
                         {
                             for (int x = 0; x < tex.width; x++)

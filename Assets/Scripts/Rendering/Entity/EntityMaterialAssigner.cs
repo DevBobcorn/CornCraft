@@ -10,11 +10,11 @@ namespace CraftSharp.Rendering
     [Serializable]
     public class EntityMaterialEntry
     {
-        [SerializeField] public EntityRenderType RenderType = EntityRenderType.SOLID;
+        [SerializeField] public EntityRenderType RenderType;
         [SerializeField] private Material? m_DefaultMaterial = null;
         public Material DefaultMaterial => m_DefaultMaterial!;
         [SerializeField] public string TextureId = string.Empty;
-        [SerializeField] private Renderer[] m_Renderers = { };
+        [SerializeField] private Renderer[] m_Renderers;
         public Renderer[] Renderers => m_Renderers;
 
         public bool DynamicTextureId { get; private set; } = false;
@@ -26,7 +26,7 @@ namespace CraftSharp.Rendering
             m_DefaultMaterial = material;
             RenderType = renderType;
 
-            if (material != null && material.mainTexture != null)
+            if (material && material.mainTexture)
             {
                 TextureId = material.mainTexture.name;
             }
@@ -46,7 +46,20 @@ namespace CraftSharp.Rendering
             DependentMetaSlots = new();
 
             // Turn texture id into a string template. e.g. entity/cow/{COLOR}_mooshroom
-            string pattern = @"\{.*?\}"; // Non-greedy matching using '?'
+            const string pattern = @"\{.*?\}"; // Non-greedy matching using '?'
+
+            TextureId = Regex.Replace(TextureId, pattern, m => convert(m.Value[1..^1]));
+
+            if (TextureIdVariables.Count == 0)
+            {
+                Debug.LogWarning($"Malformed texture id: {TextureId}");
+            }
+            else
+            {
+                DynamicTextureId = true;
+            }
+
+            return;
 
             string convert(string variable)
             {
@@ -77,17 +90,6 @@ namespace CraftSharp.Rendering
                 
                 return $"{{{TextureIdVariables.Count - 1}}}";
             }
-
-            TextureId = Regex.Replace(TextureId, pattern, m => convert(m.Value[1..^1]));
-
-            if (TextureIdVariables.Count == 0)
-            {
-                Debug.LogWarning($"Malformed texture id: {TextureId}");
-            }
-            else
-            {
-                DynamicTextureId = true;
-            }
         }
     }
 
@@ -103,7 +105,7 @@ namespace CraftSharp.Rendering
 
             foreach (var renderer in renderers)
             {
-                if (renderer.sharedMaterial == null) continue;
+                if (!renderer.sharedMaterial) continue;
 
                 if (!entries.ContainsKey(renderer.sharedMaterial))
                 {
@@ -162,19 +164,14 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private bool IsTextureIdAffected(EntityMaterialEntry entry, HashSet<string>? updatedVars, HashSet<int>? updatedMeta)
+        private static bool IsTextureIdAffected(EntityMaterialEntry entry, HashSet<string>? updatedVars, HashSet<int>? updatedMeta)
         {
-            if (updatedVars is not null && entry.TextureIdVariables.Any(x => updatedVars.Contains(x.Item1)))
+            if (updatedVars is not null && entry.TextureIdVariables!.Any(x => updatedVars.Contains(x.Item1)))
             {
                 return true;
             }
 
-            if (updatedMeta is not null && entry.DependentMetaSlots.Any(x => updatedMeta.Contains(x)))
-            {
-                return true;
-            }
-
-            return false;
+            return updatedMeta is not null && entry.DependentMetaSlots!.Any(updatedMeta.Contains);
         }
 
         /// <summary>
@@ -185,7 +182,7 @@ namespace CraftSharp.Rendering
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
 
-            var isRagdoll = GetComponent<EntityRagdoll>() != null;
+            var isRagdoll = GetComponent<EntityRagdoll>();
 
             //var info = updatedMeta.Select(x => entityType.MetaEntries[x].Name + ": [" + metadata?[x] + "],");
             //Debug.Log($"Updating meta ({gameObject.name}):\n{string.Join("\n", info)}");
@@ -197,8 +194,8 @@ namespace CraftSharp.Rendering
 
                 if (entry.DynamicTextureId && IsTextureIdAffected(entry, updatedVars, updatedMeta))
                 {
-                    var vars = entry.TextureIdVariables.Select(x =>
-                            GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
+                    var vars = entry.TextureIdVariables!.Select(x =>
+                        (object) GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
                     var interpolated = string.Format(entry.TextureId, vars);
                     //Debug.Log($"Updating texture {entry.TextureId} with {string.Join(", ", vars)}");
                     textureId = ResourceLocation.FromString(interpolated);
@@ -211,12 +208,13 @@ namespace CraftSharp.Rendering
 
                 if (isRagdoll)
                 {
-                    var matInstance = new Material(matManager.EnityDissolveMaterial);
+                    var matInstance = new Material(matManager.EntityDissolveMaterial);
+                    var entry1 = entry;
                     matManager.ApplyTextureOrSkin(textureId, tex =>
                     {
-                        matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, tex);
-                        matInstance.SetColor(matManager.EnityDissolveMaterialColorName, matManager.EntityBaseColor);
-                        AssignMaterialToRenderer(entry.Renderers, matInstance);
+                        matInstance.SetTexture(matManager.EntityDissolveMaterialTextureName, tex);
+                        matInstance.SetColor(matManager.EntityDissolveMaterialColorName, matManager.EntityBaseColor);
+                        AssignMaterialToRenderer(entry1.Renderers, matInstance);
                     });
                 }
                 else
@@ -242,7 +240,7 @@ namespace CraftSharp.Rendering
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
 
-            var isRagdoll = GetComponent<EntityRagdoll>() != null;
+            var isRagdoll = GetComponent<EntityRagdoll>();
 
             for (int i = 0; i < m_MaterialEntries.Length; i++)
             {
@@ -257,8 +255,8 @@ namespace CraftSharp.Rendering
 
                 if (entry.DynamicTextureId)
                 {
-                    var vars = entry.TextureIdVariables.Select(x =>
-                            GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
+                    var vars = entry.TextureIdVariables!.Select(x =>
+                            (object) GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
                     var interpolated = string.Format(entry.TextureId, vars);
                     textureId = ResourceLocation.FromString(interpolated);
                 }
@@ -269,14 +267,14 @@ namespace CraftSharp.Rendering
                 
                 if (isRagdoll)
                 {
-                    var matInstance = new Material(matManager.EnityDissolveMaterial);
+                    var matInstance = new Material(matManager.EntityDissolveMaterial);
                     matManager.ApplyTextureOrSkin(textureId, texture =>
                     {
-                        matInstance.SetTexture(matManager.EnityDissolveMaterialTextureName, texture);
-                        matInstance.SetColor(matManager.EnityDissolveMaterialColorName, matManager.EntityBaseColor);
+                        matInstance.SetTexture(matManager.EntityDissolveMaterialTextureName, texture);
+                        matInstance.SetColor(matManager.EntityDissolveMaterialColorName, matManager.EntityBaseColor);
                         AssignMaterialToRenderer(entry.Renderers, matInstance);
 
-                        callbackForEach?.Invoke(matManager, textureId, matInstance);
+                        callbackForEach.Invoke(matManager, textureId, matInstance);
                     });
                 }
                 else
@@ -285,7 +283,7 @@ namespace CraftSharp.Rendering
                     {
                         AssignMaterialToRenderer(entry.Renderers, matInstance);
 
-                        callbackForEach?.Invoke(matManager, textureId, matInstance);
+                        callbackForEach.Invoke(matManager, textureId, matInstance);
                     });
                 }
             }

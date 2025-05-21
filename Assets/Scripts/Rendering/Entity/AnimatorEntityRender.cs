@@ -10,15 +10,15 @@ namespace CraftSharp.Rendering
         protected static readonly int MIRRORED_HASH = Animator.StringToHash("Mirrored");
         protected static readonly int JUMP_HASH = Animator.StringToHash("Jump");
 
-        public static readonly string SPRINT_NAME = "Sprint";
-        public static readonly string RUN_NAME = "Run";
-        public static readonly string WALK_NAME = "Walk";
-        public static readonly string IDLE_NAME = "Idle";
+        public const string SPRINT_NAME = "Sprint";
+        public const string RUN_NAME = "Run";
+        public const string WALK_NAME = "Walk";
+        public const string IDLE_NAME = "Idle";
 
-        public static readonly string FALLING_NAME = "Falling";
-        public static readonly string LANDING_NAME = "Landing";
+        public const string FALLING_NAME = "Falling";
+        public const string LANDING_NAME = "Landing";
 
-        public static readonly string TREAD_NAME = "Tread";
+        public const string TREAD_NAME = "Tread";
 
         protected static readonly int VERTICAL_SPEED_HASH = Animator.StringToHash("VerticalSpeed");
         protected static readonly int HORIZONTAL_SPEED_HASH = Animator.StringToHash("HorizontalSpeed");
@@ -28,19 +28,18 @@ namespace CraftSharp.Rendering
 
         public static GameObject CreateFromModel(GameObject visualPrefab)
         {
-            var visualObj = GameObject.Instantiate(visualPrefab);
-            visualObj.name = "Visual";
-
             var renderObj = new GameObject($"Player {visualPrefab.name} Entity");
             var render = renderObj.AddComponent<PlayerEntityRiggedRender>();
+            
+            var visualObj = GameObject.Instantiate(visualPrefab, renderObj.transform, false);
+            visualObj.name = "Visual";
+            
             render.VisualTransform = visualObj.transform;
 
             var infoAnchorObj = new GameObject("Info Anchor");
             infoAnchorObj.transform.SetParent(renderObj.transform, false);
             infoAnchorObj.transform.localPosition = new(0F, 2F, 0F);
             render.InfoAnchor = infoAnchorObj.transform;
-
-            visualObj.transform.SetParent(renderObj.transform, false);
 
             return renderObj;
         }
@@ -60,18 +59,18 @@ namespace CraftSharp.Rendering
 
         public virtual void UpdateAnimator(PlayerStatus info) { }
 
-        public virtual void RandomizeMirroredFlag()
+        protected virtual void RandomizeMirroredFlag()
         {
             var mirrored = Time.frameCount % 2 == 0;
             entityAnimator!.SetBool(MIRRORED_HASH, mirrored);
         }
 
-        public virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset)
+        protected virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset)
         {
             entityAnimator!.CrossFade(stateName, time, layer, timeOffset);
         }
 
-        public virtual void OverrideState(AnimationClip dummyClip, AnimationClip animationClip)
+        protected virtual void OverrideState(AnimationClip dummyClip, AnimationClip animationClip)
         {
             // Apply animation clip override
             animatorOverrideController![dummyClip] = animationClip;

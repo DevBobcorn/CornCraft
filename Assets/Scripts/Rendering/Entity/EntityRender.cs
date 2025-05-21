@@ -109,7 +109,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Entity metadata
         /// </summary>
-        public Dictionary<int, object?>? Metadata { get; private set; }
+        protected Dictionary<int, object?>? Metadata { get; private set; }
 
         /// <summary>
         /// Update entity metadata, validate control variables,
@@ -199,7 +199,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         public Transform InfoAnchor
         {
-            get => _infoAnchor != null ? _infoAnchor : transform;
+            get => _infoAnchor ? _infoAnchor : transform;
             protected set => _infoAnchor = value;
         }
 
@@ -208,7 +208,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         public Transform VisualTransform
         {
-            get => _visualTransform != null ? _visualTransform : transform;
+            get => _visualTransform ? _visualTransform : transform;
             protected set => _visualTransform = value;
         }
 
@@ -226,7 +226,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         public virtual void Initialize(EntityData source, Vector3Int originOffset)
         {
-            if (_visualTransform == null)
+            if (!_visualTransform)
             {
                 Debug.LogWarning("Visual transform for entity render not assigned!");
                 _visualTransform = transform;
@@ -247,7 +247,7 @@ namespace CraftSharp.Rendering
             {
                 lastTickPosition = prevVal;
 
-                // Reset lerp variable every timee we receive a new position
+                // Reset lerp variable every time we receive a new position
                 currentTickStartMilSec = Time.realtimeSinceStartupAsDouble * 1000D;
             };
 
@@ -276,11 +276,29 @@ namespace CraftSharp.Rendering
                 materialControl.InitializeMaterials(source.Type, GetControlVariables(), source.Metadata, HandleMaterialUpdate);
             }
         }
+        
+        public string GetDisplayName()
+        {
+            if (IsCustomNameVisible)
+            {
+                if (CustomNameJson is not null)
+                {
+                    return ChatParser.ParseText(CustomNameJson);
+                }
+                
+                if (CustomName is not null)
+                {
+                    return CustomName;
+                }
+            }
+
+            return Name ?? ChatParser.TranslateString(Type.TypeId.GetTranslationKey("entity"));
+        }
 
         /// <summary>
         /// Get variable table for render control (pose, texture, etc.)
         /// </summary>
-        public virtual Dictionary<string, string>? GetControlVariables()
+        protected virtual Dictionary<string, string>? GetControlVariables()
         {
             return null;
         }
@@ -290,9 +308,9 @@ namespace CraftSharp.Rendering
         /// </summary>
         public virtual void Unload()
         {
-            if (this != null)
+            if (this)
             {
-                Destroy(this.gameObject);
+                Destroy(gameObject);
             }
         }
 
@@ -314,7 +332,7 @@ namespace CraftSharp.Rendering
             receivedVelocity = velocity;
         }
 
-        public virtual void UpdateTransform(float tickMilSec)
+        protected virtual void UpdateTransform(float tickMilSec)
         {
             //var currentTickMilSec = Time.realtimeSinceStartupAsDouble * 1000D - currentTickStartMilSec;
 
@@ -370,6 +388,7 @@ namespace CraftSharp.Rendering
                 Yaw.Value = HeadYaw.Value;
             }
             
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (lastPitch != Pitch.Value)
             {
                 lastPitch = Mathf.MoveTowardsAngle(lastPitch, Pitch.Value, Time.deltaTime * 300F);
@@ -386,7 +405,7 @@ namespace CraftSharp.Rendering
 
         protected Transform SetupCameraRef(Vector3 pos)
         {
-            var cameraRefObj = new GameObject($"Camera Ref Obj");
+            var cameraRefObj = new GameObject("Camera Ref Obj");
             var cameraRef = cameraRefObj.transform;
 
             cameraRef.SetParent(_visualTransform, false);
@@ -417,7 +436,7 @@ namespace CraftSharp.Rendering
             _turnedIntoRagdoll = true;
 
             // Create ragdoll in place
-            if (ragdollPrefab != null)
+            if (ragdollPrefab)
             {
                 var ragdollObj = GameObject.Instantiate(ragdollPrefab)!;
 
@@ -425,13 +444,13 @@ namespace CraftSharp.Rendering
 
                 // Assign own rotation and localScale to ragdoll object
                 var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
-                if (ragdoll != null && _visualTransform != null)
+                if (ragdoll && _visualTransform)
                 {
                     ragdollObj.transform.rotation = _visualTransform.rotation;
                     ragdoll.Visual.localScale = _visualTransform.localScale;
 
                     // Make it fly!
-                    if (ragdoll.mainRigidbody != null)
+                    if (ragdoll.mainRigidbody)
                     {
                         if (_visualMovementVelocity.sqrMagnitude > 0F)
                             ragdoll.mainRigidbody.AddForce(_visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
@@ -450,7 +469,7 @@ namespace CraftSharp.Rendering
                 }
 
                 // Hide own visual
-                if (_visualTransform != null)
+                if (_visualTransform)
                 {
                     _visualTransform.gameObject.SetActive(false);
                 }

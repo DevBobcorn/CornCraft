@@ -8,7 +8,7 @@ using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
-    public class EntityVertexBufferBuilder
+    public static class EntityVertexBufferBuilder
     {
         public static Mesh BuildMesh(EntityVertexBuffer visualBuffer)
         {

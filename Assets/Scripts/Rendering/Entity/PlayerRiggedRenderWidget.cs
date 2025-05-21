@@ -84,7 +84,7 @@ namespace CraftSharp.Rendering
             switch (actionType)
             {
                 case ItemActionType.Sword:
-                    _currentItem = itemObj!.AddComponent<MeleeWeapon>();
+                    _currentItem = itemObj.AddComponent<MeleeWeapon>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
@@ -108,7 +108,7 @@ namespace CraftSharp.Rendering
 
                     break;
                 case ItemActionType.Bow:
-                    _currentItem = itemObj!.AddComponent<UselessActionItem>();
+                    _currentItem = itemObj.AddComponent<UselessActionItem>();
                     meshData = ItemMeshBuilder.BuildItem(itemStack, false);
                     // Use dummy material and mesh if failed to build for item
                     meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
@@ -146,32 +146,32 @@ namespace CraftSharp.Rendering
         /// Properly destroy a gameobject, in either editor mode, play mode, or an actual build.
         /// See https://forum.unity.com/threads/editor-and-destroyimmediate.1261745/
         /// </summary>
-        /// <param name="gameObject"></param>
-        private void SafeDestroy(GameObject? gameObject)
+        /// <param name="targetGameObject"></param>
+        private static void SafeDestroy(GameObject? targetGameObject)
         {
-            if (gameObject != null)
+            if (targetGameObject)
             {
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
                 {
-                    DestroyImmediate(gameObject);
+                    DestroyImmediate(targetGameObject);
                 }
                 else
 #endif
                 {
-                    Destroy(gameObject);
+                    Destroy(targetGameObject);
                 }
             }
         }
 
         private void DestroyActionItem()
         {
-            if (_currentItem != null) SafeDestroy(_currentItem.gameObject);
+            if (_currentItem) SafeDestroy(_currentItem.gameObject);
         }
 
         private void MoveItemToWidgetSlot(Transform slot)
         {
-            if (_currentItem != null)
+            if (_currentItem)
             {
                 _currentItem.transform.SetParent(slot, false);
                 _currentItem.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
@@ -202,7 +202,7 @@ namespace CraftSharp.Rendering
             }
             else
             {
-                if ((psi != null) || (_player != null && (psi = _player.SkillItemConfig) != null))
+                if (psi || (_player && (psi = _player.SkillItemConfig)))
                 {
                     CreateActionItem(itemStack, actionType, psi);
                 }
@@ -234,7 +234,7 @@ namespace CraftSharp.Rendering
 
         private void StartItemAction()
         {
-            if (_currentItem != null)
+            if (_currentItem)
             {
                 _currentItem.StartAction();
             }
@@ -242,7 +242,7 @@ namespace CraftSharp.Rendering
 
         private void EndItemAction()
         {
-            if (_currentItem != null)
+            if (_currentItem)
             {
                 _currentItem.EndAction();
             }
@@ -254,10 +254,10 @@ namespace CraftSharp.Rendering
         /// </summary>
         public void CleanUpSlots()
         {
-            if (_mainHandSlot != null)   SafeDestroy(_mainHandSlot.gameObject);
-            if (_offHandSlot != null)    SafeDestroy(_offHandSlot.gameObject);
-            if (_itemMountPivot != null) SafeDestroy(_itemMountPivot.gameObject);
-            if (_itemMountSlot != null)  SafeDestroy(_itemMountSlot.gameObject);
+            if (_mainHandSlot)   SafeDestroy(_mainHandSlot.gameObject);
+            if (_offHandSlot)    SafeDestroy(_offHandSlot.gameObject);
+            if (_itemMountPivot) SafeDestroy(_itemMountPivot.gameObject);
+            if (_itemMountSlot)  SafeDestroy(_itemMountSlot.gameObject);
         }
 
         public void Initialize()
@@ -266,30 +266,30 @@ namespace CraftSharp.Rendering
             _playerAnimator = GetComponent<Animator>();
 
             // Subscribe player controller events
-            if (_player != null)
+            if (_player)
             {
-                _player.OnItemStateChanged += this.UpdateActionItemState;
-                _player.OnCurrentItemChanged += this.UpdateActiveItem;
-                _player.OnMeleeDamageStart += this.StartItemAction;
-                _player.OnMeleeDamageEnd += this.EndItemAction;
+                _player.OnItemStateChanged += UpdateActionItemState;
+                _player.OnCurrentItemChanged += UpdateActiveItem;
+                _player.OnMeleeDamageStart += StartItemAction;
+                _player.OnMeleeDamageEnd += EndItemAction;
             }
         }
 
         public void Unload()
         {
             // Unsubscribe player controller events
-            if (_player != null)
+            if (_player)
             {
-                _player.OnItemStateChanged -= this.UpdateActionItemState;
-                _player.OnCurrentItemChanged -= this.UpdateActiveItem;
-                _player.OnMeleeDamageStart -= this.StartItemAction;
-                _player.OnMeleeDamageEnd -= this.EndItemAction;
+                _player.OnItemStateChanged -= UpdateActionItemState;
+                _player.OnCurrentItemChanged -= UpdateActiveItem;
+                _player.OnMeleeDamageStart -= StartItemAction;
+                _player.OnMeleeDamageEnd -= EndItemAction;
             }
         }
 
         public void ManagedUpdate()
         {
-            if (_spineRef == null || _itemMountPivot == null)
+            if (!_spineRef || !_itemMountPivot)
                 return;
 
             _itemMountPivot.localEulerAngles = new Vector3(-_spineRef.localEulerAngles.x, 0F, 0F);
@@ -297,7 +297,7 @@ namespace CraftSharp.Rendering
 
         void OnAnimatorMove()
         {
-            if (_player != null && _player.UseRootMotion)
+            if (_player && _player.UseRootMotion)
             {
                 if (_player.IgnoreAnimatorScale)
                 {

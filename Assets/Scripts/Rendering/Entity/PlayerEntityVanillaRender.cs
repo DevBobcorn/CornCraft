@@ -50,9 +50,10 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public override Dictionary<string, string>? GetControlVariables()
+        protected override Dictionary<string, string>? GetControlVariables()
         {
-            return new Dictionary<string, string>(){
+            return new Dictionary<string, string>
+            {
                 ["player_skin"] = $"skin:{UUID}"
             };
         }

@@ -11,22 +11,29 @@ namespace CraftSharp.UI
         [SerializeField] private BaseValueBar healthBar;
         [SerializeField] private string textFormat = "Lv.{0:0}";
 
-        private void UpdateHealth()
+        private void UpdateMaxHealth(float prevVal, float newVal)
         {
-            if (healthBar != null && entityRender != null)
+            if (healthBar)
             {
-                healthBar.MaxValue = entityRender.MaxHealth.Value;
-                healthBar.CurValue = entityRender.Health.Value;
+                healthBar.MaxValue = newVal;
+            }
+        }
+        
+        private void UpdateHealth(float prevVal, float newVal)
+        {
+            if (healthBar)
+            {
+                healthBar.CurValue = newVal;
             }
         }
 
         private void OnDestroy()
         {
             // Unregister events for previous entity
-            if (entityRender != null)
+            if (entityRender)
             {
-                entityRender.MaxHealth.OnValueUpdate -= (_, _) => UpdateHealth();
-                entityRender.Health.OnValueUpdate -= (_, _) => UpdateHealth();
+                entityRender.MaxHealth.OnValueUpdate -= UpdateMaxHealth;
+                entityRender.Health.OnValueUpdate -= UpdateHealth;
             }
         }
 
@@ -34,29 +41,30 @@ namespace CraftSharp.UI
         {
             // Unregister events for previous entity
             // NOTE: It is not recommended to call SetInfo for more than one entity
-            if (this.entityRender != null)
+            if (this.entityRender)
             {
-                this.entityRender.MaxHealth.OnValueUpdate -= (_, _) => UpdateHealth();
-                this.entityRender.Health.OnValueUpdate -= (_, _) => UpdateHealth();
+                this.entityRender.MaxHealth.OnValueUpdate -= UpdateMaxHealth;
+                this.entityRender.Health.OnValueUpdate -= UpdateHealth;
             }
 
             this.entityRender = entityRender;
 
             // Register events for new entity
-            if (this.entityRender != null)
+            if (this.entityRender)
             {
-                this.entityRender.MaxHealth.OnValueUpdate += (_, _) => UpdateHealth();
-                this.entityRender.Health.OnValueUpdate += (_, _) => UpdateHealth();
+                this.entityRender.MaxHealth.OnValueUpdate += UpdateMaxHealth;
+                this.entityRender.Health.OnValueUpdate += UpdateHealth;
+
+                UpdateHealth(0F, this.entityRender.Health.Value);
+                UpdateMaxHealth(0F, this.entityRender.MaxHealth.Value);
             }
 
-            if (levelText != null)
+            if (levelText)
             {
                 // This is used for mimicking the UI format of some anime game
                 // This text is no longer updated after first set
                 levelText.text = string.Format(textFormat, entityRender.MaxHealth.Value * 2);
             }
-
-            UpdateHealth();
         }
     }
 }

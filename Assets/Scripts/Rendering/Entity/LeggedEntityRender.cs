@@ -14,6 +14,7 @@ namespace CraftSharp.Rendering
         {
             var movFract = Mathf.Clamp01(_visualMovementVelocity.x * _visualMovementVelocity.x + _visualMovementVelocity.z * _visualMovementVelocity.z);
 
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (currentMovFract != movFract)
                 currentMovFract = Mathf.MoveTowards(currentMovFract, movFract, Time.deltaTime * 3F);
 
