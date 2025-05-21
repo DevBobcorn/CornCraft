@@ -352,7 +352,7 @@ namespace CraftSharp.Protocol
             {"obfuscated",    "§k"},
             {"bold",          "§l"},
             {"strikethrough", "§m"},
-            {"underline",     "§n"},
+            {"underlined",    "§n"},
             {"italic",        "§o"}
         };
         
