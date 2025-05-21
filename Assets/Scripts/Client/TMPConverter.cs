@@ -64,7 +64,7 @@ namespace CraftSharp
         /// </summary>
         public static string MC2TMP(string original)
         {
-            //Debug.Log($"MC2TMP original: \"{original}\"");
+            Debug.Log($"MC2TMP original: \"{original}\"");
             var processed = new StringBuilder();
 
             // lastColor: Color used to print last character
@@ -140,9 +140,19 @@ namespace CraftSharp
                                     text2append = "<i>";
                                 formatFlag |= 1 << 4;
                                 break;
+                            case '<': // interactable start
+                                ptr++; // Skip '@' symbol before reading the action
+                                var action = new StringBuilder();
+                                while (original[ptr] != '§') // This character will be skipped in for loop
+                                    action.Append(original[ptr++]);
+                                text2append = $"<link=\"{action}\">";
+                                break;
+                            case '>': // interactable end
+                                text2append = "</link>";
+                                break;
                             case 'r': // reset
                                 text2append = GetTMPCloseTags(formatFlag);
-                                formatFlag = 0;
+                                formatFlag &= 1 << 6; // Keep only interactable bit
                                 lastColor = DEFAULT_COLOR;
                                 break;
                             default:

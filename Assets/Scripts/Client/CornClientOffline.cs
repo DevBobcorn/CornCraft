@@ -581,9 +581,11 @@ namespace CraftSharp
         /// <param name="message">Message received</param>
         public void DummyOnTextReceived(ChatMessage message)
         {
-            var messageText = message.isJson ? ChatParser.ParseText(message.content) : message.content;
+            List<(string, string, string, string)> actions = new();
             
-            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(messageText));
+            var messageText = message.isJson ? ChatParser.ParseText(message.content, actions) : message.content;
+            
+            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(messageText, actions.ToArray()));
         }
 
         /// <summary>

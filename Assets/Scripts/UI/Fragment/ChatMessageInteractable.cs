@@ -1,0 +1,75 @@
+using System;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+namespace CraftSharp.UI
+{
+    public class ChatMessageInteractable : MonoBehaviour, IPointerClickHandler, IPointerMoveHandler, IPointerExitHandler
+    {
+        private TMP_Text messageText;
+        private (string, string, string, string)[] messageActions;
+        private Camera uiCamera;
+        
+        #nullable enable
+        
+        protected Action<string>? cursorTextHandler;
+        
+        #nullable disable
+
+        public void SetupInteractable(TMP_Text text, (string, string, string, string)[] actions, Action<string> handler, Camera uiCam)
+        {
+            messageText = text;
+            messageActions = actions;
+            
+            cursorTextHandler = handler;
+            uiCamera = uiCam;
+        }
+
+        private int GetPointerActionIndex(Vector2 pointerPosition)
+        {
+            int linkIndex = TMP_TextUtilities.FindIntersectingLink(messageText, pointerPosition, uiCamera);
+            if (linkIndex != -1)
+            {
+                TMP_LinkInfo linkInfo = messageText.textInfo.linkInfo[linkIndex];
+                if (int.TryParse(linkInfo.GetLinkID(), out int actionIndex))
+                {
+                    return actionIndex;
+                }
+                Debug.LogWarning($"{linkInfo.GetLinkID()} is not a valid action id!");
+            }
+            return -1;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            int pointerActionIndex = GetPointerActionIndex(eventData.position);
+
+            if (pointerActionIndex >= 0 && pointerActionIndex < messageActions.Length)
+            {
+                var (clickAction, clickValue, _, _) = messageActions[pointerActionIndex];
+                Debug.Log($"Click on action [{clickAction}: {clickValue}]");
+            }
+        }
+
+        public void OnPointerMove(PointerEventData eventData)
+        {
+            int pointerActionIndex = GetPointerActionIndex(eventData.position);
+
+            if (pointerActionIndex >= 0 && pointerActionIndex < messageActions.Length)
+            {
+                var (_, _, hoverAction, hoverContents) = messageActions[pointerActionIndex];
+                cursorTextHandler?.Invoke($"{hoverAction}: {hoverContents}");
+            }
+            else
+            {
+                cursorTextHandler?.Invoke(string.Empty);
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            cursorTextHandler?.Invoke(string.Empty);
+        }
+    }
+}

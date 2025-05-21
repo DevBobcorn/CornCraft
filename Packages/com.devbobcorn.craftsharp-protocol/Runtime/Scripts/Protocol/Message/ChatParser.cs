@@ -90,25 +90,26 @@ namespace CraftSharp.Protocol
         /// The main function to convert text from MC 1.6+ JSON to MC 1.5.2 formatted text
         /// </summary>
         /// <param name="json">JSON serialized text</param>
-        /// <param name="links">Optional container for links from JSON serialized text</param>
+        /// <param name="actions">Actions from JSON serialized text. Passing in null will ignore actions</param>
         /// <returns>Returns the translated text</returns>
-        public static string ParseText(string json, List<string>? links = null)
+        public static string ParseText(string json, List<(string, string, string, string)>? actions = null)
         {
             var jsonData = Json.ParseJson(json);
             Debug.Log(jsonData.ToJson());
-            return JSONData2String(jsonData, string.Empty, string.Empty, links);
+            return JSONData2String(jsonData, string.Empty, string.Empty, actions);
         }
 
         /// <summary>
         /// The main function to convert text from MC 1.6+ JSON to MC 1.5.2 formatted text
         /// </summary>
         /// <param name="nbt">NBT dictionary</param>
+        /// <param name="actions">Actions from JSON serialized text. Passing in null will ignore actions</param>
         /// <returns>Returns the translated text</returns>
-        public static string ParseText(Dictionary<string, object> nbt)
+        public static string ParseText(Dictionary<string, object> nbt, List<(string, string, string, string)>? actions = null)
         {
             var jsonData = Json.Object2JSONData(nbt);
             Debug.Log(jsonData.ToJson());
-            return JSONData2String(jsonData, string.Empty, string.Empty, null);
+            return JSONData2String(jsonData, string.Empty, string.Empty, actions);
         }
 
         /// <summary>
@@ -362,9 +363,9 @@ namespace CraftSharp.Protocol
         /// <param name="data">JSON object to convert</param>
         /// <param name="parentColorCode">Last parent color code before entering child scope</param>
         /// <param name="parentFlags">Parent formatting flags</param>
-        /// <param name="links">Container for links from JSON serialized text</param>
+        /// <param name="actions">Actions from JSON serialized text. Passing in null will ignore actions</param>
         /// <returns>returns the Minecraft-formatted string</returns>
-        private static string JSONData2String(Json.JSONData data, string parentColorCode, string parentFlags, List<string>? links)
+        private static string JSONData2String(Json.JSONData data, string parentColorCode, string parentFlags, List<(string, string, string, string)>? actions)
         {
             string extraResult = "";
             
@@ -416,33 +417,57 @@ namespace CraftSharp.Protocol
                     
                     if (clearBeforePush) pushFormatting = $"§r{pushFormatting}";
                     if (clearBeforePop) popFormatting = $"§r{parentColorCode}{parentFlags}";
-                    
-                    if (data.Properties.ContainsKey("clickEvent") && links != null)
+
+                    if ((data.Properties.ContainsKey("clickEvent") || data.Properties.ContainsKey("hoverEvent")) && actions != null)
                     {
-                        Json.JSONData clickEvent = data.Properties["clickEvent"];
-                        if (clickEvent.Properties.ContainsKey("action")
-                            && clickEvent.Properties.ContainsKey("value")
-                            && clickEvent.Properties["action"].StringValue == "open_url"
-                            && !string.IsNullOrEmpty(clickEvent.Properties["value"].StringValue))
+                        string clickAction, clickValue, hoverAction, hoverContents;
+                        
+                        if (data.Properties.TryGetValue("clickEvent", out var clickEvent) &&
+                            clickEvent.Properties.TryGetValue("action", out var cAct) &&
+                            clickEvent.Properties.TryGetValue("value", out var cVal))
                         {
-                            links.Add(clickEvent.Properties["value"].StringValue);
+                            clickAction = cAct.StringValue;
+                            clickValue = cVal.StringValue;
                         }
+                        else
+                        {
+                            clickAction = string.Empty;
+                            clickValue = string.Empty;
+                        }
+                        
+                        if (data.Properties.TryGetValue("hoverEvent", out var hoverEvent) &&
+                            hoverEvent.Properties.TryGetValue("action", out var hAct) &&
+                            (hoverEvent.Properties.TryGetValue("contents", out var hVal) || hoverEvent.Properties.TryGetValue("value", out hVal)))
+                        {
+                            hoverAction = hAct.StringValue;
+                            hoverContents = hVal.ToJson();
+                        }
+                        else
+                        {
+                            hoverAction = string.Empty;
+                            hoverContents = string.Empty;
+                        }
+                        
+                        int actionIndex = actions.Count;
+                        actions.Add((clickAction, clickValue, hoverAction, hoverContents));
+                        pushFormatting += $"§<{actionIndex}§";
+                        popFormatting = "§>" + popFormatting;
                     }
                     
                     if (data.Properties.TryGetValue("extra", out val)) // Nested text components
                     {
                         Json.JSONData[] extras = val.DataArray.ToArray();
-                        extraResult = extras.Aggregate(extraResult, (current, item) => current + JSONData2String(item, colorCode, flags, links));
+                        extraResult = extras.Aggregate(extraResult, (current, item) => current + JSONData2String(item, colorCode, flags, actions));
                     }
                     
                     if (data.Properties.TryGetValue("text", out val))
                     {
-                        return pushFormatting + JSONData2String(val, colorCode, flags, links) + extraResult + popFormatting;
+                        return pushFormatting + JSONData2String(val, colorCode, flags, actions) + extraResult + popFormatting;
                     }
                     
                     if (data.Properties.TryGetValue(string.Empty, out val)) // Text field can be anonymous, do the same as above
                     {
-                        return pushFormatting + JSONData2String(val, colorCode, flags, links) + extraResult + popFormatting;
+                        return pushFormatting + JSONData2String(val, colorCode, flags, actions) + extraResult + popFormatting;
                     }
                     
                     if (data.Properties.ContainsKey("translate"))
@@ -453,7 +478,7 @@ namespace CraftSharp.Protocol
                         if (data.Properties.TryGetValue("with", out val))
                         {
                             Json.JSONData[] array = val.DataArray.ToArray();
-                            usingData.AddRange(array.Select(t => JSONData2String(t, colorCode, flags, links)));
+                            usingData.AddRange(array.Select(t => JSONData2String(t, colorCode, flags, actions)));
                         }
                         return pushFormatting + TranslateString(data.Properties["translate"].StringValue, usingData) + extraResult + popFormatting;
                     }
@@ -462,7 +487,7 @@ namespace CraftSharp.Protocol
 
                 case Json.JSONData.DataType.Array:
                     string result = data.DataArray.Aggregate(string.Empty,
-                        (current, item) => current + JSONData2String(item, colorCode, flags, links));
+                        (current, item) => current + JSONData2String(item, colorCode, flags, actions));
                     return pushFormatting + result + popFormatting;
 
                 case Json.JSONData.DataType.String:

@@ -37,6 +37,8 @@ namespace CraftSharp.UI
         [SerializeField] private AutoCompletedInputField chatInput;
         [SerializeField] private RectTransform chatContentPanel;
         [SerializeField] private GameObject chatMessagePrefab;
+        [SerializeField] private RectTransform cursorTextPanel;
+        [SerializeField] private TMP_Text cursorText;
         private CanvasGroup screenGroup;
         private readonly Queue<TMP_Text> chatMessages = new();
 
@@ -159,6 +161,19 @@ namespace CraftSharp.UI
         private Action<AutoCompletionEvent>? autoCompleteCallback;
 
         #nullable disable
+        
+        private void UpdateCursorText(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                cursorTextPanel.gameObject.SetActive(false);
+            }
+            else
+            {
+                cursorText.text = str;
+                cursorTextPanel.gameObject.SetActive(true);
+            }
+        }
 
         protected override void Initialize()
         {
@@ -175,6 +190,9 @@ namespace CraftSharp.UI
             }
 
             chatInput.onValueChanged.AddListener(RefreshCompletions);
+            
+            // Hide cursor text
+            cursorTextPanel.gameObject.SetActive(false);
 
             // Register callbacks
             chatMessageCallback = e =>
@@ -184,6 +202,15 @@ namespace CraftSharp.UI
                 
                 var chatMessage = chatMessageObj.GetComponent<TMP_Text>();
                 chatMessage.text = styledMessage;
+
+                if (e.Actions is not null && e.Actions.Length > 0)
+                {
+                    var game = CornApp.CurrentClient;
+                    if (!game) return;
+                    
+                    var chatMessageInteractable = chatMessageObj.AddComponent<ChatMessageInteractable>();
+                    chatMessageInteractable.SetupInteractable(chatMessage, e.Actions, UpdateCursorText, game.UICamera);
+                }
                 
                 chatMessages.Enqueue(chatMessage);
 
@@ -241,6 +268,19 @@ namespace CraftSharp.UI
                 }
                 return;
             }
+            
+            var game = CornApp.CurrentClient;
+            if (!game) return;
+
+            // Update cursor text position
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                transform as RectTransform, Mouse.current.position.value,
+                game.UICamera, out Vector2 newPos);
+            
+            newPos = transform.TransformPoint(newPos);
+
+            // Don't modify z coordinate
+            cursorTextPanel.position = new Vector3(newPos.x, newPos.y, cursorTextPanel.position.z);
 
             if (chatInput.IsActive())
             {

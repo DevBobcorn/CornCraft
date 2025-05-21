@@ -33,6 +33,7 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject inventoryButtonPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
         [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
+        [SerializeField] private RectTransform cursorRect;
         [SerializeField] private InventoryItemSlot cursorSlot;
         [SerializeField] private RectTransform cursorTextPanel;
         [SerializeField] private TMP_Text cursorText;
@@ -954,7 +955,6 @@ namespace CraftSharp.UI
             if (!game) return;
 
             // Update cursor slot position
-            var cursorRect = cursorSlot.GetComponent<RectTransform>();
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 transform as RectTransform, Mouse.current.position.value,
                 game.UICamera, out Vector2 newPos);

@@ -1746,11 +1746,11 @@ namespace CraftSharp
         {
             UpdateKeepAlive();
 
-            List<string> links = new();
+            List<(string, string, string, string)> actions = new();
             string messageText;
 
             // Used for 1.19+ to mark: system message, legal / illegal signature
-            string color = string.Empty;
+            string signaturePrefix = string.Empty;
 
             if (message.isSignedChat)
             {
@@ -1761,7 +1761,7 @@ namespace CraftSharp
                 if (message.isSystemChat)
                 {
                     if (ProtocolSettings.MarkSystemMessage)
-                        color = "§7▌§r";     // Background Gray
+                        signaturePrefix = "§7▌§r";     // Background Gray
                 }
                 else
                 {
@@ -1770,27 +1770,27 @@ namespace CraftSharp
                         if (ProtocolSettings.ShowModifiedChat && message.unsignedContent != null)
                         {
                             if (ProtocolSettings.MarkModifiedMsg)
-                                color = "§6▌§r"; // Background Yellow
+                                signaturePrefix = "§6▌§r"; // Background Yellow
                         }
                         else
                         {
                             if (ProtocolSettings.MarkLegallySignedMsg)
-                                color = "§2▌§r"; // Background Green
+                                signaturePrefix = "§2▌§r"; // Background Green
                         }
                     }
                     else
                     {
                         if (ProtocolSettings.MarkIllegallySignedMsg)
-                            color = "§4▌§r"; // Background Red
+                            signaturePrefix = "§4▌§r"; // Background Red
                     }
                 }
             }
             else
             {
-                messageText = message.isJson ? ChatParser.ParseText(message.content, links) : message.content;
+                messageText = message.isJson ? ChatParser.ParseText(message.content, actions) : message.content;
             }
 
-            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(color + messageText));
+            EventManager.Instance.BroadcastOnUnityThread<ChatMessageEvent>(new(signaturePrefix + messageText, actions.ToArray()));
         }
 
         /// <summary>

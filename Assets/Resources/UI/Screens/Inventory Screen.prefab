@@ -489,9 +489,9 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6088781475013719432}
   m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!114 &126009368537333100
 MonoBehaviour:
@@ -517,6 +517,7 @@ MonoBehaviour:
   workPanel: {fileID: 1331511003286532197}
   backpackPanel: {fileID: 7295928138024989594}
   hotbarPanel: {fileID: 538468640777511636}
+  cursorRect: {fileID: 1795606555313849826}
   cursorSlot: {fileID: 2244766575053017127}
   cursorTextPanel: {fileID: 1546807143242781322}
   cursorText: {fileID: 1727254230390999321}
