@@ -30,6 +30,8 @@ namespace CraftSharp
         public const int    CORN_CRAFT_BUILTIN_VERSION = 24;
         private const string VANILLA_FIX_FILE_NAME = "VanillaFix";
         private const int    VANILLA_FIX_VERSION = 5;
+        
+        public const string RESOURCE_LOCATION_NAMESPACE = "corncraft";
 
         private BaseCornClient? Client { get; set; }
 

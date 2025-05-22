@@ -140,21 +140,121 @@
     "corncraft:gui_mob_effect_speed": {
         "texture_id": "minecraft:mob_effect/speed"
     },
+    "corncraft:gui_mob_effect_slowness": {
+        "texture_id": "minecraft:mob_effect/slowness"
+    },
     "corncraft:gui_mob_effect_haste": {
         "texture_id": "minecraft:mob_effect/haste"
     },
-    "corncraft:gui_mob_effect_resistance": {
-        "texture_id": "minecraft:mob_effect/resistance"
-    },
-    "corncraft:gui_mob_effect_jump_boost": {
-        "texture_id": "minecraft:mob_effect/jump_boost"
+    "corncraft:gui_mob_effect_mining_fatigue": {
+        "texture_id": "minecraft:mob_effect/mining_fatigue"
     },
     "corncraft:gui_mob_effect_strength": {
         "texture_id": "minecraft:mob_effect/strength"
     },
+    "corncraft:gui_mob_effect_instant_health": {
+        "texture_id": "minecraft:mob_effect/instant_health"
+    },
+    "corncraft:gui_mob_effect_instant_damage": {
+        "texture_id": "minecraft:mob_effect/instant_damage"
+    },
+    "corncraft:gui_mob_effect_jump_boost": {
+        "texture_id": "minecraft:mob_effect/jump_boost"
+    },
+    "corncraft:gui_mob_effect_jump_nausea": {
+        "texture_id": "minecraft:mob_effect/nausea"
+    },
     "corncraft:gui_mob_effect_regeneration": {
         "texture_id": "minecraft:mob_effect/regeneration"
     },
+    "corncraft:gui_mob_effect_resistance": {
+        "texture_id": "minecraft:mob_effect/resistance"
+    },
+    "corncraft:gui_mob_effect_fire_resistance": {
+        "texture_id": "minecraft:mob_effect/fire_resistance"
+    },
+    "corncraft:gui_mob_effect_water_breathing": {
+        "texture_id": "minecraft:mob_effect/water_breathing"
+    },
+    "corncraft:gui_mob_effect_invisibility": {
+        "texture_id": "minecraft:mob_effect/invisibility"
+    },
+    "corncraft:gui_mob_effect_blindness": {
+        "texture_id": "minecraft:mob_effect/blindness"
+    },
+    "corncraft:gui_mob_effect_night_vision": {
+        "texture_id": "minecraft:mob_effect/night_vision"
+    },
+    "corncraft:gui_mob_effect_hunger": {
+        "texture_id": "minecraft:mob_effect/hunger"
+    },
+    "corncraft:gui_mob_effect_weakness": {
+        "texture_id": "minecraft:mob_effect/weakness"
+    },
+    "corncraft:gui_mob_effect_poison": {
+        "texture_id": "minecraft:mob_effect/poison"
+    },
+    "corncraft:gui_mob_effect_wither": {
+        "texture_id": "minecraft:mob_effect/wither"
+    },
+    "corncraft:gui_mob_effect_health_boost": {
+        "texture_id": "minecraft:mob_effect/health_boost"
+    },
+    "corncraft:gui_mob_effect_absorption": {
+        "texture_id": "minecraft:mob_effect/absorption"
+    },
+    "corncraft:gui_mob_effect_saturation": {
+        "texture_id": "minecraft:mob_effect/saturation"
+    },
+    "corncraft:gui_mob_effect_glowing": {
+        "texture_id": "minecraft:mob_effect/glowing"
+    },
+    "corncraft:gui_mob_effect_levitation": {
+        "texture_id": "minecraft:mob_effect/levitation"
+    },
+    "corncraft:gui_mob_effect_luck": {
+        "texture_id": "minecraft:mob_effect/luck"
+    },
+    "corncraft:gui_mob_effect_unluck": {
+        "texture_id": "minecraft:mob_effect/unluck"
+    },
+    "corncraft:gui_mob_effect_slow_falling": {
+        "texture_id": "minecraft:mob_effect/slow_falling"
+    },
+    "corncraft:gui_mob_effect_conduit_power": {
+        "texture_id": "minecraft:mob_effect/conduit_power"
+    },
+    "corncraft:gui_mob_effect_dolphins_grace": {
+        "texture_id": "minecraft:mob_effect/dolphins_grace"
+    },
+    "corncraft:gui_mob_effect_bad_omen": {
+        "texture_id": "minecraft:mob_effect/bad_omen"
+    },
+    "corncraft:gui_mob_effect_hero_of_the_village": {
+        "texture_id": "minecraft:mob_effect/hero_of_the_village"
+    },
+    "corncraft:gui_mob_effect_darkness": {
+        "texture_id": "minecraft:mob_effect/darkness"
+    },
+    "corncraft:gui_mob_effect_trial_omen": {
+        "texture_id": "minecraft:mob_effect/trial_omen"
+    },
+    "corncraft:gui_mob_effect_raid_omen": {
+        "texture_id": "minecraft:mob_effect/raid_omen"
+    },
+    "corncraft:gui_mob_effect_wind_charged": {
+        "texture_id": "minecraft:mob_effect/wind_charged"
+    },
+    "corncraft:gui_mob_effect_weaving": {
+        "texture_id": "minecraft:mob_effect/weaving"
+    },
+    "corncraft:gui_mob_effect_oozing": {
+        "texture_id": "minecraft:mob_effect/oozing"
+    },
+    "corncraft:gui_mob_effect_infested": {
+        "texture_id": "minecraft:mob_effect/infested"
+    },
+
     "corncraft:gui_background_beacon": {
         "texture_id": "corncraft:background/background_beacon"
     },

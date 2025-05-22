@@ -107,7 +107,7 @@ namespace CraftSharp
 
         private void Awake() // In case where the client wasn't properly assigned before
         {
-            if (CornApp.CurrentClient == null)
+            if (!CornApp.CurrentClient)
             {
                 CornApp.SetCurrentClient(this);
             }
@@ -2120,16 +2120,41 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when the Entity use effects
+        /// Called when an entity acquires an effect
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="effect">Effect Id</param>
+        /// <param name="effectId">Effect Id</param>
         /// <param name="amplifier">Effect amplifier</param>
         /// <param name="duration">Effect duration</param>
         /// <param name="flags">Effect flags</param>
         /// <param name="hasFactorData">Has factor data</param>
         /// <param name="factorCodec">FactorCodec</param>
-        public void OnEntityEffect(int entityId, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<string, object>? factorCodec) { }
+        public void OnEntityEffect(int entityId, int effectId, int amplifier, int duration, byte flags,
+            bool hasFactorData, Dictionary<string, object>? factorCodec)
+        {
+            if (entityId == clientEntity.Id)
+            {
+                bool isAmbient = (flags & 0x01) != 0;
+                bool showParticle = (flags & 0x02) != 0;
+                bool showIcon = (flags & 0x04) != 0;
+                
+                EventManager.Instance.BroadcastOnUnityThread(new MobEffectUpdateEvent(
+                    effectId, amplifier, duration, isAmbient, showParticle, showIcon));
+            }
+        }
+        
+        /// <summary>
+        /// Called when an entity removes an effect
+        /// </summary>
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="effectId">Effect Id</param>
+        public void OnRemoveEntityEffect(int entityId, int effectId)
+        {
+            if (entityId == clientEntity.Id)
+            {
+                EventManager.Instance.BroadcastOnUnityThread(new MobEffectRemovalEvent(effectId));
+            }
+        }
 
         /// <summary>
         /// Called when a player spawns or enters the client's render distance

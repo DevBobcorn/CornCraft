@@ -368,16 +368,23 @@ namespace CraftSharp.Protocol
         void OnReceivePlayerEntityId(int entityId);
 
         /// <summary>
-        /// Called when the Entity use effects
+        /// Called when an entity acquires an effect
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="effect">Effect Id</param>
+        /// <param name="effectId">Effect Id</param>
         /// <param name="amplifier">Effect amplifier</param>
         /// <param name="duration">Effect duration</param>
         /// <param name="flags">Effect flags</param>
         /// <param name="hasFactorData">Has factor data</param>
         /// <param name="factorCodec">FactorCodec</param>
-        void OnEntityEffect(int entityId, Effects effect, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<String, object>? factorCodec);
+        void OnEntityEffect(int entityId, int effectId, int amplifier, int duration, byte flags, bool hasFactorData, Dictionary<string, object>? factorCodec);
+
+        /// <summary>
+        /// Called when an entity removes an effect
+        /// </summary>
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="effectId">Effect Id</param>
+        void OnRemoveEntityEffect(int entityId, int effectId);
 
         /// <summary>
         /// Called when ScoreboardObjective is updated

@@ -1961,24 +1961,31 @@ namespace CraftSharp.Protocol.Handlers
                             ? DataTypes.ReadNextVarInt(packetData)
                             : DataTypes.ReadNextByte(packetData);
 
-                        if (Enum.TryParse(effectId.ToString(), out Effects effect))
+                        var amplifier = DataTypes.ReadNextByte(packetData);
+                        var duration = DataTypes.ReadNextVarInt(packetData);
+                        var flags = DataTypes.ReadNextByte(packetData);
+                        var hasFactorData = false;
+                        Dictionary<string, object>? factorCodec = null;
+
+                        if (protocolVersion is >= MC_1_19_Version and < MC_1_20_6_Version)
                         {
-                            var amplifier = DataTypes.ReadNextByte(packetData);
-                            var duration = DataTypes.ReadNextVarInt(packetData);
-                            var flags = DataTypes.ReadNextByte(packetData);
-                            var hasFactorData = false;
-                            Dictionary<string, object>? factorCodec = null;
-
-                            if (protocolVersion is >= MC_1_19_Version and < MC_1_20_6_Version)
-                            {
-                                hasFactorData = DataTypes.ReadNextBool(packetData);
-                                if (hasFactorData)
-                                    factorCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT);
-                            }
-
-                            handler.OnEntityEffect(entityId, effect, amplifier, duration, flags, hasFactorData,
-                                factorCodec);
+                            hasFactorData = DataTypes.ReadNextBool(packetData);
+                            if (hasFactorData)
+                                factorCodec = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT);
                         }
+
+                        handler.OnEntityEffect(entityId, effectId, amplifier, duration, flags, hasFactorData,
+                            factorCodec);
+                    }
+                    break;
+                case PacketTypesIn.RemoveEntityEffect:
+                    {
+                        var entityId = DataTypes.ReadNextVarInt(packetData);
+                        var effectId = protocolVersion >= MC_1_18_2_Version
+                            ? DataTypes.ReadNextVarInt(packetData)
+                            : DataTypes.ReadNextByte(packetData);
+
+                        handler.OnRemoveEntityEffect(entityId, effectId);
                     }
                     break;
                 case PacketTypesIn.DestroyEntities:

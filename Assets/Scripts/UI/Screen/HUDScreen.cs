@@ -19,6 +19,7 @@ namespace CraftSharp.UI
         [SerializeField] private TMP_Text latencyText, debugText, modeText;
         [SerializeField] private Animator modePanelAnimator, crosshairAnimator, statusPanelAnimator, playerPanelAnimator;
         [SerializeField] private Button[] modeButtons = new Button[4];
+        [SerializeField] private IconSpritePanel mobEffectsPanel;
         [SerializeField] private ValueBar healthBar;
         [SerializeField] private Image experienceBarFill, hungerBarFill;
         [SerializeField] private TMP_Text experienceText, hungerText;
@@ -96,6 +97,23 @@ namespace CraftSharp.UI
                 interactionPanel.UpdateItemIconsAndTargetHintVisibility(showPlayerPanel);
             };
 
+            mobEffectUpdateCallback = e =>
+            {
+                var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
+                var spriteTypeId = new ResourceLocation(
+                    CornApp.RESOURCE_LOCATION_NAMESPACE, $"gui_mob_effect_{effectId.Path}");
+                
+                if (e.ShowIcon)
+                    mobEffectsPanel.AddIconSprite(effectId, spriteTypeId);
+            };
+            
+            mobEffectRemovalCallback = e =>
+            {
+                var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
+                
+                mobEffectsPanel.RemoveIconSprite(effectId);
+            };
+
             healthCallback = e =>
             {
                 if (e.UpdateMaxHealth)
@@ -112,7 +130,7 @@ namespace CraftSharp.UI
             
             experienceCallback = e =>
             {
-                experienceText.text = $"Lv {e.Level}";
+                experienceText.text = $"Lv.{e.Level}";
                 experienceBarFill.fillAmount = Mathf.Clamp01(e.LevelUpProgress);
             };
 
@@ -140,6 +158,8 @@ namespace CraftSharp.UI
 
             EventManager.Instance.Register(cameraAimCallback);
             EventManager.Instance.Register(gameModeCallback);
+            EventManager.Instance.Register(mobEffectUpdateCallback);
+            EventManager.Instance.Register(mobEffectRemovalCallback);
             EventManager.Instance.Register(healthCallback);
             EventManager.Instance.Register(hungerCallback);
             EventManager.Instance.Register(experienceCallback);
@@ -164,6 +184,8 @@ namespace CraftSharp.UI
 
         private Action<CameraAimingEvent>?      cameraAimCallback;
         private Action<GameModeUpdateEvent>?    gameModeCallback;
+        private Action<MobEffectUpdateEvent>?   mobEffectUpdateCallback;
+        private Action<MobEffectRemovalEvent>?  mobEffectRemovalCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
         private Action<HungerUpdateEvent>?      hungerCallback;
         private Action<ExperienceUpdateEvent>?  experienceCallback;
@@ -179,6 +201,12 @@ namespace CraftSharp.UI
             
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);
+            
+            if (mobEffectUpdateCallback is not null)
+                EventManager.Instance.Unregister(mobEffectUpdateCallback);
+            
+            if (mobEffectRemovalCallback is not null)
+                EventManager.Instance.Unregister(mobEffectRemovalCallback);
             
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);

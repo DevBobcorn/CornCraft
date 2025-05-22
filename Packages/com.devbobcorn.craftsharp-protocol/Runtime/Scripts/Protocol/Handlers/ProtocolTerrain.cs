@@ -21,6 +21,7 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         /// <param name="protocolVersion">Minecraft Protocol Version</param>
         /// <param name="dataTypes">Minecraft Protocol Data Types</param>
+        /// <param name="handler">Minecraft Protocol Handler</param>
         public ProtocolTerrain(int protocolVersion, DataTypes dataTypes, IMinecraftComHandler handler)
         {
             this.protocolVersion = protocolVersion;
@@ -32,7 +33,6 @@ namespace CraftSharp.Protocol.Handlers
         /// Reading the "Block states" field: consists of 4096 entries, representing all the blocks in the chunk section.
         /// See https://wiki.vg/Chunk_Format#Data_structure
         /// </summary>
-        /// <param name="chunk">Blocks will store in this chunk</param>
         /// <param name="cache">Cache for reading data</param>
         private Chunk? ReadBlockStatesField(Queue<byte> cache)
         {
@@ -288,7 +288,7 @@ namespace CraftSharp.Protocol.Handlers
 
                 // Read Biomes (Type: Paletted Container) - 1.18(1.18.1) and above
                 if (protocolVersion >= ProtocolMinecraft.MC_1_18_1_Version)
-                    ReadBiomesField(chunkY, biomes!, cache);
+                    ReadBiomesField(chunkY, biomes, cache);
             }
 
             if (chunkMask == 0) // The whole chunk column is empty (chunks around main island in the end, for example)
@@ -357,7 +357,7 @@ namespace CraftSharp.Protocol.Handlers
             var c = chunksManager.GetChunkColumn(chunkX, chunkZ);
             if (c is not null)
             {
-                if (biomes!.Length == c.ColumnSize * 64)
+                if (biomes.Length == c.ColumnSize * 64)
                     c.SetBiomeIds(biomes);
                 else if (biomes.Length > 0)
                     UnityEngine.Debug.Log($"Unexpected biome length: {biomes.Length}, should be {c.ColumnSize * 64}");
@@ -365,7 +365,7 @@ namespace CraftSharp.Protocol.Handlers
                 c.SetLights(skyLight, blockLight);
                 c.InitializeBlockLightCache();
 
-                c!.FullyLoaded = true;
+                c.FullyLoaded = true;
             }
             return true;
         }
@@ -564,7 +564,7 @@ namespace CraftSharp.Protocol.Handlers
         /// Read chunk column light data from the server - 1.17 and above.
         /// The returned indices is from one section below bottom to one section above top
         /// </summary>
-        /// <returns>Indicies of chunk sections whose light data is included</returns>
+        /// <returns>Indices of chunk sections whose light data is included</returns>
         public int[] ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = DataTypes.ReadNextBool(cache);
@@ -608,7 +608,7 @@ namespace CraftSharp.Protocol.Handlers
             if (protocolVersion >= ProtocolMinecraft.MC_1_20_Version)
             {
                 // TODO: Fix and implement
-                return new int[0];
+                return Array.Empty<int>();
             }
             
             // Block Light Arrays
@@ -639,7 +639,7 @@ namespace CraftSharp.Protocol.Handlers
         /// Read chunk column light data from the server - 1.16.
         /// The returned indices is from one section below bottom to one section above top
         /// </summary>
-        /// <returns>Indicies of chunk sections whose light data is included</returns>
+        /// <returns>Indices of chunk sections whose light data is included</returns>
         public int[] ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = DataTypes.ReadNextBool(cache);
