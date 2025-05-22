@@ -92,12 +92,12 @@ namespace CraftSharp.UI
             }
 
             // Block items might use block translation key
-            var text = ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
-                translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block"));
+            var text = getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
+                translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")) );
                 
             // TODO: Also check item enchantments
             var rarity = itemStack.ItemType.Rarity;
-                
+            
             if (rarity != ItemRarity.Common)
             {
                 var colorPrefix = rarity switch
@@ -115,6 +115,15 @@ namespace CraftSharp.UI
                 text += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
                 
             return text;
+
+            string? getDisplayName()
+            {
+                var displayNameJson = itemStack.DisplayName;
+                if (string.IsNullOrEmpty(displayNameJson)) return null;
+                
+                var formattedName = ChatParser.ParseText(displayNameJson);
+                return TMPConverter.MC2TMP($"§o{formattedName}§r"); // Make the name italic
+            }
         }
 
         protected override void UpdateCursorText()
