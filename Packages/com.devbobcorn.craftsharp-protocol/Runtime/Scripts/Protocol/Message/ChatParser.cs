@@ -429,7 +429,7 @@ namespace CraftSharp.Protocol
                         
                         if (data.Properties.TryGetValue("clickEvent", out var clickEvent) &&
                             clickEvent.Properties.TryGetValue("action", out var cAct) &&
-                            clickEvent.Properties.TryGetValue("value", out var cVal))
+                            (clickEvent.Properties.TryGetValue("value", out var cVal) || clickEvent.Properties.TryGetValue(getValueKeyName(cAct.StringValue), out cVal)))
                         {
                             clickAction = cAct.StringValue;
                             clickValue = cVal.StringValue;
@@ -489,6 +489,20 @@ namespace CraftSharp.Protocol
                     }
                     
                     return extraResult;
+
+                    string getValueKeyName(string action)
+                    {
+                        return action switch
+                        {
+                            "open_url" => "url",
+                            "open_file" => "path",
+                            "run_command" => "command",
+                            "suggest_command" => "command",
+                            "change" => "change_page",
+
+                            _ => "value"
+                        };
+                    }
 
                 case Json.JSONData.DataType.Array:
                     string result = data.DataArray.Aggregate(string.Empty,

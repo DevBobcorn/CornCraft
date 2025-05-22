@@ -161,6 +161,39 @@ namespace CraftSharp.UI
         private Action<AutoCompletionEvent>? autoCompleteCallback;
 
         #nullable disable
+
+        private void HandleTextClickAction(string clickAction, string clickValue)
+        {
+            Debug.Log($"Click on action [{clickAction}: {clickValue}]");
+
+            switch (clickAction)
+            {
+                case "open_url":
+                    Protocol.Microsoft.OpenBrowser(clickValue);
+                    break;
+                case "open_file":
+                    
+                    break;
+                case "run_command":
+                    // Not supported for chat message. Only works with root component on a sign
+                    break;
+                case "suggest_command":
+                    // Don't notify before we set the caret position
+                    chatInput.SetTextWithoutNotify(clickValue);
+                    chatInput.caretPosition = clickValue.Length;
+                    chatInput.ClearCompletionOptions();
+                    
+                    RefreshCompletions(clickValue);
+                    break;
+                case "change_page":
+                    // Not supported for chat message. Only works within book screen
+                    break;
+                case "copy_to_clipboard":
+                    GUIUtility.systemCopyBuffer = clickValue;
+                    CornApp.Notify(Translations.Get("login.link_copied"), Notification.Type.Success);
+                    break;
+            }
+        }
         
         private void UpdateCursorText(string str)
         {
@@ -209,7 +242,8 @@ namespace CraftSharp.UI
                     if (!game) return;
                     
                     var chatMessageInteractable = chatMessageObj.AddComponent<ChatMessageInteractable>();
-                    chatMessageInteractable.SetupInteractable(chatMessage, e.Actions, UpdateCursorText, game.UICamera);
+                    chatMessageInteractable.SetupInteractable(chatMessage, e.Actions,
+                        HandleTextClickAction, UpdateCursorText, game.UICamera);
                 }
                 
                 chatMessages.Enqueue(chatMessage);

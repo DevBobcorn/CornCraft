@@ -15,16 +15,18 @@ namespace CraftSharp.UI
         
         #nullable enable
         
+        protected Action<string, string>? clickActionHandler;
         protected Action<string>? cursorTextHandler;
         
         #nullable disable
 
-        public void SetupInteractable(TMP_Text text, (string, string, string, string)[] actions, Action<string> handler, Camera uiCam)
+        public void SetupInteractable(TMP_Text text, (string, string, string, string)[] actions, Action<string, string> clickHandler, Action<string> hoverHandler, Camera uiCam)
         {
             messageText = text;
             messageActions = actions;
             
-            cursorTextHandler = handler;
+            clickActionHandler = clickHandler;
+            cursorTextHandler = hoverHandler;
             uiCamera = uiCam;
         }
 
@@ -50,7 +52,10 @@ namespace CraftSharp.UI
             if (pointerActionIndex >= 0 && pointerActionIndex < messageActions.Length)
             {
                 var (clickAction, clickValue, _, _) = messageActions[pointerActionIndex];
-                Debug.Log($"Click on action [{clickAction}: {clickValue}]");
+                if (clickAction != string.Empty && clickValue != string.Empty)
+                {
+                    clickActionHandler?.Invoke(clickAction, clickValue);
+                }
             }
         }
 
@@ -61,15 +66,22 @@ namespace CraftSharp.UI
             if (pointerActionIndex >= 0 && pointerActionIndex < messageActions.Length)
             {
                 var (_, _, hoverAction, hoverContents) = messageActions[pointerActionIndex];
-                var displayText = hoverAction switch
+                if (hoverAction != string.Empty || hoverContents != string.Empty)
                 {
-                    "show_text" => TMPConverter.MC2TMP(ChatParser.ParseText(hoverContents)),
-                    "show_item" => InventoryItemSlot.GetItemDisplayText(ItemStack.FromJson(Json.ParseJson(hoverContents))),
+                    var displayText = hoverAction switch
+                    {
+                        "show_text" => TMPConverter.MC2TMP(ChatParser.ParseText(hoverContents)),
+                        "show_item" => InventoryItemSlot.GetItemDisplayText(ItemStack.FromJson(Json.ParseJson(hoverContents))),
+                        
+                        _ => $"{hoverAction}: {hoverContents}"
+                    };
                     
-                    _ => $"{hoverAction}: {hoverContents}"
-                };
-                
-                cursorTextHandler?.Invoke(displayText);
+                    cursorTextHandler?.Invoke(displayText);
+                }
+                else
+                {
+                    cursorTextHandler?.Invoke(string.Empty);
+                }
             }
             else
             {
