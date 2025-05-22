@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -95,8 +94,7 @@ namespace CraftSharp.Protocol
         public static string ParseText(string json, List<(string, string, string, string)>? actions = null)
         {
             var jsonData = Json.ParseJson(json);
-            Debug.Log(jsonData.ToJson());
-            return JSONData2String(jsonData, string.Empty, string.Empty, actions);
+            return ParseText(jsonData, actions);
         }
 
         /// <summary>
@@ -108,7 +106,18 @@ namespace CraftSharp.Protocol
         public static string ParseText(Dictionary<string, object> nbt, List<(string, string, string, string)>? actions = null)
         {
             var jsonData = Json.Object2JSONData(nbt);
-            Debug.Log(jsonData.ToJson());
+            return ParseText(jsonData, actions);
+        }
+        
+        /// <summary>
+        /// The main function to convert text from MC 1.6+ JSON to MC 1.5.2 formatted text
+        /// </summary>
+        /// <param name="jsonData">JSON data</param>
+        /// <param name="actions">Actions from JSON serialized text. Passing in null will ignore actions</param>
+        /// <returns>Returns the translated text</returns>
+        private static string ParseText(Json.JSONData jsonData, List<(string, string, string, string)>? actions = null)
+        {
+            //Debug.Log(jsonData.ToJson());
             return JSONData2String(jsonData, string.Empty, string.Empty, actions);
         }
 
@@ -116,22 +125,23 @@ namespace CraftSharp.Protocol
         /// The main function to convert text from MC 1.9+ JSON to MC 1.5.2 formatted text
         /// </summary>
         /// <param name="message">Message received</param>
+        /// <param name="actions">Actions from JSON serialized text. Passing in null will ignore actions</param>
         /// <returns>Returns the translated text</returns>
-        public static string ParseSignedChat(ChatMessage message)
+        public static string ParseSignedChat(ChatMessage message, List<(string, string, string, string)>? actions = null)
         {
-            string sender = message.isSenderJson ? ParseText(message.displayName!) : message.displayName!;
+            string sender = message.isSenderJson ? ParseText(message.displayName!, actions) : message.displayName!;
             string content;
             if (ProtocolSettings.ShowModifiedChat && message.unsignedContent != null)
             {
-                content = ParseText(message.unsignedContent!);
+                content = ParseText(message.unsignedContent!, actions);
                 if (string.IsNullOrEmpty(content))
                     content = message.unsignedContent!;
             }
             else
             {
-                content = message.isJson ? ParseText(message.content) : message.content;
+                content = message.isJson ? ParseText(message.content, actions) : message.content;
                 if (string.IsNullOrEmpty(content))
-                    content = message.content!;
+                    content = message.content;
             }
 
             string text;
@@ -252,7 +262,7 @@ namespace CraftSharp.Protocol
             translationRules["commands.message.display.incoming"] = "§7%s whispers to you: %s";
             translationRules["commands.message.display.outgoing"] = "§7You whisper to %s: %s";
 
-            // Load the external dictionnary of translation rules or display an error message
+            // Load the external dictionary of translation rules or display an error message
             if (File.Exists(langFile))
             {
                 var translations = Json.ParseJson(File.ReadAllText(langFile));

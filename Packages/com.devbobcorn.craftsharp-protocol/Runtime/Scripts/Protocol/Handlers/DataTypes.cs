@@ -1082,14 +1082,29 @@ namespace CraftSharp.Protocol.Handlers
             {
                 // Read as NBT
                 var r = ReadNextNbt(cache, UseAnonymousNBT);
-                var msg = ChatParser.ParseText(r);
-                return msg;
+                return ChatParser.ParseText(r);
             }
             else
             {
                 // Read as String
                 var json = ReadNextString(cache);
                 return ChatParser.ParseText(json);
+            }
+        }
+        
+        public Json.JSONData ReadNextChatAsJson(Queue<byte> cache)
+        {
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_4_Version)
+            {
+                // Read as NBT
+                var r = ReadNextNbt(cache, UseAnonymousNBT);
+                return Json.Object2JSONData(r);
+            }
+            else
+            {
+                // Read as String
+                var json = ReadNextString(cache);
+                return Json.ParseJson(json);
             }
         }
 

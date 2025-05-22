@@ -999,10 +999,10 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     break;
                 case PacketTypesIn.SystemChat:
-                    var systemMessage = dataTypes.ReadNextChat(packetData);
-                    
                     if (protocolVersion >= MC_1_19_3_Version)
                     {
+                        var systemMessageJsonData = dataTypes.ReadNextChatAsJson(packetData);
+                        
                         var isOverlay = DataTypes.ReadNextBool(packetData);
                         if (isOverlay)
                         {
@@ -1014,14 +1014,16 @@ namespace CraftSharp.Protocol.Handlers
                             if (!ProtocolSettings.DisplaySystemMessages)
                                 break;
                         }
-
-                        handler.OnTextReceived(new(systemMessage, null, false, -1, Guid.Empty, true));
+                        handler.OnTextReceived(new(systemMessageJsonData.ToJson(), null, true, -1, Guid.Empty, true));
                     }
                     else
                     {
+                        var systemMessage = dataTypes.ReadNextChat(packetData);
+                        
                         var msgType = DataTypes.ReadNextVarInt(packetData);
                         if (msgType == 1 && !ProtocolSettings.DisplaySystemMessages)
                             break;
+                        
                         handler.OnTextReceived(new(systemMessage, null, true, msgType, Guid.Empty, true));
                     }
 
