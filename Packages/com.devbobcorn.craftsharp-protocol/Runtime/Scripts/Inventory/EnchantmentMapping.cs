@@ -168,34 +168,5 @@ namespace CraftSharp.Inventory
             var translation = ChatParser.TranslateString("Enchantments.minecraft." + enchantment.ToString().ToUnderscoreCase());
             return string.IsNullOrEmpty(translation) ? $"Unknown Enchantment with ID: {(short)enchantment} (Probably not named in the code yet)" : translation;
         }
-
-        public static string ConvertLevelToRomanNumbers(int num)
-        {
-            var result = string.Empty;
-            var romanNumbers = new Dictionary<string, int>
-            {
-                {"M", 1000},
-                {"CM", 900},
-                {"D", 500},
-                {"CD", 400},
-                {"C", 100},
-                {"XC", 90},
-                {"L", 50},
-                {"XL", 40},
-                {"X", 10},
-                {"IX", 9},
-                {"V", 5},
-                {"IV", 4},
-                {"I", 1}
-            };
-
-            foreach (var pair in romanNumbers)
-            {
-                result += string.Join(string.Empty, Enumerable.Repeat(pair.Key, num / pair.Value));
-                num %= pair.Value;
-            }
-
-            return result;
-        }
     }
 }
