@@ -273,6 +273,30 @@
     "corncraft:gui_furnace_fire_progress": {
         "texture_id": "corncraft:icon/gui_furnace_fire_full",
         "image_type": "filled",
+        "fill_type": "bottom"
+    },
+
+
+
+    "corncraft:gui_brewing_fuel_progress": {
+        "texture_id": "corncraft:icon/gui_brewing_fuel",
+        "image_type": "filled",
+        "fill_type": "left"
+    },
+    "corncraft:gui_brewing_arrow_empty": {
+        "texture_id": "corncraft:icon/gui_brewing_arrow_empty"
+    },
+    "corncraft:gui_brewing_arrow_progress": {
+        "texture_id": "corncraft:icon/gui_brewing_arrow_full",
+        "image_type": "filled",
+        "fill_type": "top"
+    },
+    "corncraft:gui_brewing_bubbles_empty": {
+        "texture_id": "corncraft:icon/gui_brewing_bubbles_empty"
+    },
+    "corncraft:gui_brewing_bubbles_progress": {
+        "texture_id": "corncraft:icon/gui_brewing_bubbles_full",
+        "image_type": "filled",
         "fill_type": "bottom",
         "fill_start": 0.16666667,
         "fill_end": 0.8888889
