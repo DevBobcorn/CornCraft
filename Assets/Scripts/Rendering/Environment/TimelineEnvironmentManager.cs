@@ -115,12 +115,12 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            if (mainCamera != null)
+            if (mainCamera)
             {
                 transform.position = mainCamera.transform.position;
 
 #if ATMOSPHERIC_HEIGHT_FOG
-                if (fogGlobal != null)
+                if (fogGlobal)
                 {
                     fogGlobal.fogHeightStart = transform.position.y - 10F;
                     fogGlobal.fogHeightEnd = transform.position.y + 300F;
@@ -128,7 +128,7 @@ namespace CraftSharp.Rendering
             }
             else // Main camera temporarily unavailable, disable fog to avoid it flooding the console
             {
-                if (fogGlobal != null && fogGlobal.gameObject.activeSelf)
+                if (fogGlobal && fogGlobal.gameObject.activeSelf)
                 {
                     fogGlobal.gameObject.SetActive(false);
                 }
@@ -139,7 +139,7 @@ namespace CraftSharp.Rendering
 
         private void SetPlayableSpeed(double speed)
         {
-            if (playableDirector != null)
+            if (playableDirector)
             {
                 var playableGraph = playableDirector.playableGraph;
                 

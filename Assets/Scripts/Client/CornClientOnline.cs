@@ -2349,6 +2349,7 @@ namespace CraftSharp
                     averageTPS = sampleSum / tpsSamples.Count;
                     serverTPS = tps;
                 }
+                EventManager.Instance.BroadcastOnUnityThread(new TickSyncEvent((int) tickDiff));
             }
             else
             {

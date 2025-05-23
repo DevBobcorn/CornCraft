@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -35,6 +37,8 @@ namespace CraftSharp.UI
         private bool modePanelShown  = false;
         private int selectedMode     = 0;
         private int displayedLatency = 0;
+        private readonly Dictionary<ResourceLocation, int> mobEffectsDurationTicks = new();
+        private readonly Dictionary<ResourceLocation, int> mobEffectsCurrentTicks = new();
 
         [SerializeField] private RectTransform chatContentPanel;
         [SerializeField] private GameObject chatMessagePreviewPrefab;
@@ -102,9 +106,14 @@ namespace CraftSharp.UI
                 var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
                 var spriteTypeId = new ResourceLocation(
                     CornApp.RESOURCE_LOCATION_NAMESPACE, $"gui_mob_effect_{effectId.Path}");
-                
+
                 if (e.ShowIcon)
+                {
+                    mobEffectsDurationTicks[effectId] = e.DurationTicks;
+                    mobEffectsCurrentTicks[effectId] = e.DurationTicks;
                     mobEffectsPanel.AddIconSprite(effectId, spriteTypeId);
+                    mobEffectsPanel.UpdateIconText(effectId, e.Amplifier > 0 ? StringUtil.ToRomanNumbers(e.Amplifier + 1) : string.Empty);
+                }
             };
             
             mobEffectRemovalCallback = e =>
@@ -112,6 +121,24 @@ namespace CraftSharp.UI
                 var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
                 
                 mobEffectsPanel.RemoveIconSprite(effectId);
+                mobEffectsCurrentTicks.Remove(effectId);
+                mobEffectsDurationTicks.Remove(effectId);
+            };
+            
+            tickSyncCallback = e =>
+            {
+                if (mobEffectsCurrentTicks.Count > 0)
+                {
+                    foreach (var effectId in mobEffectsCurrentTicks.Keys.ToArray())
+                    {
+                        var updatedTicks = Mathf.Max(0, mobEffectsCurrentTicks[effectId] - e.PassedTicks);
+                        mobEffectsCurrentTicks[effectId] = updatedTicks;
+                        var fill = updatedTicks / (float) mobEffectsDurationTicks[effectId];
+                        mobEffectsPanel.UpdateIconFill(effectId, Mathf.Clamp01(fill));
+                        var blink = updatedTicks < 200; // Roughly 10 seconds at 20TPS
+                        mobEffectsPanel.UpdateIconBlink(effectId, blink, blink ? 200F / Mathf.Max(40, updatedTicks) : 1F);
+                    }
+                }
             };
 
             healthCallback = e =>
@@ -160,6 +187,7 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(gameModeCallback);
             EventManager.Instance.Register(mobEffectUpdateCallback);
             EventManager.Instance.Register(mobEffectRemovalCallback);
+            EventManager.Instance.Register(tickSyncCallback);
             EventManager.Instance.Register(healthCallback);
             EventManager.Instance.Register(hungerCallback);
             EventManager.Instance.Register(experienceCallback);
@@ -186,6 +214,7 @@ namespace CraftSharp.UI
         private Action<GameModeUpdateEvent>?    gameModeCallback;
         private Action<MobEffectUpdateEvent>?   mobEffectUpdateCallback;
         private Action<MobEffectRemovalEvent>?  mobEffectRemovalCallback;
+        private Action<TickSyncEvent>?          tickSyncCallback;
         private Action<HealthUpdateEvent>?      healthCallback;
         private Action<HungerUpdateEvent>?      hungerCallback;
         private Action<ExperienceUpdateEvent>?  experienceCallback;
@@ -207,6 +236,9 @@ namespace CraftSharp.UI
             
             if (mobEffectRemovalCallback is not null)
                 EventManager.Instance.Unregister(mobEffectRemovalCallback);
+            
+            if (tickSyncCallback is not null)
+                EventManager.Instance.Unregister(tickSyncCallback);
             
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);

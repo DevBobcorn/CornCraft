@@ -1,6 +1,6 @@
 namespace CraftSharp.Event
 {
-    public class MobEffectUpdateEvent
+    public record MobEffectUpdateEvent
     {
         public int EffectId { get; }
         public int Amplifier { get; }

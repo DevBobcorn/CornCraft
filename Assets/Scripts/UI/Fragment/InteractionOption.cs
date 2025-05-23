@@ -119,10 +119,9 @@ namespace CraftSharp.UI
         }
 
         // Called by animator after hide animation ends...
-        void Expire()
+        private void Expire()
         {
-            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(interactionKey));
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
 
         private void UpdateItemMesh(ResourceLocation itemId)

@@ -40,7 +40,6 @@ namespace CraftSharp.UI
         // Called by animator after hide animation ends...
         private void Expire()
         {
-            EventManager.Instance.Broadcast<NotificationExpireEvent>(new(numeralID));
             Destroy(gameObject);
         }
 
