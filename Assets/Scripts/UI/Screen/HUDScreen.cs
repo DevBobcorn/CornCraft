@@ -227,31 +227,22 @@ namespace CraftSharp.UI
         {
             if (cameraAimCallback is not null)
                 EventManager.Instance.Unregister(cameraAimCallback);
-            
             if (gameModeCallback is not null)
                 EventManager.Instance.Unregister(gameModeCallback);
-            
             if (mobEffectUpdateCallback is not null)
                 EventManager.Instance.Unregister(mobEffectUpdateCallback);
-            
             if (mobEffectRemovalCallback is not null)
                 EventManager.Instance.Unregister(mobEffectRemovalCallback);
-            
             if (tickSyncCallback is not null)
                 EventManager.Instance.Unregister(tickSyncCallback);
-            
             if (healthCallback is not null)
                 EventManager.Instance.Unregister(healthCallback);
-            
             if (hungerCallback is not null)
                 EventManager.Instance.Unregister(hungerCallback);
-            
             if (experienceCallback is not null)
                 EventManager.Instance.Unregister(experienceCallback);
-
             if (staminaCallback is not null)
                 EventManager.Instance.Unregister(staminaCallback);
-            
             if (chatMessageCallback is not null)
                 EventManager.Instance.Unregister(chatMessageCallback);
         }

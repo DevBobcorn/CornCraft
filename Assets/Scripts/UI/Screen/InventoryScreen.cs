@@ -10,6 +10,7 @@ using TMPro;
 
 using CraftSharp.Event;
 using CraftSharp.Inventory;
+using CraftSharp.Protocol;
 
 namespace CraftSharp.UI
 {
@@ -32,7 +33,9 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject inventoryLabelPrefab;
         [SerializeField] private GameObject inventoryButtonPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
+        [SerializeField] private GameObject rightScrollViewObject;
         [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
+        [SerializeField] private IconSpritePanel mobEffectsPanel;
         [SerializeField] private RectTransform cursorRect;
         [SerializeField] private InventoryItemSlot cursorSlot;
         [SerializeField] private RectTransform cursorTextPanel;
@@ -55,6 +58,9 @@ namespace CraftSharp.UI
         private readonly List<(SpriteType.FlipbookTimer, SpriteType, Image)> currentTimerFlipbookSprites = new();
         // (predicate_type, predicate, inventory_fragment)
         private readonly List<(InventoryType.PredicateType, InventoryPropertyPredicate, MonoBehaviour)> propertyDependents = new();
+        
+        private readonly Dictionary<ResourceLocation, string> mobEffectsNames = new();
+        private readonly Dictionary<ResourceLocation, int> mobEffectsCurrentTicks = new();
 
         private bool isActive = false;
 
@@ -64,6 +70,9 @@ namespace CraftSharp.UI
         
 #nullable enable
 
+        private Action<MobEffectUpdateEvent>? mobEffectUpdateCallback;
+        private Action<MobEffectRemovalEvent>? mobEffectRemovalCallback;
+        private Action<TickSyncEvent>? tickSyncCallback;
         private Action<InventorySlotUpdateEvent>? slotUpdateCallback;
         private Action<InventoryItemsUpdateEvent>? itemsUpdateCallback;
         private Action<InventoryPropertyUpdateEvent>? propertyUpdateCallback;
@@ -772,6 +781,12 @@ namespace CraftSharp.UI
         
         private void OnDestroy()
         {
+            if (mobEffectUpdateCallback is not null)
+                EventManager.Instance.Unregister(mobEffectUpdateCallback);
+            if (mobEffectRemovalCallback is not null)
+                EventManager.Instance.Unregister(mobEffectRemovalCallback);
+            if (tickSyncCallback is not null)
+                EventManager.Instance.Unregister(tickSyncCallback);
             if (slotUpdateCallback is not null)
                 EventManager.Instance.Unregister(slotUpdateCallback);
             if (itemsUpdateCallback is not null)
@@ -833,6 +848,61 @@ namespace CraftSharp.UI
         {
             // Initialize controls and add listeners
             closeButton.onClick.AddListener(CloseInventory);
+            
+            mobEffectUpdateCallback = e =>
+            {
+                var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
+                var spriteTypeId = new ResourceLocation(
+                    CornApp.RESOURCE_LOCATION_NAMESPACE, $"gui_mob_effect_{effectId.Path}");
+
+                if (e.ShowIcon)
+                {
+                    mobEffectsCurrentTicks[effectId] = e.DurationTicks;
+                    mobEffectsPanel.AddIconSprite(effectId, spriteTypeId);
+                    var seconds = e.DurationTicks / 20;
+                    mobEffectsPanel.UpdateIconFill(effectId, 0F); // Fill is not used for this view
+                    
+                    var effectName = ChatParser.TranslateString(effectId.GetTranslationKey("effect"));
+                    if (e.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(e.Amplifier + 1)}";
+                    mobEffectsNames[effectId] = effectName;
+                    mobEffectsPanel.UpdateIconText(effectId, $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
+                    
+                    // Show mob effects panel
+                    rightScrollViewObject.SetActive(true);
+                }
+                
+            };
+            
+            mobEffectRemovalCallback = e =>
+            {
+                var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
+                
+                mobEffectsPanel.RemoveIconSprite(effectId);
+                mobEffectsCurrentTicks.Remove(effectId);
+                mobEffectsNames.Remove(effectId);
+                
+                if (mobEffectsCurrentTicks.Count == 0)
+                {
+                    rightScrollViewObject.SetActive(false);
+                }
+            };
+            
+            tickSyncCallback = e =>
+            {
+                if (mobEffectsCurrentTicks.Count > 0)
+                {
+                    foreach (var effectId in mobEffectsCurrentTicks.Keys.ToArray())
+                    {
+                        var updatedTicks = Mathf.Max(0, mobEffectsCurrentTicks[effectId] - e.PassedTicks);
+                        mobEffectsCurrentTicks[effectId] = updatedTicks;
+                        var blink = updatedTicks < 200; // Roughly 10 seconds at 20TPS
+                        mobEffectsPanel.UpdateIconBlink(effectId, blink, blink ? 200F / Mathf.Max(40, updatedTicks) : 1F);
+                        var seconds = updatedTicks / 20;
+                        
+                        mobEffectsPanel.UpdateIconText(effectId, $"{mobEffectsNames[effectId]}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
+                    }
+                }
+            };
             
             slotUpdateCallback = e =>
             {
@@ -939,6 +1009,9 @@ namespace CraftSharp.UI
                 }
             };
             
+            EventManager.Instance.Register(mobEffectUpdateCallback);
+            EventManager.Instance.Register(mobEffectRemovalCallback);
+            EventManager.Instance.Register(tickSyncCallback);
             EventManager.Instance.Register(slotUpdateCallback);
             EventManager.Instance.Register(itemsUpdateCallback);
             EventManager.Instance.Register(propertyUpdateCallback);
