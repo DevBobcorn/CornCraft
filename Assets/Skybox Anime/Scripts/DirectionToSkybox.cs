@@ -5,6 +5,8 @@ namespace AnimeSkybox
     [ExecuteAlways]
     public class DirectionToSkybox : MonoBehaviour
     {
+        private static readonly int L_TO_W = Shader.PropertyToID("LToW");
+        
         public GameObject sun; // 模拟太阳的空物体
         public GameObject moon; // 模拟月亮的空物体
         public Material targetMaterial; // 你希望修改的Skybox材质
@@ -15,7 +17,7 @@ namespace AnimeSkybox
 
         private void Start()
         {
-            if (targetMaterial == null)
+            if (!targetMaterial)
             {
                 Debug.LogError("Please assign a target Skybox material.");
                 return;
@@ -25,9 +27,9 @@ namespace AnimeSkybox
         private void Update()
         {
             Matrix4x4 LtoW = moon.transform.localToWorldMatrix;
-            targetMaterial.SetMatrix("LToW",LtoW);
+            targetMaterial.SetMatrix(L_TO_W,LtoW);
         
-            if (targetMaterial == null)
+            if (!targetMaterial)
                 return;
 
             if (sun)

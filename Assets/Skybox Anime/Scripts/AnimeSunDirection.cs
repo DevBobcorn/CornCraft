@@ -28,8 +28,8 @@ public class AnimeSunDirection : MonoBehaviour
         
         Vector3 orbPos = new(tiltDistance, y, x);
 
-        if (sunDir != null) sunDir.rotation = Quaternion.LookRotation(-orbPos);
-        if (moonDir != null) moonDir.rotation = Quaternion.LookRotation(orbPos);
+        if (sunDir) sunDir.rotation = Quaternion.LookRotation(-orbPos);
+        if (moonDir) moonDir.rotation = Quaternion.LookRotation(orbPos);
     }
 
     void OnValidate()

@@ -11,7 +11,7 @@ namespace AnimeSkybox
         public override void ProcessFrame(Playable playable, FrameData info, object playerData)
         {
             Material material = playerData as Material;
-            if (material == null) return;
+            if (!material) return;
             
             RenderSettings.skybox = material; // 设置天空盒的材质
 

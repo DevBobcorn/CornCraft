@@ -9,18 +9,19 @@ namespace BoatAttackSkybox
     [ExecuteAlways]
     public class CloudRenderer : MonoBehaviour
     {
+        private static readonly int BA_CLOUD_DATA = Shader.PropertyToID("_BA_CloudData");
+        
         public Mesh[] cloudMeshes;
         public Material cloudMaterial;
         public ParticleSystem ps;
         public Transform viewerTransform;
 
         private NativeArray<ParticleSystem.Particle> particles;
-        //private ParticleSystem.Particle[] parts;
         private MaterialPropertyBlock[] mpbs;
         
         private void OnEnable()
         {
-            RenderPipelineManager.beginCameraRendering += RenderPipelineManagerOnbeginCameraRendering;
+            RenderPipelineManager.beginCameraRendering += RenderPipelineManagerOnBeginCameraRendering;
             // TODO: PlanarReflections.BeginPlanarReflections += RenderPipelineManagerOnbeginCameraRendering;
             
             var main = ps.main;
@@ -35,13 +36,13 @@ namespace BoatAttackSkybox
 
         private void OnDisable()
         {
-            RenderPipelineManager.beginCameraRendering -= RenderPipelineManagerOnbeginCameraRendering;
+            RenderPipelineManager.beginCameraRendering -= RenderPipelineManagerOnBeginCameraRendering;
             // TODO: PlanarReflections.BeginPlanarReflections -= RenderPipelineManagerOnbeginCameraRendering;
 
             particles.Dispose();
         }
 
-        private void RenderPipelineManagerOnbeginCameraRendering(ScriptableRenderContext context, Camera camera)
+        private void RenderPipelineManagerOnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
         {
             DrawClouds(camera);
         }
@@ -59,9 +60,7 @@ namespace BoatAttackSkybox
             
             var camPos = camera.transform.position;
             var aliveCount = ps.GetParticles(particles);
-            particles.OrderByDescending(x => Vector3.Distance(x.position, camPos));
-            
-            var scale = Vector3.zero;
+            particles.CopyFrom(particles.OrderByDescending(x => Vector3.Distance(x.position, camPos)).ToArray());
 
             for (var index = 0; index < aliveCount; index++)
             {
@@ -74,13 +73,13 @@ namespace BoatAttackSkybox
                 Random.InitState((int)particle.randomSeed);
                 var mesh = cloudMeshes[Random.Range(0, cloudMeshes.Length)];
 
-                scale = particle.startSize3D;
+                var scale = particle.startSize3D;
                 scale.x *= Random.value > 0.5f ? 1f : -1f;
                 
-                mpbs[index].SetVector("_BA_CloudData", new Vector4(scale.x, 0f, 0f, particle.GetCurrentColor(ps).a / 255f));
+                mpbs[index].SetVector(BA_CLOUD_DATA, new Vector4(scale.x, 0f, 0f, particle.GetCurrentColor(ps).a / 255f));
                 
                 Graphics.DrawMesh(mesh, Matrix4x4.TRS(pos, q, scale * CloudRenderHelper.SkyboxScale),
-                    cloudMaterial, LayerMask.NameToLayer("3DSkybox"), camera, 0, mpbs[index], false, false, false);
+                    cloudMaterial, LayerMask.NameToLayer("3DSprite"), camera, 0, mpbs[index], false, false, false);
             }
         }
     }

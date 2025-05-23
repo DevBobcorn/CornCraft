@@ -8,7 +8,6 @@ namespace BoatAttackSkybox
     {
         public float scale = 0.1f;
         public Material material;
-        public LayerMask layer;
 
         private Cloud[] _clouds;
         
@@ -31,8 +30,10 @@ namespace BoatAttackSkybox
 
             for (int i = 0; i < _clouds.Length; i++)
             {
-                var cloud = new Cloud();
-                cloud.T = transform.GetChild(i);
+                var cloud = new Cloud
+                {
+                    T = transform.GetChild(i)
+                };
                 cloud.Matrix = cloud.T.localToWorldMatrix;
                 cloud.Mesh = cloud.T.GetComponent<MeshFilter>().sharedMesh;
                 cloud.T.GetComponent<Renderer>().enabled = false;
@@ -45,7 +46,7 @@ namespace BoatAttackSkybox
             RenderPipelineManager.beginCameraRendering -= CloudAlign;
         }
 
-        void CloudAlign(ScriptableRenderContext context, Camera camera)
+        private void CloudAlign(ScriptableRenderContext context, Camera camera)
         {
             if (camera.cameraType != CameraType.Preview)
             {
