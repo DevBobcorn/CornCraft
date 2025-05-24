@@ -379,7 +379,44 @@
                 "pos_x": 0,
                 "pos_y": 0,
                 "width": 9,
-                "height": 3
+                "height": 4
+            },
+            {
+                "type_id": "corncraft:gui_brewing_fuel_progress",
+                "pos_x": 3,
+                "pos_y": 2,
+                "cur_value_property": "fuel_time",
+                "max_value_property": "20"
+            },
+            {
+                "type_id": "corncraft:gui_brewing_bubbles_empty",
+                "pos_x": 3,
+                "pos_y": 2,
+                "height": 2
+            },
+            {
+                "type_id": "corncraft:gui_brewing_bubbles_progress",
+                "pos_x": 3,
+                "pos_y": 2,
+                "height": 2,
+                "cur_value_property": "bubble_progress",
+                "max_value_property": "40"
+            },
+            {
+                "type_id": "corncraft:gui_brewing_arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1.5,
+                "width": 0.5,
+                "height": 1.5
+            },
+            {
+                "type_id": "corncraft:gui_brewing_arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1.5,
+                "width": 0.5,
+                "height": 1.5,
+                "cur_value_property": "arrow_progress",
+                "max_value_property": "400"
             }
         ],
         "slots": {
@@ -404,7 +441,7 @@
             "3": {
                 "type_id": "minecraft:brewing_material_item",
                 "pos_x": 4,
-                "pos_y": 2
+                "pos_y": 2.5
             },
             "4": {
                 "type_id": "minecraft:brewing_fuel_item",
@@ -412,7 +449,14 @@
                 "pos_y": 2.0,
                 "placeholder_type_id": "corncraft:empty_slot_blaze_powder"
             }
-        }
+        },
+        "properties": {
+            "0": "brew_time",
+            "1": "fuel_time",
+            "-1": "bubble_progress",
+            "-2": "arrow_progress"
+        },
+        "work_panel_height": 4
     },
     "minecraft:crafting": {
         "protocol_id": 11,
