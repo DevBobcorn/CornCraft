@@ -68,6 +68,7 @@ namespace CraftSharp.UI
         private InventoryData activeInventoryData = null;
         private readonly Dictionary<string, short> propertyTable = new();
         private int fixedValuePropertyCount = 0;
+        private HashSet<string> updatedPropertyNames = new();
         
 #nullable enable
 
@@ -581,6 +582,8 @@ namespace CraftSharp.UI
                     }
                     // Add it to the list
                     currentFilledSprites.Add((curFillProp, maxFillProp, spriteType, spriteImage));
+
+                    Debug.Log($"Filled sprite: {spriteType}, CurProp: {curFillProp}, MaxProp: {maxFillProp}");
                 }
             }
             
@@ -725,6 +728,8 @@ namespace CraftSharp.UI
         private void SetPseudoProperty(string propertyName, short propertyValue)
         {
             propertyTable[propertyName] = propertyValue;
+            
+            updatedPropertyNames.Add(propertyName);
             //Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
         }
 
@@ -760,10 +765,23 @@ namespace CraftSharp.UI
                     SetPseudoProperty("second_potion_effect_index", secondIndex);
                 }
             }
+            
+            if (activeInventoryData.Type.TypeId == InventoryType.BREWING_STAND_ID)
+            {
+                if (propertyName == "brew_time")
+                {
+                    var curBubbleProgress = propertyTable.GetValueOrDefault("bubble_progress", (short) 0);
+                    SetPseudoProperty("bubble_progress", (short) (value < 1 ? (curBubbleProgress + 1) % 40 : 0));
+                    
+                    SetPseudoProperty("arrow_progress", (short) (400 - value));
+                }
+            }
         }
 
         private void UpdatePredicateDependents()
         {
+            // TODO: Update only dependents affected by the change
+            
             foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
             {
                 var predicateResult = predicate.Check(propertyTable);
@@ -954,6 +972,10 @@ namespace CraftSharp.UI
                     if (currentSlots.TryGetValue(e.Slot, out var slot))
                     {
                         slot.UpdateItemStack(e.ItemStack);
+                        
+                        // Collect updated property names
+                        updatedPropertyNames.Clear();
+                        
                         // Handle change with custom logic
                         HandleSlotChange(e.Slot, e.ItemStack);
                     }
@@ -1015,6 +1037,10 @@ namespace CraftSharp.UI
                     
                     //Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
                     propertyTable[propertyName] = e.Value;
+                    
+                    // Collect updated property names
+                    updatedPropertyNames.Clear();
+                    updatedPropertyNames.Add(propertyName);
 
                     // Update pseudo properties
                     UpdatePseudoProperties(propertyName, e.Value);
@@ -1025,16 +1051,12 @@ namespace CraftSharp.UI
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)
                     {
-                        if (curPropName == propertyName || maxPropName == propertyName) // This one needs to be updated
+                        if (updatedPropertyNames.Contains(curPropName) || updatedPropertyNames.Contains(maxPropName)) // This one needs to be updated
                         {
-                            if (activeInventoryData.Type.PropertySlots.TryGetValue(curPropName, out var curProp) &&
-                                activeInventoryData.Type.PropertySlots.TryGetValue(maxPropName, out var maxProp))
+                            if (propertyTable.TryGetValue(curPropName, out var curPropValue) &&
+                                propertyTable.TryGetValue(maxPropName, out var maxPropValue))
                             {
-                                if (activeInventoryData.Properties.TryGetValue(curProp, out var curPropValue) &&
-                                    activeInventoryData.Properties.TryGetValue(maxProp, out var maxPropValue))
-                                {
-                                    SpriteType.UpdateFilledSpriteImage(spriteType, spriteImage, curPropValue, maxPropValue);
-                                }
+                                SpriteType.UpdateFilledSpriteImage(spriteType, spriteImage, curPropValue, maxPropValue);
                             }
                             else
                             {
