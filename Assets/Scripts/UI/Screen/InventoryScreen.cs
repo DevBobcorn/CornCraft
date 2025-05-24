@@ -67,6 +67,7 @@ namespace CraftSharp.UI
         private int activeInventoryId = -1; // -1 for none
         private InventoryData activeInventoryData = null;
         private readonly Dictionary<string, short> propertyTable = new();
+        private int fixedValuePropertyCount = 0;
         
 #nullable enable
 
@@ -91,6 +92,9 @@ namespace CraftSharp.UI
 
             activeInventoryId = inventoryData.Id;
             activeInventoryData = inventoryData;
+
+            propertyTable.Clear();
+            fixedValuePropertyCount = 0;
             
             var inventoryType = inventoryData.Type;
 
@@ -217,6 +221,22 @@ namespace CraftSharp.UI
             {
                 propertyPreviewText.text = string.Empty;
             }
+        }
+        
+        private bool TryAddFixedValueProperty(string fixedValue, out string propertyName)
+        {
+            propertyName = $"fixed_value_{fixedValuePropertyCount}";
+            
+            if (short.TryParse(fixedValue, out var shortValue))
+            {
+                if (propertyTable.TryAdd(propertyName, shortValue))
+                {
+                    Debug.Log($"Add fixed value property {propertyName}: {shortValue}");
+                    fixedValuePropertyCount++;
+                    return true;
+                }
+            }
+            return false;
         }
 
         private InventoryItemSlot CreateSlot(RectTransform parent, int slotId, float x, float y, ItemStack previewItem,
@@ -543,8 +563,25 @@ namespace CraftSharp.UI
                 {
                     Debug.LogWarning($"Filled sprite properties for sprite {spriteType.TypeId} is not specified!");
                 }
-                // Add it to the list
-                currentFilledSprites.Add((curFillProp, maxFillProp, spriteType, spriteImage));
+                else
+                {
+                    if (!activeInventoryData.Type.PropertySlots.ContainsKey(curFillProp))
+                    {
+                        if (TryAddFixedValueProperty(curFillProp, out var fixedValuePropName))
+                        {
+                            curFillProp = fixedValuePropName;
+                        }
+                    }
+                    if (!activeInventoryData.Type.PropertySlots.ContainsKey(maxFillProp))
+                    {
+                        if (TryAddFixedValueProperty(maxFillProp, out var fixedValuePropName))
+                        {
+                            maxFillProp = fixedValuePropName;
+                        }
+                    }
+                    // Add it to the list
+                    currentFilledSprites.Add((curFillProp, maxFillProp, spriteType, spriteImage));
+                }
             }
             
             if (spriteType.FlipbookSprites is null)
@@ -839,7 +876,8 @@ namespace CraftSharp.UI
             currentPropertyFlipbookSprites.Clear();
             propertyDependents.Clear();
             propertyTable.Clear();
-
+            
+            fixedValuePropertyCount = 0;
             activeInventoryId = -1;
             activeInventoryData = null;
         }
@@ -851,19 +889,19 @@ namespace CraftSharp.UI
             
             mobEffectUpdateCallback = e =>
             {
-                var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
+                var effectId = e.Effect.EffectId;
                 var spriteTypeId = new ResourceLocation(
                     CornApp.RESOURCE_LOCATION_NAMESPACE, $"gui_mob_effect_{effectId.Path}");
 
-                if (e.ShowIcon)
+                if (e.Effect.ShowIcon)
                 {
-                    mobEffectsCurrentTicks[effectId] = e.DurationTicks;
+                    mobEffectsCurrentTicks[effectId] = e.Effect.Duration;
                     mobEffectsPanel.AddIconSprite(effectId, spriteTypeId);
-                    var seconds = e.DurationTicks / 20;
+                    var seconds = e.Effect.Duration / 20;
                     mobEffectsPanel.UpdateIconFill(effectId, 0F); // Fill is not used for this view
                     
                     var effectName = ChatParser.TranslateString(effectId.GetTranslationKey("effect"));
-                    if (e.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(e.Amplifier + 1)}";
+                    if (e.Effect.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(e.Effect.Amplifier + 1)}";
                     mobEffectsNames[effectId] = effectName;
                     mobEffectsPanel.UpdateIconText(effectId, $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
                     

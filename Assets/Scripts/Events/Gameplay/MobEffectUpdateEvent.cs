@@ -2,22 +2,11 @@ namespace CraftSharp.Event
 {
     public record MobEffectUpdateEvent
     {
-        public int EffectId { get; }
-        public int Amplifier { get; }
-        public int DurationTicks { get; }
-        public bool IsAmbient { get; }
-        public bool ShowParticles { get; }
-        public bool ShowIcon { get; }
+        public MobEffectInstance Effect { get; }
         
-        public MobEffectUpdateEvent(int effectId, int amplifier, int durationTicks,
-            bool isAmbient, bool showParticles, bool showIcon)
+        public MobEffectUpdateEvent(MobEffectInstance effect)
         {
-            EffectId = effectId;
-            Amplifier = amplifier;
-            DurationTicks = durationTicks;
-            IsAmbient = isAmbient;
-            ShowParticles = showParticles;
-            ShowIcon = showIcon;
+            Effect = effect;
         }
     }
 }

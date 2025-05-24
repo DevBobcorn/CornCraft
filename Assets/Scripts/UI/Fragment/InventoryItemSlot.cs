@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -94,7 +95,7 @@ namespace CraftSharp.UI
             // Block items might use block translation key
             var text = getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
                 translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")) );
-                
+            
             // TODO: Also check item enchantments
             var rarity = itemStack.ItemType.Rarity;
             
@@ -118,6 +119,26 @@ namespace CraftSharp.UI
 
             string? getDisplayName()
             {
+                if (itemStack.NBT is not null)
+                {
+                    // Check potion NBTs https://minecraft.wiki/w/Item_format/Before_1.20.5#Potion_Effects
+                    // Used by potions and tipped arrows
+                    if (itemStack.NBT.TryGetValue("Potion", out var value))
+                    {
+                        var baseTranslationKey = itemStack.ItemType.ItemId.GetTranslationKey("item");
+                        var potionId = ResourceLocation.FromString((string) value);
+                        var potionTranslationKey = potionId.Path;
+                        
+                        if (potionTranslationKey.StartsWith("strong_")) // Remove Enhanced (Level II) Prefix
+                            potionTranslationKey = potionTranslationKey.Remove(0, "strong_".Length);
+                        
+                        if (potionTranslationKey.StartsWith("long_")) // Remove Extended Prefix
+                            potionTranslationKey = potionTranslationKey.Remove(0, "long_".Length);
+                        
+                        return ChatParser.TranslateString($"{baseTranslationKey}.effect.{potionTranslationKey}");
+                    }
+                }
+                
                 var displayNameJson = itemStack.DisplayName;
                 if (string.IsNullOrEmpty(displayNameJson)) return null;
                 
@@ -157,7 +178,6 @@ namespace CraftSharp.UI
             }
             else
             {
-                
                 var maxDamage = (float) newItemType.MaxDurability; // TODO: Check enchantment
                 
                 damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);

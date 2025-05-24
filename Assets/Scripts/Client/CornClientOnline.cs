@@ -2137,9 +2137,11 @@ namespace CraftSharp
                 bool isAmbient = (flags & 0x01) != 0;
                 bool showParticle = (flags & 0x02) != 0;
                 bool showIcon = (flags & 0x04) != 0;
+
+                var effectInstance = new MobEffectInstance(MobEffectPalette.INSTANCE.GetIdByNumId(effectId),
+                    amplifier, duration, isAmbient, showParticle, showIcon);
                 
-                EventManager.Instance.BroadcastOnUnityThread(new MobEffectUpdateEvent(
-                    effectId, amplifier, duration, isAmbient, showParticle, showIcon));
+                EventManager.Instance.BroadcastOnUnityThread(new MobEffectUpdateEvent(effectInstance));
             }
         }
         

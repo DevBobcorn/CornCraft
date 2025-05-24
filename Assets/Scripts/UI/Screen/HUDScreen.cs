@@ -103,16 +103,16 @@ namespace CraftSharp.UI
 
             mobEffectUpdateCallback = e =>
             {
-                var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
+                var effectId = e.Effect.EffectId;
                 var spriteTypeId = new ResourceLocation(
                     CornApp.RESOURCE_LOCATION_NAMESPACE, $"gui_mob_effect_{effectId.Path}");
 
-                if (e.ShowIcon)
+                if (e.Effect.ShowIcon)
                 {
-                    mobEffectsDurationTicks[effectId] = e.DurationTicks;
-                    mobEffectsCurrentTicks[effectId] = e.DurationTicks;
+                    mobEffectsDurationTicks[effectId] = e.Effect.Duration;
+                    mobEffectsCurrentTicks[effectId] = e.Effect.Duration;
                     mobEffectsPanel.AddIconSprite(effectId, spriteTypeId);
-                    mobEffectsPanel.UpdateIconText(effectId, e.Amplifier > 0 ? StringUtil.ToRomanNumbers(e.Amplifier + 1) : string.Empty);
+                    mobEffectsPanel.UpdateIconText(effectId, e.Effect.Amplifier > 0 ? StringUtil.ToRomanNumbers(e.Effect.Amplifier + 1) : string.Empty);
                 }
             };
             

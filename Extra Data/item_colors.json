@@ -1,4 +1,12 @@
 {
+    "dynamic": {
+        "potion": [
+            "minecraft:potion",
+            "minecraft:splash_potion",
+            "minecraft:lingering_potion",
+            "minecraft:tipped_arrow"
+        ]
+    },
     "fixed": {
         "minecraft:birch_leaves": [
             128,
