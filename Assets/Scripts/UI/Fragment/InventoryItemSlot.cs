@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -85,12 +86,22 @@ namespace CraftSharp.UI
                 ShowPlaceholderImage();
         }
 
+        private static readonly HashSet<ResourceLocation> POTION_ITEM_IDS = new()
+        {
+            new("potion"),
+            new("splash_potion"),
+            new("lingering_potion"),
+            new("tipped_arrow")
+        };
+        
         public static string GetItemDisplayText(ItemStack? itemStack)
         {
             if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)
             {
                 return string.Empty;
             }
+            
+            var itemId = itemStack.ItemType.ItemId;
 
             // Block items might use block translation key
             var text = getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
@@ -111,6 +122,65 @@ namespace CraftSharp.UI
                 // Make sure TMP color tag is closed
                 text = TMPConverter.MC2TMP($"{colorPrefix}{text}");
             }
+
+            if (POTION_ITEM_IDS.Contains(itemId))
+            {
+                var effectInstances = new List<MobEffectInstance>();
+                
+                // Default effects for potion
+                if (itemStack.NBT is not null && itemStack.NBT.TryGetValue("Potion", out var value))
+                {
+                    var potionId = ResourceLocation.FromString((string) value);
+                    var potion = PotionPalette.INSTANCE.GetById(potionId);
+
+                    effectInstances.AddRange(potion.Effects);
+                } 
+                
+                // Custom effects overrides
+                if (itemStack.NBT is not null && (itemStack.NBT.TryGetValue("CustomPotionEffects ", out value) ||
+                                                  itemStack.NBT.TryGetValue("custom_potion_effects", out value)))
+                {
+                    var effectList = (object[]) value;
+
+                    effectInstances.AddRange(effectList.Select(
+                        x => GetEffectInstanceFromNBT((Dictionary<string, object>) x)) );
+                }
+
+                if (effectInstances.Count > 0)
+                {
+                    var effectNames = new StringBuilder();
+                    
+                    foreach (var instance in effectInstances)
+                    {
+                        var effect = MobEffectPalette.INSTANCE.GetById(instance.EffectId);
+                        var effectName = ChatParser.TranslateString(instance.EffectId.GetTranslationKey("effect"));
+                        if (instance.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(instance.Amplifier + 1)}";
+                        var seconds = instance.Duration / 20;
+                        effectName += seconds > 6039 ? " (+∞)" : $" ({Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02})";
+
+                        effectNames.Append('\n');
+                        effectNames.Append(effect.Category switch
+                        {
+                            MobEffectCategory.Beneficial => "§9", // Blue
+                            MobEffectCategory.Harmful => "§c", // Red
+                            _ => "§7" // Grey
+                        });
+                        effectNames.Append(effectName);
+                    }
+                    text += TMPConverter.MC2TMP(effectNames.ToString());
+                    
+                    var effectModifiers = new StringBuilder();
+
+                    foreach (var instance in effectInstances)
+                    {
+                        
+                    }
+                }
+                else // No effects
+                {
+                    text += TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString("effect.none")}"); // Grey
+                }
+            }
                 
             if (itemStack.Lores is not null && itemStack.Lores.Length > 0)
                 text += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
@@ -119,13 +189,13 @@ namespace CraftSharp.UI
 
             string? getDisplayName()
             {
-                if (itemStack.NBT is not null)
+                if (POTION_ITEM_IDS.Contains(itemId))
                 {
                     // Check potion NBTs https://minecraft.wiki/w/Item_format/Before_1.20.5#Potion_Effects
-                    // Used by potions and tipped arrows
-                    if (itemStack.NBT.TryGetValue("Potion", out var value))
+                    var baseTranslationKey = itemStack.ItemType.ItemId.GetTranslationKey("item");
+                    
+                    if (itemStack.NBT is not null && itemStack.NBT.TryGetValue("Potion", out var value))
                     {
-                        var baseTranslationKey = itemStack.ItemType.ItemId.GetTranslationKey("item");
                         var potionId = ResourceLocation.FromString((string) value);
                         var potionTranslationKey = potionId.Path;
                         
@@ -137,6 +207,7 @@ namespace CraftSharp.UI
                         
                         return ChatParser.TranslateString($"{baseTranslationKey}.effect.{potionTranslationKey}");
                     }
+                    return ChatParser.TranslateString($"{baseTranslationKey}.effect.empty"); // Uncraftable potion
                 }
                 
                 var displayNameJson = itemStack.DisplayName;
@@ -145,6 +216,15 @@ namespace CraftSharp.UI
                 var formattedName = ChatParser.ParseText(displayNameJson);
                 return TMPConverter.MC2TMP($"§o{formattedName}§r"); // Make the name italic
             }
+
+            static MobEffectInstance GetEffectInstanceFromNBT(Dictionary<string, object> x)
+            {
+                var effectId = ResourceLocation.FromString((string) x["id"]);
+                int amplifier = x.TryGetValue("amplifier", out var value) ? (int) value : 0; // 0 (Level I) by default
+                int duration = x.TryGetValue("duration", out value) ? (int) value : 1; // 1 tick by default
+
+                return new MobEffectInstance(effectId, amplifier, duration, false, true, true);
+            };
         }
 
         protected override void UpdateCursorText()

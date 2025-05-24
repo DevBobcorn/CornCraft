@@ -325,7 +325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: 50cbd73f955d8f1478dbea51f3f5fa3d, type: 2}
+  m_Material: {fileID: 2100000, guid: 00d5239d3db2e7144bc573377eb33890, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -370,10 +370,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 10
-    m_Right: 10
-    m_Top: 5
-    m_Bottom: 5
+    m_Left: 15
+    m_Right: 15
+    m_Top: 10
+    m_Bottom: 10
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -396,7 +396,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 3143470686356829235}
-  borderWidth: 5
+  borderWidth: 10
   cornerRadii: {x: 0, y: 30, z: 0, w: 0}
 --- !u!1 &3615550297693520197
 GameObject:
@@ -848,7 +848,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3563352315205571409}
   m_HandleRect: {fileID: 3258922928042609678}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1085,8 +1085,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4257652920781531165}
   m_HandleRect: {fileID: 8298209400240063701}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.9999999
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

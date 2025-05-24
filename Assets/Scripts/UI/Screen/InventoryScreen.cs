@@ -903,12 +903,14 @@ namespace CraftSharp.UI
                     var effectName = ChatParser.TranslateString(effectId.GetTranslationKey("effect"));
                     if (e.Effect.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(e.Effect.Amplifier + 1)}";
                     mobEffectsNames[effectId] = effectName;
-                    mobEffectsPanel.UpdateIconText(effectId, $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
-                    
+                    mobEffectsPanel.UpdateIconText(effectId,
+                        e.Effect.Duration > 6039
+                            ? $"{effectName}\n<color=#AAAAAA>+∞</color>"
+                            : $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
+
                     // Show mob effects panel
                     rightScrollViewObject.SetActive(true);
                 }
-                
             };
             
             mobEffectRemovalCallback = e =>
