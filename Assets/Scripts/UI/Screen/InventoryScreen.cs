@@ -919,12 +919,13 @@ namespace CraftSharp.UI
                     mobEffectsPanel.UpdateIconFill(effectId, 0F); // Fill is not used for this view
                     
                     var effectName = ChatParser.TranslateString(effectId.GetTranslationKey("effect"));
-                    if (e.Effect.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(e.Effect.Amplifier + 1)}";
+                    
+                    var potencyText = ChatParser.TranslateString($"potion.potency.{e.Effect.Amplifier}");
+                    if (potencyText != string.Empty)
+                        effectName = ChatParser.TranslateString("potion.withAmplifier", new List<string> { effectName, potencyText });
+                    
                     mobEffectsNames[effectId] = effectName;
-                    mobEffectsPanel.UpdateIconText(effectId,
-                        e.Effect.Duration >= 3600
-                            ? $"{effectName}\n<color=#AAAAAA>+∞</color>"
-                            : $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
+                    mobEffectsPanel.UpdateIconText(effectId, $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
 
                     // Show mob effects panel
                     rightScrollViewObject.SetActive(true);

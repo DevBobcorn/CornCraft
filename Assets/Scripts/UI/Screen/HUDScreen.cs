@@ -112,7 +112,7 @@ namespace CraftSharp.UI
                     mobEffectsDurationTicks[effectId] = e.Effect.Duration;
                     mobEffectsCurrentTicks[effectId] = e.Effect.Duration;
                     mobEffectsPanel.AddIconSprite(effectId, spriteTypeId);
-                    mobEffectsPanel.UpdateIconText(effectId, e.Effect.Amplifier > 0 ? StringUtil.ToRomanNumbers(e.Effect.Amplifier + 1) : string.Empty);
+                    mobEffectsPanel.UpdateIconText(effectId, ChatParser.TranslateString($"potion.potency.{e.Effect.Amplifier}"));
                 }
             };
             

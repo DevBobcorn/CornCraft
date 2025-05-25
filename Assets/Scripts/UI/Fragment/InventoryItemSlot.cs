@@ -154,9 +154,17 @@ namespace CraftSharp.UI
                     {
                         var effect = MobEffectPalette.INSTANCE.GetById(instance.EffectId);
                         var effectName = ChatParser.TranslateString(instance.EffectId.GetTranslationKey("effect"));
-                        if (instance.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(instance.Amplifier + 1)}";
-                        var seconds = instance.Duration / 20;
-                        effectName += seconds > 6039 ? " (+∞)" : $" ({Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02})";
+                        
+                        var potencyText = ChatParser.TranslateString($"potion.potency.{instance.Amplifier}");
+                        if (potencyText != string.Empty)
+                            effectName = ChatParser.TranslateString("potion.withAmplifier", new List<string> { effectName, potencyText });
+                        
+                        if (!effect.Instant)
+                        {
+                            var seconds = instance.Duration / 20;
+                            effectName = ChatParser.TranslateString("potion.withDuration",
+                                new List<string> { effectName, $"{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}" });
+                        }
 
                         effectNames.Append('\n');
                         effectNames.Append(effect.Category switch
@@ -170,10 +178,38 @@ namespace CraftSharp.UI
                     text += TMPConverter.MC2TMP(effectNames.ToString());
                     
                     var effectModifiers = new StringBuilder();
+                    var hasModifiers = false;
 
                     foreach (var instance in effectInstances)
                     {
-                        
+                        var effect = MobEffectPalette.INSTANCE.GetById(instance.EffectId);
+                        if (effect.Modifiers.Length > 0)
+                        {
+                            foreach (var modifier in effect.Modifiers)
+                            {
+                                effectModifiers.Append('\n');
+                                var opTranslationKey = modifier.Value switch
+                                {
+                                    > 0 => $"attribute.modifier.plus.{(int) modifier.Operation}",
+                                    < 0 => $"attribute.modifier.take.{(int) modifier.Operation}",
+                                    _ => $"attribute.modifier.equals.{(int) modifier.Operation}"
+                                };
+                                var opValue = modifier.Operation switch
+                                {
+                                    MobAttributeModifier.Operations.AddValue => ((int)(modifier.Value * (1 + instance.Amplifier))).ToString(),
+                                    _ => ((int) (modifier.Value * (1 + instance.Amplifier) * 100)).ToString()
+                                };
+                                var opAttrName = ChatParser.TranslateString($"attribute.name.{modifier.Attribute}");
+                                effectModifiers.Append(ChatParser.TranslateString(opTranslationKey, new List<string> { opValue, opAttrName }));
+                            }
+                            
+                            hasModifiers = true;
+                        }
+                    }
+
+                    if (hasModifiers)
+                    {
+                        text += TMPConverter.MC2TMP($"\n\n{ChatParser.TranslateString("potion.whenDrank")}{effectModifiers}");
                     }
                 }
                 else // No effects
