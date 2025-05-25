@@ -300,7 +300,7 @@ namespace CraftSharp.Protocol
             {
                 if (template[i] == '%' && i + 1 < template.Length)
                 {
-                    //Using string or int with %s or %d
+                    // Using string or int with %s or %d
                     if (template[i + 1] == 's' || template[i + 1] == 'd')
                     {
                         if (data.Count > usingIdx)
@@ -311,8 +311,16 @@ namespace CraftSharp.Protocol
                             continue;
                         }
                     }
+                    
+                    // Unescape '%'
+                    if (template[i + 1] == '%')
+                    {
+                        result.Append('%');
+                        i += 1;
+                        continue;
+                    }
 
-                    //Using specified string or int with %1$s, %2$s...
+                    // Using specified string or int with %1$s, %2$s...
                     else if (char.IsDigit(template[i + 1])
                         && i + 3 < template.Length && template[i + 2] == '$'
                         && (template[i + 3] == 's' || template[i + 3] == 'd'))
