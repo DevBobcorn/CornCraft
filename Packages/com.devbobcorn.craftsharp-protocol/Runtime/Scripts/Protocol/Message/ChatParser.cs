@@ -248,7 +248,7 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Rule initialization method.
         /// </summary>
-        public static void LoadTranslationRules(string langFile)
+        public static void LoadTranslationRules(string langFile, string fallbackLangFile)
         {
             translationRules.Clear(); // Clear loaded stuffs
 
@@ -263,17 +263,33 @@ namespace CraftSharp.Protocol
             translationRules["commands.message.display.outgoing"] = "§7You whisper to %s: %s";
 
             // Load the external dictionary of translation rules or display an error message
-            if (File.Exists(langFile))
+            if (File.Exists(langFile) && File.Exists(fallbackLangFile))
             {
                 var translations = Json.ParseJson(File.ReadAllText(langFile));
+
                 foreach (var text in translations.Properties)
+                {
                     translationRules[text.Key] = text.Value.StringValue;
+                }
+
+                if (langFile != fallbackLangFile) // Load fallback language file and add missing entries
+                {
+                    var fallbackTranslations = Json.ParseJson(File.ReadAllText(fallbackLangFile));
+
+                    foreach (var text in fallbackTranslations.Properties
+                                 .Where(text => !translationRules.ContainsKey(text.Key)))
+                    {
+                        translationRules[text.Key] = text.Value.StringValue;
+                    }
+                }
 
                 if (ProtocolSettings.DebugMode)
                     Debug.Log(Translations.Get("chat.loaded"));
             }
             else // No external dictionary found.
+            {
                 Debug.Log(Translations.Get("chat.not_found", langFile));
+            }
         }
 
         private static string InterpolateString(string template, List<string> data)

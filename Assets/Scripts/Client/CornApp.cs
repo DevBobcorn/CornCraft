@@ -244,6 +244,8 @@ namespace CraftSharp
             var s = Path.DirectorySeparatorChar;
             var langFile = PathHelper.GetPackDirectoryNamed(
                     $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}{ProtocolSettings.Language}.json");
+            var fallbackLangFile = PathHelper.GetPackDirectoryNamed(
+                $"vanilla-{resourceVersion}{s}assets{s}minecraft{s}lang{s}en_us.json");
             
             // Load sprite definitions (vanilla doesn't have this)
             loadFlag.Finished = false;
@@ -265,7 +267,7 @@ namespace CraftSharp
                 ));
             }
 
-            Protocol.ChatParser.LoadTranslationRules(langFile);
+            Protocol.ChatParser.LoadTranslationRules(langFile, fallbackLangFile);
 
             // Load ProtoDef
             var protodefVersionInt = int.Parse(protodefVersion);
