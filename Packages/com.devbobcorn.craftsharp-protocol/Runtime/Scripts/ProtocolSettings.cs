@@ -33,7 +33,7 @@ namespace CraftSharp
 
         // Proxy setup
         public static bool ProxyEnabledLogin { get; set; } = false;
-        public static bool ProxyEnabledIngame { get; set; } = false;
+        public static bool ProxyEnabledInGame { get; set; } = false;
         public static ProxyHandler.Type ProxyType { get; set; }
         public static string ProxyHost { get; set; }
         public static int ProxyPort { get; set; }

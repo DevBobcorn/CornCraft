@@ -29,7 +29,7 @@ namespace CraftSharp.Proxy
         {
             try
             {
-                if (login ? ProtocolSettings.ProxyEnabledLogin : ProtocolSettings.ProxyEnabledIngame)
+                if (login ? ProtocolSettings.ProxyEnabledLogin : ProtocolSettings.ProxyEnabledInGame)
                 {
                     ProxyType innerProxytype = ProxyType.Http;
 
