@@ -68,7 +68,7 @@ namespace CraftSharp.UI
         private InventoryData activeInventoryData = null;
         private readonly Dictionary<string, short> propertyTable = new();
         private int fixedValuePropertyCount = 0;
-        private HashSet<string> updatedPropertyNames = new();
+        private readonly HashSet<string> updatedPropertyNames = new();
         
 #nullable enable
 
@@ -771,7 +771,7 @@ namespace CraftSharp.UI
                 if (propertyName == "brew_time")
                 {
                     var curBubbleProgress = propertyTable.GetValueOrDefault("bubble_progress", (short) 0);
-                    SetPseudoProperty("bubble_progress", (short) (value < 1 ? (curBubbleProgress + 1) % 40 : 0));
+                    SetPseudoProperty("bubble_progress", (short) (value > 1 ? (curBubbleProgress + 1) % 40 : 0));
                     
                     SetPseudoProperty("arrow_progress", (short) (400 - value));
                 }
@@ -922,7 +922,7 @@ namespace CraftSharp.UI
                     if (e.Effect.Amplifier > 0) effectName += $" {StringUtil.ToRomanNumbers(e.Effect.Amplifier + 1)}";
                     mobEffectsNames[effectId] = effectName;
                     mobEffectsPanel.UpdateIconText(effectId,
-                        e.Effect.Duration > 6039
+                        e.Effect.Duration >= 3600
                             ? $"{effectName}\n<color=#AAAAAA>+∞</color>"
                             : $"{effectName}\n<color=#AAAAAA>{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}</color>");
 
