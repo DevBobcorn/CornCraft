@@ -65,7 +65,7 @@
         "uuid": "648d7064-6a60-4f59-8abe-c2c23a6dd7a9",
         "attribute": "generic.attack_damage",
         "operation": "addition",
-        "value": 0.0
+        "value": 3.0
       }
     ]
   },
@@ -163,7 +163,7 @@
         "uuid": "22653b89-116e-49dc-9b6b-9971489b5be5",
         "attribute": "generic.attack_damage",
         "operation": "addition",
-        "value": 0.0
+        "value": -4.0
       }
     ]
   },
