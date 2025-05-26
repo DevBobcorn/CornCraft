@@ -1,11 +1,22 @@
+using UnityEngine;
 using CraftSharp.Proxy;
 
 namespace CraftSharp
 {
     public static class ProtocolSettings
     {
-        public static string Version { get; private set; } = "0.1.0";
-        public static string BrandInfo => $"CornCraft/{Version}";
+        private static string version = "UwU";
+        private static bool versionInitialized = false;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void InitializeVersion()
+        {
+            version = Application.version; // Application.version is only accessible from Unity thread
+            versionInitialized = true;
+        }
+        
+        public static string Version => versionInitialized ? version : "???";
+        public static string BrandInfo => $"CornCraft/{Application.version}";
 
         public static bool DisplaySystemMessages  { get; set; } =  true;
         public static bool DisplayXpBarMessages   { get; set; } =  true;
