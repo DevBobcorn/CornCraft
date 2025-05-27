@@ -59,8 +59,18 @@ namespace CraftSharp.UI
 
         public void InputCommandPrefix()
         {
-            chatInput.text = COMMAND_PREFIX;
+            chatInput.ClearCompletionOptions();
+            
+            chatInput.SetTextWithoutNotify(COMMAND_PREFIX);
             chatInput.caretPosition = COMMAND_PREFIX.Length;
+
+            // Workaround for IMEs. See https://github.com/DevBobcorn/CornCraft/issues/25
+            StartCoroutine(AutoCompletedInputField.SimpleWait(null, () =>
+            {
+                // Wait till next frame
+                chatInput.SetTextWithoutNotify(COMMAND_PREFIX);
+                chatInput.caretPosition = COMMAND_PREFIX.Length;
+            }));
         }
 
         private void RefreshCompletions(string chatInputText)
@@ -100,7 +110,14 @@ namespace CraftSharp.UI
                 client.TrySendChat(chat);
             }
             
-            chatInput.text = string.Empty;
+            chatInput.SetTextWithoutNotify(string.Empty);
+            chatInput.ClearCompletionOptions();
+
+            StartCoroutine(AutoCompletedInputField.SimpleWait(null, () =>
+            {
+                // Wait till next frame
+                chatInput.ActivateInputField();
+            }));
 
             // Remove the chat text from previous history if present
             if (sentChatHistory.Contains(chat))
@@ -122,8 +139,14 @@ namespace CraftSharp.UI
 
                 // Don't notify before we set the caret position
                 chatInput.SetTextWithoutNotify(sentChatHistory[chatIndex]);
-                chatInput.caretPosition = sentChatHistory[chatIndex].Length;
                 chatInput.ClearCompletionOptions();
+
+                chatInput.caretPosition = sentChatHistory[chatIndex].Length;
+                StartCoroutine(AutoCompletedInputField.SimpleWait(null, () =>
+                {
+                    // Wait till next frame
+                    chatInput.caretPosition = sentChatHistory[chatIndex].Length;
+                }));
 
                 RefreshCompletions(sentChatHistory[chatIndex]);
             }
@@ -138,8 +161,14 @@ namespace CraftSharp.UI
                 {
                     // Restore buffer... Don't notify before we set the caret position
                     chatInput.SetTextWithoutNotify(chatBuffer);
-                    chatInput.caretPosition = chatBuffer.Length;
                     chatInput.ClearCompletionOptions();
+                    
+                    chatInput.caretPosition = chatBuffer.Length;
+                    StartCoroutine(AutoCompletedInputField.SimpleWait(null, () =>
+                    {
+                        // Wait till next frame
+                        chatInput.caretPosition = chatBuffer.Length;
+                    }));
 
                     RefreshCompletions(chatBuffer);
                 }
@@ -147,8 +176,14 @@ namespace CraftSharp.UI
                 {
                     // Don't notify before we set the caret position
                     chatInput.SetTextWithoutNotify(sentChatHistory[chatIndex]);
-                    chatInput.caretPosition = sentChatHistory[chatIndex].Length;
                     chatInput.ClearCompletionOptions();
+                    
+                    chatInput.caretPosition = sentChatHistory[chatIndex].Length;
+                    StartCoroutine(AutoCompletedInputField.SimpleWait(null, () =>
+                    {
+                        // Wait till next frame
+                        chatInput.caretPosition = sentChatHistory[chatIndex].Length;
+                    }));
 
                     RefreshCompletions(sentChatHistory[chatIndex]);
                 }
@@ -321,7 +356,6 @@ namespace CraftSharp.UI
                 if (Keyboard.current.enterKey.wasPressedThisFrame)
                 {
                     SendChatMessage();
-                    chatInput.ActivateInputField();
                 }
 
                 if (Keyboard.current.tabKey.wasPressedThisFrame)

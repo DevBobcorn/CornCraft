@@ -848,7 +848,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3563352315205571409}
   m_HandleRect: {fileID: 3258922928042609678}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1085,7 +1085,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4257652920781531165}
   m_HandleRect: {fileID: 8298209400240063701}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1198,10 +1198,6 @@ PrefabInstance:
     - target: {fileID: 5017895952881429141, guid: a7ba785eca90b9e4da2c98f24ce8a266, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 45
-      objectReference: {fileID: 0}
-    - target: {fileID: 5282372876633310401, guid: a7ba785eca90b9e4da2c98f24ce8a266, type: 3}
-      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
-      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 5705719463277693647, guid: a7ba785eca90b9e4da2c98f24ce8a266, type: 3}
       propertyPath: m_AnchorMax.y

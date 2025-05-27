@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -28,9 +29,6 @@ namespace CraftSharp.UI
         [Serializable]
         public class ArrowKeyEvent : UnityEvent { }
 
-        [Serializable]
-        public class CaretArrowKeyEvent : UnityEvent { }
-
         /// <summary>
         /// Event delegates triggered when up arrow key is not consumed by completion selection.
         /// </summary>
@@ -42,6 +40,13 @@ namespace CraftSharp.UI
         /// </summary>
         [SerializeField]
         public ArrowKeyEvent m_OnDownArrowKeyNotConsumedByCompletionSelection = new();
+
+        public static IEnumerator SimpleWait(object waitObj, Action action)
+        {
+            yield return waitObj;
+            
+            action.Invoke();
+        }
 
         public void ClearCompletionOptions()
         {
@@ -99,6 +104,11 @@ namespace CraftSharp.UI
                     // Set input field text
                     text = basePart + completion + textBehindCursor;
                     caretPosition = (basePart + completion).Length;
+                    StartCoroutine(SimpleWait(null, () =>
+                    {
+                        // Wait till next frame
+                        caretPosition = (basePart + completion).Length;
+                    }));
 
                     completedCallback(text);
                 }
@@ -222,6 +232,11 @@ namespace CraftSharp.UI
 
                         // Set cursor position to line end
                         caretPosition = text.Length;
+                        StartCoroutine(SimpleWait(null, () =>
+                        {
+                            // Wait till next frame
+                            caretPosition = text.Length;
+                        }));
                     }
                     else // No or only one completion option is available
                     {
@@ -265,6 +280,11 @@ namespace CraftSharp.UI
 
                         // Set cursor position to line end
                         caretPosition = text.Length;
+                        StartCoroutine(SimpleWait(null, () =>
+                        {
+                            // Wait till next frame
+                            caretPosition = text.Length;
+                        }));
                     }
                     else // No or only one completion option is available
                     {
