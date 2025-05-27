@@ -135,13 +135,22 @@ namespace CraftSharp.UI
             completionSelectedIndex = 0;
         }
 
-        private void OnChatInputChange(string message)
+        private int lastTextUpdateFrameCount = -1;
+        
+        private void OnInputTextChange(string text)
         {
+            // Workaround for TMP's pasting problem. See https://discussions.unity.com/t/tmp-inputfield-insert-is-very-badly-optimized/1513475
+            if (Time.frameCount == lastTextUpdateFrameCount)
+            {
+                return;
+            }
+            lastTextUpdateFrameCount = Time.frameCount;
+            
             if (completionOptionsShown)
             {
                 if (completionSelectedIndex >= 0 && completionSelectedIndex < completionOptions.Length)
                 {
-                    if (!(confirmedPart + completionOptions[completionSelectedIndex]).Contains(message))
+                    if (!(confirmedPart + completionOptions[completionSelectedIndex]).Contains(text))
                     {
                         // User is typing something which is not in the completion list, so hide it...
                         HideCompletions();
@@ -182,7 +191,7 @@ namespace CraftSharp.UI
         {
             base.Start();
 
-            onValueChanged.AddListener(OnChatInputChange);
+            onValueChanged.AddListener(OnInputTextChange);
 
             autoCompleteCanvasGroup.alpha = 0F;
             autoCompleteCanvasGroup.interactable = false;

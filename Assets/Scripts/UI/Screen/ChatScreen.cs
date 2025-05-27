@@ -73,8 +73,17 @@ namespace CraftSharp.UI
             }));
         }
 
-        private void RefreshCompletions(string chatInputText)
+        private int lastTextUpdateFrameCount = -1;
+
+        private void OnChatInputTextChange(string chatInputText)
         {
+            // Workaround for TMP's pasting problem. See https://discussions.unity.com/t/tmp-inputfield-insert-is-very-badly-optimized/1513475
+            if (Time.frameCount == lastTextUpdateFrameCount)
+            {
+                return;
+            }
+            lastTextUpdateFrameCount = Time.frameCount;
+            
             if (chatInputText.StartsWith(COMMAND_PREFIX) && chatInputText.Length > COMMAND_PREFIX.Length)
             {
                 string requestText;
@@ -168,7 +177,8 @@ namespace CraftSharp.UI
                         chatInput.caretPosition = chatBuffer.Length;
                     }));
 
-                    RefreshCompletions(chatBuffer);
+                    // Refresh auto-completion options
+                    OnChatInputTextChange(chatBuffer);
                 }
                 else
                 {
@@ -214,7 +224,7 @@ namespace CraftSharp.UI
                     chatInput.caretPosition = clickValue.Length;
                     chatInput.ClearCompletionOptions();
                     
-                    RefreshCompletions(clickValue);
+                    OnChatInputTextChange(clickValue);
                     break;
                 case "change_page":
                     // Not supported for chat message. Only works within book screen
@@ -253,7 +263,7 @@ namespace CraftSharp.UI
                 chatMessages.Clear();
             }
 
-            chatInput.onValueChanged.AddListener(RefreshCompletions);
+            chatInput.onValueChanged.AddListener(OnChatInputTextChange);
             
             // Hide cursor text
             cursorTextPanel.gameObject.SetActive(false);
@@ -356,7 +366,7 @@ namespace CraftSharp.UI
 
                 if (Keyboard.current.tabKey.wasPressedThisFrame)
                 {
-                    chatInput.PerformCompletion(RefreshCompletions);
+                    chatInput.PerformCompletion(OnChatInputTextChange);
                 }
             }
         }
