@@ -147,8 +147,6 @@ namespace CraftSharp.UI
                     // Wait till next frame
                     chatInput.caretPosition = sentChatHistory[chatIndex].Length;
                 }));
-
-                RefreshCompletions(sentChatHistory[chatIndex]);
             }
         }
 
@@ -184,8 +182,6 @@ namespace CraftSharp.UI
                         // Wait till next frame
                         chatInput.caretPosition = sentChatHistory[chatIndex].Length;
                     }));
-
-                    RefreshCompletions(sentChatHistory[chatIndex]);
                 }
             }
         }
