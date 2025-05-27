@@ -16,7 +16,7 @@ namespace CraftSharp
         }
         
         public static string Version => versionInitialized ? version : "???";
-        public static string BrandInfo => $"CornCraft/{Application.version}";
+        public static string BrandInfo => $"CornCraft/{Version}";
 
         public static bool DisplaySystemMessages  { get; set; } =  true;
         public static bool DisplayXpBarMessages   { get; set; } =  true;
