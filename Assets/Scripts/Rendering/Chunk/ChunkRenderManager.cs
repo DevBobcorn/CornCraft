@@ -9,6 +9,7 @@ using UnityEngine.Pool;
 using UnityEngine.Profiling;
 using Unity.Mathematics;
 
+using CraftSharp.Control;
 using CraftSharp.Event;
 using CraftSharp.Resource;
 
@@ -976,6 +977,59 @@ namespace CraftSharp.Rendering
         public void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
         {
             builder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
+        }
+
+        public record BlockRaycastInfo
+        {
+            public Vector3Int CellPos;
+            public BlockLoc BlockLoc;
+            public Location ExactLoc;
+            public readonly BlockState BlockState;
+
+            public BlockRaycastInfo(Vector3Int cellPos, BlockLoc blockLoc, Location exactLoc, BlockState blockState)
+            {
+                CellPos = cellPos;
+                BlockLoc = blockLoc;
+                ExactLoc = exactLoc;
+                BlockState = blockState;
+            }
+        }
+
+        public bool RaycastBlocks(List<Vector3Int> cellPosList, Ray ray,
+            out Raycaster.AABBRaycastHit aabbInfo,
+            out BlockRaycastInfo blockInfo)
+        {
+            foreach (var cellPos in cellPosList) // Go through the list
+            {
+                var cellSpaceRay = new Ray(ray.origin - cellPos, ray.direction);
+                
+                var blockLoc = CoordConvert.Unity2MC(_worldOriginOffset, cellPos);
+                var block = GetBlock(blockLoc);
+                if (block.StateId == 0) continue; // Extra optimization for air
+                
+                var blockState = block.State;
+                if (blockState.Shape.AABBs.Length == 0) continue; // No AABB, skip
+
+                aabbInfo = Raycaster.RaycastBlockShape(cellSpaceRay, blockState.Shape);
+                if (aabbInfo.hit)
+                {
+                    // Convert from cell space back to world space
+                    aabbInfo.point += cellPos;
+                    var exactLoc = CoordConvert.Unity2MC(_worldOriginOffset, aabbInfo.point);
+                    
+                    blockInfo = new(cellPos, blockLoc, exactLoc, blockState);
+                    return true;
+                }
+            }
+            
+            aabbInfo = new Raycaster.AABBRaycastHit
+            {
+                hit = false,
+                point = Vector3.zero,
+                direction = Direction.Up
+            };
+            blockInfo = null;
+            return false;
         }
 
         private Action<BlockPredictionEvent> blockPredictionCallback;

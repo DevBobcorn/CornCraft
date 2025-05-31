@@ -45,7 +45,7 @@ namespace CraftSharp.Control
     public class InteractionUpdater : MonoBehaviour
     {
         public static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
-        private const int MAX_TARGET_DISTANCE = 8;
+        private const int MAX_INTERACTION_DISTANCE = 5;
         private const int BLOCK_INTERACTION_RADIUS = 2;
         private const float BLOCK_INTERACTION_RADIUS_SQR = BLOCK_INTERACTION_RADIUS * BLOCK_INTERACTION_RADIUS; // BLOCK_INTERACTION_RADIUS ^ 2
         private const float BLOCK_INTERACTION_RADIUS_SQR_PLUS = (BLOCK_INTERACTION_RADIUS + 0.5F) * (BLOCK_INTERACTION_RADIUS + 0.5F); // (BLOCK_INTERACTION_RADIUS + 0.5f) ^ 2
@@ -90,6 +90,9 @@ namespace CraftSharp.Control
         private ItemStack? currentItemStack;
         private ItemActionType currentActionType = ItemActionType.None;
 
+        private readonly List<Vector3Int> rayCells = new();
+        private static Ray ray;
+        
         public Direction? TargetDirection { get; private set; }
         public BlockLoc? TargetBlockLoc { get; private set; }
         public Location? TargetExactLoc { get; private set; }
@@ -97,33 +100,22 @@ namespace CraftSharp.Control
         private float instaBreakCooldown;
         private float placeBlockCooldown;
 
-        private void UpdateBlockSelection(Ray? viewRay)
+        private void UpdateBlockSelection(Ray? viewRay, float maxDistance)
         {
             if (viewRay is null || !client) return;
+            
+            ray = viewRay.Value;
+            Raycaster.RaycastGridCells(viewRay.Value.origin, viewRay.Value.direction, maxDistance, rayCells);
 
             if (placeBlockCooldown >= 0F) // Ongoing block placement cooldown
             {
                 // Don't update block selection block location
                 
             }
-            else if (Physics.Raycast(viewRay.Value.origin, viewRay.Value.direction, out RaycastHit viewHit, MAX_TARGET_DISTANCE, blockSelectionLayer, QueryTriggerInteraction.Collide))
+            else if (client.ChunkRenderManager.RaycastBlocks(rayCells, ray, out var aabbInfo, out var blockInfo))
             {
-                Vector3 normal = viewHit.normal.normalized;
-                TargetDirection = GetDirectionFromNormal(normal);
-
-                Vector3 offseted = PointOnCubeSurface(viewHit.point)
-                    ? viewHit.point - normal * 0.5f
-                    : viewHit.point;
-
-                Vector3 unityBlockPos = new(
-                    Mathf.FloorToInt(offseted.x),
-                    Mathf.FloorToInt(offseted.y),
-                    Mathf.FloorToInt(offseted.z)
-                );
-
-                TargetExactLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, viewHit.point);
-                var newBlockLoc = CoordConvert.Unity2MC(client.WorldOriginOffset, unityBlockPos).GetBlockLoc();
-                var block = client.ChunkRenderManager.GetBlock(newBlockLoc);
+                TargetDirection = aabbInfo.direction;
+                TargetExactLoc = blockInfo.ExactLoc;
 
                 // Create selection box if not present
                 if (!blockSelectionBox)
@@ -133,16 +125,16 @@ namespace CraftSharp.Control
                 }
 
                 // Update target location if changed
-                if (TargetBlockLoc != newBlockLoc)
+                if (TargetBlockLoc != blockInfo.BlockLoc)
                 {
-                    TargetBlockLoc = newBlockLoc;
-                    blockSelectionBox.transform.position = unityBlockPos;
+                    TargetBlockLoc = blockInfo.BlockLoc;
+                    blockSelectionBox.transform.position = blockInfo.CellPos;
 
-                    EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(newBlockLoc));
+                    EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(blockInfo.BlockLoc));
                 }
 
                 // Update shape even if target location is not changed (the block itself may change)
-                blockSelectionBox.UpdateShape(block.State.Shape);
+                blockSelectionBox.UpdateShape(blockInfo.BlockState.Shape);
             }
             else
             {
@@ -160,35 +152,6 @@ namespace CraftSharp.Control
                 {
                     blockSelectionBox.ClearShape();
                 }
-            }
-
-            return;
-
-            static Direction GetDirectionFromNormal(Vector3 normal)
-            {
-                float absX = Mathf.Abs(normal.x);
-                float absY = Mathf.Abs(normal.y);
-                float absZ = Mathf.Abs(normal.z);
-
-                if (absX >= absY && absX >= absZ)
-                    return normal.x > 0 ? Direction.South : Direction.North;
-                if (absY >= absX && absY >= absZ)
-                    return normal.y > 0 ? Direction.Up : Direction.Down;
-
-                return normal.z > 0 ? Direction.East : Direction.West;
-            }
-
-            static bool PointOnCubeSurface(Vector3 point)
-            {
-                Vector3 delta = new(
-                    point.x - Mathf.Floor(point.x),
-                    point.y - Mathf.Floor(point.y),
-                    point.z - Mathf.Floor(point.z)
-                );
-
-                return delta.x is < 0.01f or > 0.99f ||
-                       delta.y is < 0.01f or > 0.99f ||
-                       delta.z is < 0.01f or > 0.99f;
             }
         }
 
@@ -870,7 +833,7 @@ namespace CraftSharp.Control
 
             if (cameraController && cameraController.IsAimingOrLocked)
             {
-                UpdateBlockSelection(cameraController.GetPointerRay());
+                UpdateBlockSelection(cameraController.GetPointerRay(), MAX_INTERACTION_DISTANCE);
 
                 if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null &&
                     playerController && client)

@@ -7,7 +7,11 @@ namespace CraftSharp.Control
 {
     public class BlockSelectionBox : MonoBehaviour
     {
-        public const int MAX_AABB_COUNT = 64;
+        private static readonly int DESTROY_STAGE = Shader.PropertyToID("_DestroyStage");
+        private static readonly int DESTROY_TEXTURE_ARRAY = Shader.PropertyToID("_DestroyTextureArray");
+        private static readonly int LINE_LENGTH = Shader.PropertyToID("_Line_Length");
+        private static readonly int BILLBOARD_AXIS = Shader.PropertyToID("_BillboardAxis");
+        private const int MAX_AABB_COUNT = 64;
 
         [SerializeField] private Material lineMaterial;
         [SerializeField] private Mesh lineMesh;
@@ -29,8 +33,8 @@ namespace CraftSharp.Control
         private static MaterialPropertyBlock GetLengthPropertyBlock(int axis, float length)
         {
             var propBlock = new MaterialPropertyBlock();
-            propBlock.SetFloat("_Line_Length", length);
-            propBlock.SetInteger("_BillboardAxis", axis);
+            propBlock.SetFloat(LINE_LENGTH, length);
+            propBlock.SetInteger(BILLBOARD_AXIS, axis);
 
             return propBlock;
         }
@@ -46,10 +50,10 @@ namespace CraftSharp.Control
 
             if (destroyTextureArray) // If destroy texture array is present
             {
-                propBlock.SetTexture("_DestroyTextureArray", destroyTextureArray);
+                propBlock.SetTexture(DESTROY_TEXTURE_ARRAY, destroyTextureArray);
             }
             // Add an extra offset to ensure reading at the right depth
-            propBlock.SetFloat("_DestroyStage", destroyStage + 0.1F);
+            propBlock.SetFloat(DESTROY_STAGE, destroyStage + 0.1F);
 
             return propBlock;
         }

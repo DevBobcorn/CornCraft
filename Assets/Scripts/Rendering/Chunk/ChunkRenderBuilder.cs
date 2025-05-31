@@ -18,8 +18,8 @@ namespace CraftSharp.Rendering
         private static readonly int WATER_LAYER_INDEX = ChunkRender.TypeIndex(RenderType.WATER);
         private static readonly int LAVA_LAYER_INDEX  = ChunkRender.TypeIndex(RenderType.SOLID);
 
-        private const int MOVEMENT_RADIUS = 5;
-        public const float MOVEMENT_RADIUS_SQR = MOVEMENT_RADIUS * MOVEMENT_RADIUS;
+        private const int MOVEMENT_RADIUS = 3;
+        public const float MOVEMENT_RADIUS_SQR_MINI = (MOVEMENT_RADIUS - 0.5F) * (MOVEMENT_RADIUS - 0.5F);
         public const float MOVEMENT_RADIUS_SQR_PLUS = (MOVEMENT_RADIUS + 0.5F) * (MOVEMENT_RADIUS + 0.5F);
         
         private static readonly List<BlockLoc> validOffsets = ComputeOffsets();
@@ -30,7 +30,7 @@ namespace CraftSharp.Rendering
             for (int x = -MOVEMENT_RADIUS; x <= MOVEMENT_RADIUS; x++)
                 for (int y = -MOVEMENT_RADIUS; y <= MOVEMENT_RADIUS; y++)
                     for (int z = -MOVEMENT_RADIUS; z <= MOVEMENT_RADIUS; z++)
-                        if (x * x + y * y + z * z <= MOVEMENT_RADIUS_SQR)
+                        if (x * x + y * y + z * z <= MOVEMENT_RADIUS_SQR_MINI)
                             offsets.Add(new BlockLoc(x, y, z));
             return offsets;
         }
