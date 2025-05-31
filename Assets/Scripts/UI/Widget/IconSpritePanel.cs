@@ -72,5 +72,14 @@ namespace CraftSharp.UI
                 iconSprites.Remove(iconId);
             }
         }
+        
+        public void DestroyAllChildren()
+        {
+            foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
+            }
+            iconSprites.Clear();
+        }
     }
 }

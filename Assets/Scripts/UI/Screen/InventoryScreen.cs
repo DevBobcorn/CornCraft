@@ -33,9 +33,12 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject inventoryLabelPrefab;
         [SerializeField] private GameObject inventoryButtonPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
+        [SerializeField] private GameObject leftScrollViewObject;
+        [SerializeField] private RectTransform listPanel;
         [SerializeField] private GameObject rightScrollViewObject;
-        [SerializeField] private RectTransform listPanel, workPanel, backpackPanel, hotbarPanel;
         [SerializeField] private IconSpritePanel mobEffectsPanel;
+        [SerializeField] private VerticalLayoutGroup inventoryPanelLayoutGroup;
+        [SerializeField] private RectTransform inventoryPanel, workPanel, backpackPanel, hotbarPanel;
         [SerializeField] private RectTransform cursorRect;
         [SerializeField] private InventoryItemSlot cursorSlot;
         [SerializeField] private RectTransform cursorTextPanel;
@@ -102,25 +105,38 @@ namespace CraftSharp.UI
             inventoryTitleText.text = inventoryData.Title;
             Debug.Log($"Set inventory: [{activeInventoryId}] {inventoryData.Title}");
             
+            // Update work panel height
+            workPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
+                inventoryType.WorkPanelHeight * inventorySlotSize);
+
+            var totalHeight = (inventoryType.WorkPanelHeight + 4) * inventorySlotSize +
+                2 * inventoryPanelLayoutGroup.spacing +
+                inventoryPanelLayoutGroup.padding.top + inventoryPanelLayoutGroup.padding.bottom;
+            
+            // Update total height of all columns
+            inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, totalHeight);
+            
             if (inventoryType.ListPanelWidth > 0)
             {
                 // TODO: Initialize trade list
                 Debug.Log("Initialize trade list");
+
+                var leftRect = leftScrollViewObject.GetComponent<RectTransform>();
                 
                 // Show list panel
-                listPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+                leftRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                     inventoryType.ListPanelWidth * inventorySlotSize);
-                listPanel.gameObject.SetActive(true);
+                leftRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, totalHeight);
+                leftScrollViewObject.SetActive(true);
             }
             else
             {
                 // Hide list panel
-                listPanel.gameObject.SetActive(false);
+                leftScrollViewObject.SetActive(false);
             }
             
-            // Update work panel height
-            workPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
-                inventoryType.WorkPanelHeight * inventorySlotSize);
+            var rightRect = rightScrollViewObject.GetComponent<RectTransform>();
+            rightRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, totalHeight);
             
             // Populate work panel controls, except slots
             CreateLayout(workPanel, inventoryType.WorkPanelLayout, false);
@@ -936,6 +952,8 @@ namespace CraftSharp.UI
             {
                 var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
                 
+                Debug.Log($"Remove mob effect {effectId}");
+                
                 mobEffectsPanel.RemoveIconSprite(effectId);
                 mobEffectsCurrentTicks.Remove(effectId);
                 mobEffectsNames.Remove(effectId);
@@ -943,6 +961,9 @@ namespace CraftSharp.UI
                 if (mobEffectsCurrentTicks.Count == 0)
                 {
                     rightScrollViewObject.SetActive(false);
+                    // Setting the parent inactive will disable the fade out animator, and some items might already been
+                    // unregistered, preventing remaining items to be removed, so we need to destroy these manually.
+                    mobEffectsPanel.DestroyAllChildren();
                 }
             };
             
