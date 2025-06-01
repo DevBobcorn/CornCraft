@@ -147,7 +147,7 @@ namespace CraftSharp.Rendering
         /// See https://forum.unity.com/threads/editor-and-destroyimmediate.1261745/
         /// </summary>
         /// <param name="targetGameObject"></param>
-        private static void SafeDestroy(GameObject? targetGameObject)
+        private static void SafeDestroy(GameObject targetGameObject)
         {
             if (targetGameObject)
             {

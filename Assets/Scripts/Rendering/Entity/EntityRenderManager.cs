@@ -8,24 +8,24 @@ namespace CraftSharp.Rendering
     public class EntityRenderManager : MonoBehaviour
     {
         #region GameObject Prefabs for each entity type
-        [SerializeField] private GameObject? defaultPrefab;
+        [SerializeField] private GameObject defaultPrefab;
 
-        [SerializeField] private GameObject? serverPlayerPrefab;
+        [SerializeField] private GameObject serverPlayerPrefab;
 
-        [SerializeField] private GameObject? skeletonPrefab;
-        [SerializeField] private GameObject? witherSkeletonPrefab;
-        [SerializeField] private GameObject? strayPrefab;
-        [SerializeField] private GameObject? zombiePrefab;
-        [SerializeField] private GameObject? huskPrefab;
-        [SerializeField] private GameObject? drownedPrefab;
-        [SerializeField] private GameObject? creeperPrefab;
-        [SerializeField] private GameObject? pigPrefab;
-        [SerializeField] private GameObject? cowPrefab;
-        [SerializeField] private GameObject? mooshroomPrefab;
-        [SerializeField] private GameObject? sheepPrefab;
-        [SerializeField] private GameObject? itemPrefab;
-        [SerializeField] private GameObject? arrowPrefab;
-        [SerializeField] private GameObject? experienceOrbPrefab;
+        [SerializeField] private GameObject skeletonPrefab;
+        [SerializeField] private GameObject witherSkeletonPrefab;
+        [SerializeField] private GameObject strayPrefab;
+        [SerializeField] private GameObject zombiePrefab;
+        [SerializeField] private GameObject huskPrefab;
+        [SerializeField] private GameObject drownedPrefab;
+        [SerializeField] private GameObject creeperPrefab;
+        [SerializeField] private GameObject pigPrefab;
+        [SerializeField] private GameObject cowPrefab;
+        [SerializeField] private GameObject mooshroomPrefab;
+        [SerializeField] private GameObject sheepPrefab;
+        [SerializeField] private GameObject itemPrefab;
+        [SerializeField] private GameObject arrowPrefab;
+        [SerializeField] private GameObject experienceOrbPrefab;
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> entityPrefabs = new();
