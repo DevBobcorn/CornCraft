@@ -327,14 +327,15 @@ namespace CraftSharp.UI
                     }
                     else
                     {
+                        int minSupported = ProtocolHandler.GetMinSupported();
                         int maxSupported = ProtocolHandler.GetMaxSupported();
 
-                        if (protocolVersion > maxSupported)
+                        if (protocolVersion > maxSupported || protocolVersion < minSupported)
                         {
                             // This version is not directly supported, yet might
                             // still be joinable if ViaBackwards' installed
 
-                            protocolVersion = maxSupported; // Try our luck
+                            protocolVersion = protocolVersion > maxSupported ? maxSupported : minSupported; // Try our luck
 
                             // Authentication completed, hide the panel...
                             HideLoginPanel();
@@ -342,8 +343,8 @@ namespace CraftSharp.UI
                             loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
                                     protocolVersion, null, accountLower);
                             // Display a notification
-                            var maxMcVersion = ProtocolHandler.ProtocolVersion2MCVer(maxSupported);
-                            CornApp.Notify($"Using supported version {maxMcVersion} (protocol v{protocolVersion})", Notification.Type.Warning);
+                            var altMcVersion = ProtocolHandler.ProtocolVersion2MCVer(protocolVersion);
+                            CornApp.Notify($"Using alternative version {altMcVersion} (protocol v{protocolVersion})", Notification.Type.Warning);
                             // No need to yield return this coroutine because it's the last step here
                             StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
                         }
