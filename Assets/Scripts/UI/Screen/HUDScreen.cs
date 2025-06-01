@@ -321,7 +321,7 @@ namespace CraftSharp.UI
             var mouseScroll = Mouse.current.scroll.value.y;
             if (mouseScroll != 0F && !Keyboard.current.shiftKey.IsPressed())
             {
-                if (interactionPanel && interactionPanel.ShouldConsumeMouseScroll && !Keyboard.current.altKey.isPressed) // Interaction option selection
+                if (interactionPanel && interactionPanel.ShouldConsumeMouseScroll && Keyboard.current.altKey.isPressed) // Interaction option selection
                 {
                     if (mouseScroll < 0F)
                         interactionPanel.SelectNextOption();
