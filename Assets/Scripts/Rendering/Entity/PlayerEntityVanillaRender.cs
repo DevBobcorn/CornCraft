@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +5,7 @@ namespace CraftSharp.Rendering
 {
     public class PlayerEntityVanillaRender : BipedEntityRender
     {
-        [SerializeField] private Transform? leftArm, rightArm;
+        [SerializeField] private Transform leftArm, rightArm;
         [SerializeField] private GameObject[] slimModelObjects = { };
         [SerializeField] private GameObject[] regularModelObjects = { };
 
@@ -50,7 +49,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        protected override Dictionary<string, string>? GetControlVariables()
+        protected override Dictionary<string, string> GetControlVariables()
         {
             return new Dictionary<string, string>
             {

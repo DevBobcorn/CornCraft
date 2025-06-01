@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 
 using CraftSharp.Control;
@@ -8,7 +7,6 @@ namespace CraftSharp.Rendering
     public abstract class AnimatorEntityRender : EntityRender
     {
         protected static readonly int MIRRORED_HASH = Animator.StringToHash("Mirrored");
-        protected static readonly int JUMP_HASH = Animator.StringToHash("Jump");
 
         public const string SPRINT_NAME = "Sprint";
         public const string RUN_NAME = "Run";
@@ -23,8 +21,8 @@ namespace CraftSharp.Rendering
         protected static readonly int VERTICAL_SPEED_HASH = Animator.StringToHash("VerticalSpeed");
         protected static readonly int HORIZONTAL_SPEED_HASH = Animator.StringToHash("HorizontalSpeed");
 
-        protected Animator? entityAnimator;
-        protected AnimatorOverrideController? animatorOverrideController;
+        protected Animator entityAnimator;
+        protected AnimatorOverrideController animatorOverrideController;
 
         public static GameObject CreateFromModel(GameObject visualPrefab)
         {
@@ -59,18 +57,18 @@ namespace CraftSharp.Rendering
 
         public virtual void UpdateAnimator(PlayerStatus info) { }
 
-        protected virtual void RandomizeMirroredFlag()
+        protected void RandomizeMirroredFlag()
         {
             var mirrored = Time.frameCount % 2 == 0;
             entityAnimator!.SetBool(MIRRORED_HASH, mirrored);
         }
 
-        protected virtual void CrossFadeState(string stateName, float time, int layer, float timeOffset)
+        protected void CrossFadeState(string stateName, float time, int layer, float timeOffset)
         {
             entityAnimator!.CrossFade(stateName, time, layer, timeOffset);
         }
 
-        protected virtual void OverrideState(AnimationClip dummyClip, AnimationClip animationClip)
+        protected void OverrideState(AnimationClip dummyClip, AnimationClip animationClip)
         {
             // Apply animation clip override
             animatorOverrideController![dummyClip] = animationClip;

@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
@@ -11,20 +10,20 @@ namespace CraftSharp.Rendering
     [RequireComponent(typeof (Animator))]
     public class PlayerRiggedRenderWidget : MonoBehaviour
     {
-        private Transform? _spineRef;
+        private Transform _spineRef;
 
         public Vector3 m_VisualOffset = new(0F, 0.1F, 0F);
-        public Vector3 m_CameraRefPos = new(0F, 1.2F, 0F);
         public Vector2 m_ClimbOverOffset = new(0F, 0F);
+        public Transform m_AimingRef;
 
         public bool m_UseAuxOffhandTransform = false;
 
-        private Transform? _mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
-        private Transform? _offHandSlot; // A slot fixed to offHandRef transform (as a child)
-        private Transform? _itemMountPivot, _itemMountSlot;
-        private PlayerController? _player;
-        private PlayerActionItem? _currentItem;
-        private Animator? _playerAnimator;
+        private Transform _mainHandSlot; // A slot fixed to mainHandRef transform (as a child)
+        private Transform _offHandSlot; // A slot fixed to offHandRef transform (as a child)
+        private Transform _itemMountPivot, _itemMountSlot;
+        private PlayerController _player;
+        private PlayerActionItem _currentItem;
+        private Animator _playerAnimator;
 
         public void SetRefTransforms(Transform mainHandRef, Transform offHandRef, Transform spineRef)
         {
@@ -70,7 +69,7 @@ namespace CraftSharp.Rendering
             _itemMountSlot.SetParent(_itemMountPivot);
         }
 
-        private void CreateActionItem(ItemStack? itemStack, ItemActionType actionType, PlayerSkillItemConfig psi)
+        private void CreateActionItem(ItemStack itemStack, ItemActionType actionType, PlayerSkillItemConfig psi)
         {
             DestroyActionItem();
 
@@ -190,11 +189,13 @@ namespace CraftSharp.Rendering
         // Called by animator event
         public void FootL() { }
 
+        // Called by animator event
         public void FootR() { }
 
+        // Called by animator event
         public void Hit() { }
 
-        public void UpdateActiveItem(ItemStack? itemStack, ItemActionType actionType, PlayerSkillItemConfig? psi = null)
+        public void UpdateActiveItem(ItemStack itemStack, ItemActionType actionType, PlayerSkillItemConfig psi = null)
         {
             if (actionType == ItemActionType.None)
             {
@@ -295,7 +296,7 @@ namespace CraftSharp.Rendering
             _itemMountPivot.localEulerAngles = new Vector3(-_spineRef.localEulerAngles.x, 0F, 0F);
         }
 
-        void OnAnimatorMove()
+        private void OnAnimatorMove()
         {
             if (_player && _player.UseRootMotion)
             {

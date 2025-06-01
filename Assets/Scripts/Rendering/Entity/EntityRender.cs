@@ -1,9 +1,9 @@
-#nullable enable
-using CraftSharp.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
+using CraftSharp.Protocol;
 
 namespace CraftSharp.Rendering
 {
@@ -20,6 +20,8 @@ namespace CraftSharp.Rendering
         /// UUID of the entity if it is a player.
         /// </summary>
         public Guid UUID;
+        
+        #nullable enable
 
         /// <summary>
         /// Nickname of the entity if it is a player.
@@ -41,12 +43,10 @@ namespace CraftSharp.Rendering
         /// </summary>
         public string? CustomName;
 
-        private EntityType type = EntityType.DUMMY_ENTITY_TYPE;
-
         /// <summary>
         /// Entity type
         /// </summary>
-        public EntityType Type => type;
+        public EntityType Type { get; private set; } = EntityType.DUMMY_ENTITY_TYPE;
 
         /// <summary>
         /// Entity position
@@ -172,7 +172,7 @@ namespace CraftSharp.Rendering
             // Update own materials
             if (TryGetComponent(out EntityMaterialAssigner materialControl))
             {
-                materialControl.UpdateMaterials(type, null, updatedMeta.Keys.ToHashSet(), GetControlVariables(), Metadata);
+                materialControl.UpdateMaterials(Type, null, updatedMeta.Keys.ToHashSet(), GetControlVariables(), Metadata);
             }
         }
 
@@ -186,13 +186,15 @@ namespace CraftSharp.Rendering
         /// </summary>
         protected Vector3 _visualMovementVelocity = Vector3.zero;
 
+        #nullable disable
+
         /// <summary>
         /// Whether the current entity has turned into ragdoll form
         /// </summary>
         protected bool _turnedIntoRagdoll = false;
 
-        [SerializeField] protected Transform? _infoAnchor;
-        [SerializeField] protected Transform? _visualTransform;
+        [SerializeField] protected Transform _infoAnchor;
+        [SerializeField] protected Transform _visualTransform;
 
         /// <summary>
         /// Anchor transform for locating floating labels, health bars, etc.
@@ -212,8 +214,8 @@ namespace CraftSharp.Rendering
             protected set => _visualTransform = value;
         }
 
-        [SerializeField] protected GameObject? ragdollPrefab;
-        public GameObject? FloatingInfoPrefab;
+        [SerializeField] protected GameObject ragdollPrefab;
+        public GameObject FloatingInfoPrefab;
 
         /// <summary>
         /// A number made from the entity's numeral id, used in animations to prevent
@@ -235,7 +237,7 @@ namespace CraftSharp.Rendering
             NumeralId = source.Id;
             UUID = source.UUID;
             Name = source.Name;
-            type = source.Type;
+            Type = source.Type;
 
             Position.Value = CoordConvert.MC2Unity(originOffset, source.Location);
             lastTickPosition = Position.Value;
@@ -294,6 +296,8 @@ namespace CraftSharp.Rendering
 
             return Name ?? ChatParser.TranslateString(Type.TypeId.GetTranslationKey("entity"));
         }
+        
+        #nullable enable
 
         /// <summary>
         /// Get variable table for render control (pose, texture, etc.)
@@ -302,6 +306,8 @@ namespace CraftSharp.Rendering
         {
             return null;
         }
+        
+        #nullable disable
 
         /// <summary>
         /// Finalize this entity render
@@ -397,10 +403,16 @@ namespace CraftSharp.Rendering
 
         public virtual Transform SetupCameraRef()
         {
-            // TODO: Get pos by entity size
-            var pos = new Vector3(0F, 1.6F, 0F);
+            var viewPos = transform.InverseTransformPoint(GetAimingRef().position);
+            var pos = new Vector3(0F, viewPos.y, 0F);
+            Debug.Log($"View height: {viewPos.y}");
 
             return SetupCameraRef(pos);
+        }
+        
+        public virtual Transform GetAimingRef()
+        {
+            return transform;
         }
 
         protected Transform SetupCameraRef(Vector3 pos)
@@ -461,7 +473,7 @@ namespace CraftSharp.Rendering
                     // Initialize ragdoll materials using own metadata
                     if (ragdoll.gameObject.TryGetComponent(out EntityMaterialAssigner materialControl))
                     {
-                        materialControl.InitializeMaterials(type, GetControlVariables(), Metadata, (matManager, texId, mat) =>
+                        materialControl.InitializeMaterials(Type, GetControlVariables(), Metadata, (matManager, texId, mat) =>
                         {
                             HandleRagdollMaterialUpdate(materialControl, matManager, texId, mat);
                         });

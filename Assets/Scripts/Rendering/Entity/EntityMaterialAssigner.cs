@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,15 +10,19 @@ namespace CraftSharp.Rendering
     public class EntityMaterialEntry
     {
         [SerializeField] public EntityRenderType RenderType;
-        [SerializeField] private Material? m_DefaultMaterial = null;
+        [SerializeField] private Material m_DefaultMaterial = null;
         public Material DefaultMaterial => m_DefaultMaterial!;
         [SerializeField] public string TextureId = string.Empty;
         [SerializeField] private Renderer[] m_Renderers;
         public Renderer[] Renderers => m_Renderers;
+        
+        #nullable enable
 
         public bool DynamicTextureId { get; private set; } = false;
         public List<(string, string)>? TextureIdVariables { get; private set; }
         public HashSet<int>? DependentMetaSlots { get; private set; }
+        
+        #nullable disable
 
         public EntityMaterialEntry(EntityRenderType renderType, Material material, Renderer[] renderers)
         {
@@ -78,15 +81,17 @@ namespace CraftSharp.Rendering
                     }
 
                     var metaSlot = entityType.MetaSlotByName[metaEntry.Name];
-                    DependentMetaSlots.Add(metaSlot);
+                    DependentMetaSlots!.Add(metaSlot);
                     //Debug.Log($"{TextureId} depends on meta [{metaSlot}] {metaEntry.Name}");
                 }
+                /*
                 else
                 {
-                    //Debug.Log($"{TextureId} depends on variable named {variableName}");
+                    Debug.Log($"{TextureId} depends on variable named {variableName}");
                 }
+                */
 
-                TextureIdVariables.Add((variableName, defaultValue));
+                TextureIdVariables!.Add((variableName, defaultValue));
                 
                 return $"{{{TextureIdVariables.Count - 1}}}";
             }
@@ -118,8 +123,10 @@ namespace CraftSharp.Rendering
             m_MaterialEntries = entries.Select(x => new EntityMaterialEntry(
                     EntityRenderType.SOLID, x.Key, x.Value.ToArray() ) ).ToArray();
         }
+        
+        #nullable enable
 
-        private string GetVariableValue(EntityType entityType, string variableName, string defaultValue, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
+        private static string GetVariableValue(EntityType entityType, string variableName, string defaultValue, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata)
         {
             if (variableName.StartsWith("meta@"))
             {
@@ -149,19 +156,17 @@ namespace CraftSharp.Rendering
                 // Return the value directly
                 return metaValue.ToString();
             }
-            else
+
+            // Look in variable table
+            var value = variables?.GetValueOrDefault(variableName, defaultValue);
+
+            if (value is null)
             {
-                // Look in variable table
-                var value = variables?.GetValueOrDefault(variableName, defaultValue);
-
-                if (value is null)
-                {
-                    Debug.LogWarning($"Failed to get variable {variableName} for {entityType}!");
-                    return defaultValue;
-                }
-
-                return value;
+                Debug.LogWarning($"Failed to get variable {variableName} for {entityType}!");
+                return defaultValue;
             }
+
+            return value;
         }
 
         private static bool IsTextureIdAffected(EntityMaterialEntry entry, HashSet<string>? updatedVars, HashSet<int>? updatedMeta)

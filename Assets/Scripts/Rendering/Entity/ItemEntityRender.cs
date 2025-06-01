@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,8 +5,10 @@ namespace CraftSharp.Rendering
 {
     public class ItemEntityRender : EntityRender
     {
-        public MeshFilter? itemMeshFilter;
-        public MeshRenderer? itemMeshRenderer;
+        public MeshFilter itemMeshFilter;
+        public MeshRenderer itemMeshRenderer;
+        
+        #nullable enable
 
         private ItemStack? EntityItemStack;
 

@@ -1,11 +1,10 @@
-#nullable enable
 using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
     public class SkeletonEntityRender : BipedEntityRender
     {
-        public Transform? leftArm, rightArm;
+        public Transform leftArm, rightArm;
 
         public override void UpdateAnimation(float tickMilSec)
         {

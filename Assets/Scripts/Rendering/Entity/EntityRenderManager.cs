@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -29,9 +28,12 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject? experienceOrbPrefab;
         #endregion
 
-        private readonly Dictionary<ResourceLocation, GameObject?> entityPrefabs = new();
-        public Dictionary<ResourceLocation, GameObject?> GetAllPrefabs() => entityPrefabs;
-        private GameObject? GetPrefabForType(ResourceLocation type) => entityPrefabs.GetValueOrDefault(type, defaultPrefab);
+        private readonly Dictionary<ResourceLocation, GameObject> entityPrefabs = new();
+
+        private GameObject GetPrefabForType(ResourceLocation type)
+        {
+            return entityPrefabs.GetValueOrDefault(type, defaultPrefab);
+        }
         
         /// <summary>
         /// All entity renders in the current world
@@ -68,7 +70,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="entityId">Numeral id of the entity</param>
         /// <returns>Entity render with the id. Null if not present</returns>
-        public EntityRender? GetEntityRender(int entityId)
+        public EntityRender GetEntityRender(int entityId)
         {
             return entityRenders.GetValueOrDefault(entityId);
         }

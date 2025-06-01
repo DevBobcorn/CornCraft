@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,13 +14,11 @@ namespace CraftSharp.Rendering
 {
     public class BedrockModelEntityRender : EntityRender
     {
+        #nullable enable
+        
         private EntityRenderDefinition? entityDefinition = null;
 
         private readonly Dictionary<string, GameObject> boneObjects = new();
-
-        public string[] MaterialNames = { };
-        private readonly Dictionary<string, string> materials = new();
-        private Material? currentMaterial = null;
 
         public string[] TextureNames = { };
         private readonly Dictionary<string, Texture2D> textures = new();
@@ -34,6 +31,10 @@ namespace CraftSharp.Rendering
 
         private readonly MoScope scope = new(new MoLangRuntime());
         private readonly MoLangEnvironment env = new();
+        
+        #nullable disable
+
+        private Material currentMaterial = null;
 
         private static string GetImagePathFromFileName(string name)
         {
@@ -42,13 +43,7 @@ namespace CraftSharp.Rendering
             {
                 return $"{name}.png";
             }
-            else if (File.Exists($"{name}.tga"))
-            {
-                return $"{name}.tga";
-            }
-
-            // Nothing found
-            return name;
+            return File.Exists($"{name}.tga") ? $"{name}.tga" : name;
         }
 
         public void SetDefinitionData(EntityRenderDefinition def)
@@ -66,7 +61,7 @@ namespace CraftSharp.Rendering
 
             if (entityDefinition.GeometryNames.Count == 0)
             {
-                Debug.LogWarning($"Entity definition has no geometry!");
+                Debug.LogWarning("Entity definition has no geometry!");
                 return;
             }
 
@@ -98,17 +93,19 @@ namespace CraftSharp.Rendering
                 texture.filterMode = FilterMode.Point;
                 //Debug.Log($"Loaded texture from {fileName} ({texture.width}x{texture.height})");
 
-                if (geometry.TextureWidth != texture.width && geometry.TextureHeight != texture.height)
+                if (geometry!.TextureWidth != texture.width && geometry.TextureHeight != texture.height)
                 {
                     if (geometry.TextureWidth == 0 && geometry.TextureHeight == 0) // Not specified, just use the size we have
                     {
                         geometry.TextureWidth = texture.width;
                         geometry.TextureHeight = texture.height;
                     }
+                    /*
                     else // The sizes doesn't match
                     {
-                        //Debug.LogWarning($"Specified texture size({geometry.TextureWidth}x{geometry.TextureHeight}) doesn't match image file {tex.Value} ({texture.width}x{texture.height})!");
+                        Debug.LogWarning($"Specified texture size({geometry.TextureWidth}x{geometry.TextureHeight}) doesn't match image file {tex.Value} ({texture.width}x{texture.height})!");
                     }
+                    */
                 }
             
                 textures.Add(tex.Key, texture);
@@ -123,7 +120,7 @@ namespace CraftSharp.Rendering
             currentMaterial = new Material(materialTemplate) { mainTexture = textures.First().Value };
 
             // Build mesh for each bone
-            foreach (var bone in geometry.Bones.Values)
+            foreach (var bone in geometry!.Bones.Values)
             {
                 var boneObj = new GameObject($"Bone [{bone.Name}]");
                 boneObj.transform.SetParent(transform, false);
@@ -197,7 +194,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public EntityAnimation? SetAnimation(int index, float initialTime)
+        public EntityAnimation SetAnimation(int index, float initialTime)
         {
             if (index >= 0 && index < animations.Length)
             {

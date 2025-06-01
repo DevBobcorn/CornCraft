@@ -26,9 +26,9 @@ namespace CraftSharp.Rendering
 
             // Subscribe player controller events
             var playerController = GetComponentInParent<PlayerController>();
-            playerController.OnCrossFadeState += this.CrossFadeState;
-            playerController.OnOverrideState += this.OverrideState;
-            playerController.OnRandomizeMirroredFlag += this.RandomizeMirroredFlag;
+            playerController.OnCrossFadeState += CrossFadeState;
+            playerController.OnOverrideState += OverrideState;
+            playerController.OnRandomizeMirroredFlag += RandomizeMirroredFlag;
 
             var visualObj = _visualTransform!.gameObject;
 
@@ -49,16 +49,9 @@ namespace CraftSharp.Rendering
             playerRenderWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
         }
 
-        public override Transform SetupCameraRef()
+        public override Transform GetAimingRef()
         {
-            if (playerRenderWidget)
-            {
-                var pos = playerRenderWidget.m_CameraRefPos;
-
-                return SetupCameraRef(pos);
-            }
-
-            return base.SetupCameraRef();
+            return playerRenderWidget ? playerRenderWidget.m_AimingRef : base.GetAimingRef();
         }
 
         public Vector2 GetClimbOverOffset()
@@ -71,9 +64,9 @@ namespace CraftSharp.Rendering
             // Unsubscribe player controller events. This is necessary because we
             // cannot effectively clear all subscriptions from the event publisher
             var playerController = GetComponentInParent<PlayerController>();
-            playerController.OnCrossFadeState -= this.CrossFadeState;
-            playerController.OnOverrideState -= this.OverrideState;
-            playerController.OnRandomizeMirroredFlag -= this.RandomizeMirroredFlag;
+            playerController.OnCrossFadeState -= CrossFadeState;
+            playerController.OnOverrideState -= OverrideState;
+            playerController.OnRandomizeMirroredFlag -= RandomizeMirroredFlag;
 
             var visualObj = _visualTransform!.gameObject;
 
@@ -99,6 +92,8 @@ namespace CraftSharp.Rendering
 
         public override void UpdateAnimator(PlayerStatus info)
         {
+            if (!entityAnimator) return;
+            
             // Update animator parameters
             entityAnimator.SetBool(GLIDING_HASH, info.Gliding);
             entityAnimator.SetBool(MOVING_HASH, info.Moving);
@@ -113,20 +108,6 @@ namespace CraftSharp.Rendering
             playerRenderWidget.ManagedUpdate();
         }
 
-        public void SetSlimModel(bool slimModel)
-        {
-            foreach (var model in slimModelObjects)
-            {
-                model.SetActive(slimModel);
-            }
-
-            foreach (var model in regularModelObjects)
-            {
-                model.SetActive(!slimModel);
-            }
-        }
-
-        #nullable enable
         protected override Dictionary<string, string> GetControlVariables()
         {
             return new Dictionary<string, string>
@@ -134,6 +115,5 @@ namespace CraftSharp.Rendering
                 ["player_skin"] = $"skin:{UUID}"
             };
         }
-        #nullable disable
     }
 }

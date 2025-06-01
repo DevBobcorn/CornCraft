@@ -1,11 +1,10 @@
-#nullable enable
 using UnityEngine;
 
 namespace CraftSharp.Rendering
 {
     public class QuadrupedEntityRender : LeggedEntityRender
     {
-        public Transform? frontLeftLeg, frontRightLeg, rearLeftLeg, rearRightLeg;
+        public Transform frontLeftLeg, frontRightLeg, rearLeftLeg, rearRightLeg;
 
         public override void UpdateAnimation(float tickMilSec)
         {

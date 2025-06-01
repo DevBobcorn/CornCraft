@@ -1,4 +1,3 @@
-#nullable enable
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -14,7 +13,7 @@ namespace CraftSharp.Rendering
                 transform.position = Vector3.SmoothDamp(transform.position, Position.Value, ref _visualMovementVelocity, tickMilSec);
 
             // Update rotation
-            if (lastYaw != Yaw.Value || lastPitch != Pitch.Value)
+            if (!Mathf.Approximately(lastYaw, Yaw.Value) || !Mathf.Approximately(lastPitch, Pitch.Value))
             {
                 lastPitch = Pitch.Value;
                 lastYaw = Yaw.Value;
