@@ -28,7 +28,11 @@ namespace CraftSharp.Rendering
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> blockEntityPrefabs = new();
-        private GameObject GetPrefabForType(ResourceLocation type) => blockEntityPrefabs.GetValueOrDefault(type, defaultPrefab);
+
+        private GameObject GetPrefabForType(ResourceLocation type)
+        {
+            return blockEntityPrefabs.GetValueOrDefault(type, defaultPrefab);
+        }
 
         /// <summary>
         /// World data, accessible on both Unity thread and mesh builder threads

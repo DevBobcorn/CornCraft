@@ -35,15 +35,9 @@ namespace CraftSharp.Control
                 {
                     return AnimatorEntityRender.SPRINT_NAME;
                 }
-                else
-                {
-                    return info.WalkMode ? AnimatorEntityRender.WALK_NAME : AnimatorEntityRender.RUN_NAME;
-                }
+                return info.WalkMode ? AnimatorEntityRender.WALK_NAME : AnimatorEntityRender.RUN_NAME;
             }
-            else
-            {
-                return AnimatorEntityRender.IDLE_NAME;
-            }
+            return AnimatorEntityRender.IDLE_NAME;
         }
 
         private void CheckClimbOver(PlayerStatus info, PlayerController player)
@@ -260,7 +254,6 @@ namespace CraftSharp.Control
             return info.Spectating || !info.Grounded || info.Clinging || info.Floating;
         }
 
-        private Action<InputAction.CallbackContext>? toggleAimingLockCallback;
         private Action<InputAction.CallbackContext>? jumpRequestCallback;
         private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
         private Action<InputAction.CallbackContext>? sprintRequestCallback;
@@ -274,11 +267,6 @@ namespace CraftSharp.Control
             _jumpConfirmed = false;
             _walkToggleRequested = false;
             _sprintRequested = false;
-
-            player.Actions.Interaction.ToggleAimingLock.performed += toggleAimingLockCallback = _ =>
-            {
-                player.ToggleAimingLock();
-            };
 
             player.Actions.Locomotion.Jump.performed += jumpRequestCallback = _ =>
             {
@@ -325,7 +313,6 @@ namespace CraftSharp.Control
             info.Sprinting = false;
 
             // Unregister input action events
-            player.Actions.Interaction.ToggleAimingLock.performed -= toggleAimingLockCallback;
             player.Actions.Locomotion.Jump.performed -= jumpRequestCallback;
             player.Actions.Locomotion.WalkToggle.performed -= walkToggleRequestCallback;
             player.Actions.Locomotion.Sprint.performed -= sprintRequestCallback;
