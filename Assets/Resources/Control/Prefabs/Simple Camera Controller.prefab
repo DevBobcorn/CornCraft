@@ -92,9 +92,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damping: {x: 0, y: 0, z: 0}
   ShoulderOffset: {x: 0, y: 0, z: 0}
-  VerticalArmLength: 0.2
-  CameraSide: 1
-  CameraDistance: -0.35
+  VerticalArmLength: 0.4
+  CameraSide: 0.5
+  CameraDistance: -0.3
   AvoidObstacles:
     Enabled: 0
     CollisionFilter:
@@ -131,7 +131,7 @@ MonoBehaviour:
   TiltAxis:
     Value: 0
     Center: 0
-    Range: {x: -85, y: 85}
+    Range: {x: -90, y: 90}
     Wrap: 0
     Recentering:
       Enabled: 0
@@ -164,8 +164,8 @@ MonoBehaviour:
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
-        AccelTime: 0.2
-        DecelTime: 0.2
+        AccelTime: 0
+        DecelTime: 0
     - Name: Look Y (Tilt)
       Owner: {fileID: 6890505560969682199}
       Enabled: 1
@@ -175,8 +175,8 @@ MonoBehaviour:
         CancelDeltaTime: 0
       InputValue: -0
       Driver:
-        AccelTime: 0.2
-        DecelTime: 0.2
+        AccelTime: 0
+        DecelTime: 0
   PlayerIndex: -1
   AutoEnableInputs: 1
 --- !u!1 &2555420394471349852
