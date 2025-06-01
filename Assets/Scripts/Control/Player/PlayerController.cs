@@ -496,17 +496,6 @@ namespace CraftSharp.Control
             return m_CameraController && m_CameraController.IsAimingOrLocked;
         }
 
-        public void UseAimingLock(bool enable)
-        {
-            if (m_CameraController)
-            {
-                // Align target visual yaw with camera, immediately
-                if (enable) Status!.TargetVisualYaw = m_CameraController.GetYaw();
-
-                m_CameraController.UseAimingLock(enable);
-            }
-        }
-
         public void ToggleAimingLock()
         {
             if (m_CameraController)

@@ -326,13 +326,6 @@ namespace CraftSharp.Control
 
             // Reset jump confirmation flag
             _jumpConfirmed = false;
-
-            // Disable aiming lock if next state is not applicable
-            if (nextState is not DiggingAimState && nextState is not RangedAimState &&
-                nextState is not ForceMoveState && nextState is not AirborneState)
-            {
-                player.UseAimingLock(false);
-            }
         }
 
         public override string ToString() => "Grounded";

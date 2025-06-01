@@ -676,7 +676,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private bool AffectsAttackBehaviour(ItemActionType itemType)
+        private static bool AffectsAttackBehaviour(ItemActionType itemType)
         {
             return itemType switch
             {
