@@ -2242,7 +2242,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7597801883631828752}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
@@ -2360,7 +2360,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7249426671761368327, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7249426672461787743, guid: 64cc96bcd0e11144aaeab133b3071ec6, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2498,6 +2498,10 @@ PrefabInstance:
     - target: {fileID: 8332482839386662393, guid: b823d3edaacafe14daf213215f04bcb0, type: 3}
       propertyPath: m_Name
       value: Mode Panel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8332482839386662394, guid: b823d3edaacafe14daf213215f04bcb0, type: 3}
+      propertyPath: m_Alpha
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8332482839664156092, guid: b823d3edaacafe14daf213215f04bcb0, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'

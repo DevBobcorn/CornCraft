@@ -338,6 +338,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -480,6 +483,7 @@ Transform:
   m_LocalScale: {x: 1.0000008, y: 1.0000006, z: 1.0000011}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 453548065143960011}
   - {fileID: 400142}
   - {fileID: 400250}
   - {fileID: 400100}
@@ -739,6 +743,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -838,6 +845,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1003,6 +1013,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1619,6 +1632,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1749,6 +1765,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1853,6 +1872,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2170,7 +2192,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &9500000
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2184,6 +2206,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -2224,8 +2247,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_VisualOffset: {x: 0, y: 0.02, z: 0}
-  m_CameraRefPos: {x: 0, y: 1.3, z: 0}
+  m_FollowOffset: {x: 0, y: 1.3, z: 0}
   m_ClimbOverOffset: {x: 0.15, y: 0.14}
+  m_AimingRef: {fileID: 453548065143960011}
   m_UseAuxOffhandTransform: 1
 --- !u!1 &100098
 GameObject:
@@ -2309,6 +2333,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2592,6 +2619,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2848,6 +2878,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3165,6 +3198,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3356,6 +3392,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3510,6 +3549,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3700,6 +3742,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3829,6 +3874,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3943,6 +3991,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {x: -0.15, y: 0, z: 0}
   size: {x: 0.07, y: 0.001, z: 0.32}
+  symmetryMode: 0
+  symmetryTarget: {fileID: 0}
   direction: 0
   reverseDirection: 0
   radiusSeparation: 0
@@ -4366,6 +4416,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {x: -0.1, y: 0, z: 0}
   size: {x: 0.04, y: 0.001, z: 0.35}
+  symmetryMode: 0
+  symmetryTarget: {fileID: 0}
   direction: 0
   reverseDirection: 0
   radiusSeparation: 0
@@ -4647,6 +4699,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4819,6 +4874,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5152,6 +5210,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {x: -0.1, y: 0, z: 0}
   size: {x: 0.04, y: 0.001, z: 0.35}
+  symmetryMode: 0
+  symmetryTarget: {fileID: 0}
   direction: 0
   reverseDirection: 0
   radiusSeparation: 0
@@ -5489,6 +5549,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5654,6 +5717,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6270,6 +6336,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6419,6 +6488,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6780,6 +6852,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   center: {x: -0.15, y: 0, z: 0}
   size: {x: 0.07, y: 0.001, z: 0.32}
+  symmetryMode: 0
+  symmetryTarget: {fileID: 0}
   direction: 0
   reverseDirection: 0
   radiusSeparation: 0
@@ -6842,6 +6916,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7170,6 +7247,9 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7303,6 +7383,7 @@ MonoBehaviour:
     meshWriteMode: 0
     paintMode: 0
     paintMaps: []
+    paintMapUvChannel: 0
     rootBones:
     - {fileID: 400118}
     - {fileID: 400120}
@@ -7652,8 +7733,8 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 1
-      localHash: 19789
+      initVersion: 2
+      localHash: 29665
       globalHash: -275186674
       clothType: 1
       clothTransformRecord:
@@ -7908,6 +7989,7 @@ MonoBehaviour:
           x: 1.05
           y: 1.05
           z: 1.05
+        originalMesh: {fileID: 0}
     selectionData:
       positions:
       - x: 0.06955631
@@ -7966,6 +8048,37 @@ MonoBehaviour:
   localInertiaProperty: 0
   windInfluenceProperty: 0
   blendWeightProperty: 0
+--- !u!1 &872492199215983333
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 453548065143960011}
+  m_Layer: 0
+  m_Name: Aiming Ref
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &453548065143960011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872492199215983333}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.46390373, y: 0.5336603, z: 0.46390373, w: 0.5336603}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 400022}
+  m_LocalEulerAnglesHint: {x: -82, y: 90, z: 0}
 --- !u!1 &1427946734156719889
 GameObject:
   m_ObjectHideFlags: 0
@@ -8016,6 +8129,7 @@ MonoBehaviour:
     meshWriteMode: 0
     paintMode: 0
     paintMaps: []
+    paintMapUvChannel: 0
     rootBones:
     - {fileID: 400212}
     - {fileID: 400088}
@@ -8367,8 +8481,8 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 1
-      localHash: 32349
+      initVersion: 2
+      localHash: 42225
       globalHash: 1807251042
       clothType: 1
       clothTransformRecord:
@@ -8823,6 +8937,7 @@ MonoBehaviour:
           x: 1.05
           y: 1.05
           z: 1.05
+        originalMesh: {fileID: 0}
     selectionData:
       positions:
       - x: 0.06209011
@@ -8971,6 +9086,7 @@ MonoBehaviour:
     meshWriteMode: 0
     paintMode: 0
     paintMaps: []
+    paintMapUvChannel: 0
     rootBones:
     - {fileID: 400016}
     - {fileID: 400024}
@@ -9318,8 +9434,8 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 1
-      localHash: 73305
+      initVersion: 2
+      localHash: 83181
       globalHash: -596960886
       clothType: 10
       clothTransformRecord:
@@ -9614,6 +9730,7 @@ MonoBehaviour:
           x: 1.05
           y: 1.05
           z: 1.05
+        originalMesh: {fileID: 0}
     selectionData:
       positions:
       - x: 0.04227542
@@ -9730,6 +9847,7 @@ MonoBehaviour:
     meshWriteMode: 0
     paintMode: 0
     paintMaps: []
+    paintMapUvChannel: 0
     rootBones:
     - {fileID: 400318}
     - {fileID: 400108}
@@ -10077,8 +10195,8 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 1
-      localHash: 19789
+      initVersion: 2
+      localHash: 29665
       globalHash: 840881765
       clothType: 1
       clothTransformRecord:
@@ -10333,6 +10451,7 @@ MonoBehaviour:
           x: 1.05
           y: 1.05
           z: 1.05
+        originalMesh: {fileID: 0}
     selectionData:
       positions:
       - x: 0.0045579723
@@ -10478,6 +10597,7 @@ MonoBehaviour:
     meshWriteMode: 0
     paintMode: 0
     paintMaps: []
+    paintMapUvChannel: 0
     rootBones:
     - {fileID: 400136}
     - {fileID: 400176}
@@ -10827,8 +10947,8 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 1
-      localHash: 19789
+      initVersion: 2
+      localHash: 29665
       globalHash: -1088910662
       clothType: 1
       clothTransformRecord:
@@ -11083,6 +11203,7 @@ MonoBehaviour:
           x: 1.05
           y: 1.05
           z: 1.05
+        originalMesh: {fileID: 0}
     selectionData:
       positions:
       - x: 0.069419526
@@ -11102,7 +11223,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 1
       - Value: 2
-      maxConnectionDistance: 0.18333416
+      maxConnectionDistance: 0.18333414
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -11191,6 +11312,7 @@ MonoBehaviour:
     meshWriteMode: 0
     paintMode: 0
     paintMaps: []
+    paintMapUvChannel: 0
     rootBones:
     - {fileID: 400196}
     - {fileID: 400140}
@@ -11538,8 +11660,8 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 1
-      localHash: 22301
+      initVersion: 2
+      localHash: 32177
       globalHash: -1379784011
       clothType: 1
       clothTransformRecord:
@@ -11834,6 +11956,7 @@ MonoBehaviour:
           x: 1.05
           y: 1.05
           z: 1.05
+        originalMesh: {fileID: 0}
     selectionData:
       positions:
       - x: 0.086042024

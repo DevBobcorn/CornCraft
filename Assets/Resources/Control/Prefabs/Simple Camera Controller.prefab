@@ -10,9 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3083690404439012666}
   - component: {fileID: 3015198322040405935}
-  - component: {fileID: 653941937882390471}
+  - component: {fileID: 6890908826744568153}
   - component: {fileID: 6890505560969682199}
-  - component: {fileID: 2819967806162033735}
   - component: {fileID: 5359323640807527738}
   m_Layer: 0
   m_Name: Aim Virtual
@@ -62,7 +61,7 @@ MonoBehaviour:
   Lens:
     FieldOfView: 60.000004
     OrthographicSize: 5
-    NearClipPlane: 0.3
+    NearClipPlane: 0.01
     FarClipPlane: 1000
     Dutch: 0
     ModeOverride: 0
@@ -79,7 +78,7 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
---- !u!114 &653941937882390471
+--- !u!114 &6890908826744568153
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -88,10 +87,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1367375308091481784}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36d1163fa822e8b418a0a603ec078d5c, type: 3}
+  m_Script: {fileID: 11500000, guid: 625c14eee3ad46c99df7c7c891ef668a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damping: 0.5
+  Damping: {x: 0, y: 0, z: 0}
+  ShoulderOffset: {x: 0, y: 0, z: 0}
+  VerticalArmLength: 0.2
+  CameraSide: 1
+  CameraDistance: -0.35
+  AvoidObstacles:
+    Enabled: 0
+    CollisionFilter:
+      serializedVersion: 2
+      m_Bits: 1
+    IgnoreTag: 
+    CameraRadius: 0.2
+    DampingIntoCollision: 0
+    DampingFromCollision: 0.5
 --- !u!114 &6890505560969682199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,21 +138,6 @@ MonoBehaviour:
       Wait: 1
       Time: 2
     Restrictions: 0
---- !u!114 &2819967806162033735
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1367375308091481784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44d70cc20219cd84593f67d248eafe36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Offset: {x: 0.8, y: 0, z: -1.5}
-  ApplyAfter: 1
-  PreserveComposition: 0
 --- !u!114 &5359323640807527738
 MonoBehaviour:
   m_ObjectHideFlags: 0
