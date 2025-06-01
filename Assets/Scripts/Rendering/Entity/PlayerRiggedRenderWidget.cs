@@ -13,6 +13,7 @@ namespace CraftSharp.Rendering
         private Transform _spineRef;
 
         public Vector3 m_VisualOffset = new(0F, 0.1F, 0F);
+        public Vector3 m_FollowOffset = new(0F, 1.5F, 0F);
         public Vector2 m_ClimbOverOffset = new(0F, 0F);
         public Transform m_AimingRef;
 

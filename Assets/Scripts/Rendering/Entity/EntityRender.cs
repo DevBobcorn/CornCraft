@@ -403,9 +403,8 @@ namespace CraftSharp.Rendering
 
         public virtual Transform SetupCameraRef()
         {
-            var viewPos = transform.InverseTransformPoint(GetAimingRef().position);
-            var pos = new Vector3(0F, viewPos.y, 0F);
-            Debug.Log($"View height: {viewPos.y}");
+            var aimingLocalHeight = transform.InverseTransformPoint(GetAimingRef().position).y;
+            var pos = new Vector3(0F, aimingLocalHeight, 0F);
 
             return SetupCameraRef(pos);
         }

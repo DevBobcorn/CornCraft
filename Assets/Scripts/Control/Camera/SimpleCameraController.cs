@@ -110,19 +110,19 @@ namespace CraftSharp.Control
             EventManager.Instance.Broadcast(new CameraAimingEvent(false));
         }
 
-        public override void SetTarget(Transform target)
+        public override void SetTargets(Transform followTarget, Transform aimingTarget)
         {
             EnsureInitialized();
 
-            virtualCameraFollow!.Follow = target;
-            virtualCameraFollow!.LookAt = target;
+            virtualCameraFollow!.Follow = followTarget;
+            virtualCameraFollow!.LookAt = followTarget;
 
-            virtualCameraAim!.Follow = target;
+            virtualCameraAim!.Follow = aimingTarget;
         }
 
-        public override Transform GetTarget()
+        protected override Transform GetFollowTarget()
         {
-            return virtualCameraFollow == null ? null : virtualCameraFollow.Follow;
+            return !virtualCameraFollow ? null : virtualCameraFollow.Follow;
         }
 
         public override void TeleportByDelta(Vector3 posDelta)

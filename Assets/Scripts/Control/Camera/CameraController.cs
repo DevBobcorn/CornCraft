@@ -82,9 +82,9 @@ namespace CraftSharp.Control
 
         public abstract void EnsureInitialized();
 
-        public abstract void SetTarget(Transform target);
+        public abstract void SetTargets(Transform followTarget, Transform aimingTarget);
 
-        public abstract Transform GetTarget();
+        protected abstract Transform GetFollowTarget();
 
         /// <summary>
         /// Used when updating world origin offset to seamlessly teleport the camera
@@ -134,7 +134,7 @@ namespace CraftSharp.Control
 
         public virtual Vector3 GetTargetViewportPos(Vector3 offset)
         {
-            var target = GetTarget();
+            var target = GetFollowTarget();
             if (target)
             {
                 var pos = renderCamera.WorldToViewportPoint(target.TransformPoint(offset));

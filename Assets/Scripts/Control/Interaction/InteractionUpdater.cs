@@ -668,6 +668,11 @@ namespace CraftSharp.Control
                     }
                     // TODO: Implement for 1.21.4+
                 };
+
+                playerController.Actions.Interaction.ToggleAimingLock.performed += _ =>
+                {
+                    playerController.ToggleAimingLock();
+                };
             }
         }
 

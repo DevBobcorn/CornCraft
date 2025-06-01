@@ -49,6 +49,18 @@ namespace CraftSharp.Rendering
             playerRenderWidget.SetRefTransforms(mainHandRef, offHandRef, itemMountRef);
         }
 
+        public override Transform SetupCameraRef()
+        {
+            if (playerRenderWidget)
+            {
+                var pos = playerRenderWidget.m_FollowOffset;
+
+                return SetupCameraRef(pos);
+            }
+
+            return base.SetupCameraRef();
+        }
+        
         public override Transform GetAimingRef()
         {
             return playerRenderWidget ? playerRenderWidget.m_AimingRef : base.GetAimingRef();

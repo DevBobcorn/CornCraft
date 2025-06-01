@@ -52,7 +52,8 @@ namespace CraftSharp.Control
 
         // Camera & Player Render Fields
         private CameraController m_CameraController;
-        private Transform m_CameraRef;
+        private Transform m_FollowRef;
+        private Transform m_AimingRef;
         private EntityRender m_PlayerRender;
         [SerializeField] private Vector3 m_InitialUpward = Vector3.up;
         [SerializeField] private Vector3 m_InitialForward = Vector3.forward;
@@ -182,7 +183,8 @@ namespace CraftSharp.Control
                     usingAnimator = false;
                 }
                 // Setup camera ref and use it
-                m_CameraRef = m_PlayerRender.SetupCameraRef();
+                m_FollowRef = m_PlayerRender.SetupCameraRef();
+                m_AimingRef = m_PlayerRender.GetAimingRef();
                 // Reset player render local position
                 m_PlayerRender!.transform.localPosition = Vector3.zero;
             }
@@ -190,14 +192,15 @@ namespace CraftSharp.Control
             {
                 Debug.LogWarning("Player render not found in game object!");
                 // Use own transform
-                m_CameraRef = transform;
+                m_FollowRef = transform;
+                m_AimingRef = transform;
                 // Reset animator flag
                 usingAnimator = false;
             }
 
             if (m_CameraController)
             {
-                m_CameraController.SetTarget(m_CameraRef);
+                m_CameraController.SetTargets(m_FollowRef, m_AimingRef);
             }
             
             // Re-initialize current state
@@ -208,10 +211,10 @@ namespace CraftSharp.Control
         {
             m_CameraController = cameraController;
 
-            if (m_CameraRef)
+            if (m_FollowRef && m_AimingRef)
             {
                 cameraController.transform.rotation = Quaternion.LookRotation(m_InitialForward, m_InitialUpward);
-                cameraController.SetTarget(m_CameraRef);
+                m_CameraController.SetTargets(m_FollowRef, m_AimingRef);
             }
             else
             {
@@ -490,7 +493,7 @@ namespace CraftSharp.Control
 
         public bool IsUsingAimingCamera()
         {
-            return m_CameraController != null && m_CameraController.IsAimingOrLocked;
+            return m_CameraController && m_CameraController.IsAimingOrLocked;
         }
 
         public void UseAimingLock(bool enable)
