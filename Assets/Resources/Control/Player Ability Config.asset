@@ -17,7 +17,7 @@ MonoBehaviour:
   ClimbOverTotalTime: 1.2
   ClimbOverMoveTime: 0.3
   ClimbOverCheckExit: 0.6
-  WalkSpeed: 2.15
+  WalkSpeed: 1
   RunSpeed: 6
   AccSpeed: 25
   DecSpeed: 15

@@ -134,7 +134,7 @@ namespace CraftSharp.Control
                     player.RandomizeMirroredFlag();
                 }
 
-                if (info.Moving || info.SprintBrakeTime > 0F) // Moving or sprint braking
+                if (info.Moving) // Moving
                 {
                     // Initiate sprinting check
                     if (info.Moving && _sprintRequested && info.StaminaLeft > SPRINT_STAMINA_START_MIN)
@@ -143,13 +143,16 @@ namespace CraftSharp.Control
                         info.SprintBrakeTime = SPRINT_BRAKE_TIME;
                     }
 
-                    if (info.Sprinting && (!inputData.Locomotion.Sprint.IsPressed() || info.StaminaLeft <= SPRINT_STAMINA_STOP))
+                    if (info.Sprinting)
                     {
-                        info.Sprinting = false;
+                        if ((!inputData.Locomotion.Sprint.IsPressed() || info.StaminaLeft <= SPRINT_STAMINA_STOP))
+                        {
+                            info.Sprinting = false;
+                        }
                         info.SprintBrakeTime = SPRINT_BRAKE_TIME;
                     }
 
-                    var moveSpeed = Mathf.Lerp(ability.RunSpeed,
+                    var moveSpeed = Mathf.Lerp(info.WalkMode ? ability.WalkSpeed : ability.RunSpeed,
                         ability.SprintSpeed, Mathf.Max(info.SprintBrakeTime, 0F) / SPRINT_BRAKE_TIME);
                     
                     info.SprintBrakeTime -= interval;
@@ -199,6 +202,17 @@ namespace CraftSharp.Control
                         info.Sprinting = false;
                         info.SprintBrakeTime = SPRINT_BRAKE_TIME;
                         moveVelocity = currentVelocity;
+                    }
+
+                    if (info.SprintBrakeTime > 0F)
+                    {
+                        var moveSpeed = Mathf.Lerp(info.WalkMode ? ability.WalkSpeed : ability.RunSpeed,
+                            ability.SprintSpeed, Mathf.Max(info.SprintBrakeTime, 0F) / SPRINT_BRAKE_TIME);
+                    
+                        info.SprintBrakeTime -= interval;
+
+                        // Use target orientation to calculate actual movement direction, taking ground shape into consideration
+                        moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
                     }
                     else
                     {
