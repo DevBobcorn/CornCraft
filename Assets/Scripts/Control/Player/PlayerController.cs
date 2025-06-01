@@ -553,7 +553,7 @@ namespace CraftSharp.Control
                 status.TargetVisualYaw = m_CameraController!.GetYaw();
 
                 // Align player orientation with camera view (which is set as the target value)
-                status.CurrentVisualYaw = Mathf.LerpAngle(status.CurrentVisualYaw, status.TargetVisualYaw, 10F * deltaTime);
+                status.CurrentVisualYaw = status.TargetVisualYaw;
             }
 
             // Update player status (in water, grounded, etc)
