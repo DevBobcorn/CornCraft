@@ -359,7 +359,8 @@ namespace CraftSharp.UI
 
             if (chatInput.IsActive())
             {
-                if (Keyboard.current.enterKey.wasPressedThisFrame)
+                if (Keyboard.current.enterKey.wasPressedThisFrame ||
+                    Keyboard.current.numpadEnterKey.wasPressedThisFrame)
                 {
                     SendChatMessage();
                 }
