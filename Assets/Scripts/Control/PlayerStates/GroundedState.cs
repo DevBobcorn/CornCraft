@@ -38,27 +38,41 @@ namespace CraftSharp.Control
             }
             return AnimatorEntityRender.IDLE_NAME;
         }
+        
+        public static float DistanceToSquareSide(Vector2 direction, float halfSideLength)
+        {
+            // Handle edge cases where direction aligns exactly with axes
+            if (direction.x == 0) return halfSideLength / Math.Abs(direction.y);
+            if (direction.y == 0) return halfSideLength / Math.Abs(direction.x);
+
+            // Calculate the angle in the first quadrant (0 to π/2)
+            var absX = Mathf.Abs(direction.x);
+            var absY = Mathf.Abs(direction.y);
+        
+            // The distance is halfSideLength divided by the maximum of the absolute components
+            // or equivalently, halfSideLength divided by the appropriate component
+            return halfSideLength / Mathf.Max(absX, absY);
+        }
 
         private void CheckClimbOver(PlayerStatus info, PlayerController player)
         {
+            var yawRadian = info.TargetVisualYaw * Mathf.Deg2Rad;
+            var dirVector = new Vector2(Mathf.Sin(yawRadian), Mathf.Cos(yawRadian));
+            var maxDist = DistanceToSquareSide(dirVector, player.AbilityConfig.ClimbOverMaxDist);
+            
             if (info is { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } &&
-                info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+                info.BarrierDistance < maxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
-                bool walkUp = info.BarrierHeight < THRESHOLD_WALK_UP;
-
-                if (walkUp || info.BarrierYawAngle < 30F) // Check if available, for high barriers check cooldown and angle
+                if (info.YawDeltaAbs <= 10F) // Trying to moving forward
                 {
-                    if (info.YawDeltaAbs <= 10F) // Trying to moving forward
+                    // Workaround: Use a cooldown value to disable climbing in a short period after landing
+                    if (_timeSinceGrounded > 0.3F)
                     {
-                        // Workaround: Use a cooldown value to disable climbing in a short period after landing
-                        if (_timeSinceGrounded > 0.3F)
-                        {
-                            player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, walkUp, false);
-                        }
-
-                        // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
-                        _jumpRequested = false;
+                        player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, info.BarrierHeight < THRESHOLD_WALK_UP, false);
                     }
+
+                    // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
+                    _jumpRequested = false;
                 }
             }
         }

@@ -15,8 +15,12 @@ namespace CraftSharp.Control
 
         private void CheckClimbOverInLiquid(PlayerStatus info, PlayerController player)
         {
+            var yawRadian = info.TargetVisualYaw * Mathf.Deg2Rad;
+            var dirVector = new Vector2(Mathf.Sin(yawRadian), Mathf.Cos(yawRadian));
+            var maxDist = GroundedState.DistanceToSquareSide(dirVector, player.AbilityConfig.ClimbOverMaxDist);
+            
             if (info is { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } &&
-                info.BarrierDistance < player.AbilityConfig.ClimbOverMaxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
+                info.BarrierDistance < maxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
                 if (info is { BarrierYawAngle: < 30F, YawDeltaAbs: <= 10F }) // Check if available, for high barriers check cooldown and angle
                     // Trying to moving forward
