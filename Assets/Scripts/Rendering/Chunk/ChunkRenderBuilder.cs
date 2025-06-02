@@ -51,7 +51,7 @@ namespace CraftSharp.Rendering
 
         public static float3 GetBlockOffsetInChunk(OffsetType offsetType, int chunkX, int chunkZ, int blocX, int blocY, int blocZ)
         {
-            if (offsetType == OffsetType.XZ) // Apply random offset on horizontal directions
+            if (offsetType == OffsetType.XZ || offsetType == OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
             {
                 var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
@@ -74,7 +74,7 @@ namespace CraftSharp.Rendering
 
         public static float3 GetBlockOffsetInBlock(OffsetType offsetType, int chunkX, int chunkZ, int blocX, int blocZ)
         {
-            if (offsetType == OffsetType.XZ) // Apply random offset on horizontal directions
+            if (offsetType == OffsetType.XZ || offsetType == OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
             {
                 var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F

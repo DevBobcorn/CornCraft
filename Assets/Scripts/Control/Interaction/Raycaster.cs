@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace CraftSharp.Control
 {
@@ -91,7 +92,7 @@ namespace CraftSharp.Control
             }
         }
 
-        public static AABBRaycastHit RaycastBlockShape(Ray cellSpaceRay, BlockShape blockShape)
+        public static AABBRaycastHit RaycastBlockShape(Ray cellSpaceRay, BlockShape blockShape, float3? blockOffset)
         {
             AABBRaycastHit nearestHit = new AABBRaycastHit
             {
@@ -104,7 +105,8 @@ namespace CraftSharp.Control
 
             foreach (var aabb in blockShape.AABBs)
             {
-                var res = RaycastAABB(cellSpaceRay, aabb);
+                var res = RaycastAABB(cellSpaceRay, blockOffset.HasValue ?
+                    aabb.WithOffset(blockOffset.Value.z, blockOffset.Value.y, blockOffset.Value.x) : aabb);
 
                 float curDistance;
                 if (res.hit && (curDistance = (res.point - cellSpaceRay.origin).magnitude) < minDistance)

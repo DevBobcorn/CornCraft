@@ -989,13 +989,15 @@ namespace CraftSharp.Rendering
             public BlockLoc BlockLoc;
             public Location ExactLoc;
             public readonly BlockState BlockState;
+            public readonly int StateId;
 
-            public BlockRaycastInfo(Vector3Int cellPos, BlockLoc blockLoc, Location exactLoc, BlockState blockState)
+            public BlockRaycastInfo(Vector3Int cellPos, BlockLoc blockLoc, Location exactLoc, BlockState blockState, int stateId)
             {
                 CellPos = cellPos;
                 BlockLoc = blockLoc;
                 ExactLoc = exactLoc;
                 BlockState = blockState;
+                StateId = stateId;
             }
         }
 
@@ -1003,6 +1005,8 @@ namespace CraftSharp.Rendering
             out Raycaster.AABBRaycastHit aabbInfo,
             out BlockRaycastInfo blockInfo)
         {
+            var stateModelTable = ResourcePackManager.Instance.StateModelTable;
+
             foreach (var cellPos in cellPosList) // Go through the list
             {
                 var cellSpaceRay = new Ray(ray.origin - cellPos, ray.direction);
@@ -1014,14 +1018,19 @@ namespace CraftSharp.Rendering
                 var blockState = block.State;
                 if (blockState.Shape.AABBs.Length == 0) continue; // No AABB, skip
 
-                aabbInfo = Raycaster.RaycastBlockShape(cellSpaceRay, blockState.Shape);
+                var offsetType = stateModelTable[block.StateId].OffsetType;
+                Vector3? offset = offsetType == OffsetType.XZ_BoundingBox ? ChunkRenderBuilder.GetBlockOffsetInBlock(
+                    offsetType, blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
+
+                aabbInfo = Raycaster.RaycastBlockShape(cellSpaceRay, blockState.Shape, offset);
+                
                 if (aabbInfo.hit)
                 {
                     // Convert from cell space back to world space
                     aabbInfo.point += cellPos;
                     var exactLoc = CoordConvert.Unity2MC(_worldOriginOffset, aabbInfo.point);
                     
-                    blockInfo = new(cellPos, blockLoc, exactLoc, blockState);
+                    blockInfo = new(cellPos, blockLoc, exactLoc, blockState, block.StateId);
                     return true;
                 }
             }

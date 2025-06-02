@@ -11,6 +11,7 @@ using System.IO;
 using System.Threading.Tasks;
 using CraftSharp.Protocol.Handlers;
 using CraftSharp.Resource;
+using Unity.Mathematics;
 
 namespace CraftSharp.Control
 {
@@ -128,8 +129,19 @@ namespace CraftSharp.Control
                 if (TargetBlockLoc != blockInfo.BlockLoc)
                 {
                     TargetBlockLoc = blockInfo.BlockLoc;
+                    var newBlockLoc = blockInfo.BlockLoc;
                     blockSelectionBox.transform.position = blockInfo.CellPos;
-
+                    
+                    var offsetType = ResourcePackManager.Instance.StateModelTable[blockInfo.StateId].OffsetType;
+                    if (offsetType == OffsetType.XZ_BoundingBox)
+                    {
+                        var locationOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
+                                newBlockLoc.X >> 4, newBlockLoc.Z >> 4,
+                                newBlockLoc.X & 0xF, newBlockLoc.Z & 0xF);
+                        
+                        blockSelectionBox.transform.position += (Vector3) locationOffset;
+                    }
+                    
                     EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(blockInfo.BlockLoc));
                 }
 
@@ -285,8 +297,19 @@ namespace CraftSharp.Control
             //EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, predictedStateId));
 
             TargetBlockLoc = newBlockLoc;
+                
             blockSelectionBox.transform.position = CoordConvert.MC2Unity(client.WorldOriginOffset, newBlockLoc.ToLocation());
             blockSelectionBox.UpdateShape(predictedBlockState.Shape);
+
+            var offsetType = ResourcePackManager.Instance.StateModelTable[predictedStateId].OffsetType;
+            if (offsetType == OffsetType.XZ_BoundingBox)
+            {
+                var locationOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
+                    newBlockLoc.X >> 4, newBlockLoc.Z >> 4,
+                    newBlockLoc.X & 0xF, newBlockLoc.Z & 0xF);
+                        
+                blockSelectionBox.transform.position += (Vector3) locationOffset;
+            }
 
             EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(newBlockLoc));
         }
