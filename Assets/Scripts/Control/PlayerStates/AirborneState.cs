@@ -54,6 +54,8 @@ namespace CraftSharp.Control
                 info.Flying = false;
             }
             _flightRequested = false;
+            
+            info.AirTime += interval;
 
             // Check stamina for gliding
             if (info.StaminaLeft == 0)
@@ -75,7 +77,7 @@ namespace CraftSharp.Control
                     // Smooth rotation for player model
                     info.CurrentVisualYaw = Mathf.MoveTowardsAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.TurnSpeed * interval * 0.5F);
                     // Horizontal speed
-                    moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, motor.CharacterUp) * Vector3.forward * ability.GlideSpeed;
+                    moveVelocity = player.GetMovementOrientation() * Vector3.forward * ability.GlideSpeed;
                 }
                 else // No horizontal movement
                 {
@@ -159,18 +161,16 @@ namespace CraftSharp.Control
                     {
                         if (info.AirTime <= FLIGHT_START_AIRTIME_MAX)
                         {
-                            Debug.Log("Request flight");
                             _flightRequested = true;
                         }
+                        info.AirTime = 0F; // Reset air time for next flight request check
                     }
                     else
                     {
                         if (_stopFlightTimer <= FLIGHT_STOP_TIMEOUT_MAX)
                         {
                             info.Flying = false; // Stop flight
-                            Debug.Log("Stop flight");
                         }
-                        
                         _stopFlightTimer = 0F;
                     }
                 }
