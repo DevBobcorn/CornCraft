@@ -30,8 +30,6 @@ namespace CraftSharp.UI
                 iconSprites.Add(iconId, iconSprite = (spriteTypeId, bgImage, spFill, spText, spImage, animator));
 
                 spFill.fillAmount = 1F;
-                animator.SetBool(BLINK, false);
-                animator.SetFloat(BLINK_RATE, 1F);
             }
 
             var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteTypeId);
