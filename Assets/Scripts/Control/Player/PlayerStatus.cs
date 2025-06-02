@@ -5,6 +5,7 @@ namespace CraftSharp.Control
     public class PlayerStatus
     {
         // Player data
+        public GameMode GameMode;
         public float StaminaLeft = 0F;
 
         // Player status
@@ -28,6 +29,11 @@ namespace CraftSharp.Control
         /// Whether player is grounded (internal use only)
         /// </summary>
         public bool GroundCheck = false;
+        
+        /// <summary>
+        /// Time since last grounded, 0 when player is not in air
+        /// </summary>
+        public float AirTime  = 0F;
 
         /// <summary>
         /// Unused for now
@@ -38,6 +44,11 @@ namespace CraftSharp.Control
         /// Whether player is gliding
         /// </summary>
         public bool Gliding   = false;
+        
+        /// <summary>
+        /// Whether player is flying
+        /// </summary>
+        public bool Flying    = false;
 
         /// <summary>
         /// Whether player have active horizontal movement input
@@ -48,6 +59,10 @@ namespace CraftSharp.Control
         /// Whether player is sprinting
         /// </summary>
         public bool Sprinting = false;
+
+        /// <summary>
+        /// Time left to brake current sprinting
+        /// </summary>
         public float SprintBrakeTime = 0F;
 
         /// <summary>
@@ -85,10 +100,10 @@ namespace CraftSharp.Control
         public override string ToString()
         {
             var moveInfo = $"Moving: {Moving} CenterDownDist: {CenterDownDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {CurrentVisualYaw:0.00} -> {TargetVisualYaw:0.00} ({YawDeltaAbs:0.00})";
-            var envInfo = $"\nBarrier Yaw Angle: {BarrierYawAngle:0.00} Dist:\t{BarrierDistance:0.00} ({WallDistance:0.00}) Hgt:{BarrierHeight:0.00}\nGravity Scale: {GravityScale:0.00}";
+            var envInfo = $"\nBarrier Yaw Angle: {BarrierYawAngle:0.00} Dist:\t{BarrierDistance:0.00} ({WallDistance:0.00}) Hgt:{BarrierHeight:0.00}\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
-            return $"InLiquid: {InLiquid}\nFloating: {Floating}\nGrounded: {Grounded}\nClinging: {Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
+            return $"Flying: {Flying}\nGliding: {Gliding}\nInLiquid: {InLiquid}\nFloating: {Floating}\nGrounded: {Grounded}\nClinging: {Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
         }
     }
 }

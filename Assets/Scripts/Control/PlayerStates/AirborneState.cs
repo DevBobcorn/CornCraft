@@ -8,18 +8,21 @@ namespace CraftSharp.Control
 {
     public class AirborneState : IPlayerState
     {
-        public const float THRESHOLD_CLIMB_2M = -2.05F;
-        public const float THRESHOLD_CLIMB_1M = -1.55F;
-        public const float THRESHOLD_CLIMB_UP = -1.35F;
+        public const float FLIGHT_START_AIRTIME_MAX = 0.3F;
+        public const float FLIGHT_STOP_TIMEOUT_MAX = 0.3F;
 
         public const float THRESHOLD_ANGLE_FORWARD = 40F;
 
-        private bool _glideToggleRequested = false;
+        //private bool _glideToggleRequested = false;
+        private bool _flightRequested = false;
+
+        private float _stopFlightTimer = 0F;
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             var ability = player.AbilityConfig;
 
+            /* DISABLE GLIDING FEATURE FOR NOW
             // Check toggle gliding
             if (_glideToggleRequested)
             {
@@ -39,6 +42,18 @@ namespace CraftSharp.Control
 
                 _glideToggleRequested = false;
             }
+            */
+            
+            if (info.GameMode == GameMode.Creative)
+            {
+                if (_flightRequested)
+                    info.Flying = true;
+            }
+            else
+            {
+                info.Flying = false;
+            }
+            _flightRequested = false;
 
             // Check stamina for gliding
             if (info.StaminaLeft == 0)
@@ -53,7 +68,7 @@ namespace CraftSharp.Control
             // Movement velocity update
             Vector3 moveVelocity;
 
-            if (info.Gliding) // Gliding
+            if (info.Gliding || info.Flying) // Gliding or flying
             {
                 if (info.Moving) // Trying to move
                 {
@@ -67,8 +82,22 @@ namespace CraftSharp.Control
                     moveVelocity = Vector3.zero;
                 }
 
-                // Apply gravity (Not additive when gliding)
-                moveVelocity += info.GravityScale * 1.4f * interval * Physics.gravity;
+                if (info.Flying)
+                {
+                    // Accumulate stop flight timer value
+                    _stopFlightTimer += interval;
+                    
+                    // Check vertical movement...
+                    if (inputData.Locomotion.Ascend.IsPressed())
+                        moveVelocity += ability.WalkSpeed * 3F * motor.CharacterUp;
+                    else if (inputData.Locomotion.Descend.IsPressed())
+                        moveVelocity -= ability.WalkSpeed * 3F * motor.CharacterUp;
+                }
+                else
+                {
+                    // Apply gravity when gliding and not flying (Not additive when gliding)
+                    moveVelocity += info.GravityScale * 1.4f * interval * Physics.gravity;
+                }
             }
             else // Falling
             {
@@ -115,14 +144,38 @@ namespace CraftSharp.Control
         {
             info.Sprinting = false;
             info.Gliding = false;
+            info.AirTime = 0F;
 
             // Reset request flags
-            _glideToggleRequested = false;
+            //_glideToggleRequested = false;
+            _flightRequested = false;
 
             // Register input action events
-            player.Actions.Locomotion.Jump.performed += glideToggleRequestCallback = (context) =>
+            player.Actions.Locomotion.Jump.performed += glideToggleRequestCallback = _ =>
             {
-                _glideToggleRequested = true;
+                if (info.GameMode == GameMode.Creative)
+                {
+                    if (!info.Flying)
+                    {
+                        if (info.AirTime <= FLIGHT_START_AIRTIME_MAX)
+                        {
+                            Debug.Log("Request flight");
+                            _flightRequested = true;
+                        }
+                    }
+                    else
+                    {
+                        if (_stopFlightTimer <= FLIGHT_STOP_TIMEOUT_MAX)
+                        {
+                            info.Flying = false; // Stop flight
+                            Debug.Log("Stop flight");
+                        }
+                        
+                        _stopFlightTimer = 0F;
+                    }
+                }
+                
+                //_glideToggleRequested = true;
             };
         }
 

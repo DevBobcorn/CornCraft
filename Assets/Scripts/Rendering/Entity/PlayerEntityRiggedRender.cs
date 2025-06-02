@@ -107,7 +107,7 @@ namespace CraftSharp.Rendering
             if (!entityAnimator) return;
             
             // Update animator parameters
-            entityAnimator.SetBool(GLIDING_HASH, info.Gliding);
+            entityAnimator.SetBool(GLIDING_HASH, info.Gliding || info.Flying);
             entityAnimator.SetBool(MOVING_HASH, info.Moving);
             entityAnimator.SetBool(SPRINTING_HASH, info.Sprinting || info.SprintBrakeTime > 0F);
             entityAnimator.SetBool(WALK_MODE_HASH, info.WalkMode);

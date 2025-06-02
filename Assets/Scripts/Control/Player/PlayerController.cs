@@ -310,16 +310,18 @@ namespace CraftSharp.Control
 
         private void SetGameMode(GameMode gameMode)
         {
+            Status!.GameMode = gameMode;
+
             switch (gameMode)
             {
                 case GameMode.Survival:
                 case GameMode.Creative:
                 case GameMode.Adventure:
-                    Status!.Spectating = false;
+                    Status.Spectating = false;
                     EnableEntity();
                     break;
                 case GameMode.Spectator:
-                    Status!.Spectating = true;
+                    Status.Spectating = true;
                     DisableEntity();
                     break;
             }
