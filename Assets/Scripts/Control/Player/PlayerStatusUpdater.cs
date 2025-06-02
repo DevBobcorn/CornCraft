@@ -48,13 +48,32 @@ namespace CraftSharp.Control
             Debug.DrawRay(rayCenter, motor.CharacterUp * -GROUND_RAYCAST_DIST, Color.cyan);
 
             // Perform barrier check and wall check
-            const float barrierCheckRayHeight = 0.1F;
-            var barrierCheckRayOrigin = transform.position + barrierCheckRayHeight * motor.CharacterUp;
-
+            const float barrierLowerCheckRayHeight = 0.1F;
+            const float barrierUpperCheckRayHeight = 0.6F;
+            var barrierLowerCheckRayOrigin = transform.position + barrierLowerCheckRayHeight * motor.CharacterUp;
+            var barrierLowerResult = Physics.Raycast(barrierLowerCheckRayOrigin, frontDirNormalized,
+                out RaycastHit barrierLowerForwardHit,
+                BARRIER_RAYCAST_LENGTH, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore);
+            var barrierUpperCheckRayOrigin = transform.position + barrierUpperCheckRayHeight * motor.CharacterUp;
+            var barrierUpperResult = Physics.Raycast(barrierUpperCheckRayOrigin, frontDirNormalized,
+                out RaycastHit barrierUpperForwardHit,
+                BARRIER_RAYCAST_LENGTH, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore);
+            
             // > Cast a ray forward from feet height
-            if (Physics.Raycast(barrierCheckRayOrigin, frontDirNormalized, out RaycastHit barrierForwardHit, 
-                BARRIER_RAYCAST_LENGTH, terrainBoxColliderLayer, QueryTriggerInteraction.Ignore))
+            if (barrierLowerResult || barrierUpperResult)
             {
+                RaycastHit barrierForwardHit;
+
+                if (barrierLowerResult && barrierUpperResult) // Both rays hit something, pick the nearer one
+                {
+                    barrierForwardHit = barrierLowerForwardHit.distance <= barrierUpperForwardHit.distance ?
+                            barrierLowerForwardHit : barrierUpperForwardHit;
+                }
+                else // Only one of them hit something, check which
+                {
+                    barrierForwardHit = barrierLowerResult ? barrierLowerForwardHit : barrierUpperForwardHit;
+                }
+                
                 Status.BarrierYawAngle = Vector3.Angle(frontDirNormalized, -barrierForwardHit.normal);
                 Status.BarrierDistance = barrierForwardHit.distance;
 
@@ -90,8 +109,6 @@ namespace CraftSharp.Control
                 // Skip wall check
                 Status.WallDistance = 0F;
             }
-
-            Debug.DrawRay(barrierCheckRayOrigin, frontDirNormalized, Color.blue);
 
             // In liquid state update
             Status.InLiquid = Physics.CheckBox(transform.position + motor.CharacterUp * 0.25F,

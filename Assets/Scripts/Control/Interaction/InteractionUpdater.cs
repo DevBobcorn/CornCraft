@@ -244,6 +244,13 @@ namespace CraftSharp.Control
                 }
             }
             
+            if (propTable.TryGetValue("type", out possibleValues))
+            {
+                if (possibleValues.Contains("bottom"))
+                {
+                    predicateProps["type"] = clickedTopHalf ? "top" : "bottom";
+                }
+            }
 
             if (propTable.TryGetValue("half", out possibleValues))
             {
