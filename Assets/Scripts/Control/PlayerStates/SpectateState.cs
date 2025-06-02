@@ -12,7 +12,7 @@ namespace CraftSharp.Control
         {
             var ability = player.AbilityConfig;
 
-            info.Sprinting = false;
+            info.Sprinting = inputData.Locomotion.Sprint.IsPressed();
 
             Vector3 moveVelocity = Vector3.zero;
 
@@ -23,10 +23,10 @@ namespace CraftSharp.Control
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
-                var moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
 
-                // Use the target visual yaw as actual movement direction, y speed is set to 0 by this point
-                moveVelocity = Quaternion.AngleAxis(info.TargetVisualYaw, motor.CharacterUp) * Vector3.forward * moveSpeed;
+                // Use target orientation to calculate actual movement direction, y speed is set to 0 by this point
+                moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
             }
             else
             {
@@ -51,6 +51,8 @@ namespace CraftSharp.Control
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
+            info.Sprinting = false;
+            
             // Ungrounded, go to falling state
             if (nextState == PlayerStates.AIRBORNE && !info.Grounded)
             {

@@ -284,16 +284,17 @@ namespace CraftSharp.Control
             EventManager.Instance.Broadcast(new TargetBlockLocUpdateEvent(newBlockLoc));
         }
 
-        private void UpdateBlockInteractions(ChunkRenderManager chunksManager)
+        private void UpdateBlockTriggerInteractions(ChunkRenderManager chunksManager)
         {
-            var playerBlockLoc = client!.GetCurrentLocation().GetBlockLoc();
+            if (!client) return;
+            
+            var playerBlockLoc = client.GetCurrentLocation().GetBlockLoc();
             var table = InteractionManager.INSTANCE.InteractionTable;
 
-            if (!client) return;
-
             foreach (var blockLoc in blockTriggerInteractionInfos.Keys.ToList()
-                         .Where(blockLoc => playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS)
-                         .Where(blockLoc => blockLoc != TargetBlockLoc))
+                         .Where(blockLoc => playerBlockLoc.SqrDistanceTo(blockLoc) > BLOCK_INTERACTION_RADIUS_SQR_PLUS
+                                            // Don't remove target block from list even if it's far
+                                            && blockLoc != TargetBlockLoc))
             {
                 RemoveBlockTriggerInteractionsAt(blockLoc, info =>
                 {
@@ -374,6 +375,18 @@ namespace CraftSharp.Control
                         //Debug.Log($"Rem: [{blockLoc}]");
                     }
                 }
+            }
+        }
+
+        private void ClearBlockTriggerInteractions()
+        {
+            foreach (var blockLoc in blockTriggerInteractionInfos.Keys.ToList())
+            {
+                RemoveBlockTriggerInteractionsAt(blockLoc, info =>
+                {
+                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                });
+                //Debug.Log($"Rem: [{blockLoc}]");
             }
         }
 
@@ -495,6 +508,8 @@ namespace CraftSharp.Control
 
             if (playerController != curPlayerController)
             {
+                if (client.GameMode == GameMode.Spectator) return;
+                
                 playerController = curPlayerController;
 
                 playerController.Actions.Interaction.ChargedAttack.performed += _ =>
@@ -531,6 +546,8 @@ namespace CraftSharp.Control
 
                 playerController.Actions.Interaction.NormalAttack.performed += _ =>
                 {
+                    if (client.GameMode == GameMode.Spectator) return;
+                    
                     var status = playerController.Status;
 
                     if (TargetBlockLoc is not null && TargetDirection is not null && instaBreakCooldown <= 0F)
@@ -563,6 +580,8 @@ namespace CraftSharp.Control
 
                 playerController.Actions.Interaction.UseChargedItem.performed += _ =>
                 {
+                    if (client.GameMode == GameMode.Spectator) return;
+                    
                     var status = playerController.Status;
 
                     if (currentActionType == ItemActionType.Bow)
@@ -580,6 +599,8 @@ namespace CraftSharp.Control
 
                 playerController.Actions.Interaction.UseNormalItem.performed += _ =>
                 {
+                    if (client.GameMode == GameMode.Spectator) return;
+                    
                     if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null)
                     {
                         if (blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value)) // Check if target block is interactable
@@ -619,6 +640,8 @@ namespace CraftSharp.Control
             
                 playerController.Actions.Interaction.PickTargetItem.performed += _ =>
                 {
+                    if (client.GameMode == GameMode.Spectator) return;
+                    
                     //if (client.GetProtocolVersion() < ProtocolMinecraft.MC_1_21_4_Version)
                     if (TargetBlockLoc is not null)
                     {
@@ -835,10 +858,18 @@ namespace CraftSharp.Control
         {
             instaBreakCooldown -= Time.deltaTime;
             placeBlockCooldown -= Time.deltaTime;
+            
+            if (!client) return;
 
             if (cameraController && cameraController.IsAimingOrLocked)
             {
                 UpdateBlockSelection(cameraController.GetPointerRay(), MAX_INTERACTION_DISTANCE);
+
+                if (client.GameMode == GameMode.Spectator)
+                {
+                    AbortDiggingBlockIfPresent();
+                    return;
+                }
 
                 if (TargetBlockLoc is not null && TargetDirection is not null && TargetExactLoc is not null &&
                     playerController && client)
@@ -923,8 +954,18 @@ namespace CraftSharp.Control
         {
             if (client)
             {
-                // Update block interactions
-                UpdateBlockInteractions(client.ChunkRenderManager);
+                if (client.GameMode != GameMode.Spectator)
+                {
+                    // Update block interactions
+                    UpdateBlockTriggerInteractions(client.ChunkRenderManager);
+                }
+                else
+                {
+                    if (blockTriggerInteractionInfos.Any())
+                    {
+                        ClearBlockTriggerInteractions();
+                    }
+                }
             }
         }
 

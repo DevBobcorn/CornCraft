@@ -254,7 +254,7 @@ namespace CraftSharp.UI
                 transitionCooldown -= Time.unscaledDeltaTime;
                 return;
             }
-            
+
             var game = CornApp.CurrentClient;
             if (!game) return;
 
@@ -266,15 +266,17 @@ namespace CraftSharp.UI
                     if (modePanelShown) // Select next gamemode
                     {
                         selectedMode = (selectedMode + 1) % buttonCount;
-                        modeText.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
+                        modeText.text =
+                            ChatParser.TranslateString($"gameMode.{((GameMode)selectedMode).GetIdentifier()}");
                         modeButtons[selectedMode].Select();
                     }
                     else // Show gamemode switch
                     {
-                        selectedMode = (int) game.GameMode;
+                        selectedMode = (int)game.GameMode;
                         if (selectedMode >= 0 && selectedMode < modeButtons.Length)
                         {
-                            modeText.text = ChatParser.TranslateString($"gameMode.{((GameMode) selectedMode).GetIdentifier()}");
+                            modeText.text =
+                                ChatParser.TranslateString($"gameMode.{((GameMode)selectedMode).GetIdentifier()}");
                             modePanelAnimator.SetBool(SHOW_HASH, true);
                             modePanelShown = true;
                             modeButtons[selectedMode].Select();
@@ -297,9 +299,9 @@ namespace CraftSharp.UI
                         crosshairAnimator.SetBool(SHOW_HASH, true);
                     }
 
-                    if (selectedMode != (int) game.GameMode) // Commit switch request
+                    if (selectedMode != (int)game.GameMode) // Commit switch request
                     {
-                        game.TrySendChat($"/gamemode {((GameMode) selectedMode).GetIdentifier()}");
+                        game.TrySendChat($"/gamemode {((GameMode)selectedMode).GetIdentifier()}");
                     }
                 }
                 else // Toggle debug info
@@ -308,68 +310,72 @@ namespace CraftSharp.UI
                 }
             }
 
-            if (Keyboard.current.xKey.wasPressedThisFrame) // Execute interactions
-            {
-                interactionPanel.RunInteractionOption();
-            }
-
             if (Keyboard.current.pKey.wasPressedThisFrame) // Open packet screen
             {
                 game.ScreenControl.PushScreen<PacketScreen>();
             }
-
-            var mouseScroll = Mouse.current.scroll.value.y;
-            if (mouseScroll != 0F && !Keyboard.current.shiftKey.IsPressed())
-            {
-                if (interactionPanel && interactionPanel.ShouldConsumeMouseScroll && Keyboard.current.altKey.isPressed) // Interaction option selection
-                {
-                    if (mouseScroll < 0F)
-                        interactionPanel.SelectNextOption();
-                    else
-                        interactionPanel.SelectPrevOption();
-                }
-                else // Hotbar slot selection
-                {
-                    if (mouseScroll < 0F)
-                        game.ChangeHotbarSlotBy(1);
-                    else
-                        game.ChangeHotbarSlotBy(-1);
-                }
-            }
             
-            // Hotbar slot selection by key
-            if (Keyboard.current.digit1Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(0);
-            if (Keyboard.current.digit2Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(1);
-            if (Keyboard.current.digit3Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(2);
-            if (Keyboard.current.digit4Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(3);
-            if (Keyboard.current.digit5Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(4);
-            if (Keyboard.current.digit6Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(5);
-            if (Keyboard.current.digit7Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(6);
-            if (Keyboard.current.digit8Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(7);
-            if (Keyboard.current.digit9Key.wasPressedThisFrame)
-                game.ChangeHotbarSlot(8);
+            if (game.GameMode != GameMode.Spectator) // Check inventory actions
+            {
+                if (Keyboard.current.xKey.wasPressedThisFrame) // Execute interactions
+                {
+                    interactionPanel.RunInteractionOption();
+                }
 
-            if (Keyboard.current.qKey.wasPressedThisFrame)
-            {
-                game.DropItem(Keyboard.current.ctrlKey.isPressed);
-            }
+                var mouseScroll = Mouse.current.scroll.value.y;
+                if (mouseScroll != 0F && !Keyboard.current.shiftKey.IsPressed())
+                {
+                    if (interactionPanel && interactionPanel.ShouldConsumeMouseScroll &&
+                        Keyboard.current.altKey.isPressed) // Interaction option selection
+                    {
+                        if (mouseScroll < 0F)
+                            interactionPanel.SelectNextOption();
+                        else
+                            interactionPanel.SelectPrevOption();
+                    }
+                    else // Hotbar slot selection
+                    {
+                        if (mouseScroll < 0F)
+                            game.ChangeHotbarSlotBy(1);
+                        else
+                            game.ChangeHotbarSlotBy(-1);
+                    }
+                }
 
-            if (Keyboard.current.fKey.wasPressedThisFrame)
-            {
-                game.SwapItemOnHands();
-            }
-            
-            if (Keyboard.current.eKey.wasPressedThisFrame)
-            {
-                game.OpenPlayerInventory();
+                // Hotbar slot selection by key
+                if (Keyboard.current.digit1Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(0);
+                if (Keyboard.current.digit2Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(1);
+                if (Keyboard.current.digit3Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(2);
+                if (Keyboard.current.digit4Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(3);
+                if (Keyboard.current.digit5Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(4);
+                if (Keyboard.current.digit6Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(5);
+                if (Keyboard.current.digit7Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(6);
+                if (Keyboard.current.digit8Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(7);
+                if (Keyboard.current.digit9Key.wasPressedThisFrame)
+                    game.ChangeHotbarSlot(8);
+
+                if (Keyboard.current.qKey.wasPressedThisFrame)
+                {
+                    game.DropItem(Keyboard.current.ctrlKey.isPressed);
+                }
+
+                if (Keyboard.current.fKey.wasPressedThisFrame)
+                {
+                    game.SwapItemOnHands();
+                }
+
+                if (Keyboard.current.eKey.wasPressedThisFrame)
+                {
+                    game.OpenPlayerInventory();
+                }
             }
 
             if (Keyboard.current.slashKey.wasPressedThisFrame)
