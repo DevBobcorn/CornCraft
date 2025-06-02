@@ -952,8 +952,6 @@ namespace CraftSharp.UI
             {
                 var effectId = MobEffectPalette.INSTANCE.GetIdByNumId(e.EffectId);
                 
-                Debug.Log($"Remove mob effect {effectId}");
-                
                 mobEffectsPanel.RemoveIconSprite(effectId);
                 mobEffectsCurrentTicks.Remove(effectId);
                 mobEffectsNames.Remove(effectId);
