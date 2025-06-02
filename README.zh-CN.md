@@ -33,17 +33,18 @@ CornCraft用来解析原版资源包的代码已独立成一个package并开源�
 键位                                                       | 操作
 ---                                                       | :---:
 <kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> | 水平移动
-<kbd>空格</kbd>                                           | 空中向上移动（或跳跃）
-<kbd>左Shift</kbd>                                        | 空中向下移动
+<kbd>空格</kbd>                                           | 空中向上移动/跳跃
+<kbd>空格</kbd> * 2                                       | 切换飞行（创造模式）
+<kbd>左Shift</kbd>                                        | 疾跑/空中向下移动
 <kbd>左Ctrl</kbd>                                         | 切换行走/奔跑模式
 <kbd>鼠标滚轮</kbd>                                        | 选择快捷栏物品
 <kbd>鼠标滚轮</kbd> + <kbd>Alt</kbd>                       | 选择交互选项
 <kbd>E</kbd>                                              | 打开玩家物品栏
 <kbd>F</kbd>                                              | 交换主副手物品
-<kbd>R</kbd>                                              | 切换瞄准模式（需在地面上）
+<kbd>R</kbd>                                              | 切换瞄准模式
 <kbd>X</kbd>                                              | 进行交互
 <kbd>F3</kbd>                                             | 切换调试信息
-<kbd>F3</kbd> + <kbd>F4</kbd>（按下）                      | 显示游戏模式菜单
+<kbd>F3（按下）</kbd> + <kbd>F4</kbd>                      | 显示游戏模式菜单
 <kbd>F5</kbd> + <kbd>C</kbd>                              | 重建区块
 <kbd>F5</kbd> + <kbd>L</kbd>                              | 更新全局光照
 <kbd>F6</kbd> / <kbd>F7</kbd> / <kbd>F8</kbd>             | 加载上一个/重载/加载下一个玩家模型
