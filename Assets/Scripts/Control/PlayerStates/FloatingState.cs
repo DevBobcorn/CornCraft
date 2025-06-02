@@ -122,9 +122,8 @@ namespace CraftSharp.Control
                     // Smooth rotation for player model
                     info.CurrentVisualYaw = Mathf.MoveTowardsAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.TurnSpeed * interval * 0.5F);
                     
-                    // Use *current* orientation to calculate actual movement direction, unlike grounded state
-                    // This means our player will not turn around in-place, but rather need to make a U-turn
-                    moveVelocity += player.GetCurrentOrientation() * Vector3.forward * swimSpeed;
+                    // Use target orientation to calculate actual movement direction
+                    moveVelocity += player.GetMovementOrientation() * Vector3.forward * swimSpeed;
                 }
 
                 // Smooth movement (if accelerating)

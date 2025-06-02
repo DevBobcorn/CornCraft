@@ -509,14 +509,6 @@ namespace CraftSharp.Control
             }
         }
 
-        public Quaternion GetCurrentOrientation()
-        {
-            var upward = m_InitialUpward;
-            var forward = Quaternion.AngleAxis(Status!.CurrentVisualYaw, upward) * m_InitialForward;
-
-            return Quaternion.LookRotation(forward, upward);
-        }
-
         public Quaternion GetMovementOrientation()
         {
             var upward = m_InitialUpward;
