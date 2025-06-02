@@ -12,7 +12,8 @@ namespace CraftSharp.Control
         {
             var ability = player.AbilityConfig;
 
-            info.Sprinting = inputData.Locomotion.Sprint.IsPressed();
+            // Sprinting and moving downwards uses the same key, so we don't use it
+            info.Sprinting = false;
 
             Vector3 moveVelocity = Vector3.zero;
 
@@ -20,10 +21,10 @@ namespace CraftSharp.Control
             {
                 info.Moving = true;
 
-                // Smooth rotation for player model
+                // Update orientation for player model
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
-                var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                var moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
 
                 // Use target orientation to calculate actual movement direction, y speed is set to 0 by this point
                 moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
