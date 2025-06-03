@@ -38,19 +38,19 @@ Key                                                       | Action
 <kbd>Left Shift</kbd>                                     | Sprint/Move Down in Air
 <kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
 <kbd>Mouse Scroll</kbd>                                   | Select Hotbar Slot
-<kbd>Mouse Scroll</kbd> + <kbd>Alt</kbd>                  | Select Interaction Option
+<kbd>Alt (Hold)</kbd> + <kbd>Mouse Scroll</kbd>           | Select Interaction Option
 <kbd>E</kbd>                                              | Open Player Inventory
 <kbd>F</kbd>                                              | Swap Items on Hands
 <kbd>R</kbd>                                              | Toggle Camera Focus Lock
 <kbd>X</kbd>                                              | Perform Interaction
 <kbd>F3</kbd>                                             | Toggle Debug Info
 <kbd>F3 (Hold)</kbd> + <kbd>F4</kbd>                      | Show Game Mode Switch
-<kbd>F5</kbd> + <kbd>C</kbd>                              | Rebuild Chunks
-<kbd>F5</kbd> + <kbd>L</kbd>                              | Update Global Illumination
+<kbd>F5 (Hold)</kbd> + <kbd>C</kbd>                              | Rebuild Chunks
+<kbd>F5 (Hold)</kbd> + <kbd>L</kbd>                              | Update Global Illumination
 <kbd>F6</kbd> / <kbd>F7</kbd> / <kbd>F8</kbd>             | Load Previous/Reload/Load Next Player Model
 <kbd>F11</kbd>                                            | Toggle Fullscreen
-<kbd>Shift</kbd> + <kbd>Tab</kbd>                         | Switch to Next Camera Controller
-<kbd>Shift</kbd> + <kbd>Mouse Scroll</kbd>                | Adjust Camera Zoom
+<kbd>Shift (Hold)</kbd> + <kbd>Tab</kbd>                         | Switch to Next Camera Controller
+<kbd>Shift (Hold)</kbd> + <kbd>Mouse Scroll</kbd>                | Adjust Camera Zoom
 <kbd>T</kbd> / <kbd>/</kbd>                               | Show Chat Screen/Input Command
 <kbd>P</kbd>                                              | Show Packet Inspector Screen
 <kbd>Tab</kbd>                                            | Command Auto-Completion
