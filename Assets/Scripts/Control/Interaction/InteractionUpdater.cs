@@ -133,7 +133,7 @@ namespace CraftSharp.Control
                     blockSelectionBox.transform.position = blockInfo.CellPos;
                     
                     var offsetType = ResourcePackManager.Instance.StateModelTable[blockInfo.StateId].OffsetType;
-                    if (offsetType == OffsetType.XZ_BoundingBox)
+                    if (ChunkRenderBuilder.OffsetTypeAffectsAABB(offsetType))
                     {
                         var locationOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
                                 newBlockLoc.X >> 4, newBlockLoc.Z >> 4,
@@ -302,7 +302,7 @@ namespace CraftSharp.Control
             blockSelectionBox.UpdateShape(predictedBlockState.Shape);
 
             var offsetType = ResourcePackManager.Instance.StateModelTable[predictedStateId].OffsetType;
-            if (offsetType == OffsetType.XZ_BoundingBox)
+            if (ChunkRenderBuilder.OffsetTypeAffectsAABB(offsetType))
             {
                 var locationOffset = ChunkRenderBuilder.GetBlockOffsetInBlock(offsetType,
                     newBlockLoc.X >> 4, newBlockLoc.Z >> 4,

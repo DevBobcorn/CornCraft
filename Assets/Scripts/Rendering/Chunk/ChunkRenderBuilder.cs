@@ -9,7 +9,6 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
-using Object = UnityEngine.Object;
 
 namespace CraftSharp.Rendering
 {
@@ -51,7 +50,7 @@ namespace CraftSharp.Rendering
 
         public static float3 GetBlockOffsetInChunk(OffsetType offsetType, int chunkX, int chunkZ, int blocX, int blocY, int blocZ)
         {
-            if (offsetType == OffsetType.XZ || offsetType == OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
+            if (offsetType is OffsetType.XZ or OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
             {
                 var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
@@ -74,7 +73,7 @@ namespace CraftSharp.Rendering
 
         public static float3 GetBlockOffsetInBlock(OffsetType offsetType, int chunkX, int chunkZ, int blocX, int blocZ)
         {
-            if (offsetType == OffsetType.XZ || offsetType == OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
+            if (offsetType is OffsetType.XZ or OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
             {
                 var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
@@ -572,7 +571,7 @@ namespace CraftSharp.Rendering
         }
 
         private static BoxCollider[] GetBoxCollidersAt(BlockState state, BlockLoc blockLoc,
-            Vector3Int originOffset, GameObject solidGameObject, GameObject fluidGameObject)
+            Vector3Int originOffset, Vector3? blockOffset, GameObject solidGameObject, GameObject fluidGameObject)
         {
             var aabbs = state.Shape.ColliderAABBs ?? state.Shape.AABBs;
             var colliderCount = (state.NoSolidMesh ? 0 : aabbs.Count) + (state.InLiquid ? 1 : 0);
@@ -592,6 +591,9 @@ namespace CraftSharp.Rendering
                 
                 collider.size = new(aabb.SizeZ, aabb.SizeY, aabb.SizeX);
                 collider.center = position + new Vector3(aabb.CenterZ, aabb.CenterY, aabb.CenterX);
+                if (blockOffset.HasValue)
+                    collider.center += blockOffset.Value;
+                
                 boxColliders[i++] = collider;
                 collider.isTrigger = noCollision;
             }
@@ -608,6 +610,11 @@ namespace CraftSharp.Rendering
             return boxColliders;
         }
 
+        public static bool OffsetTypeAffectsAABB(OffsetType offsetType)
+        {
+            return offsetType == OffsetType.XZ_BoundingBox;
+        }
+
         public static void BuildTerrainColliderBoxes(World world, BlockLoc playerBlockLoc, Vector3Int originOffset,
             GameObject solidGameObject, GameObject fluidGameObject, Dictionary<BlockLoc, BoxCollider[]> colliderList)
         {
@@ -617,12 +624,13 @@ namespace CraftSharp.Rendering
                 // Remove colliders at this location
                 foreach (var collider in colliderList[blockLoc])
                 {
-                    Object.Destroy(collider);
+                    UnityEngine.Object.Destroy(collider);
                 }
                 colliderList.Remove(blockLoc);
             }
 
             var availableBlockLocs = validOffsets.Select(offset => offset + playerBlockLoc);
+            var stateModelTable = ResourcePackManager.Instance.StateModelTable;
 
             foreach (var blockLoc in availableBlockLocs)
             {
@@ -630,9 +638,13 @@ namespace CraftSharp.Rendering
                     continue;
 
                 var block = world.GetBlock(blockLoc);
+                Vector3? blockOffset = stateModelTable.TryGetValue(block.StateId, out var stateModel)
+                    && OffsetTypeAffectsAABB(stateModel.OffsetType)
+                    ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
+                        blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
 
-                colliderList.Add(blockLoc,
-                    GetBoxCollidersAt(block.State, blockLoc, originOffset, solidGameObject, fluidGameObject));
+                colliderList.Add(blockLoc, GetBoxCollidersAt(block.State, blockLoc,
+                    originOffset, blockOffset, solidGameObject, fluidGameObject));
             }
         }
         
@@ -644,15 +656,20 @@ namespace CraftSharp.Rendering
                 // Remove colliders at this location
                 foreach (var collider in colliderList[blockLoc])
                 {
-                    Object.Destroy(collider); 
+                    UnityEngine.Object.Destroy(collider); 
                 }
                 colliderList.Remove(blockLoc);
             }
 
+            var stateModelTable = ResourcePackManager.Instance.StateModelTable;
             var block = world.GetBlock(blockLoc);
+            Vector3? blockOffset = stateModelTable.TryGetValue(block.StateId, out var stateModel)
+                && OffsetTypeAffectsAABB(stateModel.OffsetType)
+                ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
+                    blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
 
-            colliderList.Add(blockLoc,
-                GetBoxCollidersAt(block.State, blockLoc, originOffset, solidGameObject, fluidGameObject));
+            colliderList.Add(blockLoc, GetBoxCollidersAt(block.State, blockLoc,
+                originOffset, blockOffset, solidGameObject, fluidGameObject));
         }
     }
 }

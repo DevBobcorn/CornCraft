@@ -1019,7 +1019,7 @@ namespace CraftSharp.Rendering
                 if (blockState.Shape.AABBs.Count == 0) continue; // No AABB, skip
 
                 var offsetType = stateModelTable[block.StateId].OffsetType;
-                Vector3? offset = offsetType == OffsetType.XZ_BoundingBox ? ChunkRenderBuilder.GetBlockOffsetInBlock(
+                Vector3? offset = ChunkRenderBuilder.OffsetTypeAffectsAABB(offsetType) ? ChunkRenderBuilder.GetBlockOffsetInBlock(
                     offsetType, blockLoc.X >> 4, blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
 
                 aabbInfo = Raycaster.RaycastBlockShape(cellSpaceRay, blockState.Shape, offset);
