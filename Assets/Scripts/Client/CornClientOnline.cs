@@ -1861,8 +1861,6 @@ namespace CraftSharp
             activeInventoryId = inventoryId;
             inventories[inventoryId] = inventoryData;
 
-            Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
-
             Loom.QueueOnMainThread(() =>
             {
                 // Set inventory id before opening the screen

@@ -652,12 +652,6 @@ namespace CraftSharp
         public void DummyOnInventoryOpen(int inventoryId, InventoryData inventoryData)
         {
             inventories[inventoryId] = inventoryData;
-
-            if (inventoryId != 0)
-            {
-                Debug.Log(Translations.Get("extra.inventory_open", inventoryId, inventoryData.Title));
-                Debug.Log(Translations.Get("extra.inventory_interact"));
-            }
         }
 
         /// <summary>
