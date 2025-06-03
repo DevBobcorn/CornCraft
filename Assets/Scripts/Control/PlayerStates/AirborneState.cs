@@ -146,6 +146,7 @@ namespace CraftSharp.Control
         {
             info.Sprinting = false;
             info.Gliding = false;
+            info.Flying = false;
             info.AirTime = 0F;
 
             // Reset request flags
@@ -181,6 +182,9 @@ namespace CraftSharp.Control
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
+            info.Gliding = false;
+            info.Flying = false;
+
             // Unregister input action events
             player.Actions.Locomotion.Jump.performed -= glideToggleRequestCallback;
         }
