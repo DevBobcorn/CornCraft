@@ -1,3 +1,4 @@
+using System.Linq;
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
 using Unity.Mathematics;
@@ -63,7 +64,7 @@ namespace CraftSharp.Control
             if (currentBlockShape == blockShape) return;
             currentBlockShape = blockShape;
 
-            var aabbs = blockShape.AABBs;
+            var aabbs = blockShape.AABBs.ToArray();
             var displayedBoxCount = Mathf.Min(aabbs.Length, MAX_AABB_COUNT);
 
             int i = 0;

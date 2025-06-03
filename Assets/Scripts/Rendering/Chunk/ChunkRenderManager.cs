@@ -963,7 +963,7 @@ namespace CraftSharp.Rendering
                     }
                     colliderList.Clear();
 
-                    builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject!, liquidBoxColliderGameObject!, colliderList);
+                    ChunkRenderBuilder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject!, liquidBoxColliderGameObject!, colliderList);
 
                     // Set last player location
                     lastPlayerBlockLoc = playerBlockLoc;
@@ -975,12 +975,12 @@ namespace CraftSharp.Rendering
 
         public void RebuildTerrainBoxCollider(BlockLoc playerBlockLoc)
         {
-            builder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
+            ChunkRenderBuilder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
         }
-        
-        public void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
+
+        private void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
         {
-            builder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
+            ChunkRenderBuilder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
         }
 
         public record BlockRaycastInfo
@@ -1016,7 +1016,7 @@ namespace CraftSharp.Rendering
                 if (block.StateId == 0) continue; // Extra optimization for air
                 
                 var blockState = block.State;
-                if (blockState.Shape.AABBs.Length == 0) continue; // No AABB, skip
+                if (blockState.Shape.AABBs.Count == 0) continue; // No AABB, skip
 
                 var offsetType = stateModelTable[block.StateId].OffsetType;
                 Vector3? offset = offsetType == OffsetType.XZ_BoundingBox ? ChunkRenderBuilder.GetBlockOffsetInBlock(

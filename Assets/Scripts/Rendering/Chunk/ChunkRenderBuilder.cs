@@ -574,26 +574,25 @@ namespace CraftSharp.Rendering
         private static BoxCollider[] GetBoxCollidersAt(BlockState state, BlockLoc blockLoc,
             Vector3Int originOffset, GameObject solidGameObject, GameObject fluidGameObject)
         {
-            var aabbs = state.Shape.AABBs;
-            var colliderCount = (state.NoSolidMesh ? 0 : aabbs.Length) + (state.InLiquid ? 1 : 0);
+            var aabbs = state.Shape.ColliderAABBs ?? state.Shape.AABBs;
+            var colliderCount = (state.NoSolidMesh ? 0 : aabbs.Count) + (state.InLiquid ? 1 : 0);
             
             if (colliderCount == 0)
                 return Array.Empty<BoxCollider>();
             
             var boxColliders = new BoxCollider[colliderCount];
-            int i;
+            int i = 0;
 
             var noCollision = state.NoCollision;
             var position = CoordConvert.MC2Unity(originOffset, blockLoc.ToLocation());
-
-            for (i = 0; i < (state.NoSolidMesh ? 0 : aabbs.Length); i++) // Add block shape colliders
+            
+            foreach (var aabb in aabbs) // Add block shape colliders
             {
-                var aabb = aabbs[i];
                 var collider = solidGameObject.AddComponent<BoxCollider>();
                 
                 collider.size = new(aabb.SizeZ, aabb.SizeY, aabb.SizeX);
                 collider.center = position + new Vector3(aabb.CenterZ, aabb.CenterY, aabb.CenterX);
-                boxColliders[i] = collider;
+                boxColliders[i++] = collider;
                 collider.isTrigger = noCollision;
             }
             if (state.InLiquid) // Add liquid collider
@@ -602,14 +601,14 @@ namespace CraftSharp.Rendering
                 
                 collider.size = new(1F, 1F, 1F);
                 collider.center = new Vector3(0.5F, 0.5F, 0.5F) + position;
-                boxColliders[i] = collider;
+                boxColliders[i] = collider; // Don't increase since i is not used afterwards
                 collider.isTrigger = true;
             }
                 
             return boxColliders;
         }
 
-        public void BuildTerrainColliderBoxes(World world, BlockLoc playerBlockLoc, Vector3Int originOffset,
+        public static void BuildTerrainColliderBoxes(World world, BlockLoc playerBlockLoc, Vector3Int originOffset,
             GameObject solidGameObject, GameObject fluidGameObject, Dictionary<BlockLoc, BoxCollider[]> colliderList)
         {
             foreach (var blockLoc in colliderList.Keys.ToList()
@@ -637,7 +636,7 @@ namespace CraftSharp.Rendering
             }
         }
         
-        public void BuildTerrainColliderBoxesAt(World world, BlockLoc blockLoc, Vector3Int originOffset,
+        public static void BuildTerrainColliderBoxesAt(World world, BlockLoc blockLoc, Vector3Int originOffset,
             GameObject solidGameObject, GameObject fluidGameObject, Dictionary<BlockLoc, BoxCollider[]> colliderList)
         {
             if (colliderList.ContainsKey(blockLoc))
@@ -645,7 +644,7 @@ namespace CraftSharp.Rendering
                 // Remove colliders at this location
                 foreach (var collider in colliderList[blockLoc])
                 {
-                    Object.Destroy(collider);
+                    Object.Destroy(collider); 
                 }
                 colliderList.Remove(blockLoc);
             }

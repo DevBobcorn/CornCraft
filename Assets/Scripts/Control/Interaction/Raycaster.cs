@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -103,11 +104,9 @@ namespace CraftSharp.Control
             
             var minDistance = float.PositiveInfinity;
 
-            foreach (var aabb in blockShape.AABBs)
+            foreach (var res in blockShape.AABBs.Select(aabb => RaycastAABB(cellSpaceRay, blockOffset.HasValue ?
+                         aabb.WithOffset(blockOffset.Value.z, blockOffset.Value.y, blockOffset.Value.x) : aabb)))
             {
-                var res = RaycastAABB(cellSpaceRay, blockOffset.HasValue ?
-                    aabb.WithOffset(blockOffset.Value.z, blockOffset.Value.y, blockOffset.Value.x) : aabb);
-
                 float curDistance;
                 if (res.hit && (curDistance = (res.point - cellSpaceRay.origin).magnitude) < minDistance)
                 {
