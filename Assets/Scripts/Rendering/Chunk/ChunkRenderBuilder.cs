@@ -35,10 +35,41 @@ namespace CraftSharp.Rendering
         }
 
         private readonly Dictionary<int, BlockStateModel> modelTable;
+        private readonly Dictionary<int, BlockNeighborCheck> cullingRules;
+        
+        private static readonly HashSet<ResourceLocation> GLASS_BLOCK_IDS = new()
+        {
+            new("glass"), new("white_stained_glass"), new("orange_stained_glass"),
+            new("magenta_stained_glass"), new("light_blue_stained_glass"), new("yellow_stained_glass"),
+            new("lime_stained_glass"), new("pink_stained_glass"), new("gray_stained_glass"),
+            new("light_gray_stained_glass"), new("cyan_stained_glass"), new("purple_stained_glass"),
+            new("blue_stained_glass"), new("brown_stained_glass"), new("green_stained_glass"),
+            new("red_stained_glass"), new("black_stained_glass")
+        };
+        
+        private static readonly ResourceLocation ICE_BLOCK_ID = new("ice");
 
         public ChunkRenderBuilder(Dictionary<int, BlockStateModel> modelTable)
         {
             this.modelTable = modelTable;
+            var palette = BlockStatePalette.INSTANCE;
+            
+            cullingRules = new();
+
+            // Glass blocks
+            BlockNeighborCheck glassNeighborCheck = (_, neighbor) =>
+                !GLASS_BLOCK_IDS.Contains(neighbor.BlockId) && !neighbor.MeshFaceOcclusionSolid;
+
+            foreach (var stateId in GLASS_BLOCK_IDS
+                         .SelectMany(blockId => palette.GetAllNumIds(blockId)))
+                cullingRules[stateId] = glassNeighborCheck;
+            
+            // Ice block
+            BlockNeighborCheck iceNeighborCheck = (_, neighbor) =>
+                ICE_BLOCK_ID != neighbor.BlockId && !neighbor.MeshFaceOcclusionSolid;
+
+            foreach (var stateId in palette.GetAllNumIds(ICE_BLOCK_ID))
+                cullingRules[stateId] = iceNeighborCheck;
         }
 
         private static long GetSeedForCoords(int i, int j, int k)
@@ -129,8 +160,8 @@ namespace CraftSharp.Rendering
 
                             if (state.InLiquid) // Build liquid here
                             {
-                                var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = getCullFlags(x, y, z, state, neighborCheck);
+                                var liquidNeighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
+                                int liquidCullFlags = getCullFlags(x, y, z, state, liquidNeighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
@@ -144,7 +175,8 @@ namespace CraftSharp.Rendering
                             // If air-like (air, water block, etc), ignore it...
                             if (state.NoSolidMesh) continue;
                             
-                            int cullFlags = getCullFlags(x, y, z, state, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+                            var neighborCheck = cullingRules.GetValueOrDefault(stateId, BlockNeighborChecks.NON_FULL_SOLID);
+                            int cullFlags = getCullFlags(x, y, z, state, neighborCheck);
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
@@ -204,8 +236,8 @@ namespace CraftSharp.Rendering
 
                             if (state.InLiquid) // Build liquid here
                             {
-                                var neighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = getCullFlags(x, y, z, state, neighborCheck);
+                                var liquidNeighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
+                                int liquidCullFlags = getCullFlags(x, y, z, state, liquidNeighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
@@ -221,8 +253,9 @@ namespace CraftSharp.Rendering
 
                             // If air-like (air, water block, etc), ignore it...
                             if (state.NoSolidMesh) continue;
-                            
-                            int cullFlags = getCullFlags(x, y, z, state, BlockNeighborChecks.NON_FULL_SOLID); // TODO Make it more accurate
+
+                            var neighborCheck = cullingRules.GetValueOrDefault(stateId, BlockNeighborChecks.NON_FULL_SOLID);
+                            int cullFlags = getCullFlags(x, y, z, state, neighborCheck);
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
