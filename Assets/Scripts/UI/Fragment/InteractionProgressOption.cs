@@ -15,8 +15,8 @@ namespace CraftSharp.UI
         private void Start()
         {
             // Create a material instance for each bar
-            barMaterial = new Material(barImage.material);
-            barImage.material = barMaterial;
+            barImage.material = new Material(barImage.material);
+            barMaterial = barImage.materialForRendering;
             
             UpdateProgress(0F);
         }
