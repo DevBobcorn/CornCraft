@@ -151,7 +151,7 @@ namespace CraftSharp.UI
             
             hungerCallback = e =>
             {
-                hungerText.text = $"{e.Hunger}/20";
+                hungerText.text = $"[{e.Saturation:0.0}] {e.Hunger}/20";
                 hungerBarFill.fillAmount = Mathf.Clamp01(e.Hunger / 20F);
             };
             

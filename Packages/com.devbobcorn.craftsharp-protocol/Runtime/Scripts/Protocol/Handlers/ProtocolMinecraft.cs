@@ -2173,9 +2173,9 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.UpdateHealth:
                     {
                         var health = DataTypes.ReadNextFloat(packetData);
-                        var food = DataTypes.ReadNextVarInt(packetData);
-                        DataTypes.ReadNextFloat(packetData); // Food Saturation
-                        handler.OnUpdateHealth(health, food);
+                        var hunger = DataTypes.ReadNextVarInt(packetData);
+                        var saturation = DataTypes.ReadNextFloat(packetData); // Food Saturation
+                        handler.OnUpdateHealth(health, hunger, saturation);
                     }
                     break;
                 case PacketTypesIn.SetExperience:

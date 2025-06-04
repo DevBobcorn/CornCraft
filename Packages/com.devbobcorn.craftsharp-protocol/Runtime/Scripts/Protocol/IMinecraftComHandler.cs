@@ -297,9 +297,10 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when player health or hunger changed.
         /// </summary>
-        /// <param name="health"></param>
-        /// <param name="food"></param>
-        void OnUpdateHealth(float health, int food);
+        /// <param name="health">New health</param>
+        /// <param name="hunger">New hunger</param>
+        /// <param name="saturation">New hunger</param>
+        void OnUpdateHealth(float health, int hunger, float saturation);
 
         /// <summary>
         /// Called when entity metadata or metadata changed.

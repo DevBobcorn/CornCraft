@@ -77,7 +77,9 @@ namespace CraftSharp
         private bool locationReceived = false;
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
-        private int currentHunger, experienceLevel, totalExperience;
+        private int currentHunger;
+        private float currentSaturation;
+        private int experienceLevel, totalExperience;
         private int activeInventoryId = -1;
         private readonly Dictionary<int, InventoryData> inventories = new();
         
@@ -2393,11 +2395,12 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when client player's health changed, e.g. getting attack
+        /// Called when client player's health changed, e.g. getting attacked
         /// </summary>
         /// <param name="health">Player current health</param>
         /// <param name="hunger">Player current hunger</param>
-        public void OnUpdateHealth(float health, int hunger)
+        /// <param name="saturation">Player current saturation</param>
+        public void OnUpdateHealth(float health, int hunger, float saturation)
         {
             bool updateMaxHealth = clientEntity.MaxHealth < health;
 
@@ -2406,12 +2409,13 @@ namespace CraftSharp
             
             clientEntity.Health = health;
             currentHunger = hunger;
+            currentSaturation = saturation;
 
             EventManager.Instance.BroadcastOnUnityThread
                     <HealthUpdateEvent>(new(health, updateMaxHealth));
             
             EventManager.Instance.BroadcastOnUnityThread
-                    <HungerUpdateEvent>(new(hunger));
+                    <HungerUpdateEvent>(new(hunger, saturation));
         }
 
         /// <summary>
