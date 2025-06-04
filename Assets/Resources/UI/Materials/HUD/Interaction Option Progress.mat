@@ -16,7 +16,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -30,8 +30,14 @@ Material:
     m_Ints: []
     m_Floats:
     - _BorderThickness: 9
+    - _ColorMask: 15
     - _DeltaAmount: 1
     - _FillAmount: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
     m_Colors:
     - _BarSize: {r: 300, g: 100, b: 0, a: 0}
     - _BorderColor: {r: 1, g: 1, b: 1, a: 1}
