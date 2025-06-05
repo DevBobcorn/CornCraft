@@ -17537,7 +17537,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -17602,7 +17621,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 11.0
+            },
+            "slot": "body"
+          },
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "body"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -19987,7 +20025,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 1.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20010,7 +20067,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20033,7 +20109,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20056,7 +20151,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 1.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20079,7 +20193,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20102,7 +20235,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 5.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20125,7 +20277,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 4.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20148,7 +20319,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 1.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20171,7 +20361,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20194,7 +20403,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 6.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20217,7 +20445,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 5.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20240,7 +20487,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20263,7 +20529,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20286,7 +20571,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 8.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "chest"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20309,7 +20613,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 6.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "legs"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20332,7 +20655,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "feet"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20355,7 +20697,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20378,7 +20739,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 5.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20401,7 +20781,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20424,7 +20823,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 1.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20447,7 +20865,35 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "head"
+          },
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.knockback_resistance",
+              "operation": "add_value",
+              "value": 0.1
+            },
+            "slot": "head"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20471,7 +20917,35 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 8.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "chest"
+          },
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.knockback_resistance",
+              "operation": "add_value",
+              "value": 0.1
+            },
+            "slot": "chest"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20495,7 +20969,35 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 6.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "legs"
+          },
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.knockback_resistance",
+              "operation": "add_value",
+              "value": 0.1
+            },
+            "slot": "legs"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20519,7 +21021,35 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "feet"
+          },
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.knockback_resistance",
+              "operation": "add_value",
+              "value": 0.1
+            },
+            "slot": "feet"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:damage": 0,
@@ -20656,31 +21186,23 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 100,
+              "id": "minecraft:regeneration",
               "amplifier": 1,
+              "duration": 100,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           },
           {
             "effect": {
-              "effect": {},
-              "duration": 2400,
+              "id": "minecraft:absorption",
               "amplifier": 0,
+              "duration": 2400,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           }
@@ -20716,61 +21238,45 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 400,
+              "id": "minecraft:regeneration",
               "amplifier": 1,
+              "duration": 400,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           },
           {
             "effect": {
-              "effect": {},
-              "duration": 6000,
+              "id": "minecraft:resistance",
               "amplifier": 0,
-              "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
-            },
-            "probability": 1.0
-          },
-          {
-            "effect": {
-              "effect": {},
               "duration": 6000,
-              "amplifier": 0,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           },
           {
             "effect": {
-              "effect": {},
-              "duration": 2400,
+              "id": "minecraft:fire_resistance",
+              "amplifier": 0,
+              "duration": 6000,
+              "ambient": false,
+              "show_particles": true,
+              "show_icon": true
+            },
+            "probability": 1.0
+          },
+          {
+            "effect": {
+              "id": "minecraft:absorption",
               "amplifier": 3,
+              "duration": 2400,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           }
@@ -21981,46 +22487,34 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 1200,
+              "id": "minecraft:poison",
               "amplifier": 1,
+              "duration": 1200,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           },
           {
             "effect": {
-              "effect": {},
-              "duration": 300,
+              "id": "minecraft:hunger",
               "amplifier": 2,
+              "duration": 300,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           },
           {
             "effect": {
-              "effect": {},
-              "duration": 300,
+              "id": "minecraft:nausea",
               "amplifier": 0,
+              "duration": 300,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           }
@@ -23231,16 +23725,12 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 600,
+              "id": "minecraft:hunger",
               "amplifier": 0,
+              "duration": 600,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 0.3
           }
@@ -23303,16 +23793,12 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 600,
+              "id": "minecraft:hunger",
               "amplifier": 0,
+              "duration": 600,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 0.8
           }
@@ -23498,16 +23984,12 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 100,
+              "id": "minecraft:poison",
               "amplifier": 0,
+              "duration": 100,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 1.0
           }
@@ -25682,16 +26164,12 @@
         "effects": [
           {
             "effect": {
-              "effect": {},
-              "duration": 100,
+              "id": "minecraft:poison",
               "amplifier": 0,
+              "duration": 100,
               "ambient": false,
-              "visible": true,
-              "show_icon": true,
-              "blend_state": {
-                "factor": 0.0,
-                "factor_previous_frame": 0.0
-              }
+              "show_particles": true,
+              "show_icon": true
             },
             "probability": 0.6
           }
@@ -26246,7 +26724,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 5.0
+            },
+            "slot": "body"
+          },
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "body"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:enchantments": {
@@ -26267,7 +26764,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 7.0
+            },
+            "slot": "body"
+          },
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "body"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:enchantments": {
@@ -26288,7 +26804,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 11.0
+            },
+            "slot": "body"
+          },
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 2.0
+            },
+            "slot": "body"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:enchantments": {
@@ -26309,7 +26844,26 @@
     "action_type": "none",
     "default_components": {
       "minecraft:attribute_modifiers": {
-        "modifiers": [],
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor",
+              "operation": "add_value",
+              "value": 3.0
+            },
+            "slot": "body"
+          },
+          {
+            "modifier": {
+              "uuid": "c1c72771-8b8e-ba4a-ace0-81a93c8928b2",
+              "attribute": "generic.armor_toughness",
+              "operation": "add_value",
+              "value": 0.0
+            },
+            "slot": "body"
+          }
+        ],
         "show_in_tooltip": true
       },
       "minecraft:enchantments": {
