@@ -107,8 +107,7 @@ namespace CraftSharp.UI
             var text = getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
                 translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")) );
             
-            // TODO: Also check item enchantments
-            var rarity = itemStack.ItemType.Rarity;
+            var rarity = itemStack.Rarity;
             
             if (rarity != ItemRarity.Common)
             {
@@ -288,13 +287,13 @@ namespace CraftSharp.UI
             // Update damage bar image
             var damage = newItemStack?.Damage ?? 0;
             
-            if (!newItemType.IsDepletable || damage == 0)
+            if (newItemStack is null || !newItemStack.IsDepletable || damage == 0)
             {
                 damageBarTransform.gameObject.SetActive(false);
             }
             else
             {
-                var maxDamage = (float) newItemType.MaxDurability; // TODO: Check enchantment
+                var maxDamage = (float) newItemStack.MaxDurability; // TODO: Check enchantment
                 
                 damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);
                 var hue = Mathf.Lerp(0.33333334F, 0F, damage / maxDamage);

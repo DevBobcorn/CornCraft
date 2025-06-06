@@ -13,10 +13,12 @@ using Unity.Mathematics;
 using TMPro;
 
 using CraftSharp.Molang.Runtime;
+using CraftSharp.Protocol.Handlers;
 using CraftSharp.Resource;
 using CraftSharp.Rendering;
 using CraftSharp.Resource.BedrockEntity;
-using CraftSharp.Event;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Registries.Subcomponents;
 
 namespace CraftSharp
 {
@@ -335,8 +337,12 @@ namespace CraftSharp
             while (!loadFlag.Finished) yield return null;
 
             // Load item definitions
+            var dataTypes = new MinecraftDataTypes(ProtocolMinecraft.MC_1_16_5_Version);
+            var componentRegistry = new StructuredComponentsRegistry1206(
+                dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry1206(dataTypes));
+            
             loadFlag.Finished = false;
-            Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            Task.Run(() => ItemPalette.INSTANCE.PrepareData(componentRegistry, dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load particle definitions

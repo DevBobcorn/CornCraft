@@ -25,7 +25,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="protocol">Protocol version</param>
         public MinecraftDataTypes(int protocol)
         {
-            this.protocolVersion = protocol;
+            protocolVersion = protocol;
         }
 
         #region Complex data readers

@@ -12,6 +12,10 @@ using UnityEngine.SceneManagement;
 using CraftSharp.Event;
 using CraftSharp.Control;
 using CraftSharp.Inventory;
+using CraftSharp.Protocol.Handlers;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Registries.Subcomponents;
 using CraftSharp.Resource;
 using CraftSharp.UI;
 using CraftSharp.Protocol.ProtoDef;
@@ -90,6 +94,8 @@ namespace CraftSharp
 
             // Ensure CornApp instance is created
             _ = Instance;
+
+            Translations.LoadTranslationsFile(ProtocolSettings.Language);
         }
 
         public IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string> updateStatus)
@@ -137,8 +143,17 @@ namespace CraftSharp
             while (!loadFlag.Finished) yield return null;
 
             // Load item definitions
+            var dataTypes = new MinecraftDataTypes(protocolVersion);
+            StructuredComponentRegistry componentRegistry = protocolVersion switch
+            {
+                >= ProtocolMinecraft.MC_1_21_Version => new StructuredComponentsRegistry121(
+                    dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry121(dataTypes)),
+                _ => new StructuredComponentsRegistry1206(
+                    dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry1206(dataTypes))
+            };
+            
             loadFlag.Finished = false;
-            Task.Run(() => ItemPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            Task.Run(() => ItemPalette.INSTANCE.PrepareData(componentRegistry, dataVersion, loadFlag));
             while (!loadFlag.Finished)
                 yield return null;
 
