@@ -15,7 +15,7 @@ namespace CraftSharp.Protocol.Handlers
     class ProtocolForge
     {
         private int protocolVersion;
-        private DataTypes dataTypes;
+        private MinecraftDataTypes dataTypes;
         private ProtocolMinecraft protocolMC;
         private IMinecraftComHandler mcHandler;
 
@@ -29,7 +29,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="forgeInfo">Forge Server Information</param>
         /// <param name="protocolVersion">Minecraft protocol version</param>
         /// <param name="dataTypes">Minecraft data types handler</param>
-        public ProtocolForge(ForgeInfo forgeInfo, int protocolVersion, DataTypes dataTypes, ProtocolMinecraft protocolMC, IMinecraftComHandler mcHandler)
+        public ProtocolForge(ForgeInfo forgeInfo, int protocolVersion, MinecraftDataTypes dataTypes, ProtocolMinecraft protocolMC, IMinecraftComHandler mcHandler)
         {
             this.forgeInfo = forgeInfo;
             this.protocolVersion = protocolVersion;

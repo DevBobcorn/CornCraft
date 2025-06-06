@@ -12,7 +12,6 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents
         
         public StructuredComponentsHandler(
             int protocolVersion,
-            DataTypes dataTypes,
             ItemPalette itemPalette)
         {
             // Get the appropriate subcomponent registry type based on the protocol version and then instantiate it
@@ -23,7 +22,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents
                 _ => throw new NotSupportedException($"Protocol version {protocolVersion} is not supported for subcomponent registries!")
             };
 
-            var subcomponentRegistry = Activator.CreateInstance(subcomponentRegistryType, dataTypes) as SubComponentRegistry 
+            var subcomponentRegistry = Activator.CreateInstance(subcomponentRegistryType) as SubComponentRegistry 
                                 ?? throw new InvalidOperationException($"Failed to instantiate a component registry for type {nameof(subcomponentRegistryType)}");
             
             // Get the appropriate component registry type based on the protocol version and then instantiate it
@@ -34,7 +33,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents
                 _ => throw new NotSupportedException($"Protocol version {protocolVersion} is not supported for structured component registries!")
             };
 
-            ComponentRegistry = Activator.CreateInstance(registryType, dataTypes, itemPalette, subcomponentRegistry) as StructuredComponentRegistry 
+            ComponentRegistry = Activator.CreateInstance(registryType, itemPalette, subcomponentRegistry) as StructuredComponentRegistry 
                                 ?? throw new InvalidOperationException($"Failed to instantiate a component registry for type {nameof(registryType)}");
         }
 

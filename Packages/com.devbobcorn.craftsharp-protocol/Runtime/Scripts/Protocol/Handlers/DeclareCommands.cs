@@ -9,7 +9,7 @@ namespace CraftSharp.Protocol.Handlers
         private static int RootIdx;
         private static CommandNode[] Nodes = Array.Empty<CommandNode>();
 
-        public static void Read(DataTypes dataTypes, Queue<byte> packetData, int protocolVersion)
+        public static void Read(MinecraftDataTypes dataTypes, Queue<byte> packetData, int protocolVersion)
         {
             int count = DataTypes.ReadNextVarInt(packetData);
             Nodes = new CommandNode[count];
@@ -241,7 +241,7 @@ namespace CraftSharp.Protocol.Handlers
         internal class ParserEmpty : Parser
         {
 
-            public ParserEmpty(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserEmpty(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -264,7 +264,7 @@ namespace CraftSharp.Protocol.Handlers
             private byte Flags;
             private float Min = float.MinValue, Max = float.MaxValue;
 
-            public ParserFloat(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserFloat(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
@@ -294,7 +294,7 @@ namespace CraftSharp.Protocol.Handlers
             private byte Flags;
             private double Min = double.MinValue, Max = double.MaxValue;
 
-            public ParserDouble(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserDouble(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
@@ -324,7 +324,7 @@ namespace CraftSharp.Protocol.Handlers
             private byte Flags;
             private int Min = int.MinValue, Max = int.MaxValue;
 
-            public ParserInteger(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserInteger(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
@@ -354,7 +354,7 @@ namespace CraftSharp.Protocol.Handlers
             private byte Flags;
             private long Min = long.MinValue, Max = long.MaxValue;
 
-            public ParserLong(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserLong(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Flags = DataTypes.ReadNextByte(packetData);
                 if ((Flags & 0x01) > 0)
@@ -385,7 +385,7 @@ namespace CraftSharp.Protocol.Handlers
 
             private enum StringType { SINGLE_WORD, QUOTABLE_PHRASE, GREEDY_PHRASE };
 
-            public ParserString(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserString(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Type = (StringType)DataTypes.ReadNextVarInt(packetData);
             }
@@ -410,7 +410,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             private byte Flags;
 
-            public ParserEntity(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserEntity(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Flags = DataTypes.ReadNextByte(packetData);
             }
@@ -434,7 +434,7 @@ namespace CraftSharp.Protocol.Handlers
         internal class ParserBlockPos : Parser
         {
 
-            public ParserBlockPos(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserBlockPos(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -455,7 +455,7 @@ namespace CraftSharp.Protocol.Handlers
         internal class ParserColumnPos : Parser
         {
 
-            public ParserColumnPos(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserColumnPos(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -476,7 +476,7 @@ namespace CraftSharp.Protocol.Handlers
         internal class ParserVec3 : Parser
         {
 
-            public ParserVec3(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserVec3(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -497,7 +497,7 @@ namespace CraftSharp.Protocol.Handlers
         internal class ParserVec2 : Parser
         {
 
-            public ParserVec2(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserVec2(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -518,7 +518,7 @@ namespace CraftSharp.Protocol.Handlers
         internal class ParserRotation : Parser
         {
 
-            public ParserRotation(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserRotation(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -538,7 +538,7 @@ namespace CraftSharp.Protocol.Handlers
 
         internal class ParserMessage : Parser
         {
-            public ParserMessage(DataTypes dataTypes, Queue<byte> packetData) { }
+            public ParserMessage(MinecraftDataTypes dataTypes, Queue<byte> packetData) { }
 
             public override bool Check(string text)
             {
@@ -560,7 +560,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             private byte Flags;
 
-            public ParserScoreHolder(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserScoreHolder(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Flags = DataTypes.ReadNextByte(packetData);
             }
@@ -585,7 +585,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             private bool Decimals;
 
-            public ParserRange(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserRange(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Decimals = DataTypes.ReadNextBool(packetData);
             }
@@ -610,7 +610,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             private string Registry;
 
-            public ParserResourceOrTag(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserResourceOrTag(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Registry = DataTypes.ReadNextString(packetData);
             }
@@ -635,7 +635,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             private string Registry;
 
-            public ParserResource(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserResource(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 Registry = DataTypes.ReadNextString(packetData);
             }
@@ -661,7 +661,7 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         internal class ParserTime : Parser
         {
-            public ParserTime(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserTime(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 DataTypes.ReadNextInt(packetData);
             }
@@ -684,7 +684,7 @@ namespace CraftSharp.Protocol.Handlers
 
         internal class ParserForgeEnum : Parser
         {
-            public ParserForgeEnum(DataTypes dataTypes, Queue<byte> packetData)
+            public ParserForgeEnum(MinecraftDataTypes dataTypes, Queue<byte> packetData)
             {
                 DataTypes.ReadNextString(packetData);
             }

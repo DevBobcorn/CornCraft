@@ -18,7 +18,7 @@ namespace CraftSharp.Rendering
 
             // Update entity item
             if (Type.MetaSlotByName.TryGetValue("data_item", out var metaSlot1)
-                && Type.MetaEntries[metaSlot1].DataType == EntityMetaDataType.Slot)
+                && Type.MetaEntries[metaSlot1].DataType == EntityMetadataType.Slot)
             {
                 if (Metadata!.TryGetValue(metaSlot1, out var value) && value is ItemStack item)
                 {

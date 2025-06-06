@@ -13,7 +13,7 @@ namespace CraftSharp.Protocol.Handlers
     class ProtocolTerrain
     {
         private readonly int protocolVersion;
-        private readonly DataTypes dataTypes;
+        private readonly MinecraftDataTypes dataTypes;
         private readonly IMinecraftComHandler handler;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="protocolVersion">Minecraft Protocol Version</param>
         /// <param name="dataTypes">Minecraft Protocol Data Types</param>
         /// <param name="handler">Minecraft Protocol Handler</param>
-        public ProtocolTerrain(int protocolVersion, DataTypes dataTypes, IMinecraftComHandler handler)
+        public ProtocolTerrain(int protocolVersion, MinecraftDataTypes dataTypes, IMinecraftComHandler handler)
         {
             this.protocolVersion = protocolVersion;
             this.dataTypes = dataTypes;

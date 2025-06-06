@@ -7,34 +7,34 @@ namespace CraftSharp
     /// </summary>
     public class EntityMetadataPalette1191 : EntityMetadataPalette
     {
-        private readonly Dictionary<int, EntityMetaDataType> entityMetadataMappings = new()
+        private readonly Dictionary<int, EntityMetadataType> entityMetadataMappings = new()
         {
-            { 0, EntityMetaDataType.Byte },
-            { 1, EntityMetaDataType.VarInt },
-            { 2, EntityMetaDataType.Float },
-            { 3, EntityMetaDataType.String },
-            { 4, EntityMetaDataType.Chat },
-            { 5, EntityMetaDataType.OptionalChat },
-            { 6, EntityMetaDataType.Slot },
-            { 7, EntityMetaDataType.Boolean },
-            { 8, EntityMetaDataType.Rotation },
-            { 9, EntityMetaDataType.Position },
-            { 10, EntityMetaDataType.OptionalPosition },
-            { 11, EntityMetaDataType.Direction },
-            { 12, EntityMetaDataType.OptionalUUID },
-            { 13, EntityMetaDataType.OptionalBlockId },
-            { 14, EntityMetaDataType.Nbt },
-            { 15, EntityMetaDataType.Particle },
-            { 16, EntityMetaDataType.VillagerData },
-            { 17, EntityMetaDataType.OptionalVarInt },
-            { 18, EntityMetaDataType.Pose },
-            { 19, EntityMetaDataType.CatVariant },
-            { 20, EntityMetaDataType.FrogVariant },
-            { 21, EntityMetaDataType.OptionalGlobalPosition },
-            { 22, EntityMetaDataType.PaintingVariant }
+            { 0, EntityMetadataType.Byte },
+            { 1, EntityMetadataType.VarInt },
+            { 2, EntityMetadataType.Float },
+            { 3, EntityMetadataType.String },
+            { 4, EntityMetadataType.Chat },
+            { 5, EntityMetadataType.OptionalChat },
+            { 6, EntityMetadataType.Slot },
+            { 7, EntityMetadataType.Boolean },
+            { 8, EntityMetadataType.Rotation },
+            { 9, EntityMetadataType.Position },
+            { 10, EntityMetadataType.OptionalPosition },
+            { 11, EntityMetadataType.Direction },
+            { 12, EntityMetadataType.OptionalUUID },
+            { 13, EntityMetadataType.OptionalBlockId },
+            { 14, EntityMetadataType.Nbt },
+            { 15, EntityMetadataType.Particle },
+            { 16, EntityMetadataType.VillagerData },
+            { 17, EntityMetadataType.OptionalVarInt },
+            { 18, EntityMetadataType.Pose },
+            { 19, EntityMetadataType.CatVariant },
+            { 20, EntityMetadataType.FrogVariant },
+            { 21, EntityMetadataType.OptionalGlobalPosition },
+            { 22, EntityMetadataType.PaintingVariant }
         };
             
-        public override Dictionary<int, EntityMetaDataType> GetEntityMetadataMappingsList()
+        public override Dictionary<int, EntityMetadataType> GetEntityMetadataMappingsList()
         {
             return entityMetadataMappings;
         }

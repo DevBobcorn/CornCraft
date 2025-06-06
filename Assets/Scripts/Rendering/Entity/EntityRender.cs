@@ -127,7 +127,7 @@ namespace CraftSharp.Rendering
 
             // Update entity health
             if (Type.MetaSlotByName.TryGetValue("data_health_id", out var metaSlot1)
-                && Type.MetaEntries[metaSlot1].DataType == EntityMetaDataType.Float)
+                && Type.MetaEntries[metaSlot1].DataType == EntityMetadataType.Float)
             {
                 if (Metadata.TryGetValue(metaSlot1, out var value) && value is float health)
                 {
@@ -138,7 +138,7 @@ namespace CraftSharp.Rendering
 
             // Update entity custom name
             if (Type.MetaSlotByName.TryGetValue("data_custom_name", out var metaSlot2)
-                && Type.MetaEntries[metaSlot2].DataType == EntityMetaDataType.OptionalChat)
+                && Type.MetaEntries[metaSlot2].DataType == EntityMetadataType.OptionalChat)
             {
                 if (Metadata.TryGetValue(metaSlot2, out var value) && value is string customName)
                 {
@@ -149,7 +149,7 @@ namespace CraftSharp.Rendering
 
             // Update entity custom name
             if (Type.MetaSlotByName.TryGetValue("data_custom_name_visible", out var metaSlot3)
-                && Type.MetaEntries[metaSlot3].DataType == EntityMetaDataType.Boolean)
+                && Type.MetaEntries[metaSlot3].DataType == EntityMetadataType.Boolean)
             {
                 if (Metadata.TryGetValue(metaSlot3, out var value) && value is bool customNameVisible)
                 {
@@ -159,7 +159,7 @@ namespace CraftSharp.Rendering
 
             // Update entity pose
             if (Type.MetaSlotByName.TryGetValue("data_pose", out var metaSlot4)
-                && Type.MetaEntries[metaSlot4].DataType == EntityMetaDataType.Pose)
+                && Type.MetaEntries[metaSlot4].DataType == EntityMetadataType.Pose)
             {
                 if (Metadata.TryGetValue(metaSlot4, out var value) && value is int pose)
                 {

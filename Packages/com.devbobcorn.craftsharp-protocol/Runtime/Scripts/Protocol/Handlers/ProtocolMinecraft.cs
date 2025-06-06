@@ -74,7 +74,7 @@ namespace CraftSharp.Protocol.Handlers
         private readonly EntityMetadataPalette entityMetadataPalette;
         private readonly PacketTypePalette packetPalette;
         private readonly SocketWrapper socketWrapper;
-        private readonly DataTypes dataTypes;
+        private readonly MinecraftDataTypes dataTypes;
         private Tuple<Thread, CancellationTokenSource>? netMain = null; // Net main thread
         private Tuple<Thread, CancellationTokenSource>? netReader = null; // Net reader thread
         private readonly RandomNumberGenerator randomGen;
@@ -82,7 +82,7 @@ namespace CraftSharp.Protocol.Handlers
         public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo? forgeInfo)
         {
             this.socketWrapper = new SocketWrapper(Client);
-            this.dataTypes = new DataTypes(protocolVersion);
+            this.dataTypes = new MinecraftDataTypes(protocolVersion);
             this.protocolVersion = protocolVersion;
             this.handler = handler;
             this.pForge = new ProtocolForge(forgeInfo, protocolVersion, dataTypes, this, handler);
@@ -91,7 +91,7 @@ namespace CraftSharp.Protocol.Handlers
             this.randomGen = RandomNumberGenerator.Create();
             lastSeenMessagesCollector = protocolVersion >= MC_1_19_3_Version ? new(20) : new(5);
 
-            entityMetadataPalette = EntityMetadataPalette.GetPalette(protocolVersion);
+            entityMetadataPalette = EntityMetadataPaletteHandler.GetPalette(protocolVersion);
 
             // MessageType 
             // You can find it in https://wiki.vg/Protocol#Player_Chat_Message or /net/minecraft/network/message/MessageType.java
@@ -213,7 +213,7 @@ namespace CraftSharp.Protocol.Handlers
         /// </summary>
         internal Tuple<int, Queue<byte>> ReadNextPacket()
         {
-            int size = DataTypes.ReadNextVarIntRAW(socketWrapper); //Packet size
+            int size = ReadNextVarIntRAW(socketWrapper); //Packet size
             Queue<byte> packetData = new(socketWrapper.ReadDataRAW(size)); //Packet contents
 
             //Handle packet decompression
@@ -2723,6 +2723,26 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
+        /// Read an integer from the network
+        /// </summary>
+        /// <returns>The integer</returns>
+        public static int ReadNextVarIntRAW(SocketWrapper socket)
+        {
+            int i = 0;
+            int j = 0;
+            byte b;
+            while (true)
+            {
+                b = socket.ReadDataRAW(1)[0];
+                i |= (b & 0x7F) << j++ * 7;
+                if (j > 5) throw new OverflowException("VarInt is too big");
+                if ((b & 0x80) != 128) break;
+            }
+
+            return i;
+        }
+
+        /// <summary>
         /// Ping a Minecraft server to get information about the server
         /// </summary>
         /// <returns>True if ping was successful</returns>
@@ -2747,7 +2767,7 @@ namespace CraftSharp.Protocol.Handlers
 
             socketWrapper.SendDataRAW(requestPacket);
 
-            int packetLength = DataTypes.ReadNextVarIntRAW(socketWrapper);
+            int packetLength = ReadNextVarIntRAW(socketWrapper);
             if (packetLength > 0) // Read Response length
             {
                 Queue<byte> packetData = new(socketWrapper.ReadDataRAW(packetLength));

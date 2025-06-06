@@ -1,0 +1,674 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+using CraftSharp.Inventory;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+using CraftSharp.Protocol.Handlers.StructuredComponents;
+
+namespace CraftSharp.Protocol.Handlers
+{
+    public class MinecraftDataTypes : IMinecraftDataTypes
+    {
+        /// <summary>
+        /// Protocol version for adjusting data types
+        /// </summary>
+        private readonly int protocolVersion;
+
+        public bool UseAnonymousNBT => protocolVersion >= ProtocolMinecraft.MC_1_20_2_Version;
+        
+        /// <summary>
+        /// Initialize a new MinecraftDataTypes instance
+        /// </summary>
+        /// <param name="protocol">Protocol version</param>
+        public MinecraftDataTypes(int protocol)
+        {
+            this.protocolVersion = protocol;
+        }
+
+        #region Complex data readers
+
+        /// <summary>
+        /// Read a single item slot from a cache of bytes and remove it from the cache
+        /// </summary>
+        /// <returns>The item that was read or NULL for an empty slot</returns>
+        public ItemStack? ReadNextItemSlot(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
+            {
+                var structuredComponentsToAdd = new List<StructuredComponent>();
+
+                var itemCount = DataTypes.ReadNextVarInt(cache);
+
+                if (itemCount <= 0) return null;
+                
+                var itemId = DataTypes.ReadNextVarInt(cache);
+                var item = new ItemStack(itemPalette.GetByNumId(itemId), itemCount, null);
+                    
+                var numberOfComponentsToAdd = DataTypes.ReadNextVarInt(cache);
+                var numberOfComponentsToRemove = DataTypes.ReadNextVarInt(cache);
+
+                for (var i = 0; i < numberOfComponentsToAdd; i++)
+                {
+                    var componentTypeId = DataTypes.ReadNextVarInt(cache);
+
+                    var structuredComponentHandler = new StructuredComponentsHandler(protocolVersion, itemPalette);
+                    structuredComponentsToAdd.Add(structuredComponentHandler.Parse(componentTypeId, cache));
+                }
+
+                for (var i = 0; i < numberOfComponentsToRemove; i++)
+                {
+                    // TODO: Check what this does exactly
+                    DataTypes.ReadNextVarInt(cache); // The type of component to remove
+                }
+                    
+                // TODO: Wire up the structured components in the Item class (extract info, update fields, etc..)
+                // Use structuredComponentsToAdd
+                // Look at: https://wiki.vg/index.php?title=Slot_Data&oldid=19350#Structured_components
+                
+                return item;
+            }
+            else // MC 1.13.2 and greater
+            {
+                var itemPresent = DataTypes.ReadNextBool(cache);
+
+                if (!itemPresent)
+                    return null;
+
+                var itemId = DataTypes.ReadNextVarInt(cache);
+
+                if (itemId == -1)
+                    return null;
+
+                var type = itemPalette.GetByNumId(itemId);
+                var itemCount = DataTypes.ReadNextByte(cache);
+                var nbt = DataTypes.ReadNextNbt(cache, UseAnonymousNBT);
+                return new ItemStack(type, itemCount, nbt);
+            }
+        }
+
+        /// <summary>
+        /// Read entity information from a cache of bytes and remove it from the cache
+        /// </summary>
+        /// <param name="entityPalette">Mappings for converting entity type Ids to EntityType</param>
+        /// <param name="living">TRUE for living entities (layout differs)</param>
+        /// <returns>Entity information</returns>
+        public EntityData ReadNextEntity(Queue<byte> cache, EntityTypePalette entityPalette, bool living)
+        {
+            var entityId = DataTypes.ReadNextVarInt(cache);
+            var entityUUID = DataTypes.ReadNextUUID(cache); // MC 1.8+
+
+            EntityType entityType;
+            // Entity type data type change from byte to varint after 1.14
+            entityType = entityPalette.GetByNumId(DataTypes.ReadNextVarInt(cache));
+
+            var entityX = DataTypes.ReadNextDouble(cache);
+            var entityY = DataTypes.ReadNextDouble(cache);
+            var entityZ = DataTypes.ReadNextDouble(cache);
+
+            var data = -1;
+            byte entityPitch, entityYaw, entityHeadYaw;
+
+            if (living)
+            {
+                entityYaw = DataTypes.ReadNextByte(cache); // Yaw
+                entityPitch = DataTypes.ReadNextByte(cache); // Pitch
+                entityHeadYaw = DataTypes.ReadNextByte(cache); // Head Yaw
+            }
+            else
+            {
+                entityPitch = DataTypes.ReadNextByte(cache); // Pitch
+                entityYaw = DataTypes.ReadNextByte(cache); // Yaw
+                entityHeadYaw = entityYaw;
+
+                if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
+                    entityYaw = DataTypes.ReadNextByte(cache); // Head Yaw
+
+                // Data
+                data = protocolVersion >= ProtocolMinecraft.MC_1_19_Version 
+                    ? DataTypes.ReadNextVarInt(cache) : DataTypes.ReadNextInt(cache);
+            }
+
+            return new EntityData(entityId, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, entityHeadYaw, data);
+        }
+
+        /// <summary>
+        /// Read a Entity MetaData and remove it from the cache
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="itemPalette"></param>
+        /// <param name="metadataPalette"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        /// <exception cref="InvalidDataException"></exception>
+        public Dictionary<int, object?> ReadNextMetadata(Queue<byte> cache, ItemPalette itemPalette, EntityMetadataPalette metadataPalette)
+        {
+            Dictionary<int, object?> data = new();
+            byte key = DataTypes.ReadNextByte(cache);
+            byte terminteValue = (byte) 0xff; // 1.9+
+
+            while (key != terminteValue)
+            {
+                int typeId = DataTypes.ReadNextVarInt(cache); // 1.9+
+
+                EntityMetadataType type;
+                try
+                {
+                    type = metadataPalette.GetDataType(typeId);
+                }
+                catch (KeyNotFoundException)
+                {
+                    throw new InvalidDataException("Unknown Metadata Type ID " + typeId + ". Is this up to date for new MC Version?");
+                }
+
+                // Value's data type is depended on Type
+                object? value = null;
+
+                switch (type)
+                {
+                    case EntityMetadataType.Short: // 1.8 only
+                        value = DataTypes.ReadNextShort(cache);
+                        break;
+                    case EntityMetadataType.Int: // 1.8 only
+                        value = DataTypes.ReadNextInt(cache);
+                        break;
+                    case EntityMetadataType.Vector3Int: // 1.8 only
+                        value = new Vector3Int(
+                            DataTypes.ReadNextInt(cache),
+                            DataTypes.ReadNextInt(cache),
+                            DataTypes.ReadNextInt(cache)
+                        );
+                        break;
+                    case EntityMetadataType.Byte: // byte
+                        value = DataTypes.ReadNextByte(cache);
+                        break;
+                    case EntityMetadataType.VarInt: // VarInt
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.VarLong: // Long
+                        value = DataTypes.ReadNextVarLong(cache);
+                        break;
+                    case EntityMetadataType.Float: // Float
+                        value = DataTypes.ReadNextFloat(cache);
+                        break;
+                    case EntityMetadataType.String: // String
+                        value = DataTypes.ReadNextString(cache);
+                        break;
+                    case EntityMetadataType.Chat: // Chat
+                        value = ReadNextChat(cache);
+                        break;
+                    case EntityMetadataType.OptionalChat: // Optional Chat
+                        if (DataTypes.ReadNextBool(cache))
+                            value = ReadNextChat(cache);
+                        break;
+                    case EntityMetadataType.Slot: // Slot
+                        value = ReadNextItemSlot(cache, itemPalette);
+                        break;
+                    case EntityMetadataType.Boolean: // Boolean
+                        value = DataTypes.ReadNextBool(cache);
+                        break;
+                    case EntityMetadataType.Rotation: // Rotation (3x floats)
+                        value = new Vector3
+                        (
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache)
+                        );
+                        break;
+                    case EntityMetadataType.Position: // Position
+                        value = DataTypes.ReadNextLocation(cache);
+                        break;
+                    case EntityMetadataType.OptionalPosition: // Optional Position
+                        if (DataTypes.ReadNextBool(cache))
+                        {
+                            value = DataTypes.ReadNextLocation(cache);
+                        }
+                        break;
+                    case EntityMetadataType.Direction: // Direction (VarInt)
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.OptionalUUID: // Optional UUID
+                        if (DataTypes.ReadNextBool(cache))
+                        {
+                            value = DataTypes.ReadNextUUID(cache);
+                        }
+                        break;
+                    case EntityMetadataType.BlockId: // BlockID (VarInt)
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.OptionalBlockId: // Optional BlockID (VarInt)
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.Nbt: // NBT
+                        value = DataTypes.ReadNextNbt(cache, UseAnonymousNBT);
+                        break;
+                    case EntityMetadataType.Particle: // Particle
+                        // Skip data only, not used
+                        value = ReadParticleData(cache, itemPalette);
+                        break;
+                    case EntityMetadataType.VillagerData: // Villager Data (3x VarInt)
+                        value = new Vector3Int
+                        (
+                            DataTypes.ReadNextVarInt(cache),
+                            DataTypes.ReadNextVarInt(cache),
+                            DataTypes.ReadNextVarInt(cache)
+                        );
+                        break;
+                    case EntityMetadataType.OptionalVarInt: // Optional VarInt
+                        if (DataTypes.ReadNextBool(cache))
+                        {
+                            value = DataTypes.ReadNextVarInt(cache);
+                        }
+                        break;
+                    case EntityMetadataType.Pose: // Pose
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.CatVariant: // Cat Variant
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.FrogVariant: // Frog Variant
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.GlobalPosition: // GlobalPos
+                        // Dimension and blockLoc, currently not in use
+                        value = new Tuple<string, Location>(DataTypes.ReadNextString(cache), DataTypes.ReadNextLocation(cache));
+                        break;
+                    case EntityMetadataType.OptionalGlobalPosition:
+                        // FIXME: wiki.vg is bool + string + location
+                        //        but minecraft-data is bool + string
+                        if (DataTypes.ReadNextBool(cache))
+                        {
+                            // Dimension and blockLoc, currently not in use
+                            value = new Tuple<string, Location>(DataTypes.ReadNextString(cache), DataTypes.ReadNextLocation(cache));
+                        }
+                        break;
+                    case EntityMetadataType.PaintingVariant: // Painting Variant
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.SnifferState: // Sniffer state
+                        value = DataTypes.ReadNextVarInt(cache);
+                        break;
+                    case EntityMetadataType.Vector3: // Vector 3f
+                        value = new Vector3
+                        (
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache)
+                        );
+                        break;
+                    case EntityMetadataType.Quaternion: // Quaternion
+                        value = new Quaternion
+                        (
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache),
+                            DataTypes.ReadNextFloat(cache)
+                        );
+                        break;
+                }
+
+                data[key] = value;
+                key = DataTypes.ReadNextByte(cache);
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// Read particle extra data
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="itemPalette"></param>
+        public ParticleExtraData ReadParticleData(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var particleNumId = DataTypes.ReadNextVarInt(cache);
+            var particleType = ParticleTypePalette.INSTANCE.GetByNumId(particleNumId);
+
+            return particleType.ExtraDataType switch
+            {
+                ParticleExtraDataType.None                => ParticleExtraData.Empty,
+                ParticleExtraDataType.Block               => ReadBlockParticle(cache),
+                ParticleExtraDataType.Dust                => ReadDustParticle(cache,
+                        useFloats:    true /* TODO: false for 1.21.4+ */),
+                ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache,
+                        useFloats:    true /* TODO: false for 1.21.4+ */),
+                ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
+                ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
+                ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
+                ParticleExtraDataType.Vibration           => ReadVibrationParticle(cache,
+                        hasOrigin:    protocolVersion <= ProtocolMinecraft.MC_1_18_2_Version,
+                        hasEyeHeight: protocolVersion >= ProtocolMinecraft.MC_1_19_2_Version,
+                        useTypeId:    protocolVersion <= ProtocolMinecraft.MC_1_20_4_Version),
+                ParticleExtraDataType.Shriek              => ReadShriekParticle(cache),
+
+                _                                         => ParticleExtraData.Empty,
+            };
+        }
+
+        private BlockParticleExtraData ReadBlockParticle(Queue<byte> cache)
+        {
+            var stateId = DataTypes.ReadNextVarInt(cache);
+
+            return new BlockParticleExtraData(stateId);
+        }
+
+        private DustParticleExtraData ReadDustParticle(Queue<byte> cache, bool useFloats)
+        {
+            Color32 color;
+
+            if (useFloats)
+            {
+                var r = DataTypes.ReadNextFloat(cache); // Red
+                var g = DataTypes.ReadNextFloat(cache); // Green
+                var b = DataTypes.ReadNextFloat(cache); // Blue
+                color = new Color32((byte) (r * 255), (byte) (g * 255), (byte) (b * 255), 255);
+            }
+            else
+            {
+                var rgb = DataTypes.ReadNextInt(cache); // 0xRRGGBB
+                color = new Color32((byte) ((rgb & 0xFF0000) >> 16), (byte) ((rgb & 0xFF00) >> 8), (byte) (rgb & 0xFF), 255);
+            }
+
+            var scale = DataTypes.ReadNextFloat(cache); // Scale
+
+            return new DustParticleExtraData(color, scale);
+        }
+
+        private DustColorTransitionParticleExtraData ReadDustColorTransitionParticle(Queue<byte> cache, bool useFloats)
+        {
+            Color32 colorFrom, colorTo;
+            float scale;
+
+            if (useFloats)
+            {
+                var fr = DataTypes.ReadNextFloat(cache); // From red
+                var fg = DataTypes.ReadNextFloat(cache); // From green
+                var fb = DataTypes.ReadNextFloat(cache); // From blue
+                scale  = DataTypes.ReadNextFloat(cache); // Scale
+                var tr = DataTypes.ReadNextFloat(cache); // To red
+                var tg = DataTypes.ReadNextFloat(cache); // To green
+                var tb = DataTypes.ReadNextFloat(cache); // To Blue
+
+                colorFrom = new Color32((byte) (fr * 255), (byte) (fg * 255), (byte) (fb * 255), 255);
+                colorTo   = new Color32((byte) (tr * 255), (byte) (tg * 255), (byte) (tb * 255), 255);
+            }
+            else
+            {
+                var rgbFrom = DataTypes.ReadNextInt(cache); // 0xRRGGBB
+                var rgbT = DataTypes.ReadNextInt(cache); // 0xRRGGBB
+                scale  = DataTypes.ReadNextFloat(cache); // Scale
+
+                colorFrom = new Color32((byte) ((rgbFrom & 0xFF0000) >> 16), (byte) ((rgbFrom & 0xFF00) >> 8), (byte) (rgbFrom & 0xFF), 255);
+                colorTo   = new Color32((byte) ((rgbT & 0xFF0000) >> 16), (byte) ((rgbT & 0xFF00) >> 8), (byte) (rgbT & 0xFF), 255);
+            }
+
+            return new DustColorTransitionParticleExtraData(colorFrom, colorTo, scale);
+        }
+
+        private EntityEffectParticleExtraData ReadEntityEffectParticle(Queue<byte> cache)
+        {
+            var argb = DataTypes.ReadNextInt(cache); // 0xAARRGGGBB
+            var color = new Color32((byte) ((argb & 0xFF0000) >> 16), (byte) ((argb & 0xFF00) >> 8), (byte) (argb & 0xFF), (byte) (argb >> 24));
+
+            return new EntityEffectParticleExtraData(color);
+        }
+
+        private ItemParticleExtraData ReadItemParticle(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var itemStack = ReadNextItemSlot(cache, itemPalette);
+
+            return new ItemParticleExtraData(itemStack);
+        }
+
+        private SculkChargeParticleExtraData ReadSculkChargeParticle(Queue<byte> cache)
+        {
+            var roll = DataTypes.ReadNextFloat(cache);
+
+            return new SculkChargeParticleExtraData(roll);
+        }
+
+        private ShriekParticleExtraData ReadShriekParticle(Queue<byte> cache)
+        {
+            var delay = DataTypes.ReadNextVarInt(cache);
+
+            return new ShriekParticleExtraData(delay);
+        }
+
+        /// <summary>
+        /// For version 1.17 - 1.20.4, type ids('minecraft:block' and 'minecraft:entity')
+        /// are used. For 1.20.5+, the numeral ids of these types are sent instead.
+        /// <br/>
+        /// During version 1.17 - 1.18.2, there's also an 'origin' field of Location type
+        /// sent before destination data. For 1.19+, an 'eye height' field is included for
+        /// 'minecraft:entity' position source type, following the entity id field.
+        /// </summary>
+        private VibrationParticleExtraData ReadVibrationParticle(Queue<byte> cache, bool hasOrigin, bool hasEyeHeight, bool useTypeId)
+        {
+            if (hasOrigin) // 1.17 - 1.18.2
+            {
+                // Ignore it
+                DataTypes.ReadNextLocation(cache); // Origin location
+            }
+
+            bool useBlockPos; // Use a bool here since only 2 types are defined
+
+            if (useTypeId) // 1.17 - 1.20.4
+            {
+                var positionSourceTypeId = DataTypes.ReadNextString(cache); // Position source type
+                useBlockPos = positionSourceTypeId switch
+                {
+                    "minecraft:block"  => true,
+                    "minecraft:entity" => false,
+
+                    _                  => throw new InvalidDataException($"Unknown position source type id: {positionSourceTypeId}")
+                };
+            }
+            else // 1.20.5+
+            {
+                var positionSourceTypeNumId = DataTypes.ReadNextVarInt(cache); // Position source type's numeral id
+                useBlockPos = positionSourceTypeNumId switch
+                {
+                    0 => true,
+                    1 => false,
+
+                    _ => throw new InvalidDataException($"Unknown position source type num id: {positionSourceTypeNumId}")
+                };
+            }
+
+            if (useBlockPos) // minecraft:block
+            {
+                var loc = DataTypes.ReadNextLocation(cache);
+                var ticks = DataTypes.ReadNextVarInt(cache);
+
+                return new VibrationParticleExtraData(loc, ticks);
+            }
+            else // minecraft:entity (Not really used)
+            {
+                var entityId = DataTypes.ReadNextVarInt(cache);
+                var eyeHeight = hasEyeHeight ? DataTypes.ReadNextFloat(cache) : 0F;
+                var ticks = DataTypes.ReadNextVarInt(cache);
+
+                return new VibrationParticleExtraData(entityId, eyeHeight, ticks);
+            }
+        }
+
+        /// <summary>
+        /// Read a single villager trade from a cache of bytes and remove it from the cache
+        /// </summary>
+        /// <returns>The item that was read or NULL for an empty slot</returns>
+        public VillagerTrade ReadNextTrade(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            ItemStack inputItem1 = ReadNextItemSlot(cache, itemPalette)!;
+            ItemStack outputItem = ReadNextItemSlot(cache, itemPalette)!;
+
+            ItemStack? inputItem2 = null;
+
+            if (protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version)
+                inputItem2 = ReadNextItemSlot(cache, itemPalette);
+            else
+            {
+                if (DataTypes.ReadNextBool(cache)) //check if villager has second item
+                    inputItem2 = ReadNextItemSlot(cache, itemPalette);
+            }
+
+            bool tradeDisabled = DataTypes.ReadNextBool(cache);
+            int numberOfTradeUses = DataTypes.ReadNextInt(cache);
+            int maximumNumberOfTradeUses = DataTypes.ReadNextInt(cache);
+            int xp = DataTypes.ReadNextInt(cache);
+            int specialPrice = DataTypes.ReadNextInt(cache);
+            float priceMultiplier = DataTypes.ReadNextFloat(cache);
+            int demand = DataTypes.ReadNextInt(cache);
+            return new VillagerTrade(inputItem1, outputItem, inputItem2, tradeDisabled, numberOfTradeUses,
+                maximumNumberOfTradeUses, xp, specialPrice, priceMultiplier, demand);
+        }
+
+        public string ReadNextChat(Queue<byte> cache)
+        {
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_4_Version)
+            {
+                // Read as NBT
+                var r = DataTypes.ReadNextNbt(cache, UseAnonymousNBT);
+                return ChatParser.ParseText(r);
+            }
+            else
+            {
+                // Read as String
+                var json = DataTypes.ReadNextString(cache);
+                return ChatParser.ParseText(json);
+            }
+        }
+        
+        public Json.JSONData ReadNextChatAsJson(Queue<byte> cache)
+        {
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_4_Version)
+            {
+                // Read as NBT
+                var r = DataTypes.ReadNextNbt(cache, UseAnonymousNBT);
+                return Json.Object2JSONData(r);
+            }
+            else
+            {
+                // Read as String
+                var json = DataTypes.ReadNextString(cache);
+                return Json.ParseJson(json);
+            }
+        }
+
+        #endregion
+        
+        #region Complex data getters
+
+        /// <summary>
+        /// Get a byte array representing the given item as an item slot
+        /// </summary>
+        /// <param name="item">Item</param>
+        /// <param name="itemPalette">Item Palette</param>
+        /// <returns>Item slot representation</returns>
+        public byte[] GetItemSlot(ItemStack? item, ItemPalette itemPalette)
+        {
+            List<byte> slotData = new();
+            
+            // MC 1.13 and greater
+            if (item == null || item.IsEmpty)
+                slotData.AddRange(DataTypes.GetBool(false)); // No item
+            else
+            {
+                slotData.AddRange(DataTypes.GetBool(true)); // Item is present
+                slotData.AddRange(DataTypes.GetVarInt(itemPalette.GetNumIdById(item.ItemType.ItemId)));
+                slotData.Add((byte)item.Count);
+                slotData.AddRange(DataTypes.GetNbt(item.NBT));
+            }
+
+            return slotData.ToArray();
+        }
+
+        /// <summary>
+        /// Get a byte array representing an array of item slots
+        /// </summary>
+        /// <param name="items">Items</param>
+        /// <param name="itemPalette">Item Palette</param>
+        /// <returns>Array of Item slot representations</returns>
+        public byte[] GetSlotsArray(Dictionary<int, ItemStack> items, ItemPalette itemPalette)
+        {
+            byte[] slotsArray = new byte[items.Count];
+
+            foreach (KeyValuePair<int, ItemStack> item in items)
+            {
+                slotsArray = DataTypes.ConcatBytes(slotsArray, DataTypes.GetShort((short)item.Key), GetItemSlot(item.Value, itemPalette));
+            }
+
+            return slotsArray;
+        }
+
+        /// <summary>
+        /// Get protocol block face from Direction
+        /// </summary>
+        /// <param name="direction">Direction</param>
+        /// <returns>Block face byte enum</returns>
+        public byte GetBlockFace(Direction direction)
+        {
+            return direction switch
+            {
+                Direction.Down => 0,
+                Direction.Up => 1,
+                Direction.North => 2,
+                Direction.South => 3,
+                Direction.West => 4,
+                Direction.East => 5,
+                _ => throw new NotImplementedException("Unknown direction: " + direction.ToString()),
+            };
+        }
+
+        /// <summary>
+        /// Write LastSeenMessageList
+        /// </summary>
+        /// <param name="msgList">Message.LastSeenMessageList</param>
+        /// <param name="isOnlineMode">Whether the server is in online mode</param>
+        /// <returns>Message.LastSeenMessageList Packet Data</returns>
+        public byte[] GetLastSeenMessageList(Message.LastSeenMessageList msgList, bool isOnlineMode)
+        {
+            if (!isOnlineMode)
+                return DataTypes.GetVarInt(0); // Message list size
+            else
+            {
+                List<byte> fields = new();
+                fields.AddRange(DataTypes.GetVarInt(msgList.entries.Length)); // Message list size
+                foreach (Message.LastSeenMessageList.AcknowledgedMessage entry in msgList.entries)
+                {
+                    fields.AddRange(entry.profileId.ToBigEndianBytes()); // UUID
+                    fields.AddRange(DataTypes.GetVarInt(entry.signature.Length)); // Signature length
+                    fields.AddRange(entry.signature); // Signature data
+                }
+
+                return fields.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Write LastSeenMessageList.Acknowledgment
+        /// </summary>
+        /// <param name="ack">Acknowledgment</param>
+        /// <param name="isOnlineMode">Whether the server is in online mode</param>
+        /// <returns>Acknowledgment Packet Data</returns>
+        public byte[] GetAcknowledgment(Message.LastSeenMessageList.Acknowledgment ack, bool isOnlineMode)
+        {
+            List<byte> fields = new();
+            fields.AddRange(GetLastSeenMessageList(ack.lastSeen, isOnlineMode));
+            if (!isOnlineMode || ack.lastReceived == null)
+                fields.AddRange(DataTypes.GetBool(false)); // Has last received message
+            else
+            {
+                fields.AddRange(DataTypes.GetBool(true));
+                fields.AddRange(ack.lastReceived.profileId.ToBigEndianBytes()); // Has last received message
+                fields.AddRange(DataTypes.GetVarInt(ack.lastReceived.signature.Length)); // Last received message signature length
+                fields.AddRange(ack.lastReceived.signature); // Last received message signature data
+            }
+
+            return fields.ToArray();
+        }
+
+        #endregion
+        
+    }
+}

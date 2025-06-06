@@ -7,39 +7,39 @@ namespace CraftSharp
     /// </summary>
     public class EntityMetadataPalette1194 : EntityMetadataPalette
     {
-        private readonly Dictionary<int, EntityMetaDataType> entityMetadataMappings = new()
+        private readonly Dictionary<int, EntityMetadataType> entityMetadataMappings = new()
         {
-            { 0, EntityMetaDataType.Byte },
-            { 1, EntityMetaDataType.VarInt },
-            { 2, EntityMetaDataType.VarLong },
-            { 3, EntityMetaDataType.Float },
-            { 4, EntityMetaDataType.String },
-            { 5, EntityMetaDataType.Chat },
-            { 6, EntityMetaDataType.OptionalChat },
-            { 7, EntityMetaDataType.Slot },
-            { 8, EntityMetaDataType.Boolean },
-            { 9, EntityMetaDataType.Rotation },
-            { 10, EntityMetaDataType.Position },
-            { 11, EntityMetaDataType.OptionalPosition },
-            { 12, EntityMetaDataType.Direction },
-            { 13, EntityMetaDataType.OptionalUUID },
-            { 14, EntityMetaDataType.BlockId },
-            { 15, EntityMetaDataType.OptionalBlockId },
-            { 16, EntityMetaDataType.Nbt },
-            { 17, EntityMetaDataType.Particle },
-            { 18, EntityMetaDataType.VillagerData },
-            { 19, EntityMetaDataType.OptionalVarInt },
-            { 20, EntityMetaDataType.Pose },
-            { 21, EntityMetaDataType.CatVariant },
-            { 22, EntityMetaDataType.FrogVariant },
-            { 23, EntityMetaDataType.OptionalGlobalPosition },
-            { 24, EntityMetaDataType.PaintingVariant },
-            { 25, EntityMetaDataType.SnifferState },
-            { 26, EntityMetaDataType.Vector3 },
-            { 27, EntityMetaDataType.Quaternion },
+            { 0, EntityMetadataType.Byte },
+            { 1, EntityMetadataType.VarInt },
+            { 2, EntityMetadataType.VarLong },
+            { 3, EntityMetadataType.Float },
+            { 4, EntityMetadataType.String },
+            { 5, EntityMetadataType.Chat },
+            { 6, EntityMetadataType.OptionalChat },
+            { 7, EntityMetadataType.Slot },
+            { 8, EntityMetadataType.Boolean },
+            { 9, EntityMetadataType.Rotation },
+            { 10, EntityMetadataType.Position },
+            { 11, EntityMetadataType.OptionalPosition },
+            { 12, EntityMetadataType.Direction },
+            { 13, EntityMetadataType.OptionalUUID },
+            { 14, EntityMetadataType.BlockId },
+            { 15, EntityMetadataType.OptionalBlockId },
+            { 16, EntityMetadataType.Nbt },
+            { 17, EntityMetadataType.Particle },
+            { 18, EntityMetadataType.VillagerData },
+            { 19, EntityMetadataType.OptionalVarInt },
+            { 20, EntityMetadataType.Pose },
+            { 21, EntityMetadataType.CatVariant },
+            { 22, EntityMetadataType.FrogVariant },
+            { 23, EntityMetadataType.OptionalGlobalPosition },
+            { 24, EntityMetadataType.PaintingVariant },
+            { 25, EntityMetadataType.SnifferState },
+            { 26, EntityMetadataType.Vector3 },
+            { 27, EntityMetadataType.Quaternion },
         };
             
-        public override Dictionary<int, EntityMetaDataType> GetEntityMetadataMappingsList()
+        public override Dictionary<int, EntityMetadataType> GetEntityMetadataMappingsList()
         {
             return entityMetadataMappings;
         }

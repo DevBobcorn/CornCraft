@@ -1,19 +1,11 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using CraftSharp.Protocol.Handlers;
 
 namespace CraftSharp
 {
-    public abstract class EntityMetadataPalette
+    public static class EntityMetadataPaletteHandler
     {
-        public abstract Dictionary<int, EntityMetaDataType> GetEntityMetadataMappingsList();
-
-        public EntityMetaDataType GetDataType(int typeId)
-        {
-            return GetEntityMetadataMappingsList()[typeId];
-        }
-
         public static EntityMetadataPalette GetPalette(int protocolVersion)
         {
             return protocolVersion switch
@@ -26,6 +18,5 @@ namespace CraftSharp
                 _ => throw new NotImplementedException()
             };
         }
-
     }
 }
