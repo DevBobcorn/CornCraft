@@ -48,7 +48,7 @@ namespace CraftSharp.UI
 
                 Loom.QueueOnMainThread(() =>
                 {
-                    var texture = manager.GetMissingTexture();
+                    var texture = ResourcePackManager.GetMissingTexture();
                     texture.filterMode = FilterMode.Point;
 
                     SpriteType.DUMMY_SPRITE_TYPE.CreateSprites(texture, new Texture2D[] { });
@@ -130,7 +130,7 @@ namespace CraftSharp.UI
                                 return texture;
                             }
 
-                            texture = manager.GetMissingTexture();
+                            texture = ResourcePackManager.GetMissingTexture();
                             texture.filterMode = FilterMode.Point;
 
                             return texture;

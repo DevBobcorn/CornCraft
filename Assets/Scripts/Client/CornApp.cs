@@ -71,7 +71,7 @@ namespace CraftSharp
                 var jsonText = File.ReadAllText(jsonPath);
                 var jsonDoc = JsonConvert.DeserializeObject<JObject>(jsonText)!;
 
-                PacketDefTypeHandlerBase.RegisterTypesRecursive(null, jsonDoc);
+                //PacketDefTypeHandlerBase.RegisterTypesRecursive(null, jsonDoc);
 
                 Debug.Log($"Loaded protocol v{version} for parser.");
             }
@@ -98,7 +98,7 @@ namespace CraftSharp
             Translations.LoadTranslationsFile(ProtocolSettings.Language);
         }
 
-        public IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string> updateStatus)
+        public IEnumerator PrepareDataAndResource(int protocolVersion, DataLoadFlag startUpFlag, Action<string, string> updateStatus)
         {
             var versionDictPath = PathHelper.GetExtraDataFile("versions.json");
 
@@ -126,14 +126,14 @@ namespace CraftSharp
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
                 Notify(Translations.Get("login.data_not_availale"), Notification.Type.Error);
-                updateStatus("login.result.login_failed");
+                updateStatus("login.result.login_failed", string.Empty);
                 startUpFlag.Failed = true;
                 yield break;
             }
 
             if (startUpFlag.Failed)
             {
-                updateStatus("login.login_failed");
+                updateStatus("login.login_failed", string.Empty);
                 yield break;
             }
 
@@ -214,7 +214,7 @@ namespace CraftSharp
                 if (!downloadSucceeded)
                 {
                     Notify(Translations.Get("resource.error.base_resource_download_failure"), Notification.Type.Error);
-                    updateStatus("login.login_failed");
+                    updateStatus("login.login_failed", string.Empty);
                     startUpFlag.Failed = true;
                     yield break;
                 }
@@ -233,7 +233,7 @@ namespace CraftSharp
             if (!basePack.IsValid)
             {
                 Notify(Translations.Get("resource.error.base_resource_invalid"), Notification.Type.Error);
-                updateStatus("login.login_failed");
+                updateStatus("login.login_failed", string.Empty);
                 startUpFlag.Failed = true;
                 yield break;
             }
@@ -247,8 +247,8 @@ namespace CraftSharp
                 try {
                     // Set up thread locale for testing resource loading with different locales
                     //System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("fr-FR");
-                    packManager.LoadPacks(loadFlag, status =>
-                        Loom.QueueOnMainThread(() => updateStatus(status)), true);
+                    packManager.LoadPacks(loadFlag, (status, progress) =>
+                        Loom.QueueOnMainThread(() => updateStatus(status, progress)), true);
                 } catch (Exception e) {
                     Debug.Log($"Error loading resources: {e}");
                 }
@@ -291,7 +291,7 @@ namespace CraftSharp
             if (loadFlag.Failed) // Cancel login if resources are not properly loaded
             {
                 Notify(Translations.Get("resource.error.resource_load_failure"), Notification.Type.Error);
-                updateStatus("login.login_failed");
+                updateStatus("login.login_failed", string.Empty);
                 startUpFlag.Failed = true;
             }
         }

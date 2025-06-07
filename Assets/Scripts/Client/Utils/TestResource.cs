@@ -365,8 +365,8 @@ namespace CraftSharp
             // Load valid packs...
             loadFlag.Finished = false;
             Task.Run(() => packManager.LoadPacks(loadFlag,
-                    status => Loom.QueueOnMainThread(() =>
-                        InfoText.text = Translations.Get(status)), loadParticles: true));
+                (status, progress) => InfoText.text = Translations.Get(status) + progress,
+                loadParticles: true));
             while (!loadFlag.Finished) yield return null;
 
             // Loading complete!
@@ -507,8 +507,8 @@ namespace CraftSharp
                 Debug.Log($"Resources for {resVersion} not present. Downloading...");
 
                 StartCoroutine(ResourceDownloader.DownloadResource(resVersion,
-                        status => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status)), () => { },
-                        succeeded => {
+                        (status, progress) => InfoText.text = Translations.Get(status) + progress,
+                        () => { }, succeeded => {
                             if (succeeded) // Resources ready, do build
                                 StartCoroutine(DoBuild(dataVersion, resVersion, overrides));
                             else // Failed to download resources

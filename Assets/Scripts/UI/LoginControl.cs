@@ -395,7 +395,7 @@ namespace CraftSharp.UI
 
             var resLoadFlag = new DataLoadFlag();
             yield return StartCoroutine(CornApp.Instance.PrepareDataAndResource(info.ProtocolVersion,
-                resLoadFlag, status => loadStateInfoText.text = Translations.Get(status)));
+                resLoadFlag, (status, progress) => loadStateInfoText.text = Translations.Get(status) + progress));
             
             if (resLoadFlag.Failed)
             {
