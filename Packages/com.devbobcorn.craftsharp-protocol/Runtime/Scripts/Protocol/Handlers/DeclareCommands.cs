@@ -11,6 +11,12 @@ namespace CraftSharp.Protocol.Handlers
 
         public static void Read(MinecraftDataTypes dataTypes, Queue<byte> packetData, int protocolVersion)
         {
+            // TODO: Fix this
+            // It crashes in 1.20.6+ , could not figure out why
+            // it's hard to debug, so I'll just disable it for now
+            if(protocolVersion > ProtocolMinecraft.MC_1_20_4_Version)
+                return;
+            
             int count = DataTypes.ReadNextVarInt(packetData);
             Nodes = new CommandNode[count];
             for (int i = 0; i < count; ++i)
@@ -97,14 +103,15 @@ namespace CraftSharp.Protocol.Handlers
                             44 => new ParserResource(dataTypes, packetData),
                             50 => protocolVersion == ProtocolMinecraft.MC_1_19_4_Version ?
                               new ParserForgeEnum(dataTypes, packetData) :
-                              new ParserEmpty(dataTypes, packetData),
+                              new ParserEmpty(dataTypes, packetData),   
                             51 => (protocolVersion >= ProtocolMinecraft.MC_1_20_Version &&
                                    protocolVersion <= ProtocolMinecraft.MC_1_20_2_Version) ? // 1.20 - 1.20.2
                               new ParserForgeEnum(dataTypes, packetData) :
                               new ParserEmpty(dataTypes, packetData),
                             _ => new ParserEmpty(dataTypes, packetData),
                         };
-                    else // 1.20.3+
+                    else if (protocolVersion is > ProtocolMinecraft.MC_1_20_2_Version and < ProtocolMinecraft.MC_1_20_6_Version)
+                        // 1.20.3 - 1.20.4
                         parser = parserId switch
                         {
                             1 => new ParserFloat(dataTypes, packetData),
@@ -119,6 +126,24 @@ namespace CraftSharp.Protocol.Handlers
                             11 => new ParserVec2(dataTypes, packetData),
                             18 => new ParserMessage(dataTypes, packetData),
                             27 => new ParserRotation(dataTypes, packetData),
+                            30 => new ParserScoreHolder(dataTypes, packetData),
+                            41 => new ParserTime(dataTypes, packetData),
+                            42 => new ParserResourceOrTag(dataTypes, packetData),
+                            43 => new ParserResourceOrTag(dataTypes, packetData),
+                            44 => new ParserResource(dataTypes, packetData),
+                            45 => new ParserResource(dataTypes, packetData),
+                            52 => new ParserForgeEnum(dataTypes, packetData),
+                            _ => new ParserEmpty(dataTypes, packetData),
+                        };
+                    else // 1.20.6+
+                        parser = parserId switch
+                        {
+                            1 => new ParserFloat(dataTypes, packetData),
+                            2 => new ParserDouble(dataTypes, packetData),
+                            3 => new ParserInteger(dataTypes, packetData),
+                            4 => new ParserLong(dataTypes, packetData),
+                            5 => new ParserString(dataTypes, packetData),
+                            6 => new ParserEntity(dataTypes, packetData),
                             30 => new ParserScoreHolder(dataTypes, packetData),
                             41 => new ParserTime(dataTypes, packetData),
                             42 => new ParserResourceOrTag(dataTypes, packetData),

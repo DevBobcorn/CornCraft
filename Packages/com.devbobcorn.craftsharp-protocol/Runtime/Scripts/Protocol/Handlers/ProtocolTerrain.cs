@@ -260,8 +260,6 @@ namespace CraftSharp.Protocol.Handlers
                 dataSize = DataTypes.ReadNextVarInt(cache); // Size
             }
 
-            //var aaa = DataTypes.ReadData(dataSize, cache);
-
             int totalSize = cache.Count;
 
             // 1.17 and above chunk format
@@ -565,9 +563,10 @@ namespace CraftSharp.Protocol.Handlers
         /// The returned indices is from one section below bottom to one section above top
         /// </summary>
         /// <returns>Indices of chunk sections whose light data is included</returns>
-        public int[] ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
+        private int[] ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
-            var trustEdges = DataTypes.ReadNextBool(cache);
+            if (protocolVersion < ProtocolMinecraft.MC_1_20_Version)
+                DataTypes.ReadNextBool(cache); // Trust edges
 
             // Sky Light Mask
             var skyLightMask = DataTypes.ReadNextULongArray(cache);
@@ -581,7 +580,8 @@ namespace CraftSharp.Protocol.Handlers
             // Empty Block Light Mask
             var emptyBlockLightMask = DataTypes.ReadNextULongArray(cache);
 
-            int ptr = 0, ulLen = sizeof(ulong) << 3;
+            const int ulLen = sizeof(ulong) << 3;
+            int ptr = 0;
 
             // Sky Light Arrays
             int skyLightArrayCount = DataTypes.ReadNextVarInt(cache);
@@ -603,12 +603,6 @@ namespace CraftSharp.Protocol.Handlers
                 var chunkBlockY = skyLightIndices[i] * 16;
 
                 ReadLightArray(skyLightArray, chunkBlockY, ref skyLight);
-            }
-
-            if (protocolVersion >= ProtocolMinecraft.MC_1_20_Version)
-            {
-                // TODO: Fix and implement
-                return Array.Empty<int>();
             }
             
             // Block Light Arrays
@@ -640,7 +634,7 @@ namespace CraftSharp.Protocol.Handlers
         /// The returned indices is from one section below bottom to one section above top
         /// </summary>
         /// <returns>Indices of chunk sections whose light data is included</returns>
-        public int[] ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
+        private static int[] ReadChunkColumnLightData16(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
             var trustEdges = DataTypes.ReadNextBool(cache);
             
@@ -689,7 +683,7 @@ namespace CraftSharp.Protocol.Handlers
             return updatedSections.ToArray();
         }
 
-        private void ReadLightArray(byte[] srcArray, int chunkBlockY, ref byte[] light)
+        private static void ReadLightArray(byte[] srcArray, int chunkBlockY, ref byte[] light)
         {
             // 3 bits for x, 4 bits for z
             for (int halfX = 0;halfX < 8;halfX++)
@@ -718,7 +712,7 @@ namespace CraftSharp.Protocol.Handlers
             if (chunkColumn is null)
             {
                 // Save light data for later use (when the chunk data is ready)
-                chunksManager.GetLightingCache().AddOrUpdate(new(chunkX, chunkZ), (_) => cache, (_, _) => cache);
+                chunksManager.GetLightingCache().AddOrUpdate(new(chunkX, chunkZ), _ => cache, (_, _) => cache);
             }
             else
             {

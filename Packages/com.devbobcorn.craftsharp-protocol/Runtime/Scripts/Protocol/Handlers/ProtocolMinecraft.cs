@@ -661,7 +661,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Dimension Type (string bellow 1.20.6, VarInt for 1.20.6+)
                             var dimensionTypeName = protocolVersion < MC_1_20_6_Version
                                 ? DataTypes.ReadNextString(packetData) // < 1.20.6
-                                : World.GetDimensionTypeIdByNumId(DataTypes.ReadNextInt(packetData)).ToString();
+                                : World.GetDimensionTypeIdByNumId(DataTypes.ReadNextVarInt(packetData)).ToString();
 
                             var dimensionName = DataTypes.ReadNextString(packetData);     // Dimension Name (World Name) - 1.16 and above
                             
