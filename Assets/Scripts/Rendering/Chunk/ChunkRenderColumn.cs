@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Profiling;
@@ -38,23 +39,7 @@ namespace CraftSharp.Rendering
 
         public ChunkRender GetChunkRender(int chunkYIndex)
         {
-            if (chunks.ContainsKey(chunkYIndex))
-            {
-                return chunks[chunkYIndex];
-            }
-            else
-            {
-                // This chunk doesn't currently exist...
-                if (chunkYIndex >= 0 && chunkYIndex * Chunk.SIZE < World.GetDimensionType().height)
-                {
-                    return null;
-                }
-                else
-                {
-                    //Debug.Log("Trying to get a ChunkRender at invalid height: " + chunkY);
-                    return null;
-                }
-            }
+            return chunks.GetValueOrDefault(chunkYIndex);
         }
 
         /// <summary>
@@ -62,9 +47,9 @@ namespace CraftSharp.Rendering
         /// </summary>
         public ChunkRender GetOrCreateChunkRender(int chunkYIndex, IObjectPool<ChunkRender> pool)
         {
-            if (chunks.ContainsKey(chunkYIndex))
+            if (chunks.TryGetValue(chunkYIndex, out var render))
             {
-                return chunks[chunkYIndex];
+                return render;
             }
 
             // This ChunkRender doesn't currently exist...
@@ -91,11 +76,8 @@ namespace CraftSharp.Rendering
 
                 return chunk;
             }
-            else
-            {
-                //Debug.Log("Trying to get a ChunkRender at invalid height: " + chunkY);
-                return null;
-            }
+
+            return null;
         }
 
         /// <summary>
@@ -106,27 +88,22 @@ namespace CraftSharp.Rendering
         public void Unload(HashSet<ChunkRender> chunksBeingBuilt, HashSet<ChunkRender> chunks2BuildAsSet, PriorityQueue<ChunkRender> chunks2Build, IObjectPool<ChunkRender> pool)
         {
             // Unload this chunk column...
-            foreach (int i in chunks.Keys)
+            foreach (ChunkRender chunk in chunks.Keys.Select(i => chunks[i]).Where(chunk => chunk))
             {
-                var chunk = chunks[i];
-
-                // Unload all chunks in this column, except empty chunks...
-                if (chunk != null)
+                // Before releasing the chunk object, do one last thing
+                if (chunks2BuildAsSet.Contains(chunk))
                 {
-                    // Before releasing the chunk object, do one last thing
-                    if (chunks2BuildAsSet.Contains(chunk))
-                    {
-                        chunks2Build.Remove(chunk);
-                        chunks2BuildAsSet.Remove(chunk);
-                    }
-                    
-                    chunksBeingBuilt.Remove(chunk);
-                    chunk.Unload();
-
-                    // Return this ChunkRender to pool
-                    pool.Release(chunk);
+                    chunks2Build.Remove(chunk);
+                    chunks2BuildAsSet.Remove(chunk);
                 }
+                    
+                chunksBeingBuilt.Remove(chunk);
+                chunk.Unload();
+
+                // Return this ChunkRender to pool
+                pool.Release(chunk);
             }
+
             chunks.Clear();
         }
 

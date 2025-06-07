@@ -553,7 +553,7 @@ namespace CraftSharp.Protocol.Handlers
                     //UnityEngine.Debug.Log($"Lighting up chunk column [{chunkX}, {chunkZ}]");
                 }
 
-                c!.FullyLoaded = true;
+                c.FullyLoaded = true;
             }
             return true;
         }

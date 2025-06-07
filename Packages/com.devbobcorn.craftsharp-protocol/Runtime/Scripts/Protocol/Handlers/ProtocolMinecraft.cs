@@ -401,6 +401,13 @@ namespace CraftSharp.Protocol.Handlers
                                         
                                         World.StoreDimensionTypeList(dimensionList);
                                     }
+                                    
+                                    if (registryId == World.WORLDGEN_BIOME_ID)
+                                    {
+                                        var biomeList = ReadSingleRegistry(packetData, dataTypes.UseAnonymousNBT);
+                                        
+                                        World.StoreBiomeList(biomeList);
+                                    }
                                 }
 
                                 break;
