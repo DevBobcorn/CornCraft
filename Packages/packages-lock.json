@@ -23,7 +23,7 @@
       "source": "embedded",
       "dependencies": {
         "com.unity.mathematics": "1.2.6",
-        "com.devbobcorn.craftsharp": "4.18.0"
+        "com.devbobcorn.craftsharp": "4.19.0"
       }
     },
     "com.stalomeow.star-rail-npr-shader": {
