@@ -52,6 +52,7 @@ namespace CraftSharp.Protocol.ProtoDef
         public static readonly ResourceLocation OPTIONAL_NBT_ID                = new("optionalNbt");
         public static readonly ResourceLocation ANONYMOUS_NBT_ID               = new("anonymousNbt");
         public static readonly ResourceLocation ANON_OPTIONAL_NBT_ID           = new("anonOptionalNbt");
+        public static readonly ResourceLocation ARRAY_WITH_LENGTH_OFFSET_ID    = new("arrayWithLengthOffset");
 
         private static readonly HashSet<ResourceLocation> NATIVE_TYPE_IDS = new()
         {
@@ -59,7 +60,8 @@ namespace CraftSharp.Protocol.ProtoDef
             U8_ID, U16_ID, U32_ID, U64_ID, F32_ID, F64_ID, BOOL_ID, VOID_ID, ARRAY_ID,
             CONTAINER_ID, BUFFER_ID, BITFIELD_ID, MAPPER_ID, PSTRING_ID, UUID_ID,
             ENTITY_METADATA_LOOP_ID, TOP_BIT_SET_TERMINATED_ARRAY_ID, REST_BUFFER_ID,
-            NBT_ID, OPTIONAL_NBT_ID, ANONYMOUS_NBT_ID, ANON_OPTIONAL_NBT_ID
+            NBT_ID, OPTIONAL_NBT_ID, ANONYMOUS_NBT_ID, ANON_OPTIONAL_NBT_ID,
+            ARRAY_WITH_LENGTH_OFFSET_ID
         };
 
         private static PacketDefTypeHandlerBase BuildDefTypeHandler(string? scope, ResourceLocation customTypeId, ResourceLocation underlyingTypeId, JToken? typeParams, JObject typeDict)
@@ -222,6 +224,16 @@ namespace CraftSharp.Protocol.ProtoDef
 
                 return created;
             }
+            
+            if (underlyingTypeId == ARRAY_WITH_LENGTH_OFFSET_ID || underlyingTypeHandler is XtendedType_arrayWithLengthOffset) // Parameter overridable
+            {
+                Dictionary<string, JToken> paramsAsDict = typeParams?.ToObject<Dictionary<string, JToken>>() ?? new();
+                var created = new XtendedType_arrayWithLengthOffset(customTypeId, paramsAsDict,
+                    getUnderlyingTypeHandler() as XtendedType_arrayWithLengthOffset, buildItemHandler);
+                RegisterIfNamed(created);
+
+                return created;
+            }
 
             // Get unparameterized type handler directly from the table
             if (LOADED_DEF_TYPES.TryGetValue(underlyingTypeId, out PacketDefTypeHandlerBase? value))
@@ -282,6 +294,7 @@ namespace CraftSharp.Protocol.ProtoDef
             [OPTIONAL_NBT_ID]                 = new XtendedType_nbt(OPTIONAL_NBT_ID),
             [ANONYMOUS_NBT_ID]                = new XtendedType_nbt(ANONYMOUS_NBT_ID),
             [ANON_OPTIONAL_NBT_ID]            = new XtendedType_nbt(ANON_OPTIONAL_NBT_ID),
+            [ARRAY_WITH_LENGTH_OFFSET_ID]     = null,
         };
 
         public static PacketDefTypeHandlerBase GetLoadedHandler(ResourceLocation typeId)
@@ -395,7 +408,8 @@ namespace CraftSharp.Protocol.ProtoDef
         /// <summary>
         /// Register types defined in a scope(namespace). Use null as scope to define global types
         /// </summary>
-        /// <param name=""></param>
+        /// <param name="scope">Scope, null for global</param>
+        /// <param name="typeDict">Current type dictionary</param>
         public static void RegisterTypes(string? scope, JObject typeDict)
         {
             if (typeDict is not null)
