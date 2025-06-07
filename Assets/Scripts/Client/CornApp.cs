@@ -71,8 +71,7 @@ namespace CraftSharp
                 var jsonText = File.ReadAllText(jsonPath);
                 var jsonDoc = JsonConvert.DeserializeObject<JObject>(jsonText)!;
 
-                if (version < ProtocolMinecraft.MC_1_20_6_Version) // TODO: Fix it for 1.20.5+ versions
-                    PacketDefTypeHandlerBase.RegisterTypesRecursive(null, jsonDoc);
+                PacketDefTypeHandlerBase.RegisterTypesRecursive(null, jsonDoc);
 
                 Debug.Log($"Loaded protocol v{version} for parser.");
             }

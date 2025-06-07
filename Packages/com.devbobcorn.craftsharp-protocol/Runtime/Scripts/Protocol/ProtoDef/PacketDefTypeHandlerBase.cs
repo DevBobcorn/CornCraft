@@ -16,13 +16,13 @@ namespace CraftSharp.Protocol.ProtoDef
         private static readonly ResourceLocation OPTION_ID = new("option");
 
         // Numeric https://github.com/ProtoDef-io/ProtoDef/blob/master/doc/datatypes/numeric.md
-        public static readonly ResourceLocation VARINT_ID  = new("varint");
+        public static readonly ResourceLocation VARINT_ID = new("varint");
         public static readonly ResourceLocation VARLONG_ID = new("varlong");
-        public static readonly ResourceLocation I8_ID  = new("i8");
+        public static readonly ResourceLocation I8_ID = new("i8");
         public static readonly ResourceLocation I16_ID = new("i16");
         public static readonly ResourceLocation I32_ID = new("i32");
         public static readonly ResourceLocation I64_ID = new("i64");
-        public static readonly ResourceLocation U8_ID  = new("u8");
+        public static readonly ResourceLocation U8_ID = new("u8");
         public static readonly ResourceLocation U16_ID = new("u16");
         public static readonly ResourceLocation U32_ID = new("u32");
         public static readonly ResourceLocation U64_ID = new("u64");
@@ -34,25 +34,25 @@ namespace CraftSharp.Protocol.ProtoDef
         public static readonly ResourceLocation VOID_ID = new("void");
 
         // Structures https://github.com/ProtoDef-io/ProtoDef/blob/master/doc/datatypes/structures.md
-        private static readonly ResourceLocation ARRAY_ID     = new("array");
+        private static readonly ResourceLocation ARRAY_ID = new("array");
         private static readonly ResourceLocation CONTAINER_ID = new("container");
 
         // Utils https://github.com/ProtoDef-io/ProtoDef/blob/master/doc/datatypes/utils.md
-        private static readonly ResourceLocation BUFFER_ID   = new("buffer");
+        private static readonly ResourceLocation BUFFER_ID = new("buffer");
         private static readonly ResourceLocation BITFIELD_ID = new("bitfield");
-        private static readonly ResourceLocation MAPPER_ID   = new("mapper");
-        private static readonly ResourceLocation PSTRING_ID  = new("pstring");
+        private static readonly ResourceLocation MAPPER_ID = new("mapper");
+        private static readonly ResourceLocation PSTRING_ID = new("pstring");
 
         // Xtended from PrismarineJS https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/1.20.5/protocol.json
-        public static readonly ResourceLocation UUID_ID                        = new("UUID");
-        public static readonly ResourceLocation ENTITY_METADATA_LOOP_ID        = new("entityMetadataLoop");
+        public static readonly ResourceLocation UUID_ID = new("UUID");
+        public static readonly ResourceLocation ENTITY_METADATA_LOOP_ID = new("entityMetadataLoop");
         public static readonly ResourceLocation TOP_BIT_SET_TERMINATED_ARRAY_ID = new("topBitSetTerminatedArray");
-        public static readonly ResourceLocation REST_BUFFER_ID                 = new("restBuffer");
-        public static readonly ResourceLocation NBT_ID                         = new("nbt");
-        public static readonly ResourceLocation OPTIONAL_NBT_ID                = new("optionalNbt");
-        public static readonly ResourceLocation ANONYMOUS_NBT_ID               = new("anonymousNbt");
-        public static readonly ResourceLocation ANON_OPTIONAL_NBT_ID           = new("anonOptionalNbt");
-        public static readonly ResourceLocation ARRAY_WITH_LENGTH_OFFSET_ID    = new("arrayWithLengthOffset");
+        public static readonly ResourceLocation REST_BUFFER_ID = new("restBuffer");
+        public static readonly ResourceLocation NBT_ID = new("nbt");
+        public static readonly ResourceLocation OPTIONAL_NBT_ID = new("optionalNbt");
+        public static readonly ResourceLocation ANONYMOUS_NBT_ID = new("anonymousNbt");
+        public static readonly ResourceLocation ANON_OPTIONAL_NBT_ID = new("anonOptionalNbt");
+        public static readonly ResourceLocation ARRAY_WITH_LENGTH_OFFSET_ID = new("arrayWithLengthOffset");
 
         private static readonly HashSet<ResourceLocation> NATIVE_TYPE_IDS = new()
         {
@@ -69,6 +69,15 @@ namespace CraftSharp.Protocol.ProtoDef
             PacketDefTypeHandlerBase buildItemHandler(JToken itemToken)
             {
                 var (itemTypeId, itemTypeParams) = GetUnderlyingTypeIdAndParams(scope, itemToken, typeDict);
+
+                if (itemTypeParams is null && typeDict.ContainsKey(itemTypeId.Path))
+                {
+                    WriteLine($"Build {itemTypeId} (Proxied)");
+                    return new PacketDefTypeHandlerProxy(itemTypeId, itemTypeId);
+                }
+
+                WriteLine($"Build {itemTypeId}");
+
                 // Nested type definitions don't have custom type ids
                 return BuildDefTypeHandler(scope, itemTypeId, itemTypeId, itemTypeParams, typeDict);
             }
@@ -82,6 +91,9 @@ namespace CraftSharp.Protocol.ProtoDef
                 {
                     // Load this type first
                     var (dependentTypeId, dependentTypeParams) = GetUnderlyingTypeIdAndParams(scope, typeDict[underlyingTypeIdPath]!, typeDict);
+
+                    WriteLine($"Load dependent {dependentTypeId} for {customTypeId}");
+
                     // Nested type definitions don't have custom type ids
                     var handler = BuildDefTypeHandler(scope, dependentTypeId, dependentTypeId, dependentTypeParams, typeDict);
 
@@ -151,7 +163,7 @@ namespace CraftSharp.Protocol.ProtoDef
                     var itemTypeHandler = buildItemHandler(containerItem["type"]!);
 
                     var named = containerItem.ContainsKey("name");
-                    return (!named, named ? (string?) containerItem["name"] : null, itemTypeHandler);
+                    return (!named, named ? (string?)containerItem["name"] : null, itemTypeHandler);
                 }).ToArray();
 
                 return new StructureType_container(customTypeId, containerItems);
@@ -174,9 +186,9 @@ namespace CraftSharp.Protocol.ProtoDef
                 {
                     var bitFieldItem = (x as JObject)!;
 
-                    var name = (string) bitFieldItem.GetValue("name")!;
-                    var size = (int) bitFieldItem.GetValue("size")!;
-                    var signed = (bool) bitFieldItem.GetValue("signed")!;
+                    var name = (string)bitFieldItem.GetValue("name")!;
+                    var size = (int)bitFieldItem.GetValue("size")!;
+                    var signed = (bool)bitFieldItem.GetValue("signed")!;
 
                     return (name, size, signed);
                 }).ToArray();
@@ -224,7 +236,7 @@ namespace CraftSharp.Protocol.ProtoDef
 
                 return created;
             }
-            
+
             if (underlyingTypeId == ARRAY_WITH_LENGTH_OFFSET_ID || underlyingTypeHandler is XtendedType_arrayWithLengthOffset) // Parameter overridable
             {
                 Dictionary<string, JToken> paramsAsDict = typeParams?.ToObject<Dictionary<string, JToken>>() ?? new();
@@ -249,52 +261,54 @@ namespace CraftSharp.Protocol.ProtoDef
             throw new InvalidDataException("Why???");
         }
 
+        public static readonly HashSet<ResourceLocation> CUSTOM_DEF_TYPES = new();
+
         public static readonly Dictionary<ResourceLocation, PacketDefTypeHandlerBase?> LOADED_DEF_TYPES = GetNativeTypes();
 
         private static Dictionary<ResourceLocation, PacketDefTypeHandlerBase?> GetNativeTypes() => new()
         {
             // Conditional (Dummy)
-            [SWITCH_ID]  = null,
-            [OPTION_ID]  = null,
+            [SWITCH_ID] = null,
+            [OPTION_ID] = null,
 
             // Numeric
-            [VARINT_ID]  = new NumericType_varint(VARINT_ID),
+            [VARINT_ID] = new NumericType_varint(VARINT_ID),
             [VARLONG_ID] = new NumericType_varlong(VARLONG_ID),
-            [I8_ID]      = new NumericType_i8(I8_ID),
-            [I16_ID]     = new NumericType_i16(I16_ID),
-            [I32_ID]     = new NumericType_i32(I32_ID),
-            [I64_ID]     = new NumericType_i64(I64_ID),
-            [U8_ID]      = new NumericType_u8(U8_ID),
-            [U16_ID]     = new NumericType_u16(U16_ID),
-            [U32_ID]     = new NumericType_u32(U32_ID),
-            [U64_ID]     = new NumericType_u64(U64_ID),
-            [F32_ID]     = new NumericType_f32(F32_ID),
-            [F64_ID]     = new NumericType_f64(F64_ID),
+            [I8_ID] = new NumericType_i8(I8_ID),
+            [I16_ID] = new NumericType_i16(I16_ID),
+            [I32_ID] = new NumericType_i32(I32_ID),
+            [I64_ID] = new NumericType_i64(I64_ID),
+            [U8_ID] = new NumericType_u8(U8_ID),
+            [U16_ID] = new NumericType_u16(U16_ID),
+            [U32_ID] = new NumericType_u32(U32_ID),
+            [U64_ID] = new NumericType_u64(U64_ID),
+            [F32_ID] = new NumericType_f32(F32_ID),
+            [F64_ID] = new NumericType_f64(F64_ID),
 
             // Primitives
-            [BOOL_ID]    = new PrimitiveType_bool(BOOL_ID),
-            [VOID_ID]    = new PrimitiveType_void(VOID_ID),
+            [BOOL_ID] = new PrimitiveType_bool(BOOL_ID),
+            [VOID_ID] = new PrimitiveType_void(VOID_ID),
 
             // Structures (Dummy)
-            [ARRAY_ID]     = null,
+            [ARRAY_ID] = null,
             [CONTAINER_ID] = null,
 
             // Utils (Dummy)
-            [BUFFER_ID]    = null,
-            [BITFIELD_ID]  = null,
-            [MAPPER_ID]    = null,
-            [PSTRING_ID]   = null,
+            [BUFFER_ID] = null,
+            [BITFIELD_ID] = null,
+            [MAPPER_ID] = null,
+            [PSTRING_ID] = null,
 
             // Xtended (Some are Dummy)
-            [UUID_ID]                         = new XtendedType_UUID(UUID_ID),
-            [ENTITY_METADATA_LOOP_ID]         = null,
+            [UUID_ID] = new XtendedType_UUID(UUID_ID),
+            [ENTITY_METADATA_LOOP_ID] = null,
             [TOP_BIT_SET_TERMINATED_ARRAY_ID] = null,
-            [REST_BUFFER_ID]                  = new XtendedType_restBuffer(REST_BUFFER_ID),
-            [NBT_ID]                          = new XtendedType_nbt(NBT_ID),
-            [OPTIONAL_NBT_ID]                 = new XtendedType_nbt(OPTIONAL_NBT_ID),
-            [ANONYMOUS_NBT_ID]                = new XtendedType_nbt(ANONYMOUS_NBT_ID),
-            [ANON_OPTIONAL_NBT_ID]            = new XtendedType_nbt(ANON_OPTIONAL_NBT_ID),
-            [ARRAY_WITH_LENGTH_OFFSET_ID]     = null,
+            [REST_BUFFER_ID] = new XtendedType_restBuffer(REST_BUFFER_ID),
+            [NBT_ID] = new XtendedType_nbt(NBT_ID),
+            [OPTIONAL_NBT_ID] = new XtendedType_nbt(OPTIONAL_NBT_ID),
+            [ANONYMOUS_NBT_ID] = new XtendedType_nbt(ANONYMOUS_NBT_ID),
+            [ANON_OPTIONAL_NBT_ID] = new XtendedType_nbt(ANON_OPTIONAL_NBT_ID),
+            [ARRAY_WITH_LENGTH_OFFSET_ID] = null,
         };
 
         public static PacketDefTypeHandlerBase GetLoadedHandler(ResourceLocation typeId)
@@ -379,12 +393,12 @@ namespace CraftSharp.Protocol.ProtoDef
         {
             if (typeToken.Type == JTokenType.String) // underlyingTypeId
             {
-                var typeId = GetTypeId(scope, (string) typeToken!, typeDict);
+                var typeId = GetTypeId(scope, (string)typeToken!, typeDict);
                 return (typeId, null);
             }
             else if (typeToken.Type == JTokenType.Array) // [ underlyingTypeId, typeParams ]
             {
-                var typeId = GetTypeId(scope, (string) typeToken[0]!, typeDict);
+                var typeId = GetTypeId(scope, (string)typeToken[0]!, typeDict);
                 return (typeId, typeToken[1]);
             }
             else
@@ -493,7 +507,7 @@ namespace CraftSharp.Protocol.ProtoDef
 
         public virtual Type GetValueType()
         {
-            return typeof (object);
+            return typeof(object);
         }
 
         public abstract object? ReadValue(PacketRecord rec, string parentPath, Queue<byte> cache);
