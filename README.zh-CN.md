@@ -8,7 +8,7 @@
 
 本项目并非意在成为一个“复刻版Minecraft”，而是希望尝试用一种不同的方式重新构想这个游戏，使玩家获得与原版不太一样的游戏体验。
 
-本项目的协议实现基于另一个开源项目[Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client)，并入了其部分代码作为项目中通信系统的基础，以实现跨MC版本的网络通信。然而，由于C#代码后端的差异（MCC使用新版.NET，Unity还在用古早的Mono）以及运行平台的诸多差异，MCC中的许多代码修改或者重写后才能在本项目中使用。暂时本项目还没有构建好的发行版，但可在编辑器中游玩体验。
+本项目的协议实现基于另一个开源项目[Minecraft Console Client (MCC)](https://github.com/MCCTeam/Minecraft-Console-Client)，并入了其部分代码作为项目中通信系统的基础，以实现跨MC版本的网络通信。然而，由于C#代码后端的差异（MCC使用新版.NET，Unity还在用古早的Mono）以及运行平台的诸多差异，MCC中的许多代码修改或者重写后才能在本项目中使用。
 
 ***重要提示！*** **不**推荐使用CornCraft加入公开服/商业服，并且CornCraft**不**对使用此客户端造成的封号负责。目前仍建议自建服务端使用。
 
