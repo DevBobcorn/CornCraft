@@ -49,13 +49,13 @@ namespace CraftSharp.Protocol.Handlers
                     
                 var numberOfComponentsToAdd = DataTypes.ReadNextVarInt(cache);
                 var numberOfComponentsToRemove = DataTypes.ReadNextVarInt(cache);
+                
+                var structuredComponentRegistry = ItemPalette.INSTANCE.ComponentRegistry;
 
                 for (var i = 0; i < numberOfComponentsToAdd; i++)
                 {
-                    var componentTypeId = DataTypes.ReadNextVarInt(cache);
-
-                    var structuredComponentHandler = new StructuredComponentsHandler(protocolVersion, itemPalette);
-                    structuredComponentsToAdd.Add(structuredComponentHandler.Parse(componentTypeId, cache));
+                    var componentTypeNumId = DataTypes.ReadNextVarInt(cache);
+                    structuredComponentsToAdd.Add(structuredComponentRegistry.ParseComponent(componentTypeNumId, cache));
                 }
 
                 for (var i = 0; i < numberOfComponentsToRemove; i++)
