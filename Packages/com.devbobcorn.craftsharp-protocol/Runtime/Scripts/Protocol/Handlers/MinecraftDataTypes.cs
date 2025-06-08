@@ -6,7 +6,7 @@ using UnityEngine;
 
 using CraftSharp.Inventory;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
-using CraftSharp.Protocol.Handlers.StructuredComponents;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Protocol.Handlers
 {
@@ -147,9 +147,9 @@ namespace CraftSharp.Protocol.Handlers
         {
             Dictionary<int, object?> data = new();
             byte key = DataTypes.ReadNextByte(cache);
-            byte terminteValue = (byte) 0xff; // 1.9+
+            const byte terminateValue = (byte) 0xff; // 1.9+
 
-            while (key != terminteValue)
+            while (key != terminateValue)
             {
                 int typeId = DataTypes.ReadNextVarInt(cache); // 1.9+
 
@@ -245,8 +245,10 @@ namespace CraftSharp.Protocol.Handlers
                         value = DataTypes.ReadNextNbt(cache, UseAnonymousNBT);
                         break;
                     case EntityMetadataType.Particle: // Particle
-                        // Skip data only, not used
                         value = ReadParticleData(cache, itemPalette);
+                        break;
+                    case EntityMetadataType.Particles: // Particles
+                        value = ReadParticlesData(cache, itemPalette);
                         break;
                     case EntityMetadataType.VillagerData: // Villager Data (3x VarInt)
                         value = new Vector3Int
@@ -266,9 +268,12 @@ namespace CraftSharp.Protocol.Handlers
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
                     case EntityMetadataType.CatVariant: // Cat Variant
-                        value = DataTypes.ReadNextVarInt(cache);
-                        break;
+                    case EntityMetadataType.CowVariant: // Cow Variant
+                    case EntityMetadataType.WolfVariant: // Wolf Variant
+                    case EntityMetadataType.WolfSoundVariant: // Wolf Sound Variant
                     case EntityMetadataType.FrogVariant: // Frog Variant
+                    case EntityMetadataType.PigVariant: // Pig Variant
+                    case EntityMetadataType.ChickenVariant: // Chicken Variant
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
                     case EntityMetadataType.GlobalPosition: // GlobalPos
@@ -288,6 +293,7 @@ namespace CraftSharp.Protocol.Handlers
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
                     case EntityMetadataType.SnifferState: // Sniffer state
+                    case EntityMetadataType.ArmadilloState: // Armadillo state
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
                     case EntityMetadataType.Vector3: // Vector 3f
@@ -316,6 +322,24 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
+        /// Read an array of particle extra data (Added in 1.20.5)
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="itemPalette"></param>
+        private ParticleExtraData[] ReadParticlesData(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var count = DataTypes.ReadNextVarInt(cache);
+            var result = new ParticleExtraData[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                result[i] = ReadParticleData(cache, itemPalette);
+            }
+            
+            return result;
+        }
+
+        /// <summary>
         /// Read particle extra data
         /// </summary>
         /// <param name="cache"></param>
@@ -330,9 +354,9 @@ namespace CraftSharp.Protocol.Handlers
                 ParticleExtraDataType.None                => ParticleExtraData.Empty,
                 ParticleExtraDataType.Block               => ReadBlockParticle(cache),
                 ParticleExtraDataType.Dust                => ReadDustParticle(cache,
-                        useFloats:    true /* TODO: false for 1.21.4+ */),
+                        useFloats:    protocolVersion < ProtocolMinecraft.MC_1_21_4_Version),
                 ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache,
-                        useFloats:    true /* TODO: false for 1.21.4+ */),
+                        useFloats:    protocolVersion < ProtocolMinecraft.MC_1_21_4_Version),
                 ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
                 ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
                 ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
@@ -346,14 +370,14 @@ namespace CraftSharp.Protocol.Handlers
             };
         }
 
-        private BlockParticleExtraData ReadBlockParticle(Queue<byte> cache)
+        private static BlockParticleExtraData ReadBlockParticle(Queue<byte> cache)
         {
             var stateId = DataTypes.ReadNextVarInt(cache);
 
             return new BlockParticleExtraData(stateId);
         }
 
-        private DustParticleExtraData ReadDustParticle(Queue<byte> cache, bool useFloats)
+        private static DustParticleExtraData ReadDustParticle(Queue<byte> cache, bool useFloats)
         {
             Color32 color;
 
@@ -375,7 +399,7 @@ namespace CraftSharp.Protocol.Handlers
             return new DustParticleExtraData(color, scale);
         }
 
-        private DustColorTransitionParticleExtraData ReadDustColorTransitionParticle(Queue<byte> cache, bool useFloats)
+        private static DustColorTransitionParticleExtraData ReadDustColorTransitionParticle(Queue<byte> cache, bool useFloats)
         {
             Color32 colorFrom, colorTo;
             float scale;
@@ -406,7 +430,7 @@ namespace CraftSharp.Protocol.Handlers
             return new DustColorTransitionParticleExtraData(colorFrom, colorTo, scale);
         }
 
-        private EntityEffectParticleExtraData ReadEntityEffectParticle(Queue<byte> cache)
+        private static EntityEffectParticleExtraData ReadEntityEffectParticle(Queue<byte> cache)
         {
             var argb = DataTypes.ReadNextInt(cache); // 0xAARRGGGBB
             var color = new Color32((byte) ((argb & 0xFF0000) >> 16), (byte) ((argb & 0xFF00) >> 8), (byte) (argb & 0xFF), (byte) (argb >> 24));
@@ -421,14 +445,14 @@ namespace CraftSharp.Protocol.Handlers
             return new ItemParticleExtraData(itemStack);
         }
 
-        private SculkChargeParticleExtraData ReadSculkChargeParticle(Queue<byte> cache)
+        private static SculkChargeParticleExtraData ReadSculkChargeParticle(Queue<byte> cache)
         {
             var roll = DataTypes.ReadNextFloat(cache);
 
             return new SculkChargeParticleExtraData(roll);
         }
 
-        private ShriekParticleExtraData ReadShriekParticle(Queue<byte> cache)
+        private static ShriekParticleExtraData ReadShriekParticle(Queue<byte> cache)
         {
             var delay = DataTypes.ReadNextVarInt(cache);
 
@@ -443,7 +467,7 @@ namespace CraftSharp.Protocol.Handlers
         /// sent before destination data. For 1.19+, an 'eye height' field is included for
         /// 'minecraft:entity' position source type, following the entity id field.
         /// </summary>
-        private VibrationParticleExtraData ReadVibrationParticle(Queue<byte> cache, bool hasOrigin, bool hasEyeHeight, bool useTypeId)
+        private static VibrationParticleExtraData ReadVibrationParticle(Queue<byte> cache, bool hasOrigin, bool hasEyeHeight, bool useTypeId)
         {
             if (hasOrigin) // 1.17 - 1.18.2
             {

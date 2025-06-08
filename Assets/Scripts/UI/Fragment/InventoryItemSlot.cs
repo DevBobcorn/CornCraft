@@ -10,7 +10,7 @@ using TMPro;
 
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
-using CraftSharp.Protocol;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.UI
 {

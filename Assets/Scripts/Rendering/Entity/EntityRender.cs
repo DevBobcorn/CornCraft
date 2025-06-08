@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using CraftSharp.Protocol;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Rendering
 {

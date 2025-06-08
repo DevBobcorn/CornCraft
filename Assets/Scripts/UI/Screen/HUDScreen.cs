@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Event;
-using CraftSharp.Protocol;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.UI
 {

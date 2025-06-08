@@ -30,7 +30,6 @@ namespace CraftSharp.Protocol.Handlers
     /// </remarks>
     public class ProtocolMinecraft : IMinecraftCom
     {
-
         public const int MC_1_16_2_Version = 751;
         public const int MC_1_16_3_Version = 753;
         public const int MC_1_16_5_Version = 754;
@@ -46,7 +45,10 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_20_2_Version = 764;
         public const int MC_1_20_4_Version = 765;
         public const int MC_1_20_6_Version = 766;
-        public const int MC_1_21_Version   = 767;
+        public const int MC_1_21_1_Version = 767;
+        public const int MC_1_21_3_Version = 768;
+        public const int MC_1_21_4_Version = 769;
+        public const int MC_1_21_5_Version = 770;
 
         private int compression_threshold = -1;
         private int autocomplete_transaction_id = 0;

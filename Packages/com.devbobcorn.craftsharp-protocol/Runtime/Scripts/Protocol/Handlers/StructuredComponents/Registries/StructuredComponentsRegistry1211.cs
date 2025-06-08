@@ -1,12 +1,11 @@
-using CraftSharp.Protocol.Handlers.StructuredComponents.Components._1_20_6;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Components._1_21;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 
 namespace CraftSharp.Protocol.Handlers.StructuredComponents.Registries
 {
-    public class StructuredComponentsRegistry121 : StructuredComponentRegistry
+    public class StructuredComponentsRegistry1211 : StructuredComponentRegistry
     {
-        public StructuredComponentsRegistry121(IMinecraftDataTypes dataTypes, ItemPalette itemPalette, SubComponentRegistry subComponentRegistry) 
+        public StructuredComponentsRegistry1211(IMinecraftDataTypes dataTypes, ItemPalette itemPalette, SubComponentRegistry subComponentRegistry) 
             : base(dataTypes, itemPalette, subComponentRegistry)
         {
             RegisterComponent<CustomDataComponent>(0, StructuredComponentIds.CUSTOM_DATA_ID);

@@ -10,7 +10,7 @@ using TMPro;
 
 using CraftSharp.Event;
 using CraftSharp.Inventory;
-using CraftSharp.Protocol;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.UI
 {

@@ -6,6 +6,7 @@ using System.Threading;
 using UnityEngine;
 
 using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Protocol.Handlers
 {

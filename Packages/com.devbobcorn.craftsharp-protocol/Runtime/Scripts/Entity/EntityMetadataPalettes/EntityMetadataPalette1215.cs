@@ -3,9 +3,9 @@ using System.Collections.Generic;
 namespace CraftSharp
 {
     /// <summary>
-    /// 1.20.5 - 1.21.4
+    /// 1.21.5
     /// </summary>
-    public class EntityMetadataPalette1205 : EntityMetadataPalette
+    public class EntityMetadataPalette1215 : EntityMetadataPalette
     {
         private readonly Dictionary<int, EntityMetadataType> entityMetadataMappings = new()
         {
@@ -32,14 +32,18 @@ namespace CraftSharp
             { 20, EntityMetadataType.OptionalVarInt },
             { 21, EntityMetadataType.Pose },
             { 22, EntityMetadataType.CatVariant },
-            { 23, EntityMetadataType.WolfVariant },
-            { 24, EntityMetadataType.FrogVariant },
-            { 25, EntityMetadataType.OptionalGlobalPosition },
-            { 26, EntityMetadataType.PaintingVariant },
-            { 27, EntityMetadataType.SnifferState },
-            { 28, EntityMetadataType.ArmadilloState },
-            { 29, EntityMetadataType.Vector3 },
-            { 30, EntityMetadataType.Quaternion }
+            { 23, EntityMetadataType.CowVariant },
+            { 24, EntityMetadataType.WolfVariant },
+            { 25, EntityMetadataType.WolfSoundVariant },
+            { 26, EntityMetadataType.FrogVariant },
+            { 27, EntityMetadataType.PigVariant },
+            { 28, EntityMetadataType.ChickenVariant },
+            { 29, EntityMetadataType.OptionalGlobalPosition },
+            { 30, EntityMetadataType.PaintingVariant },
+            { 31, EntityMetadataType.SnifferState },
+            { 32, EntityMetadataType.ArmadilloState },
+            { 33, EntityMetadataType.Vector3 },
+            { 34, EntityMetadataType.Quaternion }
         };
             
         public override Dictionary<int, EntityMetadataType> GetEntityMetadataMappingsList()

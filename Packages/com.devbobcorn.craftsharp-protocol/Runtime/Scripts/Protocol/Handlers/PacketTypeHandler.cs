@@ -37,18 +37,18 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns></returns>
         public PacketTypePalette GetTypeHandler()
         {
-            return GetTypeHandler(this.protocol);
+            return GetTypeHandler(protocol);
         }
         /// <summary>
         /// Get the packet type palette
         /// </summary>
-        /// <param name="protocol">Protocol version to use</param>
+        /// <param name="protocolVersion">Protocol version to use</param>
         /// <returns></returns>
-        public PacketTypePalette GetTypeHandler(int protocol)
+        public PacketTypePalette GetTypeHandler(int protocolVersion)
         {
-            PacketTypePalette p = protocol switch
+            PacketTypePalette p = protocolVersion switch
             {
-                > ProtocolMinecraft.MC_1_21_Version => throw new NotImplementedException(Translations.Get("exception.palette.packet")),
+                > ProtocolMinecraft.MC_1_21_1_Version => throw new NotImplementedException(Translations.Get("exception.palette.packet")),
 
                 <= ProtocolMinecraft.MC_1_16_5_Version => new PacketPalette1162(),
                 <= ProtocolMinecraft.MC_1_17_1_Version => new PacketPalette117(),

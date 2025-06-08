@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using CraftSharp.Inventory;
-using CraftSharp.Protocol;
+using CraftSharp.Protocol.Message;
 using CraftSharp.UI;
 
 namespace CraftSharp.Control

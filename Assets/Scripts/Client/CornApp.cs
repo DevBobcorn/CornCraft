@@ -16,6 +16,7 @@ using CraftSharp.Protocol.Handlers;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Registries.Subcomponents;
+using CraftSharp.Protocol.Message;
 using CraftSharp.Resource;
 using CraftSharp.UI;
 using CraftSharp.Protocol.ProtoDef;
@@ -146,8 +147,8 @@ namespace CraftSharp
             var dataTypes = new MinecraftDataTypes(protocolVersion);
             StructuredComponentRegistry componentRegistry = protocolVersion switch
             {
-                >= ProtocolMinecraft.MC_1_21_Version => new StructuredComponentsRegistry121(
-                    dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry121(dataTypes)),
+                >= ProtocolMinecraft.MC_1_21_1_Version => new StructuredComponentsRegistry1211(
+                    dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry1211(dataTypes)),
                 _ => new StructuredComponentsRegistry1206(
                     dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry1206(dataTypes))
             };
@@ -282,7 +283,7 @@ namespace CraftSharp
                 ));
             }
 
-            Protocol.ChatParser.LoadTranslationRules(langFile, fallbackLangFile);
+            ChatParser.LoadTranslationRules(langFile, fallbackLangFile);
 
             // Load ProtoDef
             var protodefVersionInt = int.Parse(protodefVersion);

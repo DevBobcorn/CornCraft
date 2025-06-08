@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using CraftSharp.Protocol;
 using CraftSharp.Protocol.Handlers;
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Inventory
 {
@@ -153,7 +152,7 @@ namespace CraftSharp.Inventory
             var map = protocolVersion switch
             {
                 < ProtocolMinecraft.MC_1_19_Version => enchantmentMappings116,
-                >= ProtocolMinecraft.MC_1_19_Version and < ProtocolMinecraft.MC_1_21_Version => enchantmentMappings119,
+                < ProtocolMinecraft.MC_1_21_1_Version => enchantmentMappings119,
                 _ => enchantmentMappings
             };
 
@@ -165,7 +164,8 @@ namespace CraftSharp.Inventory
 
         public static string GetEnchantmentName(Enchantments enchantment)
         {
-            var translation = ChatParser.TranslateString("Enchantments.minecraft." + enchantment.ToString().ToUnderscoreCase());
+            var enchantmentId = new ResourceLocation(enchantment.ToString().ToUnderscoreCase());
+            var translation = ChatParser.TranslateString(enchantmentId.GetTranslationKey("enchantment"));
             return string.IsNullOrEmpty(translation) ? $"Unknown Enchantment with ID: {(short)enchantment} (Probably not named in the code yet)" : translation;
         }
     }
