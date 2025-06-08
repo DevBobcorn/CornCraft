@@ -217,8 +217,18 @@ namespace CraftSharp.UI
                 }
             }
                 
-            if (itemStack.Lores is not null && itemStack.Lores.Length > 0)
+            if (itemStack.Lores is not null && itemStack.Lores.Count > 0)
+            {
                 text += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
+            }
+
+            if (itemStack.Components.Count > 0)
+            {
+                foreach (var component in itemStack.Components)
+                {
+                    text += $"\n{component.Key}: {component.Value}";
+                }
+            }
                 
             return text;
 
@@ -245,7 +255,7 @@ namespace CraftSharp.UI
                     return ChatParser.TranslateString($"{baseTranslationKey}.effect.empty"); // Uncraftable potion
                 }
                 
-                var displayNameJson = itemStack.DisplayName;
+                var displayNameJson = itemStack.CustomName;
                 if (string.IsNullOrEmpty(displayNameJson)) return null;
                 
                 var formattedName = ChatParser.ParseText(displayNameJson);
@@ -293,7 +303,7 @@ namespace CraftSharp.UI
             }
             else
             {
-                var maxDamage = (float) newItemStack.MaxDurability; // TODO: Check enchantment
+                var maxDamage = (float) newItemStack.MaxDamage; // TODO: Check enchantment
                 
                 damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);
                 var hue = Mathf.Lerp(0.33333334F, 0F, damage / maxDamage);

@@ -74,7 +74,7 @@ namespace CraftSharp.Rendering
         {
             DestroyActionItem();
 
-            var itemObj = new GameObject($"Action Item ({itemStack?.DisplayName})")
+            var itemObj = new GameObject($"Action Item ({itemStack?.CustomName})")
             {
                 layer = gameObject.layer
             };

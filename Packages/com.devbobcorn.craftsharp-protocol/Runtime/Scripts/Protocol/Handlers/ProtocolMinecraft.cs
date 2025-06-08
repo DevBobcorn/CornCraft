@@ -14,6 +14,7 @@ using CraftSharp.Proxy;
 using CraftSharp.Inventory;
 using CraftSharp.Protocol.Handlers.PacketPalettes;
 using CraftSharp.Protocol.Handlers.Forge;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Protocol.Session;
@@ -74,6 +75,7 @@ namespace CraftSharp.Protocol.Handlers
         private readonly ProtocolTerrain pTerrain;
         private readonly IMinecraftComHandler handler;
         private readonly EntityMetadataPalette entityMetadataPalette;
+        private readonly StructuredComponentRegistry structuredComponentRegistry;
         private readonly PacketTypePalette packetPalette;
         private readonly SocketWrapper socketWrapper;
         private readonly MinecraftDataTypes dataTypes;
@@ -93,7 +95,16 @@ namespace CraftSharp.Protocol.Handlers
             this.randomGen = RandomNumberGenerator.Create();
             lastSeenMessagesCollector = protocolVersion >= MC_1_19_3_Version ? new(20) : new(5);
 
-            entityMetadataPalette = EntityMetadataPaletteHandler.GetPalette(protocolVersion);
+            entityMetadataPalette = protocolVersion switch
+            {
+                <= MC_1_19_2_Version => new EntityMetadataPalette1191(), // 1.13 - 1.19.2
+                <= MC_1_19_3_Version => new EntityMetadataPalette1193(), // 1.19.3
+                <= MC_1_20_4_Version => new EntityMetadataPalette1194(), // 1.19.4 - 1.20.4
+                <= MC_1_21_4_Version => new EntityMetadataPalette1205(), // 1.20.5 - 1.21.4
+                <= MC_1_21_5_Version => new EntityMetadataPalette1215(), // 1.21.5
+
+                _ => throw new NotImplementedException()
+            };
 
             // MessageType 
             // You can find it in https://wiki.vg/Protocol#Player_Chat_Message or /net/minecraft/network/message/MessageType.java

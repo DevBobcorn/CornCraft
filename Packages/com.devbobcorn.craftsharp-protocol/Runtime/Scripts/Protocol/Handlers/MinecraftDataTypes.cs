@@ -6,6 +6,7 @@ using UnityEngine;
 
 using CraftSharp.Inventory;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
 using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Protocol.Handlers
@@ -38,14 +39,15 @@ namespace CraftSharp.Protocol.Handlers
         {
             if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
             {
-                var structuredComponentsToAdd = new List<StructuredComponent>();
+                var structuredComponentsToAdd = new Dictionary<ResourceLocation, StructuredComponent>();
+                var structuredComponentsToRemove = new List<ResourceLocation>();
 
                 var itemCount = DataTypes.ReadNextVarInt(cache);
 
                 if (itemCount <= 0) return null;
                 
                 var itemId = DataTypes.ReadNextVarInt(cache);
-                var item = new ItemStack(itemPalette.GetByNumId(itemId), itemCount, null);
+                var item = new ItemStack(itemPalette.GetByNumId(itemId), itemCount);
                     
                 var numberOfComponentsToAdd = DataTypes.ReadNextVarInt(cache);
                 var numberOfComponentsToRemove = DataTypes.ReadNextVarInt(cache);
@@ -55,18 +57,19 @@ namespace CraftSharp.Protocol.Handlers
                 for (var i = 0; i < numberOfComponentsToAdd; i++)
                 {
                     var componentTypeNumId = DataTypes.ReadNextVarInt(cache);
-                    structuredComponentsToAdd.Add(structuredComponentRegistry.ParseComponent(componentTypeNumId, cache));
+                    structuredComponentsToAdd.Add(
+                        structuredComponentRegistry.GetIdByNumId(componentTypeNumId),
+                        structuredComponentRegistry.ParseComponent(componentTypeNumId, cache));
                 }
 
                 for (var i = 0; i < numberOfComponentsToRemove; i++)
                 {
-                    // TODO: Check what this does exactly
-                    DataTypes.ReadNextVarInt(cache); // The type of component to remove
+                    var componentTypeNumId = DataTypes.ReadNextVarInt(cache); // The type of component to remove
+                    structuredComponentsToRemove.Add(structuredComponentRegistry.GetIdByNumId(componentTypeNumId));
                 }
                     
-                // TODO: Wire up the structured components in the Item class (extract info, update fields, etc..)
-                // Use structuredComponentsToAdd
-                // Look at: https://wiki.vg/index.php?title=Slot_Data&oldid=19350#Structured_components
+                // Apply these changed components
+                item.ApplyComponents(structuredComponentsToAdd, structuredComponentsToRemove);
                 
                 return item;
             }
