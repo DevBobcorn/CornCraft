@@ -122,6 +122,16 @@ namespace CraftSharp.UI
                 text = TMPConverter.MC2TMP($"{colorPrefix}{text}");
             }
 
+            if (itemStack.IsEnchanted)
+            {
+                foreach (var enchantment in itemStack.Enchantments)
+                {
+                    var enchantmentType = EnchantmentTypePalette.INSTANCE.GetById(enchantment.EnchantmentId);
+                    var levelText = ChatParser.TranslateString($"enchantment.level.{enchantment.Level}");
+                    text += TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString(enchantmentType.TranslationKey)} {levelText}");
+                }
+            }
+
             if (POTION_ITEM_IDS.Contains(itemId))
             {
                 var effectInstances = new List<MobEffectInstance>();
@@ -226,7 +236,7 @@ namespace CraftSharp.UI
             {
                 foreach (var component in itemStack.Components)
                 {
-                    text += $"\n{component.Key}: {component.Value}";
+                    text += TMPConverter.MC2TMP($"\n§2{component.Value}");
                 }
             }
                 
