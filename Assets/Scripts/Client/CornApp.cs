@@ -142,6 +142,12 @@ namespace CraftSharp
             var loadFlag = new DataLoadFlag();
             Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
+            
+            // Load enchantment definitions
+            loadFlag.Finished = false;
+            Task.Run(() => EnchantmentTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished)
+                yield return null;
 
             // Load item definitions
             var dataTypes = new MinecraftDataTypes(protocolVersion);

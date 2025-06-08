@@ -1924,18 +1924,9 @@ namespace CraftSharp
                     var middleEnchantmentLevelRequirement = inventory.Properties[1];
                     var bottomEnchantmentLevelRequirement = inventory.Properties[2];
 
-                    var topEnchantment = EnchantmentMapping.GetEnchantmentById(
-                        GetProtocolVersion(),
-                        inventory.Properties[4]);
-
-                    var middleEnchantment = EnchantmentMapping.GetEnchantmentById(
-                        GetProtocolVersion(),
-                        inventory.Properties[5]);
-
-                    var bottomEnchantment = EnchantmentMapping.GetEnchantmentById(
-                        GetProtocolVersion(),
-                        inventory.Properties[6]);
-
+                    var topEnchantment = EnchantmentTypePalette.INSTANCE.GetIdByNumId(inventory.Properties[4]);
+                    var middleEnchantment = EnchantmentTypePalette.INSTANCE.GetIdByNumId(inventory.Properties[5]);
+                    var bottomEnchantment = EnchantmentTypePalette.INSTANCE.GetIdByNumId(inventory.Properties[6]);
                     var topEnchantmentLevel = inventory.Properties[7];
                     var middleEnchantmentLevel = inventory.Properties[8];
                     var bottomEnchantmentLevel = inventory.Properties[9];
