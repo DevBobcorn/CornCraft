@@ -6750,26 +6750,29 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 275,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -6949,26 +6952,29 @@
     "action_type": "sword",
     "tier": "wood",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.4
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.4
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 59,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -6979,26 +6985,29 @@
     "action_type": "shovel",
     "tier": "wood",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 1.5
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 1.5
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 59,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7009,26 +7018,29 @@
     "action_type": "pickaxe",
     "tier": "wood",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 1.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 1.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.8
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.8
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 59,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7039,26 +7051,29 @@
     "action_type": "axe",
     "tier": "wood",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 6.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 6.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.2
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.2
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 59,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7069,26 +7084,29 @@
     "action_type": "hoe",
     "tier": "wood",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 0.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 59,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7099,26 +7117,29 @@
     "action_type": "sword",
     "tier": "stone",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 4.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 4.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.4
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.4
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 131,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7129,26 +7150,29 @@
     "action_type": "shovel",
     "tier": "stone",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 2.5
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 2.5
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 131,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7159,26 +7183,29 @@
     "action_type": "pickaxe",
     "tier": "stone",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.8
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.8
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 131,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7189,26 +7216,29 @@
     "action_type": "axe",
     "tier": "stone",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 8.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 8.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.2
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.2
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 131,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7219,26 +7249,29 @@
     "action_type": "hoe",
     "tier": "stone",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 0.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 131,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7249,26 +7282,29 @@
     "action_type": "sword",
     "tier": "gold",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.4
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.4
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 32,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7279,26 +7315,29 @@
     "action_type": "shovel",
     "tier": "gold",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 1.5
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 1.5
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 32,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7309,26 +7348,29 @@
     "action_type": "pickaxe",
     "tier": "gold",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 1.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 1.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.8
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.8
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 32,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7339,26 +7381,29 @@
     "action_type": "axe",
     "tier": "gold",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 6.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 6.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 32,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7369,26 +7414,29 @@
     "action_type": "hoe",
     "tier": "gold",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 0.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 32,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7399,26 +7447,29 @@
     "action_type": "sword",
     "tier": "iron",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 5.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 5.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.4
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.4
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7429,26 +7480,29 @@
     "action_type": "shovel",
     "tier": "iron",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 3.5
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 3.5
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7459,26 +7513,29 @@
     "action_type": "pickaxe",
     "tier": "iron",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.8
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.8
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7489,26 +7546,29 @@
     "action_type": "axe",
     "tier": "iron",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 8.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 8.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.1
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.1
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7519,26 +7579,29 @@
     "action_type": "hoe",
     "tier": "iron",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 0.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -1.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -1.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7549,26 +7612,29 @@
     "action_type": "sword",
     "tier": "diamond",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 6.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 6.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.4
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.4
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 1561,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7579,26 +7645,29 @@
     "action_type": "shovel",
     "tier": "diamond",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 4.5
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 4.5
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 1561,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7609,26 +7678,29 @@
     "action_type": "pickaxe",
     "tier": "diamond",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 4.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 4.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.8
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.8
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 1561,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7639,26 +7711,29 @@
     "action_type": "axe",
     "tier": "diamond",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 8.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 8.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 1561,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7669,26 +7744,29 @@
     "action_type": "hoe",
     "tier": "diamond",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 0.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 1561,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7699,26 +7777,29 @@
     "action_type": "sword",
     "tier": "netherite",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 7.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 7.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.4
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.4
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 2031,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7729,26 +7810,29 @@
     "action_type": "shovel",
     "tier": "netherite",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 5.5
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 5.5
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 2031,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7759,26 +7843,29 @@
     "action_type": "pickaxe",
     "tier": "netherite",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 5.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 5.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.8
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.8
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 2031,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7789,26 +7876,29 @@
     "action_type": "axe",
     "tier": "netherite",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 9.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 9.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -3.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -3.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 2031,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7819,26 +7909,29 @@
     "action_type": "hoe",
     "tier": "netherite",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 0.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 2031,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7937,26 +8030,29 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 1.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 1.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 55,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7967,26 +8063,29 @@
     "action_type": "none",
     "equipment_slot": "chest",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "chest"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 80,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -7997,26 +8096,29 @@
     "action_type": "none",
     "equipment_slot": "legs",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "legs"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 75,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8027,26 +8129,29 @@
     "action_type": "none",
     "equipment_slot": "feet",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 1.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 1.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "feet"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 65,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8057,26 +8162,29 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 165,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8087,26 +8195,29 @@
     "action_type": "none",
     "equipment_slot": "chest",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 5.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 5.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "chest"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 240,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8117,26 +8228,29 @@
     "action_type": "none",
     "equipment_slot": "legs",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 4.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 4.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "legs"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 225,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8147,26 +8261,29 @@
     "action_type": "none",
     "equipment_slot": "feet",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 1.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 1.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "feet"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 195,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8177,26 +8294,29 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 165,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8207,26 +8327,29 @@
     "action_type": "none",
     "equipment_slot": "chest",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 6.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 6.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "chest"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 240,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8237,26 +8360,29 @@
     "action_type": "none",
     "equipment_slot": "legs",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 5.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 5.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "legs"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 225,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8267,26 +8393,29 @@
     "action_type": "none",
     "equipment_slot": "feet",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "feet"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 195,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8297,26 +8426,29 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 2.0
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 363,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8327,26 +8459,29 @@
     "action_type": "none",
     "equipment_slot": "chest",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 8.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 8.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 2.0
-          },
-          "slot": "chest"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "chest"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 528,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8357,26 +8492,29 @@
     "action_type": "none",
     "equipment_slot": "legs",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 6.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 6.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 2.0
-          },
-          "slot": "legs"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "legs"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 495,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8387,26 +8525,29 @@
     "action_type": "none",
     "equipment_slot": "feet",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 2.0
-          },
-          "slot": "feet"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "feet"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 429,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8417,26 +8558,29 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 2.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 2.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 77,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8447,26 +8591,29 @@
     "action_type": "none",
     "equipment_slot": "chest",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 5.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 5.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "chest"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "chest"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 112,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8477,26 +8624,29 @@
     "action_type": "none",
     "equipment_slot": "legs",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "legs"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "legs"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 105,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8507,26 +8657,29 @@
     "action_type": "none",
     "equipment_slot": "feet",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 1.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 1.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 0.0
-          },
-          "slot": "feet"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 0.0
+            },
+            "slot": "feet"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 91,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8537,35 +8690,38 @@
     "action_type": "none",
     "equipment_slot": "head",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 3.0
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "head"
           },
-          "slot": "head"
-        },
-        {
-          "modifier": {
-            "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
-            "attribute": "generic.knockback_resistance",
-            "operation": "addition",
-            "value": 0.1
-          },
-          "slot": "head"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "2ad3f246-fee1-4e67-b886-69fd380bb150",
+              "attribute": "generic.knockback_resistance",
+              "operation": "addition",
+              "value": 0.1
+            },
+            "slot": "head"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 407,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8576,35 +8732,38 @@
     "action_type": "none",
     "equipment_slot": "chest",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 8.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 8.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 3.0
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "chest"
           },
-          "slot": "chest"
-        },
-        {
-          "modifier": {
-            "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
-            "attribute": "generic.knockback_resistance",
-            "operation": "addition",
-            "value": 0.1
-          },
-          "slot": "chest"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "9f3d476d-c118-4544-8365-64846904b48e",
+              "attribute": "generic.knockback_resistance",
+              "operation": "addition",
+              "value": 0.1
+            },
+            "slot": "chest"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 592,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8615,35 +8774,38 @@
     "action_type": "none",
     "equipment_slot": "legs",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 6.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 6.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 3.0
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "legs"
           },
-          "slot": "legs"
-        },
-        {
-          "modifier": {
-            "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
-            "attribute": "generic.knockback_resistance",
-            "operation": "addition",
-            "value": 0.1
-          },
-          "slot": "legs"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "d8499b04-0e66-4726-ab29-64469d734e0d",
+              "attribute": "generic.knockback_resistance",
+              "operation": "addition",
+              "value": 0.1
+            },
+            "slot": "legs"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 555,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -8654,35 +8816,38 @@
     "action_type": "none",
     "equipment_slot": "feet",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor",
-            "operation": "addition",
-            "value": 3.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.armor_toughness",
-            "operation": "addition",
-            "value": 3.0
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.armor_toughness",
+              "operation": "addition",
+              "value": 3.0
+            },
+            "slot": "feet"
           },
-          "slot": "feet"
-        },
-        {
-          "modifier": {
-            "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
-            "attribute": "generic.knockback_resistance",
-            "operation": "addition",
-            "value": 0.1
-          },
-          "slot": "feet"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "845db27c-c624-495f-8c9f-6020a9a58b6b",
+              "attribute": "generic.knockback_resistance",
+              "operation": "addition",
+              "value": 0.1
+            },
+            "slot": "feet"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 481,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"
@@ -11539,26 +11704,29 @@
     "protocol_id": 1133,
     "action_type": "trident",
     "default_components": {
-      "minecraft:attribute_modifiers": [
-        {
-          "modifier": {
-            "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
-            "attribute": "generic.attack_damage",
-            "operation": "addition",
-            "value": 8.0
+      "minecraft:attribute_modifiers": {
+        "modifiers": [
+          {
+            "modifier": {
+              "uuid": "cb3f55d3-645c-4f38-a497-9c13a33db5cf",
+              "attribute": "generic.attack_damage",
+              "operation": "addition",
+              "value": 8.0
+            },
+            "slot": "mainhand"
           },
-          "slot": "mainhand"
-        },
-        {
-          "modifier": {
-            "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
-            "attribute": "generic.attack_speed",
-            "operation": "addition",
-            "value": -2.9
-          },
-          "slot": "mainhand"
-        }
-      ],
+          {
+            "modifier": {
+              "uuid": "fa233e1c-4180-4865-b01b-bcce9785aca3",
+              "attribute": "generic.attack_speed",
+              "operation": "addition",
+              "value": -2.9
+            },
+            "slot": "mainhand"
+          }
+        ],
+        "show_in_tooltip": true
+      },
       "minecraft:max_damage": 250,
       "minecraft:max_stack_size": 1,
       "minecraft:rarity": "common"

@@ -25993,7 +25993,7 @@
   },
   "minecraft:mace": {
     "protocol_id": 1093,
-    "action_type": "none",
+    "action_type": "mace",
     "default_components": {
       "minecraft:attribute_modifiers": {
         "modifiers": [
