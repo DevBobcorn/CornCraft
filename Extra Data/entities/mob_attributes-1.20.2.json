@@ -1,0 +1,44 @@
+{
+    "minecraft:generic.max_health": {
+        "protocol_id": 0
+    },
+    "minecraft:generic.follow_range": {
+        "protocol_id": 1
+    },
+    "minecraft:generic.knockback_resistance": {
+        "protocol_id": 2
+    },
+    "minecraft:generic.movement_speed": {
+        "protocol_id": 3
+    },
+    "minecraft:generic.flying_speed": {
+        "protocol_id": 4
+    },
+    "minecraft:generic.attack_damage": {
+        "protocol_id": 5
+    },
+    "minecraft:generic.attack_knockback": {
+        "protocol_id": 6
+    },
+    "minecraft:generic.attack_speed": {
+        "protocol_id": 7
+    },
+    "minecraft:generic.armor": {
+        "protocol_id": 8
+    },
+    "minecraft:generic.armor_toughness": {
+        "protocol_id": 9
+    },
+    "minecraft:generic.luck": {
+        "protocol_id": 10
+    },
+    "minecraft:generic.max_absorption": {
+        "protocol_id": 11
+    },
+    "minecraft:zombie.spawn_reinforcements": {
+        "protocol_id": 12
+    },
+    "minecraft:horse.jump_strength": {
+        "protocol_id": 13
+    }
+}
