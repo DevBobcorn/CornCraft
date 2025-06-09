@@ -10,7 +10,7 @@ namespace CraftSharp.Protocol.Handlers.StructuredComponents.Registries.Subcompon
             RegisterSubComponent<BlockPredicateSubcomponent>(SubComponents.BlockPredicate);
             RegisterSubComponent<BlockSetSubcomponent>(SubComponents.BlockSet);
             RegisterSubComponent<PropertySubComponent>(SubComponents.Property);
-            RegisterSubComponent<AttributeSubComponent>(SubComponents.Attribute);
+            RegisterSubComponent<AttributeModifierSubComponent>(SubComponents.Attribute);
             RegisterSubComponent<EffectSubComponent>(SubComponents.Effect);
             RegisterSubComponent<PotionEffectSubComponent>(SubComponents.PotionEffect);
             RegisterSubComponent<DetailsSubComponent>(SubComponents.Details);

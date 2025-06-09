@@ -137,6 +137,8 @@ namespace CraftSharp
                 updateStatus("login.login_failed", string.Empty);
                 yield break;
             }
+            
+            var dataTypes = new MinecraftDataTypes(protocolVersion);
 
             // Load block/blockstate definitions
             var loadFlag = new DataLoadFlag();
@@ -150,7 +152,6 @@ namespace CraftSharp
                 yield return null;
 
             // Load item definitions
-            var dataTypes = new MinecraftDataTypes(protocolVersion);
             StructuredComponentRegistry componentRegistry = protocolVersion switch
             {
                 >= ProtocolMinecraft.MC_1_21_1_Version => new StructuredComponentsRegistry1211(
@@ -176,7 +177,7 @@ namespace CraftSharp
 
             // Load mob effect definitions
             loadFlag.Finished = false;
-            Task.Run(() => MobEffectPalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            Task.Run(() => MobEffectPalette.INSTANCE.PrepareData(dataVersion, loadFlag, dataTypes));
             while (!loadFlag.Finished) yield return null;
             
             // Load potion definitions
