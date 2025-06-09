@@ -932,7 +932,7 @@ namespace CraftSharp
                                 // Check if items are stackable?
                                 if (InventoryData.CheckStackable(target1, cursor1))
                                 {
-                                    int maxCount = Mathf.Min(target1.StackLimit, slotType.MaxCount);
+                                    int maxCount = Mathf.Min(target1.MaxStackSize, slotType.MaxCount);
                                     
                                     // Check item stacking
                                     if (target1.Count + cursor1.Count <= maxCount)
@@ -1047,7 +1047,7 @@ namespace CraftSharp
                             // Check target slot also have item
                             if (inventory.Items.TryGetValue(slot, out var target2))
                             {
-                                int maxCount = Mathf.Min(target2.StackLimit, slotType.MaxCount);
+                                int maxCount = Mathf.Min(target2.MaxStackSize, slotType.MaxCount);
 
                                 // Check if these 2 items are stackable
                                 if (InventoryData.CheckStackable(target2, cursor2))
@@ -1234,7 +1234,7 @@ namespace CraftSharp
                         var target8 = inventory.Items.GetValueOrDefault(slot);
                         draggedSlots[slot] = target8?.Count ?? 0; // Initial count is 0 if the slot is empty
                         
-                        var stackMax = dragStartCursorItemClone.StackLimit;
+                        var stackMax = dragStartCursorItemClone.MaxStackSize;
                         var initCursorCount = dragStartCursorItemClone.Count;
                         
                         int maxAllocForEachSlot = actionType switch

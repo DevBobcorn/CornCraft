@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -104,8 +106,8 @@ namespace CraftSharp.UI
             var itemId = itemStack.ItemType.ItemId;
 
             // Block items might use block translation key
-            var text = getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
-                translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")) );
+            var text = new StringBuilder(getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
+                translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")) ) );
             
             var rarity = itemStack.Rarity;
             
@@ -119,7 +121,7 @@ namespace CraftSharp.UI
                     _ => string.Empty
                 };
                 // Make sure TMP color tag is closed
-                text = TMPConverter.MC2TMP($"{colorPrefix}{text}");
+                text = new StringBuilder(TMPConverter.MC2TMP($"{colorPrefix}{text}"));
             }
 
             if (itemStack.IsEnchanted)
@@ -128,7 +130,7 @@ namespace CraftSharp.UI
                 {
                     var enchantmentType = EnchantmentTypePalette.INSTANCE.GetById(enchantment.EnchantmentId);
                     var levelText = ChatParser.TranslateString($"enchantment.level.{enchantment.Level}");
-                    text += TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString(enchantmentType.TranslationKey)} {levelText}");
+                    text.Append(TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString(enchantmentType.TranslationKey)} {levelText}"));
                 }
             }
 
@@ -136,23 +138,18 @@ namespace CraftSharp.UI
             {
                 var effectInstances = new List<MobEffectInstance>();
                 
-                // Default effects for potion
-                if (itemStack.NBT is not null && itemStack.NBT.TryGetValue("Potion", out var value))
+                if (itemStack.TryGetComponent<PotionContentsComponent>(
+                        StructuredComponentIds.POTION_CONTENTS_ID, out var potionContentsComp))
                 {
-                    var potionId = ResourceLocation.FromString((string) value);
-                    var potion = PotionPalette.INSTANCE.GetById(potionId);
+                    // Default effects for potion
+                    if (potionContentsComp.HasPotionId)
+                    {
+                        var potion = PotionPalette.INSTANCE.GetById(potionContentsComp.PotionId);
+                        effectInstances.AddRange(potion.Effects);
+                    }
 
-                    effectInstances.AddRange(potion.Effects);
-                } 
-                
-                // Custom effects overrides
-                if (itemStack.NBT is not null && (itemStack.NBT.TryGetValue("CustomPotionEffects ", out value) ||
-                                                  itemStack.NBT.TryGetValue("custom_potion_effects", out value)))
-                {
-                    var effectList = (object[]) value;
-
-                    effectInstances.AddRange(effectList.Select(
-                        x => GetEffectInstanceFromNBT((Dictionary<string, object>) x)) );
+                    // Custom effects overrides
+                    effectInstances.AddRange(potionContentsComp.CustomEffects.Select(MobEffectInstance.FromComponent));
                 }
 
                 if (effectInstances.Count > 0)
@@ -175,19 +172,17 @@ namespace CraftSharp.UI
                                 new List<string> { effectName, $"{Mathf.Min(seconds / 60, 99):D02}:{seconds % 60:D02}" });
                         }
 
-                        effectNames.Append('\n');
-                        effectNames.Append(effect.Category switch
+                        effectNames.Append('\n').Append(effect.Category switch
                         {
                             MobEffectCategory.Beneficial => "§9", // Blue
                             MobEffectCategory.Harmful => "§c", // Red
                             _ => "§7" // Grey
-                        });
-                        effectNames.Append(effectName);
+                        }).Append(effectName);
                     }
-                    text += TMPConverter.MC2TMP(effectNames.ToString());
+                    text.Append(TMPConverter.MC2TMP(effectNames.ToString()));
                     
                     var effectModifiers = new StringBuilder();
-                    var hasModifiers = false;
+                    var hasModifiersWhenDrank = false;
 
                     foreach (var instance in effectInstances)
                     {
@@ -212,47 +207,44 @@ namespace CraftSharp.UI
                                 effectModifiers.Append(ChatParser.TranslateString(opTranslationKey, new List<string> { opValue, opAttrName }));
                             }
                             
-                            hasModifiers = true;
+                            hasModifiersWhenDrank = true;
                         }
                     }
 
-                    if (hasModifiers)
+                    if (hasModifiersWhenDrank)
                     {
-                        text += TMPConverter.MC2TMP($"\n\n{ChatParser.TranslateString("potion.whenDrank")}{effectModifiers}");
+                        text.Append(TMPConverter.MC2TMP($"\n\n{ChatParser.TranslateString("potion.whenDrank")}{effectModifiers}"));
                     }
                 }
                 else // No effects
                 {
-                    text += TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString("effect.none")}"); // Grey
+                    text.Append(TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString("effect.none")}")); // Grey
                 }
             }
                 
             if (itemStack.Lores is not null && itemStack.Lores.Count > 0)
             {
-                text += '\n' + string.Join("\n", itemStack.Lores.Select(x => x.ToString()));
+                text.Append('\n').Append(string.Join("\n", itemStack.Lores.Select(x => x.ToString())));
             }
 
-            if (itemStack.Components.Count > 0)
+            if (itemStack.Components.Count > 0) // For debugging item components
             {
-                foreach (var component in itemStack.Components)
-                {
-                    text += TMPConverter.MC2TMP($"\n§2{component.Value}");
-                }
+                text = itemStack.Components.Aggregate(text, (current, component)
+                    => current.Append(TMPConverter.MC2TMP($"\n§2{component.Value}")));
             }
-                
-            return text;
+            
+            return text.ToString();
 
             string? getDisplayName()
             {
                 if (POTION_ITEM_IDS.Contains(itemId))
                 {
-                    // Check potion NBTs https://minecraft.wiki/w/Item_format/Before_1.20.5#Potion_Effects
                     var baseTranslationKey = itemStack.ItemType.ItemId.GetTranslationKey("item");
                     
-                    if (itemStack.NBT is not null && itemStack.NBT.TryGetValue("Potion", out var value))
+                    if (itemStack.TryGetComponent<PotionContentsComponent>(
+                        StructuredComponentIds.POTION_CONTENTS_ID, out var potionContentsComp) && potionContentsComp.HasPotionId)
                     {
-                        var potionId = ResourceLocation.FromString((string) value);
-                        var potionTranslationKey = potionId.Path;
+                        var potionTranslationKey = potionContentsComp.PotionId.Path;
                         
                         if (potionTranslationKey.StartsWith("strong_")) // Remove Enhanced (Level II) Prefix
                             potionTranslationKey = potionTranslationKey.Remove(0, "strong_".Length);
@@ -271,15 +263,6 @@ namespace CraftSharp.UI
                 var formattedName = ChatParser.ParseText(displayNameJson);
                 return TMPConverter.MC2TMP($"§o{formattedName}§r"); // Make the name italic
             }
-
-            static MobEffectInstance GetEffectInstanceFromNBT(Dictionary<string, object> x)
-            {
-                var effectId = ResourceLocation.FromString((string) x["id"]);
-                int amplifier = x.TryGetValue("amplifier", out var value) ? (int) value : 0; // 0 (Level I) by default
-                int duration = x.TryGetValue("duration", out value) ? (int) value : 1; // 1 tick by default
-
-                return new MobEffectInstance(effectId, amplifier, duration, false, true, true);
-            };
         }
 
         protected override void UpdateCursorText()
