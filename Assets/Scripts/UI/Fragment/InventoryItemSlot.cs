@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcomponents;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -98,8 +99,8 @@ namespace CraftSharp.UI
             var itemId = itemStack.ItemType.ItemId;
 
             // Block items might use block translation key
-            var text = new StringBuilder(getDisplayName() ?? ( ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated) ?
-                translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")) ) );
+            var text = new StringBuilder(getDisplayName() ?? ( ChatParser.TryTranslateString(itemId.GetTranslationKey("item"), out var translated) ?
+                translated : ChatParser.TranslateString(itemId.GetTranslationKey("block")) ) );
             
             var rarity = itemStack.Rarity;
             
@@ -181,26 +182,7 @@ namespace CraftSharp.UI
                         var effect = MobEffectPalette.INSTANCE.GetById(instance.EffectId);
                         if (effect.Modifiers.Length > 0)
                         {
-                            foreach (var modifier in effect.Modifiers)
-                            {
-                                effectModifiers.Append('\n');
-                                var opTranslationKey = modifier.Value switch
-                                {
-                                    > 0 => $"attribute.modifier.plus.{(int)modifier.Operation}",
-                                    < 0 => $"attribute.modifier.take.{(int)modifier.Operation}",
-                                    _ => $"attribute.modifier.equals.{(int)modifier.Operation}"
-                                };
-                                var opValue = modifier.Operation switch
-                                {
-                                    MobAttributeModifier.Operations.AddValue => ((int)(modifier.Value *
-                                        (1 + instance.Amplifier))).ToString(),
-                                    _ => ((int)(modifier.Value * (1 + instance.Amplifier) * 100)).ToString()
-                                };
-                                var opAttrName = ChatParser.TranslateString($"attribute.name.{modifier.Attribute}");
-                                effectModifiers.Append(ChatParser.TranslateString(opTranslationKey,
-                                    new List<string> { opValue, opAttrName }));
-                            }
-
+                            effectModifiers.Append(getAttributeModifiers(effect.Modifiers, 1 + instance.Amplifier));
                             hasModifiersWhenDrank = true;
                         }
                     }
@@ -208,7 +190,7 @@ namespace CraftSharp.UI
                     if (hasModifiersWhenDrank)
                     {
                         text.Append(TMPConverter.MC2TMP(
-                            $"\n\n{ChatParser.TranslateString("potion.whenDrank")}{effectModifiers}"));
+                            $"\n\n§5{ChatParser.TranslateString("potion.whenDrank")}{effectModifiers}"));
                     }
                 }
                 else // No effects
@@ -216,7 +198,21 @@ namespace CraftSharp.UI
                     text.Append(TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString("effect.none")}")); // Grey
                 }
             }
+
+            if (itemStack.TryGetComponent<AttributeModifiersComponent>(
+                    StructuredComponentIds.ATTRIBUTE_MODIFIERS_ID, out var attributeModifiersComp) &&
+                attributeModifiersComp is { ShowInTooltip: true, NumberOfModifiers: > 0 })
+            {
+                var groupedBySlot = attributeModifiersComp.Modifiers.GroupBy(x => x.Slot);
                 
+                foreach (IGrouping<EquipmentSlot, AttributeModifierSubComponent> group in groupedBySlot)
+                {
+                    var slotTranslationKey = $"item.modifiers.{group.Key.GetEquipmentSlotName()}";
+                    text.Append(TMPConverter.MC2TMP($"\n\n§7{ChatParser.TranslateString(slotTranslationKey)}"));
+                    text.Append(getAttributeModifiers(group.Select(MobAttributeModifier.FromComponent).ToArray(), 1));
+                }
+            }
+            
             if (itemStack.Lores is not null && itemStack.Lores.Count > 0)
             {
                 text.Append('\n').Append(string.Join("\n", itemStack.Lores.Select(x => x.ToString())));
@@ -231,6 +227,54 @@ namespace CraftSharp.UI
             */
             
             return text.ToString();
+
+            string getAttributeModifiers(MobAttributeModifier[] modifiers, int multiplier)
+            {
+                var modifierText = new StringBuilder();
+                
+                foreach (var modifier in modifiers)
+                {
+                    if (modifier.Value == 0) continue;
+
+                    var displayCalculatedValue = itemStack.ItemType.ActionType is
+                        ItemActionType.Axe or ItemActionType.Hoe or ItemActionType.Pickaxe or
+                        ItemActionType.Sword or ItemActionType.Shovel or ItemActionType.Trident;
+                    var opAttrName = ChatParser.TranslateString($"attribute.name.{modifier.Attribute.Path}");
+                    
+                    modifierText.Append('\n');
+                    string opColor, opTranslationKey, opValue;
+
+                    if (displayCalculatedValue)
+                    {
+                        opColor = "§2"; // Dark Green
+                        opTranslationKey = $"attribute.modifier.equals.{(int)modifier.Operation}";
+                        var valueCalculated = (float) modifier.Value;
+                        opValue = modifier.Operation switch
+                        {
+                            MobAttributeModifier.Operations.AddValue => $"({valueCalculated * multiplier})",
+                            _ => $"??? + {valueCalculated * multiplier * 100}"
+                        };
+                    }
+                    else
+                    {
+                        opColor = modifier.Value > 0 ? "§9" : "§c"; // Blue or Red
+                        opTranslationKey = modifier.Value > 0 ?
+                            $"attribute.modifier.plus.{(int)modifier.Operation}" :
+                            $"attribute.modifier.take.{(int)modifier.Operation}";
+                        var valueAbs = (float) (modifier.Value < 0 ? -modifier.Value : modifier.Value);
+                        opValue = modifier.Operation switch
+                        {
+                            MobAttributeModifier.Operations.AddValue => $"{Mathf.CeilToInt(valueAbs * multiplier)}", // TODO: Check rounding
+                            _ => $"{valueAbs * multiplier * 100}"
+                        };
+                    }
+                    
+                    var line = ChatParser.TranslateString(opTranslationKey, new List<string> { opValue, opAttrName });
+
+                    modifierText.Append(opColor).Append(line);
+                }
+                return TMPConverter.MC2TMP(modifierText.ToString());
+            }
 
             string? getDisplayName()
             {
