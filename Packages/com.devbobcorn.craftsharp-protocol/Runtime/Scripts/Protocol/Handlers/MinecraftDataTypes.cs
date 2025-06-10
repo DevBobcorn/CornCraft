@@ -57,20 +57,47 @@ namespace CraftSharp.Protocol.Handlers
                 
                 var structuredComponentRegistry = ItemPalette.INSTANCE.ComponentRegistry;
 
-                for (var i = 0; i < numberOfComponentsToAdd; i++)
+                var componentsBytes = cache.ToArray();
+                var byteCount = componentsBytes.Length;
+                var copyStart = 0;
+
+                if (numberOfComponentsToAdd > 0)
                 {
-                    var componentTypeNumId = DataTypes.ReadNextVarInt(cache);
-                    structuredComponentsToAdd.Add(
-                        structuredComponentRegistry.GetIdByNumId(componentTypeNumId),
-                        structuredComponentRegistry.ParseComponent(componentTypeNumId, cache));
+                    item.ReceivedComponentsToAdd = new Dictionary<int, byte[]>();
+
+                    for (var i = 0; i < numberOfComponentsToAdd; i++)
+                    {
+                        var componentTypeNumId = DataTypes.ReadNextVarInt(cache);
+                        var component = structuredComponentRegistry.ParseComponent(componentTypeNumId, cache);
+
+                        structuredComponentsToAdd.Add(
+                            structuredComponentRegistry.GetIdByNumId(componentTypeNumId), component);
+
+                        var length = byteCount - cache.Count; // Length of this component in bytes, including the varint num id
+
+                        var componentBytes = new byte[length]; // Store bytes of this component
+                        Array.Copy(componentsBytes, copyStart, componentBytes, 0, length);
+
+                        item.ReceivedComponentsToAdd.Add(componentTypeNumId, componentBytes);
+
+                        byteCount -= length;
+                        copyStart += length;
+                    }
                 }
 
-                for (var i = 0; i < numberOfComponentsToRemove; i++)
+                if (numberOfComponentsToRemove > 0)
                 {
-                    var componentTypeNumId = DataTypes.ReadNextVarInt(cache); // The type of component to remove
-                    structuredComponentsToRemove.Add(structuredComponentRegistry.GetIdByNumId(componentTypeNumId));
+                    item.ReceivedComponentsToRemove = new HashSet<int>();
+
+                    for (var i = 0; i < numberOfComponentsToRemove; i++)
+                    {
+                        var componentTypeNumId = DataTypes.ReadNextVarInt(cache); // The type of component to remove
+                        structuredComponentsToRemove.Add(structuredComponentRegistry.GetIdByNumId(componentTypeNumId));
+
+                        item.ReceivedComponentsToRemove.Add(componentTypeNumId);
+                    }
                 }
-                    
+                
                 // Apply these changed components
                 item.ApplyComponents(structuredComponentsToAdd, structuredComponentsToRemove);
                 
@@ -598,16 +625,61 @@ namespace CraftSharp.Protocol.Handlers
         public byte[] GetItemSlot(ItemStack? item, ItemPalette itemPalette)
         {
             List<byte> slotData = new();
-            
-            // MC 1.13 and greater
-            if (item == null || item.IsEmpty)
-                slotData.AddRange(DataTypes.GetBool(false)); // No item
+
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_6_Version)
+            {
+                if (item == null || item.IsEmpty)
+                {
+                    slotData.AddRange(DataTypes.GetVarInt(0)); // No item
+                }
+                else
+                {
+                    slotData.AddRange(DataTypes.GetVarInt(item.Count)); // Item is present
+                    slotData.AddRange(DataTypes.GetVarInt(itemPalette.GetNumIdById(item.ItemType.ItemId)));
+
+                    if (item.ReceivedComponentsToAdd is not null && item.ReceivedComponentsToAdd.Count > 0)
+                    {
+                        slotData.AddRange(DataTypes.GetVarInt(item.ReceivedComponentsToAdd.Count));
+
+                        foreach (var (_, bytes) in item.ReceivedComponentsToAdd)
+                        {
+                            slotData.AddRange(bytes);
+                        }
+                    }
+                    else
+                    {
+                        slotData.AddRange(DataTypes.GetVarInt(0));
+                    }
+
+                    if (item.ReceivedComponentsToRemove is not null && item.ReceivedComponentsToRemove.Count > 0)
+                    {
+                        slotData.AddRange(DataTypes.GetVarInt(item.ReceivedComponentsToRemove.Count));
+
+                        foreach (var numId in item.ReceivedComponentsToRemove)
+                        {
+                            slotData.AddRange(DataTypes.GetVarInt(numId));
+                        }
+                    }
+                    else
+                    {
+                        slotData.AddRange(DataTypes.GetVarInt(0));
+                    }
+                }
+            }
             else
             {
-                slotData.AddRange(DataTypes.GetBool(true)); // Item is present
-                slotData.AddRange(DataTypes.GetVarInt(itemPalette.GetNumIdById(item.ItemType.ItemId)));
-                slotData.Add((byte)item.Count);
-                slotData.AddRange(DataTypes.GetNbt(item.NBT));
+                // MC 1.13 and greater
+                if (item == null || item.IsEmpty)
+                {
+                    slotData.AddRange(DataTypes.GetBool(false)); // No item
+                }
+                else
+                {
+                    slotData.AddRange(DataTypes.GetBool(true)); // Item is present
+                    slotData.AddRange(DataTypes.GetVarInt(itemPalette.GetNumIdById(item.ItemType.ItemId)));
+                    slotData.Add((byte)item.Count);
+                    slotData.AddRange(DataTypes.GetNbt(item.NBT));
+                }
             }
 
             return slotData.ToArray();

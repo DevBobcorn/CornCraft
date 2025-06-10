@@ -2089,41 +2089,12 @@ namespace CraftSharp.Protocol.Handlers
                             ? DataTypes.ReadNextVarInt(packetData)
                             : DataTypes.ReadNextInt(packetData);
 
-                        var attributeDictionary = new Dictionary<int, string>
-                        {
-                            { 0, "generic.armor" },
-                            { 1, "generic.armor_toughness" },
-                            { 2, "generic.attack_damage" },
-                            { 3, "generic.attack_knockback" },
-                            { 4, "generic.attack_speed" },
-                            { 5, "generic.block_break_speed" },
-                            { 6, "generic.block_interaction_range" },
-                            { 7, "generic.entity_interaction_range" },
-                            { 8, "generic.fall_damage_multiplier" },
-                            { 9, "generic.flying_speed" },
-                            { 10, "generic.follow_range" },
-                            { 11, "generic.gravity" },
-                            { 12, "generic.jump_strength" },
-                            { 13, "generic.knockback_resistance" },
-                            { 14, "generic.luck" },
-                            { 15, "generic.max_absorption" },
-                            { 16, "generic.max_health" },
-                            { 17, "generic.movement_speed" },
-                            { 18, "generic.safe_fall_distance" },
-                            { 19, "generic.scale" },
-                            { 20, "zombie.spawn_reinforcements" },
-                            { 21, "generic.step_height" },
-                            { 22, "generic.submerged_mining_speed" },
-                            { 23, "generic.sweeping_damage_ratio" },
-                            { 24, "generic.water_movement_efficiency" }
-                        };
-
-                        Dictionary<string, double> keys = new();
+                        Dictionary<ResourceLocation, double> props = new();
                         for (int i = 0; i < NumberOfProperties; i++)
                         {
                             var propertyKey = protocolVersion < MC_1_20_6_Version
-                                ? DataTypes.ReadNextString(packetData) 
-                                : attributeDictionary[DataTypes.ReadNextVarInt(packetData)];
+                                ? ResourceLocation.FromString(DataTypes.ReadNextString(packetData))
+                                : MobAttributePalette.INSTANCE.GetIdByNumId(DataTypes.ReadNextVarInt(packetData));
                             var propertyValue = DataTypes.ReadNextDouble(packetData);
 
                             List<double> op0 = new();
@@ -2153,10 +2124,10 @@ namespace CraftSharp.Protocol.Handlers
                             if (op0.Count > 0) propertyValue += op0.Sum();
                             if (op1.Count > 0) propertyValue *= 1 + op1.Sum();
                             if (op2.Count > 0) propertyValue *= op2.Aggregate((a, _x) => a * _x);
-                            keys.Add(propertyKey, propertyValue);
+                            props.Add(propertyKey, propertyValue);
                         }
 
-                        handler.OnEntityProperties(entityId, keys);
+                        handler.OnEntityProperties(entityId, props);
                     }
                     break;
                 case PacketTypesIn.EntityMetadata:

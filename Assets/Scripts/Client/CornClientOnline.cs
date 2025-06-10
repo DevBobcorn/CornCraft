@@ -2326,11 +2326,11 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when received entity properties from server.
+        /// Called when additional properties have been received for an entity
         /// </summary>
-        /// <param name="entityId"></param>
-        /// <param name="prop"></param>
-        public void OnEntityProperties(int entityId, Dictionary<string, double> prop) { }
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="props">Dictionary of properties</param>
+        public void OnEntityProperties(int entityId, Dictionary<ResourceLocation, double> props) { }
 
         /// <summary>
         /// Called when the status of an entity have been changed

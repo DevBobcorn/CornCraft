@@ -250,8 +250,8 @@ namespace CraftSharp.Protocol
         /// Called when additional properties have been received for an entity
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="prop">Dictionary of properties</param>
-        void OnEntityProperties(int entityId, Dictionary<string, double> prop);
+        /// <param name="props">Dictionary of properties</param>
+        void OnEntityProperties(int entityId, Dictionary<ResourceLocation, double> props);
 
         /// <summary>
         /// Called when the status of an entity have been changed
