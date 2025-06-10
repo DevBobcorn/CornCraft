@@ -1149,12 +1149,18 @@ namespace CraftSharp.Protocol.Handlers
                         string? dimensionTypeNameRespawn = null;
                         Dictionary<string, object>? dimensionTypeRespawn = null;
 
-                        if (protocolVersion >= MC_1_20_6_Version)
-                            dimensionTypeNameRespawn = World.GetDimensionTypeIdByNumId(DataTypes.ReadNextInt(packetData)).ToString();
-                        if (protocolVersion >= MC_1_19_Version)
-                            dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
-                        else // 1.16.2+
-                            dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
+                        switch (protocolVersion)
+                        {
+                            case >= MC_1_20_6_Version:
+                                dimensionTypeNameRespawn = World.GetDimensionTypeIdByNumId(DataTypes.ReadNextVarInt(packetData)).ToString(); // Dimension Type: Num Id
+                                break;
+                            case >= MC_1_19_Version:
+                                dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
+                                break;
+                            default: // 1.16.2+
+                                dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
+                                break;
+                        }
                             
                         currentDimension = 0;
 
@@ -2216,34 +2222,64 @@ namespace CraftSharp.Protocol.Handlers
                             explosionLocation = new(DataTypes.ReadNextFloat(packetData),
                                 DataTypes.ReadNextFloat(packetData), DataTypes.ReadNextFloat(packetData));
 
-                        var explosionStrength = DataTypes.ReadNextFloat(packetData);
-                        var explosionBlockCount = protocolVersion >= MC_1_17_Version
-                            ? DataTypes.ReadNextVarInt(packetData)
-                            : DataTypes.ReadNextInt(packetData); // Record count
+                        float explosionStrength;
+                        int explosionBlockCount;
 
-                        // Records
-                        for (var i = 0; i < explosionBlockCount; i++)
-                            DataTypes.ReadData(3, packetData);
-
-                        // Maybe use in the future when the physics are implemented
-                        DataTypes.ReadNextFloat(packetData); // Player Motion X
-                        DataTypes.ReadNextFloat(packetData); // Player Motion Y
-                        DataTypes.ReadNextFloat(packetData); // Player Motion Z
-
-                        if (protocolVersion >= MC_1_20_4_Version)
+                        // TODO: if (protocolVersion < MC_1_21_2_Version)
                         {
-                            var itemPalette = ItemPalette.INSTANCE; 
+                            explosionStrength = DataTypes.ReadNextFloat(packetData);
+                            explosionBlockCount = protocolVersion >= MC_1_17_Version
+                                ? DataTypes.ReadNextVarInt(packetData)
+                                : DataTypes.ReadNextInt(packetData); // Record count
 
-                            DataTypes.ReadNextVarInt(packetData); // Block Interaction
-                            dataTypes.ReadParticleData(packetData, itemPalette); // Small Explosion Particles
-                            dataTypes.ReadParticleData(packetData, itemPalette); // Large Explosion Particles
+                            // Records
+                            for (var i = 0; i < explosionBlockCount; i++)
+                                DataTypes.ReadData(3, packetData);
 
-                            // Explosion Sound
-                            DataTypes.ReadNextString(packetData); // Sound Id
-                            var hasFixedRange = DataTypes.ReadNextBool(packetData);
-                            if (hasFixedRange)
-                                DataTypes.ReadNextFloat(packetData); // Range
+                            // Maybe use in the future when the physics are implemented
+                            DataTypes.ReadNextFloat(packetData); // Player Motion X
+                            DataTypes.ReadNextFloat(packetData); // Player Motion Y
+                            DataTypes.ReadNextFloat(packetData); // Player Motion Z
+                            
+                            if (protocolVersion >= MC_1_20_4_Version) // 1.20.3-1.21.1
+                            {
+                                var itemPalette = ItemPalette.INSTANCE;
+
+                                DataTypes.ReadNextVarInt(packetData); // Block Interaction
+
+                                dataTypes.ReadParticleData(packetData, itemPalette); // Small Explosion Particles
+                                dataTypes.ReadParticleData(packetData, itemPalette); // Large Explosion Particles
+
+                                /*
+                                // Explosion Sound TODO: Fix reading
+                                DataTypes.ReadNextString(packetData); // Sound Id
+                                var hasFixedRange = DataTypes.ReadNextBool(packetData);
+                                if (hasFixedRange)
+                                    DataTypes.ReadNextFloat(packetData); // Range
+                                */
+                            }
                         }
+                        /*
+                        else // 1.21.2+
+                        {
+                            explosionStrength = 1F;
+                            explosionBlockCount = 0;
+
+                            var hasPlayerDeltaVelocity = DataTypes.ReadNextBool(packetData);
+
+                            if (hasPlayerDeltaVelocity)
+                            {
+                                DataTypes.ReadNextDouble(packetData); // Player Delta Velocity X
+                                DataTypes.ReadNextDouble(packetData); // Player Delta Velocity Y
+                                DataTypes.ReadNextDouble(packetData); // Player Delta Velocity Z
+                            }
+
+                        dataTypes.ReadParticleData(packetData, itemPalette); // Explosion Particles
+
+                            // Explosion Sound TODO: Fix reading
+                            //DataTypes.ReadNextString(packetData); // Sound Id
+                        }
+                        */
 
                         handler.OnExplosion(explosionLocation, explosionStrength, explosionBlockCount);
                     }
