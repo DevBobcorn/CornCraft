@@ -170,6 +170,11 @@ namespace CraftSharp
             Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
             while (!loadFlag.Finished) yield return null;
 
+            // Load mob attribute definitions
+            loadFlag.Finished = false;
+            Task.Run(() => MobAttributePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+
             // Load entity definitions
             loadFlag.Finished = false;
             Task.Run(() => EntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
