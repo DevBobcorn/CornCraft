@@ -1010,7 +1010,7 @@ namespace CraftSharp
                                     {
                                         // Leave some item on cursor
                                         cursor1.Count -= maxCount;
-                                        inventory.Items[slot] = new ItemStack(cursor1.ItemType, maxCount, cursor1.NBT);
+                                        inventory.Items[slot] = new ItemStack(cursor1, maxCount);
                                         if (ProtocolSettings.DebugMode)
                                             Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{target1}], and leave some on cursor [{cursor1}]");
                                     }
@@ -1108,7 +1108,7 @@ namespace CraftSharp
                                     if (1 <= maxCount)
                                     {
                                         // Drop 1 item count from cursor
-                                        ItemStack itemClone = new(cursor2.ItemType, 1, cursor2.NBT);
+                                        ItemStack itemClone = new(cursor2, 1);
                                         inventory.Items[slot] = itemClone;
                                         cursor2.Count--;
                                         if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
@@ -1154,7 +1154,7 @@ namespace CraftSharp
                                         {
                                             // Can be evenly divided
                                             var itemTmp = inventory.Items[slot];
-                                            playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, itemTmp.Count / 2, itemTmp.NBT);
+                                            playerInventory.Items[-1] = new ItemStack(itemTmp, itemTmp.Count / 2);
                                             inventory.Items[slot].Count = itemTmp.Count / 2;
                                             if (ProtocolSettings.DebugMode)
                                                 Debug.Log($"[RightClick] [{slot}] Take half(even) target [{target2}] to cursor [{cursor2}]");
@@ -1163,7 +1163,7 @@ namespace CraftSharp
                                         {
                                             // Cannot be evenly divided. item count on cursor is always larger than item on inventory
                                             var itemTmp = inventory.Items[slot];
-                                            playerInventory.Items[-1] = new ItemStack(itemTmp.ItemType, (itemTmp.Count + 1) / 2, itemTmp.NBT);
+                                            playerInventory.Items[-1] = new ItemStack(itemTmp, (itemTmp.Count + 1) / 2);
                                             inventory.Items[slot].Count = (itemTmp.Count - 1) / 2;
                                             if (ProtocolSettings.DebugMode)
                                                 Debug.Log($"[RightClick] [{slot}] Take half(odd) target [{target2}] to cursor [{cursor2}]");
@@ -1214,7 +1214,7 @@ namespace CraftSharp
                         {
                             if (ProtocolSettings.DebugMode)
                                 Debug.Log($"[{actionType}] Start from [{slot}]. Cursor item {cursor7}");
-                            dragStartCursorItemClone = new(cursor7.ItemType, cursor7.Count, cursor7.NBT);
+                            dragStartCursorItemClone = new(cursor7, cursor7.Count);
                             dragging = true;
                         }
                         else
@@ -1260,7 +1260,7 @@ namespace CraftSharp
                             }
                             else
                             {
-                                inventory.Items[draggedSlot] = new ItemStack(dragStartCursorItemClone.ItemType, actualAllocation, dragStartCursorItemClone.NBT);
+                                inventory.Items[draggedSlot] = new ItemStack(dragStartCursorItemClone, actualAllocation);
                             }
                             changedSlots.Add(new Tuple<short, ItemStack?>((short) draggedSlot, inventory.Items[draggedSlot]));
                         }
@@ -1281,7 +1281,7 @@ namespace CraftSharp
                         }
                         else // Previous allocation used up all the item, recreate an item stack on cursor
                         {
-                            playerInventory.Items[-1] = new ItemStack(dragStartCursorItemClone.ItemType, initCursorCount - actualAllocationTotal, dragStartCursorItemClone.NBT);
+                            playerInventory.Items[-1] = new ItemStack(dragStartCursorItemClone, initCursorCount - actualAllocationTotal);
                         }
                         if (ProtocolSettings.DebugMode)
                             Debug.Log($"Cursor slot {initCursorCount} -{actualAllocationTotal} => {initCursorCount - actualAllocationTotal}");
@@ -1515,7 +1515,7 @@ namespace CraftSharp
                 }
                 else
                 {
-                    updatedItem = new ItemStack(curItem.ItemType, curItem.Count - 1, curItem.NBT);
+                    updatedItem = new ItemStack(curItem, curItem.Count - 1);
                     if (ProtocolSettings.DebugMode)
                         Debug.Log($"Dropped a single {curItem.ItemType.ItemId} in hotbar slot {CurrentHotbarSlot}, {updatedItem.Count} left.");
                 }
@@ -1908,7 +1908,7 @@ namespace CraftSharp
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="propertyId">Property Id</param>
         /// <param name="propertyValue">Property Value</param>
-        public void OnInventoryProperty(byte inventoryId, short propertyId, short propertyValue)
+        public void OnInventoryProperty(int inventoryId, short propertyId, short propertyValue)
         {
             if (!inventories.TryGetValue(inventoryId, out var inventory))
                 return;
@@ -1964,7 +1964,7 @@ namespace CraftSharp
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list, key = slot Id, value = Item information</param>
         /// <param name="stateId">State Id of inventory</param>
-        public void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack?> itemList, int stateId)
+        public void OnInventoryItems(int inventoryId, Dictionary<int, ItemStack?> itemList, int stateId)
         {
             if (inventories.TryGetValue(inventoryId, out var inventory))
             {
@@ -2009,7 +2009,7 @@ namespace CraftSharp
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
         /// <param name="fromClient">Whether this is sent from client</param>
-        public void OnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId, bool fromClient)
+        public void OnInventorySlot(int inventoryId, short slot, ItemStack? item, int stateId, bool fromClient)
         {
             if (inventories.TryGetValue(inventoryId, out var inventory))
             {

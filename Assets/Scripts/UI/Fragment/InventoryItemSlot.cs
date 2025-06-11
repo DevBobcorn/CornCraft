@@ -225,6 +225,20 @@ namespace CraftSharp.UI
                     => current.Append(TMPConverter.MC2TMP($"\n§2{component.Value}")));
             }
             */
+
+            var itemComponentRegistry = ItemPalette.INSTANCE.ComponentRegistry;
+
+            if (itemStack.ReceivedComponentsToAdd is not null && itemStack.ReceivedComponentsToAdd.Count > 0) // For debugging item components
+            {
+                text = itemStack.ReceivedComponentsToAdd.Aggregate(text, (current, pair)
+                    => current.Append(TMPConverter.MC2TMP($"\n§9{itemComponentRegistry.GetIdByNumId(pair.Key)} ({pair.Value.Length} bytes)"))); // Blue
+            }
+
+            if (itemStack.ReceivedComponentsToRemove is not null && itemStack.ReceivedComponentsToRemove.Count > 0) // For debugging item components
+            {
+                text = itemStack.ReceivedComponentsToRemove.Aggregate(text, (current, numId)
+                    => current.Append(TMPConverter.MC2TMP($"\n§c{itemComponentRegistry.GetIdByNumId(numId)}"))); // Red
+            }
             
             return text.ToString();
 
@@ -288,10 +302,10 @@ namespace CraftSharp.UI
                         var potionTranslationKey = potionContentsComp2.PotionId.Path;
                         
                         if (potionTranslationKey.StartsWith("strong_")) // Remove Enhanced (Level II) Prefix
-                            potionTranslationKey = potionTranslationKey.Remove(0, "strong_".Length);
+                            potionTranslationKey = potionTranslationKey["strong_".Length..];
                         
                         if (potionTranslationKey.StartsWith("long_")) // Remove Extended Prefix
-                            potionTranslationKey = potionTranslationKey.Remove(0, "long_".Length);
+                            potionTranslationKey = potionTranslationKey["long_".Length..];
                         
                         return ChatParser.TranslateString($"{baseTranslationKey}.effect.{potionTranslationKey}");
                     }

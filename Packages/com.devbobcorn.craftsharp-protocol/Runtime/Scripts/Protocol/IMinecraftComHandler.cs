@@ -274,7 +274,7 @@ namespace CraftSharp.Protocol
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="propertyId">Property Id</param>
         /// <param name="propertyValue">Property Value</param>
-        public void OnInventoryProperty(byte inventoryId, short propertyId, short propertyValue);
+        public void OnInventoryProperty(int inventoryId, short propertyId, short propertyValue);
 
         /// <summary>
         /// Called when inventory items have been received
@@ -282,7 +282,7 @@ namespace CraftSharp.Protocol
         /// <param name="inventoryId">Inventory Id</param>
         /// <param name="itemList">Item list</param>
         /// <param name="stateId">State Id</param>
-        void OnInventoryItems(byte inventoryId, Dictionary<int, ItemStack?> itemList, int stateId);
+        void OnInventoryItems(int inventoryId, Dictionary<int, ItemStack?> itemList, int stateId);
 
         /// <summary>
         /// Called when a single slot has been updated inside an inventory
@@ -292,7 +292,7 @@ namespace CraftSharp.Protocol
         /// <param name="item">Item (may be null for empty slot)</param>
         /// <param name="stateId">State Id</param>
         /// <param name="fromClient">Whether this is sent from client</param>
-        public void OnInventorySlot(byte inventoryId, short slot, ItemStack? item, int stateId, bool fromClient);
+        public void OnInventorySlot(int inventoryId, short slot, ItemStack? item, int stateId, bool fromClient);
 
         /// <summary>
         /// Called when player health or hunger changed.

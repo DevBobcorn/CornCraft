@@ -75,7 +75,6 @@ namespace CraftSharp.Protocol.Handlers
         private readonly ProtocolTerrain pTerrain;
         private readonly IMinecraftComHandler handler;
         private readonly EntityMetadataPalette entityMetadataPalette;
-        private readonly StructuredComponentRegistry structuredComponentRegistry;
         private readonly PacketTypePalette packetPalette;
         private readonly SocketWrapper socketWrapper;
         private readonly MinecraftDataTypes dataTypes;
@@ -1841,7 +1840,10 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.InventoryItems:
                     {
-                        var inventoryId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = protocolVersion < MC_1_21_1_Version
+                            ? DataTypes.ReadNextByte(packetData)
+                            : DataTypes.ReadNextVarInt(packetData);
+                        
                         var stateId = -1;
                         int elements;
 
@@ -1873,24 +1875,32 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.InventoryProperty:
                     {
-                        var inventoryId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = protocolVersion < MC_1_21_1_Version
+                            ? DataTypes.ReadNextByte(packetData)
+                            : DataTypes.ReadNextVarInt(packetData);
+                        
                         var propertyId = DataTypes.ReadNextShort(packetData);
                         var propertyValue = DataTypes.ReadNextShort(packetData);
+
                         handler.OnInventoryProperty(inventoryId, propertyId, propertyValue);
                     }
                     break;
                 case PacketTypesIn.SetSlot:
                     {
-                        var inventoryId = DataTypes.ReadNextByte(packetData);
+                        var inventoryId = protocolVersion < MC_1_21_1_Version
+                            ? DataTypes.ReadNextByte(packetData)
+                            : DataTypes.ReadNextVarInt(packetData);
+                        
                         var stateId = -1;
                         if (protocolVersion >= MC_1_17_1_Version)
                             stateId = DataTypes.ReadNextVarInt(packetData); // State ID - 1.17.1 and above
                         var slotId2 = DataTypes.ReadNextShort(packetData);
                         var item = dataTypes.ReadNextItemSlot(packetData, ItemPalette.INSTANCE);
+
                         handler.OnInventorySlot(inventoryId, slotId2, item!, stateId, false);
                     }
                     break;
-                case PacketTypesIn.InventoryConfirmation:
+                case PacketTypesIn.InventoryConfirmation: // 1.16.X only
                     {
                         var inventoryId = DataTypes.ReadNextByte(packetData);
                         var actionId = DataTypes.ReadNextShort(packetData);
@@ -2092,10 +2102,18 @@ namespace CraftSharp.Protocol.Handlers
                         Dictionary<ResourceLocation, double> props = new();
                         for (int i = 0; i < NumberOfProperties; i++)
                         {
+                            int numId = 0;
+
                             var propertyKey = protocolVersion < MC_1_20_6_Version
                                 ? ResourceLocation.FromString(DataTypes.ReadNextString(packetData))
-                                : MobAttributePalette.INSTANCE.GetIdByNumId(DataTypes.ReadNextVarInt(packetData));
+                                : MobAttributePalette.INSTANCE.GetIdByNumId(numId = DataTypes.ReadNextVarInt(packetData));
                             var propertyValue = DataTypes.ReadNextDouble(packetData);
+
+                            if (propertyKey == ResourceLocation.INVALID)
+                            {
+                                Debug.LogWarning($"Received invalid entity attribute with num id [{numId}]");
+                                continue;
+                            }
 
                             List<double> op0 = new();
                             List<double> op1 = new();
@@ -2196,7 +2214,7 @@ namespace CraftSharp.Protocol.Handlers
                         float explosionStrength;
                         int explosionBlockCount;
 
-                        // TODO: if (protocolVersion < MC_1_21_2_Version)
+                        if (protocolVersion < MC_1_21_3_Version)
                         {
                             explosionStrength = DataTypes.ReadNextFloat(packetData);
                             explosionBlockCount = protocolVersion >= MC_1_17_Version
@@ -2214,9 +2232,9 @@ namespace CraftSharp.Protocol.Handlers
                             
                             if (protocolVersion >= MC_1_20_4_Version) // 1.20.3-1.21.1
                             {
-                                var itemPalette = ItemPalette.INSTANCE;
-
                                 DataTypes.ReadNextVarInt(packetData); // Block Interaction
+
+                                var itemPalette = ItemPalette.INSTANCE;
 
                                 dataTypes.ReadParticleData(packetData, itemPalette); // Small Explosion Particles
                                 dataTypes.ReadParticleData(packetData, itemPalette); // Large Explosion Particles
@@ -2230,7 +2248,6 @@ namespace CraftSharp.Protocol.Handlers
                                 */
                             }
                         }
-                        /*
                         else // 1.21.2+
                         {
                             explosionStrength = 1F;
@@ -2245,12 +2262,13 @@ namespace CraftSharp.Protocol.Handlers
                                 DataTypes.ReadNextDouble(packetData); // Player Delta Velocity Z
                             }
 
-                        dataTypes.ReadParticleData(packetData, itemPalette); // Explosion Particles
+                            var itemPalette = ItemPalette.INSTANCE;
+
+                            dataTypes.ReadParticleData(packetData, itemPalette); // Explosion Particles
 
                             // Explosion Sound TODO: Fix reading
                             //DataTypes.ReadNextString(packetData); // Sound Id
                         }
-                        */
 
                         handler.OnExplosion(explosionLocation, explosionStrength, explosionBlockCount);
                     }

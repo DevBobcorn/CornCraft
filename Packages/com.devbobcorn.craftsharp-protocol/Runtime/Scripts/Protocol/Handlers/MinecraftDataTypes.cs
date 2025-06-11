@@ -8,6 +8,7 @@ using CraftSharp.Inventory;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
 using CraftSharp.Protocol.Message;
+using System.Linq;
 
 namespace CraftSharp.Protocol.Handlers
 {
@@ -637,6 +638,10 @@ namespace CraftSharp.Protocol.Handlers
                     slotData.AddRange(DataTypes.GetVarInt(item.Count)); // Item is present
                     slotData.AddRange(DataTypes.GetVarInt(itemPalette.GetNumIdById(item.ItemType.ItemId)));
 
+                    // TODO: Check and fix sending components data in 1.20.5+
+
+                    /*
+
                     if (item.ReceivedComponentsToAdd is not null && item.ReceivedComponentsToAdd.Count > 0)
                     {
                         slotData.AddRange(DataTypes.GetVarInt(item.ReceivedComponentsToAdd.Count));
@@ -644,13 +649,19 @@ namespace CraftSharp.Protocol.Handlers
                         foreach (var (_, bytes) in item.ReceivedComponentsToAdd)
                         {
                             slotData.AddRange(bytes);
+
+                            var bytesQueue = new Queue<byte>(bytes);
+                            var numId = DataTypes.ReadNextVarInt(bytesQueue);
+
+                            Debug.Log($"Component to add: [{numId}] {ItemPalette.INSTANCE.ComponentRegistry.GetIdByNumId(numId)} Total length: {bytes.Length} bytes");
                         }
                     }
-                    else
+                    else*/
                     {
-                        slotData.AddRange(DataTypes.GetVarInt(0));
+                        slotData.AddRange(DataTypes.GetVarInt(0)); // No components to add
                     }
 
+                    /*
                     if (item.ReceivedComponentsToRemove is not null && item.ReceivedComponentsToRemove.Count > 0)
                     {
                         slotData.AddRange(DataTypes.GetVarInt(item.ReceivedComponentsToRemove.Count));
@@ -660,9 +671,9 @@ namespace CraftSharp.Protocol.Handlers
                             slotData.AddRange(DataTypes.GetVarInt(numId));
                         }
                     }
-                    else
+                    else*/
                     {
-                        slotData.AddRange(DataTypes.GetVarInt(0));
+                        slotData.AddRange(DataTypes.GetVarInt(0)); // No components to remove
                     }
                 }
             }
