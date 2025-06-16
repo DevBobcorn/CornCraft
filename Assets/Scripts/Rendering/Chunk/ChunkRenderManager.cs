@@ -624,7 +624,7 @@ namespace CraftSharp.Rendering
         {
             // Add nearby chunks
             var blockLoc   = client!.GetCurrentLocation().GetBlockLoc();
-            int unloadDist = Mathf.RoundToInt(ProtocolSettings.MCSettings.RenderDistance * 2F);
+            int unloadDist = Mathf.RoundToInt(client.RenderDistance * 1.25F);
 
             foreach (var chunkCoord in renderColumns.Keys.ToArray())
             {
@@ -971,7 +971,7 @@ namespace CraftSharp.Rendering
         public void UpdateNearbyChunkCoordList(int playerChunkX, int playerChunkZ)
         {
             int cx, cz;
-            int viewDist = ProtocolSettings.MCSettings.RenderDistance;
+            int viewDist = client.RenderDistance;
             int viewDistSqr = viewDist * viewDist;
 
             foreach (var coord in nearbyChunkCoords.ToArray())

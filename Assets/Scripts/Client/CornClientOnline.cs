@@ -1678,6 +1678,16 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Called when render distance is set
+        /// </summary>
+        /// <param name="dist">New render distance (2-32)</param>
+        public void OnViewDistance(int dist)
+        {
+            // Use the lower value of client and server view distance
+            RenderDistance = Mathf.Min(dist, ProtocolSettings.MCSettings.RenderDistance);
+        }
+
+        /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.
         /// </summary>
         public void OnRespawn()

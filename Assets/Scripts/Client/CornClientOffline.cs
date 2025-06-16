@@ -54,6 +54,7 @@ namespace CraftSharp
             
             // Setup chunk render manager
             ChunkRenderManager.SetClient(this);
+            RenderDistance = ProtocolSettings.MCSettings.RenderDistance;
 
             // Set up environment manager
             EnvironmentManager.SetCamera(m_MainCamera);

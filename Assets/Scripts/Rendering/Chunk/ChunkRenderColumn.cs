@@ -91,10 +91,9 @@ namespace CraftSharp.Rendering
             foreach (ChunkRender chunk in chunks.Keys.Select(i => chunks[i]).Where(chunk => chunk))
             {
                 // Before releasing the chunk object, do one last thing
-                if (chunks2BuildAsSet.Contains(chunk))
+                if (chunks2BuildAsSet.Remove(chunk))
                 {
                     chunks2Build.Remove(chunk);
-                    chunks2BuildAsSet.Remove(chunk);
                 }
                     
                 chunksBeingBuilt.Remove(chunk);

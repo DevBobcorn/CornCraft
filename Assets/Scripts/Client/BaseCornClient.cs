@@ -155,6 +155,7 @@ namespace CraftSharp
         public abstract bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate);
 
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
+        public int RenderDistance { get; protected set; }
 
         protected void SetWorldOriginOffset(Vector3Int offset)
         {

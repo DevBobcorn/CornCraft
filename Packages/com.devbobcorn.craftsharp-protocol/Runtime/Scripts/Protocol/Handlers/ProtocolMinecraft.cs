@@ -647,7 +647,8 @@ namespace CraftSharp.Protocol.Handlers
 
                         DataTypes.ReadNextVarInt(packetData);             // Max Players - 1.16.2 and above
                             
-                        DataTypes.ReadNextVarInt(packetData);             // View distance - 1.14 and above
+                        var dist = DataTypes.ReadNextVarInt(packetData);  // View distance - 1.14 and above
+                        handler.OnViewDistance(dist);
                             
                         if (protocolVersion >= MC_1_18_1_Version)
                             DataTypes.ReadNextVarInt(packetData);         // Simulation Distance - 1.18 and above
@@ -1921,6 +1922,9 @@ namespace CraftSharp.Protocol.Handlers
                     if (DataTypes.ReadNextBool(packetData)) // Has Objective Name
                         DataTypes.ReadNextString(packetData); // Objective Name
 
+                    break;
+                case PacketTypesIn.UpdateViewDistance:
+                    handler.OnViewDistance(DataTypes.ReadNextVarInt(packetData));
                     break;
                 case PacketTypesIn.SpawnEntity:
                     {

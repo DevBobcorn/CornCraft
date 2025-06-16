@@ -181,6 +181,12 @@ namespace CraftSharp.Protocol
         void OnHandlerUpdate(int pc);
 
         /// <summary>
+        /// Called when render distance is set
+        /// </summary>
+        /// <param name="dist">New render distance (2-32)</param>
+        void OnViewDistance(int dist);
+
+        /// <summary>
         /// Called when an entity has spawned
         /// </summary>
         /// <param name="entity">Spawned entity</param>
