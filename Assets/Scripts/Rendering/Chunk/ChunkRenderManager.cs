@@ -1185,7 +1185,7 @@ namespace CraftSharp.Rendering
             }
             Profiler.EndSample();
 
-            // Update only a small subset of chunks to reduce lag spikes
+            // Check and queue new chunk rebuilds
             Profiler.BeginSample("Update chunks (Add)");
             UpdateChunkRendersListAdd();
             Profiler.EndSample();
