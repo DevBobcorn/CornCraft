@@ -307,17 +307,17 @@ namespace CraftSharp.Control
         private void SetGameMode(GameMode gameMode)
         {
             Status.GameMode = gameMode;
-            Status.Flying = gameMode == GameMode.Creative;
-            IPlayerState initState = Status.Flying ? PlayerStates.AIRBORNE : PlayerStates.GROUNDED;
 
             switch (gameMode)
             {
                 case GameMode.Survival:
                 case GameMode.Creative:
                 case GameMode.Adventure:
+                    Status.Flying = gameMode == GameMode.Creative;
+                    IPlayerState initState = Status.Flying ? PlayerStates.AIRBORNE : PlayerStates.GROUNDED;
                     Status.Spectating = false;
 
-                    if (CurrentState != initState)
+                    if (CurrentState != initState) // Update initial player state
                     {
                         ChangeToState(initState);
                     }
@@ -336,6 +336,12 @@ namespace CraftSharp.Control
                     break;
                 case GameMode.Spectator:
                     Status.Spectating = true;
+                    
+                    if (CurrentState != PlayerStates.SPECTATE) // Update player state
+                    {
+                        ChangeToState(PlayerStates.SPECTATE);
+                    }
+
                     // Update components state...
                     Motor.Capsule.enabled = false;
                     Status.GravityScale = 0F;

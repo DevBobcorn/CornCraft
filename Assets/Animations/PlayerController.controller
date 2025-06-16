@@ -135,9 +135,9 @@ AnimatorStateMachine:
   m_EntryTransitions:
   - {fileID: -1766897249505750360}
   m_StateMachineTransitions:
-  - first: {fileID: 3238920434395452721}
-    second: []
   - first: {fileID: 6683110907381743858}
+    second: []
+  - first: {fileID: 3238920434395452721}
     second: []
   - first: {fileID: 1472473987521060036}
     second: []
@@ -1773,7 +1773,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Glide
+  m_Name: Gliding
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
