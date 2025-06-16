@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using CraftSharp.Rendering;
 using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,7 +10,9 @@ namespace CraftSharp.Control
     public class AirborneState : IPlayerState
     {
         public const float FLIGHT_START_AIRTIME_MAX = 0.3F;
-        public const float FLIGHT_STOP_TIMEOUT_MAX = 0.3F;
+        public const float FLIGHT_STOP_TIMEOUT_MAX  = 0.3F;
+
+        public const float STOP_FLYING_MAXIMUM_DIST = 0.1F;
 
         public const float THRESHOLD_ANGLE_FORWARD = 40F;
 
@@ -88,12 +91,19 @@ namespace CraftSharp.Control
                 {
                     // Accumulate stop flight timer value
                     _stopFlightTimer += interval;
-                    
+
                     // Check vertical movement...
                     if (inputData.Locomotion.Ascend.IsPressed())
                         moveVelocity += ability.WalkSpeed * 3F * motor.CharacterUp;
                     else if (inputData.Locomotion.Descend.IsPressed())
                         moveVelocity -= ability.WalkSpeed * 3F * motor.CharacterUp;
+
+                    // Flying doesn't have any gravity, which can prevent proper groundcheck
+                    // So here we stop flying when getting close enough to the ground
+                    if (info.CenterDownDist < STOP_FLYING_MAXIMUM_DIST)
+                    {
+                        info.Flying = false;
+                    }
                 }
                 else
                 {
@@ -146,12 +156,16 @@ namespace CraftSharp.Control
         {
             info.Sprinting = false;
             info.Gliding = false;
-            info.Flying = false;
             info.AirTime = 0F;
 
+            if (info.Flying)
+            {
+                player.StartCrossFadeState(AnimatorEntityRender.GLIDING_NAME, 0F);
+            }
+
             // Reset request flags
-            //_glideToggleRequested = false;
-            _flightRequested = false;
+                //_glideToggleRequested = false;
+                _flightRequested = false;
 
             // Register input action events
             player.Actions.Locomotion.Jump.performed += glideToggleRequestCallback = _ =>
@@ -182,8 +196,11 @@ namespace CraftSharp.Control
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            info.Gliding = false;
-            info.Flying = false;
+            if (nextState is not AirborneState) // Preserve flying & gliding status when switching player renders
+            {
+                info.Gliding = false;
+                info.Flying = false;
+            }
 
             // Unregister input action events
             player.Actions.Locomotion.Jump.performed -= glideToggleRequestCallback;

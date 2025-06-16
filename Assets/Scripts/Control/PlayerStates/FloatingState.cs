@@ -59,6 +59,7 @@ namespace CraftSharp.Control
             
             info.Sprinting = false;
             info.Gliding = false;
+            info.Flying = false;
 
             var swimSpeed = ability.SwimSpeed;
 

@@ -27,7 +27,7 @@ namespace CraftSharp.Control
 
         // Status Fields
         [SerializeField] private PlayerStatusUpdater m_StatusUpdater;
-        public PlayerStatus Status => m_StatusUpdater ? m_StatusUpdater.Status : null;
+        public PlayerStatus Status => m_StatusUpdater.Status;
         private bool usingAnimator = false;
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace CraftSharp.Control
         
 #nullable disable
         
-        public IPlayerState CurrentState { get; private set; } = PlayerStates.GROUNDED;
+        public IPlayerState CurrentState { get; private set; } = PlayerStates.PRE_INIT;
 
         // Values for sending over to the server. Should only be set
         // from the unity thread and read from the network thread
@@ -106,7 +106,7 @@ namespace CraftSharp.Control
                 AnimatorEntityRender.CreateFromModel(renderPrefab) : // Model prefab, wrap it up
                 // Player render prefab, just instantiate
                 Instantiate(renderPrefab);
-            renderObj!.name = $"Player Entity ({renderPrefab.name})";
+            renderObj.name = $"Player Entity ({renderPrefab.name})";
 
             SwitchPlayerRender(entity, renderObj);
         }
@@ -186,7 +186,7 @@ namespace CraftSharp.Control
                 m_FollowRef = m_PlayerRender.SetupCameraRef();
                 m_AimingRef = m_PlayerRender.GetAimingRef();
                 // Reset player render local position
-                m_PlayerRender!.transform.localPosition = Vector3.zero;
+                m_PlayerRender.transform.localPosition = Vector3.zero;
             }
             else
             {
@@ -285,19 +285,15 @@ namespace CraftSharp.Control
             Motor.CharacterController = this;
 
             // Set stamina to max value
-            Status!.StaminaLeft = m_AbilityConfig!.MaxStamina;
+            Status.StaminaLeft = m_AbilityConfig.MaxStamina;
             // And broadcast current stamina
-            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, m_AbilityConfig!.MaxStamina));
+            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, m_AbilityConfig.MaxStamina));
             // Initialize health value
             EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
 
             // Register gamemode events for updating gamemode
             gameModeCallback = e => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
-
-            // Initialize player state (idle on start)
-            Status.Grounded = true;
-            CurrentState.OnEnter(PlayerStates.PRE_INIT, Status, Motor, this);
         }
 
         private void OnDestroy()
@@ -310,7 +306,9 @@ namespace CraftSharp.Control
 
         private void SetGameMode(GameMode gameMode)
         {
-            Status!.GameMode = gameMode;
+            Status.GameMode = gameMode;
+            Status.Flying = gameMode == GameMode.Creative;
+            IPlayerState initState = Status.Flying ? PlayerStates.AIRBORNE : PlayerStates.GROUNDED;
 
             switch (gameMode)
             {
@@ -318,69 +316,65 @@ namespace CraftSharp.Control
                 case GameMode.Creative:
                 case GameMode.Adventure:
                     Status.Spectating = false;
-                    EnableEntity();
+
+                    if (CurrentState != initState)
+                    {
+                        ChangeToState(initState);
+                    }
+
+                    // Update components state...
+                    Motor.Capsule.enabled = true;
+                    Status.GravityScale = 1F;
+
+                    Status.EntityDisabled = false;
+
+                    // Show entity render
+                    if (m_PlayerRender)
+                    {
+                        m_PlayerRender.gameObject.SetActive(true);
+                    }
                     break;
                 case GameMode.Spectator:
                     Status.Spectating = true;
-                    DisableEntity();
+                    // Update components state...
+                    Motor.Capsule.enabled = false;
+                    Status.GravityScale = 0F;
+
+                    // Reset velocity to zero TODO: Check
+                    Motor.BaseVelocity = Vector3.zero;
+
+                    // Reset player status
+                    Status.Grounded = false;
+                    Status.InLiquid = false;
+                    Status.Clinging = false;
+                    Status.Sprinting = false;
+
+                    Status.EntityDisabled = true;
+
+                    // Hide entity render
+                    if (m_PlayerRender)
+                    {
+                        m_PlayerRender.gameObject.SetActive(false);
+                    }
                     break;
             }
         }
 
         public void DisablePhysics()
         {
-            Status!.PhysicsDisabled = true;
+            Status.PhysicsDisabled = true;
             Motor.enabled = false;
         }
 
         public void EnablePhysics()
         {
-            Status!.PhysicsDisabled = false;
+            Status.PhysicsDisabled = false;
             Motor.enabled = true;
-        }
-
-        protected void DisableEntity()
-        {
-            // Update components state...
-            Motor.Capsule.enabled = false;
-            Status!.GravityScale = 0F;
-
-            // Reset velocity to zero TODO: Check
-            Motor.BaseVelocity = Vector3.zero;
-
-            // Reset player status
-            Status.Grounded = false;
-            Status.InLiquid = false;
-            Status.Clinging = false;
-            Status.Sprinting = false;
-
-            Status.EntityDisabled = true;
-
-            // Hide entity render
-            if (m_PlayerRender)
-            {
-                m_PlayerRender.gameObject.SetActive(false);
-            }
-        }
-
-        protected void EnableEntity()
-        {
-            // Update components state...
-            Motor.Capsule!.enabled = true;
-            Status!.GravityScale = 1F;
-
-            Status.EntityDisabled = false;
-
-            // Show entity render
-            if (m_PlayerRender)
-            {
-                m_PlayerRender.gameObject.SetActive(true);
-            }
         }
         
         public void ToggleWalkMode()
         {
-            Status!.WalkMode = !Status.WalkMode;
+            Status.WalkMode = !Status.WalkMode;
             CornApp.Notify(Translations.Get($"gameplay.control.switch_to_{(Status.WalkMode ? "walk" : "rush")}"));
         }
 
@@ -472,14 +466,14 @@ namespace CraftSharp.Control
         {
             var prevState = CurrentState;
 
-            //Debug.Log($"Exit state [{_currentState}]");
-            CurrentState.OnExit(state, m_StatusUpdater!.Status, Motor, this);
+            Debug.Log($"Exit state [{CurrentState}]");
+            CurrentState.OnExit(state, m_StatusUpdater.Status, Motor, this);
 
             // Exit previous state and enter this state
             CurrentState = state;
             
-            //Debug.Log($"Enter state [{_currentState}]");
-            CurrentState.OnEnter(prevState, m_StatusUpdater!.Status, Motor, this);
+            Debug.Log($"Enter state [{CurrentState}]");
+            CurrentState.OnEnter(prevState, m_StatusUpdater.Status, Motor, this);
         }
 
         public void UseAimingCamera(bool enable)
@@ -487,7 +481,7 @@ namespace CraftSharp.Control
             if (m_CameraController)
             {
                 // Align target visual yaw with camera, immediately
-                if (enable) Status!.TargetVisualYaw = m_CameraController.GetYaw();
+                if (enable) Status.TargetVisualYaw = m_CameraController.GetYaw();
 
                 m_CameraController.UseAimingCamera(enable);
             }
@@ -503,7 +497,7 @@ namespace CraftSharp.Control
             if (m_CameraController)
             {
                 // Align target visual yaw with camera, immediately
-                if (!m_CameraController.AimingLocked) Status!.TargetVisualYaw = m_CameraController.GetYaw();
+                if (!m_CameraController.AimingLocked) Status.TargetVisualYaw = m_CameraController.GetYaw();
 
                 m_CameraController.UseAimingLock(!m_CameraController.AimingLocked);
             }
@@ -512,7 +506,7 @@ namespace CraftSharp.Control
         public Quaternion GetMovementOrientation()
         {
             var upward = m_InitialUpward;
-            var forward = Quaternion.AngleAxis(Status!.MovementInputYaw, upward) * m_InitialForward;
+            var forward = Quaternion.AngleAxis(Status.MovementInputYaw, upward) * m_InitialForward;
 
             return Quaternion.LookRotation(forward, upward);
         }
@@ -522,29 +516,29 @@ namespace CraftSharp.Control
         /// </summary>
         private void UpdatePlayerStatus()
         {
-            if (!Status!.EntityDisabled)
+            if (!Status.EntityDisabled)
             {
-                m_StatusUpdater!.UpdatePlayerStatus(Motor, GetMovementOrientation());
+                m_StatusUpdater.UpdatePlayerStatus(Motor, GetMovementOrientation());
             }
         }
 
         public void BeforeCharacterUpdate(float deltaTime)
         {
-            var status = m_StatusUpdater!.Status;
+            var status = m_StatusUpdater.Status;
 
             // Update target player visual yaw before updating player status
             var horInput = Actions!.Locomotion.Movement.ReadValue<Vector2>();
             if (horInput != Vector2.zero)
             {
                 var userInputYaw = GetYawFromVector2(horInput);
-                status.TargetVisualYaw = m_CameraController!.GetYaw() + userInputYaw;
+                status.TargetVisualYaw = m_CameraController.GetYaw() + userInputYaw;
                 status.MovementInputYaw = status.TargetVisualYaw;
             }
 
             // Update target visual yaw if aiming
             if (m_CameraController && m_CameraController.IsAimingOrLocked)
             {
-                status.TargetVisualYaw = m_CameraController!.GetYaw();
+                status.TargetVisualYaw = m_CameraController.GetYaw();
 
                 // Align player orientation with camera view (which is set as the target value)
                 status.CurrentVisualYaw = status.TargetVisualYaw;
@@ -576,14 +570,14 @@ namespace CraftSharp.Control
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
         {
             var upward = m_InitialUpward;
-            var forward = Quaternion.AngleAxis(Status!.CurrentVisualYaw, upward) * m_InitialForward;
+            var forward = Quaternion.AngleAxis(Status.CurrentVisualYaw, upward) * m_InitialForward;
 
             currentRotation = Quaternion.LookRotation(forward, upward);
         }
 
         public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
-            var status = m_StatusUpdater!.Status;
+            var status = m_StatusUpdater.Status;
 
             float prevStamina = status.StaminaLeft;
             
@@ -593,7 +587,7 @@ namespace CraftSharp.Control
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (prevStamina != status.StaminaLeft) // Broadcast current stamina if changed
             {
-                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig!.MaxStamina));
+                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig.MaxStamina));
             }
             
             // Handle root motion
@@ -608,7 +602,7 @@ namespace CraftSharp.Control
             }
 
             // Visual updates... Don't pass the velocity by ref here, just the value
-            OnPlayerUpdate?.Invoke(currentVelocity, deltaTime, Status!);
+            OnPlayerUpdate?.Invoke(currentVelocity, deltaTime, Status);
         }
 
         public void AfterCharacterUpdate(float deltaTime)
@@ -625,7 +619,7 @@ namespace CraftSharp.Control
             if (m_PlayerRender)
             {
                 // Update client player data
-                MCYaw2Send = Status!.CurrentVisualYaw - 90F; // Coordinate system conversion
+                MCYaw2Send = Status.CurrentVisualYaw - 90F; // Coordinate system conversion
                 Pitch2Send = 0F;
             }
             
@@ -665,8 +659,8 @@ namespace CraftSharp.Control
             var newUnityYaw = mcYaw + 90F; // Coordinate system conversion
             var newRotation = Quaternion.Euler(0F, newUnityYaw, 0F);
 
-            Status!.TargetVisualYaw = newUnityYaw;
-            Status!.CurrentVisualYaw = newUnityYaw;
+            Status.TargetVisualYaw = newUnityYaw;
+            Status.CurrentVisualYaw = newUnityYaw;
 
             // Update current location and yaw
             Motor.SetPositionAndRotation(CoordConvert.MC2Unity(_worldOriginOffset, loc), newRotation);

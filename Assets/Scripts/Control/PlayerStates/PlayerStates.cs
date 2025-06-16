@@ -6,7 +6,7 @@ namespace CraftSharp.Control
     public static class PlayerStates
     {
         // Used before player init
-        public static readonly IPlayerState PRE_INIT    = new GroundedState();
+        public static readonly IPlayerState PRE_INIT    = new PreInitState();
 
         // Grounded states
         public static readonly IPlayerState GROUNDED    = new GroundedState();

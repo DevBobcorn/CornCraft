@@ -13,6 +13,7 @@ namespace CraftSharp.Rendering
         public const string WALK_NAME = "Walk";
         public const string IDLE_NAME = "Idle";
 
+        public const string GLIDING_NAME = "Gliding";
         public const string FALLING_NAME = "Falling";
         public const string LANDING_NAME = "Landing";
 
