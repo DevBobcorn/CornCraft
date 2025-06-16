@@ -5,7 +5,6 @@ namespace CraftSharp.Rendering
         Pending,
         Building,
         Ready,
-        Delayed,
         Cancelled
     }
 }

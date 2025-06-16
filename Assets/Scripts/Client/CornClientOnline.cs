@@ -1743,13 +1743,16 @@ namespace CraftSharp
                     {
                         // Update player location
                         PlayerController.SetLocationFromServer(location, mcYaw: yaw);
+                        var playerBlockLoc = location.GetBlockLoc();
                         // Force refresh environment collider
-                        ChunkRenderManager.InitializeBoxTerrainCollider(location.GetBlockLoc(), () =>
+                        ChunkRenderManager.InitializeBoxTerrainCollider(playerBlockLoc, () =>
                         {
                             // Pop loading screen
                             ScreenControl.SetLoadingScreen(false);
                             PlayerController.EnablePhysics();
                         });
+                        // Update nearby chunk coordinate list
+                        ChunkRenderManager.UpdateNearbyChunkCoordList(playerBlockLoc.GetChunkX(), playerBlockLoc.GetChunkZ());
                         // Update camera yaw (convert to Unity yaw)
                         CameraController.SetYaw(yaw + 90F);
                     });
@@ -1763,9 +1766,11 @@ namespace CraftSharp
                         {
                             return; // I don't like this packet.
                         }
-
+                        var playerBlockLoc = location.GetBlockLoc();
                         // Force refresh environment collider
-                        ChunkRenderManager.RebuildTerrainBoxCollider(location.GetBlockLoc());
+                        ChunkRenderManager.RebuildTerrainBoxCollider(playerBlockLoc);
+                        // Update nearby chunk coordinate list
+                        ChunkRenderManager.UpdateNearbyChunkCoordList(playerBlockLoc.GetChunkX(), playerBlockLoc.GetChunkZ());
                         // Then update player location
                         PlayerController.SetLocationFromServer(location, reset: true, mcYaw: yaw);
                         //Debug.Log($"Updated to {location} offset: {offset.magnitude}");

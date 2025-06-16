@@ -83,6 +83,10 @@ namespace CraftSharp.Rendering
         private readonly HashSet<ChunkRender> chunkRendersToBeBuiltAsSet = new();
         private readonly HashSet<ChunkRender> chunkRendersBeingBuilt = new(BUILD_COUNT_LIMIT);
 
+        // Stores whether an active chunk(which is visible to the player) has been scheduled for rebuild
+        private readonly HashSet<int2> nearbyChunkCoords = new();
+        private readonly HashSet<int2> nearbyChunkCoordsToBeChecked = new();
+
         private readonly HashSet<int3> lightUpdateRequests = new();
         private readonly HashSet<int3> lightUpdateUnfinished = new();
 
@@ -128,7 +132,7 @@ namespace CraftSharp.Rendering
 
         public string GetDebugInfo()
         {
-            return $"Unfinished Light Updates: {lightUpdateUnfinished.Count}\nQueued Chunks: {chunkRendersToBeBuiltAsSet.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
+            return $"Nearby Chunks To Check: {nearbyChunkCoordsToBeChecked.Count}/{nearbyChunkCoords.Count}\nUnfinished Light Updates: {lightUpdateUnfinished.Count}\nQueued Chunks: {chunkRendersToBeBuiltAsSet.Count}\nBuilding Chunks: {chunkRendersBeingBuilt.Count}\n- Data Build Time Avg: {dataBuildTimeSum / 200F:0.00} ms\n- Vert Build Time Avg: {vertexBuildTimeSum / 200F:0.00} ms\nBlock Entity Count: {blockEntityRenders.Count}";
         }
 
         #region Chunk render access
@@ -146,7 +150,7 @@ namespace CraftSharp.Rendering
                 layer = LayerMask.NameToLayer(TERRAIN_MESH_COLLIDER_LAYER_NAME)
             };
             ChunkRender newChunk = chunkObj.AddComponent<ChunkRender>();
-            
+
             return newChunk;
         }
 
@@ -208,7 +212,7 @@ namespace CraftSharp.Rendering
             {
                 return renderColumn;
             }
-            
+
             // This ChunkRenderColumn doesn't currently exist...
             Profiler.BeginSample("Create chunk render object");
 
@@ -303,7 +307,8 @@ namespace CraftSharp.Rendering
             }
 
             // Block render is considered separately even if chunk data is not present
-            Loom.QueueOnMainThread(() => {
+            Loom.QueueOnMainThread(() =>
+            {
                 // Check if the location has a block entity and remove it
                 RemoveBlockEntityRender(blockLoc);
                 // Auto-create block entity if present
@@ -342,7 +347,7 @@ namespace CraftSharp.Rendering
                         BuildChunkRenderIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ - 1));
                     else if (blockLoc.GetChunkBlockZ() == Chunk.SIZE - 1)
                         BuildChunkRenderIfNotEmpty(GetChunkRender(chunkX, chunkYIndex, chunkZ + 1));
-                    
+
                     // Update terrain collider
                     RebuildTerrainBoxColliderAt(blockLoc);
                 }
@@ -548,8 +553,6 @@ namespace CraftSharp.Rendering
 
         #region Chunk updating
         private const int CHUNK_CENTER = Chunk.SIZE >> 1;
-        private const int MASK_CYCLE_LENGTH = 64; // Must be power of 2
-        private int updateTargetMask;
 
         private static void UpdateBuildPriority(Location currentBlockLoc, ChunkRender chunk, int offsetY)
         {
@@ -560,17 +563,9 @@ namespace CraftSharp.Rendering
                             chunk.ChunkZ * Chunk.SIZE + CHUNK_CENTER).DistanceTo(currentBlockLoc) / 16);
         }
 
-        /// <summary>
-        /// Use a mask to specify an evenly distributed subset of ChunkRenders to update
-        /// </summary>
-        /// <param name="mask">A value from 0 to MASK_CYCLE_LENGTH - 1</param>
-        private void UpdateChunkRendersListAdd(int mask)
+        private void UpdateChunkRendersListAdd()
         {
             var playerLoc = client!.GetCurrentLocation();
-            var blockLoc = playerLoc.GetBlockLoc();
-
-            int viewDist = ProtocolSettings.MCSettings.RenderDistance;
-            int viewDistSqr = viewDist * viewDist;
 
             int chunkColumnSize = (World.GetDimensionType().height + Chunk.SIZE - 1) / Chunk.SIZE; // Round up
             int offsetY = World.GetDimensionType().minY;
@@ -578,66 +573,61 @@ namespace CraftSharp.Rendering
             //var renderCamera = client.CameraController.RenderCamera;
 
             // Add nearby chunks
-            for (int cx = -viewDist;cx <= viewDist;cx++)
-                for (int cz = -viewDist;cz <= viewDist;cz++)
+            foreach (var coord in nearbyChunkCoordsToBeChecked.ToArray())
+            {
+                int chunkX = coord.x, chunkZ = coord.y;
+                
+                if (world.IsChunkColumnLoaded(chunkX, chunkZ))
                 {
-                    if (((cx + cz) & (MASK_CYCLE_LENGTH - 1)) != mask || cx * cx + cz * cz >= viewDistSqr) continue;
-                    int chunkX = blockLoc.GetChunkX() + cx, chunkZ = blockLoc.GetChunkZ() + cz;
-                    
-                    if (world.IsChunkColumnLoaded(chunkX, chunkZ))
+                    if (!(  world.IsChunkColumnLoaded(chunkX,     chunkZ - 1) && // ZNeg neighbor present
+                            world.IsChunkColumnLoaded(chunkX,     chunkZ + 1) && // ZPos neighbor present
+                            world.IsChunkColumnLoaded(chunkX - 1, chunkZ    ) && // XNeg neighbor present
+                            world.IsChunkColumnLoaded(chunkX + 1, chunkZ    ) && // XPos neighbor present
+                            world.IsChunkColumnLoaded(chunkX - 1, chunkZ - 1) &&
+                            world.IsChunkColumnLoaded(chunkX - 1, chunkZ + 1) &&
+                            world.IsChunkColumnLoaded(chunkX + 1, chunkZ - 1) &&
+                            world.IsChunkColumnLoaded(chunkX + 1, chunkZ + 1)
+                    ))
                     {
-                        var column = GetChunkRenderColumn(chunkX, chunkZ);
-                        if (!column)
-                        {
-                            // Chunks data is ready, but chunk render column is not
-                            //int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
-                            // Create it and add the whole column to render list...
-                            var columnRender = GetOrCreateChunkRenderColumn(chunkX, chunkZ);
-                            for (int chunkY = 0;chunkY < chunkColumnSize;chunkY++)
-                            {
-                                // Create chunk renders and queue them...
-                                if (!(world[chunkX, chunkZ]?.ChunkIsEmpty(chunkY) ?? true))
-                                {
-                                    // This chunk is not empty and needs to be added and queued
-                                    var chunk = columnRender.GetOrCreateChunkRender(chunkY, chunkRenderPool);
-                                    //var inView = renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY);
+                        continue;
+                    }
 
-                                    UpdateBuildPriority(playerLoc, chunk, offsetY);
-                                    QueueChunkRenderBuild(chunk);
-                                }
-                            }
-                        }
-                        else
+                    var column = GetChunkRenderColumn(chunkX, chunkZ);
+                    if (!column)
+                    {
+                        // Chunks data is ready, but chunk render column is not
+                        //int chunkMask = world[chunkX, chunkZ]!.ChunkMask;
+                        // Create it and add the whole column to render list...
+                        var columnRender = GetOrCreateChunkRenderColumn(chunkX, chunkZ);
+                        for (int chunkY = 0; chunkY < chunkColumnSize; chunkY++)
                         {
-                            foreach (var chunk in column.GetChunkRenders().Values.Where(chunk => chunk.State == ChunkBuildState.Delayed))
+                            // Create chunk renders and queue them...
+                            if (!(world[chunkX, chunkZ]?.ChunkIsEmpty(chunkY) ?? true))
                             {
+                                // This chunk is not empty and needs to be added and queued
+                                var chunk = columnRender.GetOrCreateChunkRender(chunkY, chunkRenderPool);
                                 //var inView = renderCamera.ChunkInViewport(chunkX, chunk.ChunkYIndex, chunkZ, offsetY);
 
-                                // Queue delayed or cancelled chunk builds...
                                 UpdateBuildPriority(playerLoc, chunk, offsetY);
                                 QueueChunkRenderBuild(chunk);
+
+                                nearbyChunkCoordsToBeChecked.Remove(coord); // Remove from checklist
                             }
                         }
                     }
                 }
+            }
 
         }
 
-        /// <summary>
-        /// Use a mask to specify an evenly distributed subset of ChunkRenders to update
-        /// </summary>
-        /// <param name="mask">A value from 0 to MASK_CYCLE_LENGTH - 1</param>
-        private void UpdateChunkRendersListRemove(int mask)
+        private void UpdateChunkRendersListRemove()
         {
             // Add nearby chunks
             var blockLoc   = client!.GetCurrentLocation().GetBlockLoc();
             int unloadDist = Mathf.RoundToInt(ProtocolSettings.MCSettings.RenderDistance * 2F);
 
-            var chunkCoords = renderColumns.Keys.ToArray();
-
-            for (int i = mask; i < chunkCoords.Length; i += MASK_CYCLE_LENGTH)
+            foreach (var chunkCoord in renderColumns.Keys.ToArray())
             {
-                var chunkCoord = chunkCoords[i];
                 if (Mathf.Abs(blockLoc.GetChunkX() - chunkCoord.x) > unloadDist || Mathf.Abs(blockLoc.GetChunkZ() - chunkCoord.y) > unloadDist)
                 {
                     var column = renderColumns[chunkCoord];
@@ -720,20 +710,6 @@ namespace CraftSharp.Rendering
                 return;
             }
 
-            if (!(  world.IsChunkColumnLoaded(chunkX, chunkZ - 1) && // ZNeg neighbor present
-                    world.IsChunkColumnLoaded(chunkX, chunkZ + 1) && // ZPos neighbor present
-                    world.IsChunkColumnLoaded(chunkX - 1, chunkZ) && // XNeg neighbor present
-                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ) && // XPos neighbor present
-                    world.IsChunkColumnLoaded(chunkX - 1, chunkZ - 1) &&
-                    world.IsChunkColumnLoaded(chunkX - 1, chunkZ + 1) &&
-                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ - 1) &&
-                    world.IsChunkColumnLoaded(chunkX + 1, chunkZ + 1) 
-            ))
-            {
-                chunkRender.State = ChunkBuildState.Delayed;
-                return; // Not all neighbor data ready, delay it
-            }
-
             chunkRendersBeingBuilt.Add(chunkRender);
             chunkRender.State = ChunkBuildState.Building;
 
@@ -802,6 +778,7 @@ namespace CraftSharp.Rendering
 
         private const int BUILD_COUNT_LIMIT = 6;
         private BlockLoc? lastPlayerBlockLoc;
+        private int2? lastPlayerChunkLoc;
 
         /// <summary>
         /// Unload a chunk column, invoked from network thread
@@ -813,7 +790,9 @@ namespace CraftSharp.Rendering
             world[chunkX, chunkZ] = null;
 
             int2 chunkCoord = new(chunkX, chunkZ);
-            Loom.QueueOnMainThread(() => {
+
+            Loom.QueueOnMainThread(() =>
+            {
                 if (renderColumns.ContainsKey(chunkCoord))
                 {
                     var column = renderColumns[chunkCoord];
@@ -827,7 +806,7 @@ namespace CraftSharp.Rendering
 
                 var blockEntityLocs = blockEntityRenders.Keys.Where(l =>
                         l.GetChunkX() == chunkX && l.GetChunkZ() == chunkZ).ToArray();
-                
+
                 foreach (var blockLoc in blockEntityLocs)
                 {
                     // Block entity is within the chunk column to be unloaded
@@ -835,6 +814,11 @@ namespace CraftSharp.Rendering
                     blockEntityRenders.Remove(blockLoc);
                 }
             });
+            
+            if (nearbyChunkCoords.Contains(chunkCoord))
+            {
+                nearbyChunkCoordsToBeChecked.Add(chunkCoord);
+            }
         }
 
         /// <summary>
@@ -943,7 +927,7 @@ namespace CraftSharp.Rendering
                 int chunkZ = playerBlockLoc.GetChunkZ();
 
                 int delayCount = 50; // Max delay time to stop waiting forever
-                
+
                 while (!world.IsChunkColumnLoaded(chunkX, chunkZ) && delayCount > 0)
                 {
                     // Wait until the chunk column data is ready
@@ -967,7 +951,8 @@ namespace CraftSharp.Rendering
 
                     // Set last player location
                     lastPlayerBlockLoc = playerBlockLoc;
-                
+                    lastPlayerChunkLoc = new(playerBlockLoc.GetChunkX(), playerBlockLoc.GetChunkZ());
+
                     callback?.Invoke();
                 });
             });
@@ -981,6 +966,38 @@ namespace CraftSharp.Rendering
         private void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
         {
             ChunkRenderBuilder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
+        }
+
+        public void UpdateNearbyChunkCoordList(int playerChunkX, int playerChunkZ)
+        {
+            int cx, cz;
+            int viewDist = ProtocolSettings.MCSettings.RenderDistance;
+            int viewDistSqr = viewDist * viewDist;
+
+            foreach (var coord in nearbyChunkCoords.ToArray())
+            {
+                cx = coord.x - playerChunkX;
+                cz = coord.y - playerChunkZ;
+
+                if (cx * cx + cz * cz >= viewDistSqr)
+                {
+                    nearbyChunkCoords.Remove(coord);
+                    nearbyChunkCoordsToBeChecked.Remove(coord);
+                }
+            }
+
+            for (cx = -viewDist; cx <= viewDist; cx++)
+                for (cz = -viewDist; cz <= viewDist; cz++)
+                {
+                    if (cx * cx + cz * cz >= viewDistSqr) continue;
+
+                    var coord = new int2(cx + playerChunkX, cz + playerChunkZ);
+
+                    if (nearbyChunkCoords.Add(coord))
+                    {
+                        nearbyChunkCoordsToBeChecked.Add(coord);
+                    }
+                }
         }
 
         public record BlockRaycastInfo
@@ -1170,25 +1187,25 @@ namespace CraftSharp.Rendering
 
             // Update only a small subset of chunks to reduce lag spikes
             Profiler.BeginSample("Update chunks (Add)");
-            UpdateChunkRendersListAdd(updateTargetMask);
+            UpdateChunkRendersListAdd();
             Profiler.EndSample();
 
             if (chunkRendersToBeBuiltAsSet.Count < BUILD_COUNT_LIMIT) // If CPU is not so busy
             {
                 Profiler.BeginSample("Update chunks (Remove)");
-                UpdateChunkRendersListRemove(updateTargetMask);
+                UpdateChunkRendersListRemove();
                 Profiler.EndSample();
             }
-            
-            updateTargetMask = (updateTargetMask + 1) % MASK_CYCLE_LENGTH;
         }
 
         private void Update()
         {
             if (!client) // Game is not ready, cancel update
                 return;
-            
+
             var playerBlockLoc = client.GetCurrentLocation().GetBlockLoc();
+            int pcx = playerBlockLoc.GetChunkX();
+            int pcz = playerBlockLoc.GetChunkZ();
 
             foreach (var (blockLoc, render) in blockEntityRenders)
             {
@@ -1218,14 +1235,18 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            if (lastPlayerBlockLoc != null) // Updating location, update terrain collider if necessary
+            if (lastPlayerBlockLoc != null && lastPlayerBlockLoc.Value != playerBlockLoc) // Updating block location, update terrain collider if necessary
             {
-                if (lastPlayerBlockLoc.Value != playerBlockLoc)
-                {
-                    RebuildTerrainBoxCollider(playerBlockLoc);
-                    // Update last location only if it is used
-                    lastPlayerBlockLoc = playerBlockLoc; 
-                }
+                RebuildTerrainBoxCollider(playerBlockLoc);
+                // Update last block location only if it is changed
+                lastPlayerBlockLoc = playerBlockLoc;
+            }
+
+            if (lastPlayerChunkLoc != null && (lastPlayerChunkLoc.Value.x != pcx || lastPlayerChunkLoc.Value.y != pcz)) // Updating chunk coordinate, update nearby chunk list if necessary
+            {
+                UpdateNearbyChunkCoordList(pcx, pcz);
+                // Update last chunk coordinate only if it is changed
+                lastPlayerChunkLoc = new(pcx, pcz);
             }
         }
         #endregion
