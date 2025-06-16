@@ -12,6 +12,15 @@ namespace CraftSharp.Control
 
         public Dictionary<int, InteractionDefinition> InteractionTable { get; } = new();
 
+        private static readonly ResourceLocation defaultHarvestIconTypeId = ResourceLocation.FromString("corncraft:dialog");
+        private static readonly string defaultHarvestTag = "special/default_harvest";
+        private static readonly string defaultHarvestHintKey = "gameplay.interaction.default_harvest";
+
+        public HarvestInteraction CreateDefaultHarvest(ResourceLocation blockId)
+        {
+            return new HarvestInteraction(defaultHarvestIconTypeId, blockId, ItemActionType.None, InteractionType.Break, defaultHarvestHintKey, defaultHarvestTag, false);
+        }
+
         public void PrepareData(DataLoadFlag flag)
         {
             // Block interactions
@@ -45,22 +54,22 @@ namespace CraftSharp.Control
                         var interactionType = action.StringValue switch
                         {
                             "interact" => InteractionType.Interact,
-                            "place"    => InteractionType.Place,
-                            "break"    => InteractionType.Break,
-                            _          => InteractionType.Interact
+                            "place" => InteractionType.Place,
+                            "break" => InteractionType.Break,
+                            _ => InteractionType.Interact
                         };
 
                         // Harvest interaction case
                         ItemActionType? itemActionType = entryCont.TryGetValue("item_action", out var itemAction)
                             ? itemAction.StringValue switch
                             {
-                                "axe"     => ItemActionType.Axe,
-                                "hoe"     => ItemActionType.Hoe,
+                                "axe" => ItemActionType.Axe,
+                                "hoe" => ItemActionType.Hoe,
                                 "pickaxe" => ItemActionType.Pickaxe,
-                                "shovel"  => ItemActionType.Shovel,
-                                _         => ItemActionType.None,
+                                "shovel" => ItemActionType.Shovel,
+                                _ => ItemActionType.None,
                             }
-                            : null; 
+                            : null;
 
                         // Trigger interaction icon case
                         var iconTypeId = entryCont.TryGetValue("icon_type_id", out var icon) ?
@@ -71,10 +80,10 @@ namespace CraftSharp.Control
                         var predicate = entryCont.TryGetValue("predicate", out var predicateData)
                             ? BlockStatePredicate.FromString(predicateData?.StringValue ?? string.Empty)
                             : BlockStatePredicate.EMPTY;
-                        
+
                         var reusable = entryCont.TryGetValue("reusable", out var reusableData)
                             && bool.Parse(reusableData?.StringValue!); // false if not specified
-                        
+
                         var showInList = !entryCont.TryGetValue("show_in_list", out var showInListData)
                             || bool.Parse(showInListData?.StringValue!); // true if not specified
 

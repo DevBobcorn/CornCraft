@@ -1,13 +1,6 @@
 {
   "pickable": [],
   "special": {
-    "default_harvest": {
-      "action": "break",
-      "hint": "gameplay.interaction.default_harvest",
-      "icon_type_id": "corncraft:dialog",
-      "item_action": "none",
-      "triggers": []
-    },
     "axe_harvest": {
       "action": "break",
       "hint": "gameplay.interaction.axe_harvest",

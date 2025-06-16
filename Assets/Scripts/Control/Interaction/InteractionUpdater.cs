@@ -819,12 +819,9 @@ namespace CraftSharp.Control
             {
                 return; // Possibly the other part of a double block
             }
-            
-            if (definition is null)
-            {
-                Debug.LogWarning($"Harvest interaction for {blockState} is not registered.");
-                return;
-            }
+
+            // Create a default harvest interaction if not present
+            definition ??= InteractionManager.INSTANCE.CreateDefaultHarvest(block.BlockId);
 
             if (!client) return;
             
