@@ -140,7 +140,11 @@ namespace CraftSharp.Rendering
             var renderType = entityResManager.MaterialRenderTypes.GetValueOrDefault(matId);
             var materialTemplate = matManager.GetBedrockEntityMaterialTemplate(renderType);
             // Make a copy of the material
-            currentMaterial = new Material(materialTemplate) { mainTexture = textures.First().Value };
+            currentMaterial = new Material(materialTemplate)
+            {
+                name = matId,
+                mainTexture = textures.First().Value
+            };
 
             // Build mesh for each bone
             foreach (var bone in geometry!.Bones.Values)
