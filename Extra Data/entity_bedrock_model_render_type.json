@@ -59,7 +59,7 @@
     "parrot": "cutout_culloff",
     "phantom": "cutout_culloff_emissive",
     "phantom_invisible": "translucent",
-    "pig": "solid",
+    "pig": "cutout",
     "piglin": "cutout",
     "piglin_brute": "cutout",
     "pillager": "cutout",

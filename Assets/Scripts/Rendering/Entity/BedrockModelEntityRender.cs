@@ -93,19 +93,35 @@ namespace CraftSharp.Rendering
                 texture.filterMode = FilterMode.Point;
                 //Debug.Log($"Loaded texture from {fileName} ({texture.width}x{texture.height})");
 
-                if (geometry!.TextureWidth != texture.width && geometry.TextureHeight != texture.height)
+                if (geometry!.TextureWidth != texture.width || geometry.TextureHeight != texture.height)
                 {
                     if (geometry.TextureWidth == 0 && geometry.TextureHeight == 0) // Not specified, just use the size we have
                     {
                         geometry.TextureWidth = texture.width;
                         geometry.TextureHeight = texture.height;
                     }
-                    /*
-                    else // The sizes doesn't match
+                    else // The sizes doesn't match, use specified texture size
                     {
-                        Debug.LogWarning($"Specified texture size({geometry.TextureWidth}x{geometry.TextureHeight}) doesn't match image file {tex.Value} ({texture.width}x{texture.height})!");
+                        Debug.LogWarning($"Specified texture size({geometry.TextureWidth}x{geometry.TextureHeight}) doesn't match image file {tex.Value} ({texture.width}x{texture.height})! Resizing...");
+
+                        var textureWithRightSize = new Texture2D(geometry.TextureWidth, geometry.TextureHeight)
+                        {
+                            filterMode = FilterMode.Point
+                        };
+
+                        var blitHeight = Mathf.Min(texture.height, geometry.TextureHeight);
+                        var blitOffset = geometry.TextureHeight > texture.height ? geometry.TextureHeight - texture.height : 0;
+
+                        for (int y = blitOffset; y < blitHeight; y++)
+                            for (int x = 0; x < Mathf.Min(texture.width, geometry.TextureWidth); x++)
+                            {
+                                textureWithRightSize.SetPixel(x, y, texture.GetPixel(x, y));
+                            }
+                        
+                        textureWithRightSize.Apply();
+
+                        texture = textureWithRightSize;
                     }
-                    */
                 }
             
                 textures.Add(tex.Key, texture);
