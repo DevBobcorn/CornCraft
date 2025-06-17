@@ -652,7 +652,6 @@ namespace CraftSharp.Rendering
             {
                 chunkRendersToBeBuilt.Enqueue(chunkRender);
                 chunkRendersToBeBuiltAsSet.Add(chunkRender);
-                chunkRender.State = ChunkBuildState.Pending;
             }
         }
 
@@ -699,19 +698,16 @@ namespace CraftSharp.Rendering
 
                     renderColumns.Remove(chunkCoord);
                 }
-                chunkRender.State = ChunkBuildState.Cancelled;
                 return;
             }
 
             var chunkData = chunkColumnData[chunkYIndex];
             if (chunkData == null) // Chunk not available or is empty(air chunk), cancel
             {
-                chunkRender.State = ChunkBuildState.Cancelled;
                 return;
             }
 
             chunkRendersBeingBuilt.Add(chunkRender);
-            chunkRender.State = ChunkBuildState.Building;
 
             chunkRender.TokenSource = new();
 
@@ -738,7 +734,7 @@ namespace CraftSharp.Rendering
                 sw.Restart();
 
                 // Build chunk vertex
-                var buildResult = builder.Build(buildData, chunkRender);
+                builder.Build(buildData, chunkRender);
 
                 time = (int) sw.ElapsedMilliseconds;
 
@@ -756,11 +752,6 @@ namespace CraftSharp.Rendering
                 {
                     if (chunkRender)
                     {
-                        if (buildResult == ChunkBuildResult.Cancelled)
-                        {
-                            chunkRender.State = ChunkBuildState.Cancelled;
-                        }
-
                         chunkRendersBeingBuilt.Remove(chunkRender);
                     }
                 });

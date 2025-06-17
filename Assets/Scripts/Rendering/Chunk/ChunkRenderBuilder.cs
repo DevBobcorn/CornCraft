@@ -9,6 +9,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
+using Object = UnityEngine.Object;
 
 namespace CraftSharp.Rendering
 {
@@ -311,21 +312,21 @@ namespace CraftSharp.Rendering
                         // TODO Improve below cleaning
                         Profiler.BeginSample("Clear chunk render mesh");
 
-                        var mesh = chunkRender.GetComponent<MeshFilter>().sharedMesh;
-                        if (mesh)
+                        var meshFilter = chunkRender.GetComponent<MeshFilter>();
+                        if (meshFilter.sharedMesh)
                         {
-                            mesh.Clear(false);
+                            Object.Destroy(meshFilter.sharedMesh);
+                            meshFilter.sharedMesh = null;
                         }
                         chunkRender.ClearCollider();
                     
                         Profiler.EndSample();
-
-                        chunkRender.State = ChunkBuildState.Ready;
                     });
                 }
                 else
                 {
-                    Loom.QueueOnMainThreadMinor(() => {
+                    Loom.QueueOnMainThreadMinor(() =>
+                    {
                         if (!chunkRender || !chunkRender.gameObject)
                             return;
                         
@@ -434,8 +435,14 @@ namespace CraftSharp.Rendering
                         visualMesh.RecalculateNormals();
                         visualMesh.RecalculateBounds();
                         //visualMesh.RecalculateTangents();
+                        
+                        var meshFilter = chunkRender.GetComponent<MeshFilter>();
 
-                        chunkRender.GetComponent<MeshFilter>().sharedMesh = visualMesh;
+                        if (meshFilter.sharedMesh)
+                        {
+                            Object.Destroy(meshFilter.sharedMesh);
+                        }
+                        meshFilter.sharedMesh = visualMesh;
                         chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
 
                         // Collider Mesh
@@ -500,8 +507,6 @@ namespace CraftSharp.Rendering
                         }
                         
                         Profiler.EndSample(); // "Update chunk render mesh"
-                        
-                        chunkRender.State = ChunkBuildState.Ready;
 
                         chunkRender.gameObject.SetActive(true);
                     });

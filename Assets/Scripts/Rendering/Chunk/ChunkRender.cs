@@ -60,15 +60,17 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public ChunkBuildState State = ChunkBuildState.Pending;
-
         public CancellationTokenSource TokenSource = null;
         public int Priority = 0;
         public MeshCollider InteractionCollider;
 
         public void UpdateCollider(Mesh colliderMesh)
         {
-            if (!InteractionCollider)
+            if (InteractionCollider && InteractionCollider.sharedMesh)
+            {
+                Destroy(InteractionCollider.sharedMesh);
+            }
+            else
             {
                 InteractionCollider = gameObject.AddComponent<MeshCollider>();
             }
@@ -77,8 +79,10 @@ namespace CraftSharp.Rendering
 
         public void ClearCollider()
         {
-            if (InteractionCollider)
+            if (InteractionCollider && InteractionCollider.sharedMesh)
             {
+                Destroy(InteractionCollider.sharedMesh);
+                
                 // Set this to make sure the empty mesh is no longer used by the collider, which will raise errors
                 // See https://forum.unity.com/threads/when-assigning-mesh-collider-errors-about-doesnt-have-read-write-enabled.1248541/
                 InteractionCollider.sharedMesh = null;
@@ -90,6 +94,18 @@ namespace CraftSharp.Rendering
         public void Unload()
         {
             TokenSource?.Cancel();
+
+            var meshFilter = GetComponent<MeshFilter>();
+
+            if (meshFilter && meshFilter.sharedMesh)
+            {
+                Destroy(meshFilter.sharedMesh);
+            }
+
+            if (InteractionCollider)
+            {
+                Destroy(InteractionCollider.sharedMesh);
+            }
         }
 
         public override string ToString() => $"[ChunkRender {ChunkX}, {ChunkYIndex}, {ChunkZ}]";
