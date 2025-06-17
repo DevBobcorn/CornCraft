@@ -109,13 +109,20 @@ namespace CraftSharp.Rendering
                             filterMode = FilterMode.Point
                         };
 
+                        var fillColor = Color.clear;
+                        Color[] pixels = new Color[geometry.TextureHeight * geometry.TextureWidth];
+                        for (int i = 0; i < pixels.Length; i++)
+                            pixels[i] = fillColor;
+                        
+                        textureWithRightSize.SetPixels(pixels);
+
                         var blitHeight = Mathf.Min(texture.height, geometry.TextureHeight);
                         var blitOffset = geometry.TextureHeight > texture.height ? geometry.TextureHeight - texture.height : 0;
 
-                        for (int y = blitOffset; y < blitHeight; y++)
+                        for (int y = 0; y < blitHeight; y++)
                             for (int x = 0; x < Mathf.Min(texture.width, geometry.TextureWidth); x++)
                             {
-                                textureWithRightSize.SetPixel(x, y, texture.GetPixel(x, y));
+                                textureWithRightSize.SetPixel(x, y + blitOffset, texture.GetPixel(x, y));
                             }
                         
                         textureWithRightSize.Apply();
