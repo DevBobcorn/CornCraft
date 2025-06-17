@@ -2,6 +2,7 @@
 {
     Properties
     {
+        [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _BorderColor ("Border Color", Color) = (1, 1, 1, 1)
         _FillColor ("Fill Color", Color) = (0.2, 0.5, 1, 1)
         
