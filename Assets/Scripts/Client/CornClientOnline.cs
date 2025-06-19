@@ -960,15 +960,14 @@ namespace CraftSharp
                                         {
                                             if (ProtocolSettings.DebugMode)
                                                 Debug.Log($"[LeftClick] [{slot}] Cannot stack target (output) to cursor");
+                                            
+                                            return false; // Interaction not valid
                                         }
-                                        else
-                                        {
-                                            // Leave some item on cursor
-                                            cursor1.Count -= maxCount - target1.Count;
-                                            target1.Count = maxCount;
-                                            if (ProtocolSettings.DebugMode)
-                                                Debug.Log($"[LeftClick] [{slot}] Stack cursor to target [{target1}], and leave some on cursor [{cursor1}]");
-                                        }
+                                        // Leave some item on cursor
+                                        cursor1.Count -= maxCount - target1.Count;
+                                        target1.Count = maxCount;
+                                        if (ProtocolSettings.DebugMode)
+                                            Debug.Log($"[LeftClick] [{slot}] Stack cursor to target [{target1}], and leave some on cursor [{cursor1}]");
                                     }
                                 }
                                 else // Not stackable, swap
@@ -977,14 +976,13 @@ namespace CraftSharp
                                     {
                                         if (ProtocolSettings.DebugMode)
                                             Debug.Log($"[LeftClick] [{slot}] Cannot swap target with cursor");
+                                        
+                                        return false; // Interaction not valid
                                     }
-                                    else
-                                    {
-                                        // Swap two items
-                                        (inventory.Items[slot], playerInventory.Items[-1]) = (cursor1, target1);
-                                        if (ProtocolSettings.DebugMode)
-                                            Debug.Log($"[LeftClick] [{slot}] Swap target [{target1}] with cursor [{cursor1}]");
-                                    }
+                                    // Swap two items
+                                    (inventory.Items[slot], playerInventory.Items[-1]) = (cursor1, target1);
+                                    if (ProtocolSettings.DebugMode)
+                                        Debug.Log($"[LeftClick] [{slot}] Swap target [{target1}] with cursor [{cursor1}]");
                                 }
                             }
                             else // Target has no item
@@ -993,27 +991,26 @@ namespace CraftSharp
                                 {
                                     if (ProtocolSettings.DebugMode)
                                         Debug.Log($"[LeftClick] [{slot}] Cannot put cursor to target");
+                                    
+                                    return false; // Interaction not valid
+                                }
+                                int maxCount = slotType.MaxCount;
+
+                                if (cursor1.Count <= maxCount)
+                                {
+                                    // Put cursor item to target
+                                    inventory.Items[slot] = cursor1;
+                                    playerInventory.Items.Remove(-1);
+                                    if (ProtocolSettings.DebugMode)
+                                        Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{inventory.Items[slot]}]");
                                 }
                                 else
                                 {
-                                    int maxCount = slotType.MaxCount;
-
-                                    if (cursor1.Count <= maxCount)
-                                    {
-                                        // Put cursor item to target
-                                        inventory.Items[slot] = cursor1;
-                                        playerInventory.Items.Remove(-1);
-                                        if (ProtocolSettings.DebugMode)
-                                            Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{inventory.Items[slot]}]");
-                                    }
-                                    else
-                                    {
-                                        // Leave some item on cursor
-                                        cursor1.Count -= maxCount;
-                                        inventory.Items[slot] = new ItemStack(cursor1, maxCount);
-                                        if (ProtocolSettings.DebugMode)
-                                            Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{target1}], and leave some on cursor [{cursor1}]");
-                                    }
+                                    // Leave some item on cursor
+                                    cursor1.Count -= maxCount;
+                                    inventory.Items[slot] = new ItemStack(cursor1, maxCount);
+                                    if (ProtocolSettings.DebugMode)
+                                        Debug.Log($"[LeftClick] [{slot}] Put cursor to target [{target1}], and leave some on cursor [{cursor1}]");
                                 }
                             }
 
@@ -1037,6 +1034,8 @@ namespace CraftSharp
                             {
                                 if (ProtocolSettings.DebugMode)
                                     Debug.Log($"[LeftClick] [{slot}] Do nothing");
+                                
+                                return false; // Interaction not valid
                             }
                         }
                         break;
@@ -1066,6 +1065,8 @@ namespace CraftSharp
                                         {
                                             if (ProtocolSettings.DebugMode)
                                                 Debug.Log($"[RightClick] [{slot}] Target (output) cannot be stacked anymore");
+                                            
+                                            return false; // Interaction not valid
                                         }
                                     }
                                     else if (target2.Count + 1 <= maxCount)
@@ -1084,14 +1085,13 @@ namespace CraftSharp
                                     {
                                         if (ProtocolSettings.DebugMode)
                                             Debug.Log($"[RightClick] [{slot}] Cannot swap target (output) with cursor");
+                                        
+                                        return false; // Interaction not valid
                                     }
-                                    else
-                                    {
-                                        // Swap two items
-                                        (inventory.Items[slot], playerInventory.Items[-1]) = (cursor2, target2);
-                                        if (ProtocolSettings.DebugMode)
-                                            Debug.Log($"[RightClick] [{slot}] Swap target [{target2}] with cursor [{cursor2}]");
-                                    }
+                                    // Swap two items
+                                    (inventory.Items[slot], playerInventory.Items[-1]) = (cursor2, target2);
+                                    if (ProtocolSettings.DebugMode)
+                                        Debug.Log($"[RightClick] [{slot}] Swap target [{target2}] with cursor [{cursor2}]");
                                 }
                             }
                             else // Target has no item
@@ -1100,26 +1100,27 @@ namespace CraftSharp
                                 {
                                     if (ProtocolSettings.DebugMode)
                                         Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target");
+                                    
+                                    return false; // Interaction not valid
+                                }
+                                int maxCount = slotType.MaxCount;
+
+                                if (1 <= maxCount)
+                                {
+                                    // Drop 1 item count from cursor
+                                    ItemStack itemClone = new(cursor2, 1);
+                                    inventory.Items[slot] = itemClone;
+                                    cursor2.Count--;
+                                    if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
+                                    if (ProtocolSettings.DebugMode)
+                                        Debug.Log($"[RightClick] [{slot}] Drop 1 cursor [{cursor2}] to target [{inventory.Items[slot]}]");
                                 }
                                 else
                                 {
-                                    int maxCount = slotType.MaxCount;
-
-                                    if (1 <= maxCount)
-                                    {
-                                        // Drop 1 item count from cursor
-                                        ItemStack itemClone = new(cursor2, 1);
-                                        inventory.Items[slot] = itemClone;
-                                        cursor2.Count--;
-                                        if (cursor2.Count <= 0) playerInventory.Items.Remove(-1);
-                                        if (ProtocolSettings.DebugMode)
-                                            Debug.Log($"[RightClick] [{slot}] Drop 1 cursor [{cursor2}] to target [{inventory.Items[slot]}]");
-                                    }
-                                    else
-                                    {
-                                        if (ProtocolSettings.DebugMode)
-                                            Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target");
-                                    }
+                                    if (ProtocolSettings.DebugMode)
+                                        Debug.Log($"[RightClick] [{slot}] Cannot drop 1 cursor to target");
+                                    
+                                    return false; // Interaction not valid
                                 }
                             }
                         }
@@ -1175,6 +1176,8 @@ namespace CraftSharp
                             {
                                 if (ProtocolSettings.DebugMode)
                                     Debug.Log($"[RightClick] [{slot}] Do nothing");
+                                
+                                return false; // Interaction not valid
                             }
                         }
 
