@@ -47,12 +47,28 @@ namespace CraftSharp.Inventory
                 switch (key)
                 {
                     case "id":
-                        if (!allowedValues.Select(x => ResourceLocation.FromString(x))
+                        if (!allowedValues.Select(ResourceLocation.FromString)
                                 .Contains(itemStack.ItemType.ItemId))
                         {
                             return false;
                         }
                         break;
+                    case "is":
+                        return allowedValues.Any(x =>
+                        {
+                            var res = x switch
+                            {
+                                "damageable" => itemStack.IsDamageable,
+                                "stackable" => itemStack.IsStackable,
+                                "enchanted" => itemStack.IsEnchanted,
+                                "empty" => itemStack.IsEmpty,
+                                _ => throw new System.IO.InvalidDataException($"Undefined item predicate: {x}")
+                            };
+                            
+                            Debug.Log($"{x}: {res}");
+
+                            return res;
+                        });
                     case "id_path_starts_with":
                         if (!allowedValues.Any(x => itemStack.ItemType.ItemId.Path.StartsWith(x)))
                         {
@@ -66,7 +82,7 @@ namespace CraftSharp.Inventory
                         }
                         break;
                     case "equipment_slot":
-                        if (!allowedValues.Select(x => EquipmentSlotHelper.GetEquipmentSlot(x))
+                        if (!allowedValues.Select(EquipmentSlotHelper.GetEquipmentSlot)
                                 .Contains(itemStack.ItemType.EquipmentSlot))
                         {
                             return false;

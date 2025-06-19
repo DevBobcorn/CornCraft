@@ -48,6 +48,9 @@
     "minecraft:enchantment_fuel_item": {
         "place_predicate": "id=minecraft:lapis_lazuli"
     },
+    "minecraft:grindstone_base_item": {
+        "place_predicate": "is=damageable|enchanted"
+    },
     "minecraft:smithing_additional_item_legacy": {
         "place_predicate": "id=minecraft:netherite_ingot"
     },

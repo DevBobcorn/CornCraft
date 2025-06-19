@@ -350,7 +350,7 @@ namespace CraftSharp.UI
             // Update damage bar image
             var damage = newItemStack?.Damage ?? 0;
             
-            if (newItemStack is null || !newItemStack.IsDepletable || damage == 0)
+            if (newItemStack is null || !newItemStack.IsDamageable || damage == 0)
             {
                 damageBarTransform.gameObject.SetActive(false);
             }
