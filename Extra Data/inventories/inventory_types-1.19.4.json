@@ -535,7 +535,38 @@
     },
     "minecraft:grindstone": {
         "protocol_id": 14,
-        "prepend_slot_count": 3
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_grindstone",
+                "pos_x": 1,
+                "pos_y": 0,
+                "width": 3,
+                "height": 3
+            },
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5,
+                "pos_y": 1
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:grindstone_base_item",
+                "pos_x": 2,
+                "pos_y": 0.5
+            },
+            "1": {
+                "type_id": "minecraft:grindstone_base_item",
+                "pos_x": 2,
+                "pos_y": 1.5
+            },
+            "2": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        }
     },
     "minecraft:hopper": {
         "protocol_id": 15,
