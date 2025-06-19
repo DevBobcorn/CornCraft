@@ -48,14 +48,20 @@
     "minecraft:enchantment_fuel_item": {
         "place_predicate": "id=minecraft:lapis_lazuli"
     },
+    "minecraft:smithing_additional_item_legacy": {
+        "place_predicate": "id=minecraft:netherite_ingot"
+    },
     "minecraft:smithing_template_item": {
         "place_predicate": "id_path_ends_with=_smithing_template"
     },
-    "minecraft:smithing_target_item": {
-        "place_predicate": "always"
+    "minecraft:smithing_base_item_legacy": {
+        "place_predicate": "id=minecraft:diamond_helmet|minecraft:diamond_chestplate|minecraft:diamond_leggings|minecraft:diamond_boots|minecraft:diamond_sword|minecraft:diamond_pickaxe|minecraft:diamond_axe|minecraft:diamond_shovel|minecraft:diamond_hoe"
     },
-    "minecraft:smithing_material_item": {
-        "place_predicate": "always"
+    "minecraft:smithing_base_item": {
+        "place_predicate": "id_path_ends_with=_helmet|_chestplate|_leggings|_boots|diamond_sword|diamond_pickaxe|diamond_axe|diamond_shovel|diamond_hoe"
+    },
+    "minecraft:smithing_additional_item": {
+        "place_predicate": "id=minecraft:amethyst_shard|minecraft:copper_ingot|minecraft:diamond|minecraft:emerald|minecraft:gold_ingot|minecraft:iron_ingot|minecraft:lapis_lazuli|minecraft:quartz|minecraft:netherite_ingot|minecraft:redstone|minecraft:resin_brick"
     },
     "minecraft:preview": {
         "interactable": false,

@@ -92,12 +92,48 @@
         "texture_id": "minecraft:item/empty_slot_blaze_powder",
         "invert_color": true
     },
+    "corncraft:empty_slot_smithing_base_item": {
+        "texture_id": "minecraft:item/empty_armor_slot_helmet",
+        "flipbook_texture_ids": [
+            "minecraft:item/empty_armor_slot_helmet",
+            "minecraft:item/empty_armor_slot_chestplate",
+            "minecraft:item/empty_armor_slot_leggings",
+            "minecraft:item/empty_armor_slot_boots",
+            "minecraft:item/empty_slot_axe",
+            "minecraft:item/empty_slot_pickaxe",
+            "minecraft:item/empty_slot_hoe",
+            "minecraft:item/empty_slot_shovel",
+            "minecraft:item/empty_slot_sword"
+        ],
+        "invert_color": true
+    },
+    "corncraft:empty_slot_smithing_additional_item": {
+        "texture_id": "minecraft:item/empty_slot_amethyst_shard",
+        "flipbook_texture_ids": [
+            "minecraft:item/empty_slot_amethyst_shard",
+            "minecraft:item/empty_slot_diamond",
+            "minecraft:item/empty_slot_emerald",
+            "minecraft:item/empty_slot_ingot",
+            "minecraft:item/empty_slot_lapis_lazuli",
+            "minecraft:item/empty_slot_quartz",
+            "minecraft:item/empty_slot_redstone_dust"
+        ],
+        "invert_color": true
+    },
     "corncraft:empty_slot_smithing_template_armor_trim": {
         "texture_id": "minecraft:item/empty_slot_smithing_template_armor_trim",
         "invert_color": true
     },
     "corncraft:empty_slot_smithing_template_netherite_upgrade": {
         "texture_id": "minecraft:item/empty_slot_smithing_template_netherite_upgrade",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_smithing_template_item": {
+        "texture_id": "minecraft:item/empty_slot_smithing_template_armor_trim",
+        "flipbook_texture_ids": [
+            "minecraft:item/empty_slot_smithing_template_armor_trim",
+            "minecraft:item/empty_slot_smithing_template_netherite_upgrade"
+        ],
         "invert_color": true
     },
 
@@ -275,7 +311,9 @@
         "image_type": "filled",
         "fill_type": "bottom"
     },
-
+    "corncraft:gui_grindstone": {
+        "texture_id": "corncraft:icon/gui_grindstone"
+    },
 
 
     "corncraft:gui_brewing_fuel_progress": {

@@ -565,7 +565,56 @@
     },
     "minecraft:smithing": {
         "protocol_id": 20,
-        "prepend_slot_count": 4
+        "prepend_slot_count": 4,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_netherite_hammer",
+                "pos_x": 0.5,
+                "pos_y": 1.5,
+                "width": 2,
+                "height": 2
+            },
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5.5,
+                "pos_y": 0
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:smithing_template_item",
+                "pos_x": 1,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_smithing_template_item"
+            },
+            "1": {
+                "type_id": "minecraft:smithing_base_item",
+                "pos_x": 2.5,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_smithing_base_item"
+            },
+            "2": {
+                "type_id": "minecraft:smithing_additional_item",
+                "pos_x": 4,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_ingot"
+            },
+            "3": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 0
+            }
+        },
+        "labels": [
+            {
+                "pos_x": 3,
+                "pos_y": 2,
+                "width": 5,
+                "alignment": "left",
+                "translation_key": "container.upgrade"
+            }
+        ],
+        "work_panel_height": 4
     },
     "minecraft:smoker": {
         "protocol_id": 21,
