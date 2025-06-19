@@ -9,6 +9,7 @@ namespace CraftSharp.Inventory
         public enum Operator
         {
             EQUAL,
+            NOT_EQUAL,
             LESS,
             GREATER,
             LESS_EQUAL,
@@ -20,6 +21,7 @@ namespace CraftSharp.Inventory
             return op switch
             {
                 Operator.EQUAL => propVal == targetVal,
+                Operator.NOT_EQUAL => propVal != targetVal,
                 Operator.LESS => propVal < targetVal,
                 Operator.GREATER => propVal > targetVal,
                 Operator.LESS_EQUAL => propVal <= targetVal,
@@ -57,6 +59,16 @@ namespace CraftSharp.Inventory
                 {
                     keyVal = src.Split('=', 2);
                     conditions.Add(keyVal[0], (Operator.EQUAL, keyVal[1]));
+                }
+                else if (src.Contains("=="))
+                {
+                    keyVal = src.Split("==", 2);
+                    conditions.Add(keyVal[0], (Operator.EQUAL, keyVal[1]));
+                }
+                else if (src.Contains("!="))
+                {
+                    keyVal = src.Split("!=", 2);
+                    conditions.Add(keyVal[0], (Operator.NOT_EQUAL, keyVal[1]));
                 }
                 else if (src.Contains('>'))
                 {
