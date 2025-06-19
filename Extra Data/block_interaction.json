@@ -1344,6 +1344,15 @@
         "minecraft:lectern"
       ]
     },
+    "loom": {
+      "action": "interact",
+      "hint": "container.loom",
+      "icon_type_id": "corncraft:dialog",
+      "reusable": true,
+      "triggers": [
+        "minecraft:loom"
+      ]
+    },
     "repair": {
       "action": "interact",
       "hint": "container.repair",
