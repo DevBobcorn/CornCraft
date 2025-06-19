@@ -79,6 +79,11 @@ namespace CraftSharp.UI
             keyHintText.text = keyHint;
         }
 
+        public Image GetPlaceholderImage()
+        {
+            return placeholderImage;
+        }
+
         public void SetPlaceholderSprite(Sprite? sprite)
         {
             placeholderImage.sprite = sprite;

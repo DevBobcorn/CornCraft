@@ -268,9 +268,13 @@ namespace CraftSharp.UI
 
             if (placeholderSpriteTypeId.HasValue) // Set placeholder sprite
             {
-                var placeholderSprite = SpriteTypePalette.INSTANCE.GetById(
-                    placeholderSpriteTypeId.Value).Sprite;
-                slot.SetPlaceholderSprite(placeholderSprite);
+                var placeholderSpriteType = SpriteTypePalette.INSTANCE.GetById(
+                    placeholderSpriteTypeId.Value);
+                var placeholderImage = slot.GetPlaceholderImage();
+
+                slot.SetPlaceholderSprite(placeholderSpriteType.Sprite);
+
+                SetupSprite(placeholderSpriteType, placeholderImage, null, null, null);
             }
 
             if (previewItem is not null)
@@ -574,6 +578,13 @@ namespace CraftSharp.UI
             
             spriteObj.name = $"Sprite [{spriteType.TypeId}]";
 
+            SetupSprite(spriteType, spriteImage, curFillProp, maxFillProp, flipIdxProp);
+
+            return spriteImage;
+        }
+
+        private void SetupSprite(SpriteType spriteType, Image spriteImage, string curFillProp, string maxFillProp, string flipIdxProp)
+        {
             if (spriteType.ImageType == SpriteType.SpriteImageType.Filled)
             {
                 if (curFillProp is null || maxFillProp is null)
@@ -618,8 +629,6 @@ namespace CraftSharp.UI
                     currentTimerFlipbookSprites.Add((new(), spriteType, spriteImage));
                 }
             }
-
-            return spriteImage;
         }
 
         private void RegisterPropertyDependent(InventoryType.InventoryFragmentInfo fragmentInfo, MonoBehaviour inventoryFragment)
