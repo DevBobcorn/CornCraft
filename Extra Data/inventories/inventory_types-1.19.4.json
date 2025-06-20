@@ -483,16 +483,25 @@
     "minecraft:enchantment": {
         "protocol_id": 12,
         "prepend_slot_count": 2,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_enchantment",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 3
+            }
+        ],
         "slots": {
             "0": {
-                "type_id": "minecraft:regular",
+                "type_id": "minecraft:enchantment_base_item",
                 "pos_x": 0.5,
-                "pos_y": 1
+                "pos_y": 1.5
             },
             "1": {
                 "type_id": "minecraft:enchantment_fuel_item",
                 "pos_x": 1.5,
-                "pos_y": 1,
+                "pos_y": 0.5,
                 "placeholder_type_id": "corncraft:empty_slot_lapis_lazuli"
             }
         },

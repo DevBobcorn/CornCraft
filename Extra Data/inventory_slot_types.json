@@ -45,6 +45,9 @@
     "minecraft:cartography_filled_item": {
         "place_predicate": "id=minecraft:filled_map"
     },
+    "minecraft:enchantment_base_item": {
+        "place_predicate": "always"
+    },
     "minecraft:enchantment_fuel_item": {
         "place_predicate": "id=minecraft:lapis_lazuli"
     },

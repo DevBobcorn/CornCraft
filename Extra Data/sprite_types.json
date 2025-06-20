@@ -297,6 +297,9 @@
     "corncraft:gui_background_brewing": {
         "texture_id": "corncraft:background/background_brewing"
     },
+    "corncraft:gui_background_enchantment": {
+        "texture_id": "corncraft:background/background_enchantment"
+    },
     "corncraft:gui_iron_hammer": {
         "texture_id": "corncraft:icon/gui_iron_hammer"
     },

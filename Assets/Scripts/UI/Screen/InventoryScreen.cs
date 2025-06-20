@@ -794,7 +794,7 @@ namespace CraftSharp.UI
             //Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
         }
 
-        private static string GetEnchantmentHoverText(int cost, string enchantmentTranslationKey, short enchantmentLevel, short xpLevelRequirement, int playerXpLevel, bool affordable)
+        private static string GetEnchantmentHoverText(int cost, string enchantmentTranslationKey, short enchantmentLevel, short xpLevelRequirement, int playerXpLevel, int lapisCount)
         {
             var enchantmentName = ChatParser.TranslateString(enchantmentTranslationKey);
             var enchantmentLevelText = ChatParser.TranslateString($"enchantment.level.{enchantmentLevel}");
@@ -818,11 +818,10 @@ namespace CraftSharp.UI
                     : ChatParser.TranslateString("container.enchant.level.one");
 
                 // Append enchantment cost (Grey if affordable, Red otherwise)
-                additionalInfoCode = affordable ? "§7" : "§c";
-                additionalInfo = ChatParser.TranslateString("container.repair.cost", new()
-                {
-                    $"{lapisCostText} +\n{levelCostText}"
-                });
+                additionalInfoCode = lapisCount >= cost ? "§7" : "§c";
+                var additionalInfoCode2 = playerXpLevel >= cost ? "§7" : "§c";
+                
+                additionalInfo = $"{lapisCostText}\n{additionalInfoCode2}{levelCostText}";
             }
 
             return TMPConverter.MC2TMP($"§7{enchantmentClue}\n\n{additionalInfoCode}{additionalInfo}");
@@ -849,24 +848,18 @@ namespace CraftSharp.UI
                 var game = CornApp.CurrentClient;
                 if (!game) return;
 
-                var playerXpLevel = game.ExperienceLevel;
-                var lapisCount = activeInventoryData.Items.TryGetValue(1, out var lapisSlot) ? lapisSlot.Count : 0;
+                var playerXpLevel = game.GameMode == GameMode.Creative ? 99 : game.ExperienceLevel;
+                var lapisCount = game.GameMode == GameMode.Creative ? 64 : activeInventoryData.Items.TryGetValue(1, out var lapisSlot) ? lapisSlot.Count : 0;
 
-                Debug.Log($"Lapis count: {lapisCount}");
-
-                var topEnchantmentAffordable    = playerXpLevel >= 1 && lapisCount >= 1;
-                var middleEnchantmentAffordable = playerXpLevel >= 2 && lapisCount >= 2;
-                var bottomEnchantmentAffordable = playerXpLevel >= 3 && lapisCount >= 3;
-
-                SetPseudoProperty("enchantment_enabled_top",    playerXpLevel >= topXpLevelRequirement    && topEnchantmentAffordable    ? (short) 1 : (short) 0);
-                SetPseudoProperty("enchantment_enabled_middle", playerXpLevel >= middleXpLevelRequirement && middleEnchantmentAffordable ? (short) 1 : (short) 0);
-                SetPseudoProperty("enchantment_enabled_bottom", playerXpLevel >= bottomXpLevelRequirement && bottomEnchantmentAffordable ? (short) 1 : (short) 0);
+                SetPseudoProperty("enchantment_enabled_top",    playerXpLevel >= topXpLevelRequirement    && playerXpLevel >= 1 && lapisCount >= 1 ? (short) 1 : (short) 0);
+                SetPseudoProperty("enchantment_enabled_middle", playerXpLevel >= middleXpLevelRequirement && playerXpLevel >= 2 && lapisCount >= 2 ? (short) 1 : (short) 0);
+                SetPseudoProperty("enchantment_enabled_bottom", playerXpLevel >= bottomXpLevelRequirement && playerXpLevel >= 3 && lapisCount >= 3 ? (short) 1 : (short) 0);
                 
-                currentButtons[0].HintStringOverride = GetEnchantmentHoverText(1, topEnchantment.TranslationKey,    topEnchantmentLevel,    topXpLevelRequirement,    playerXpLevel, topEnchantmentAffordable   );
+                currentButtons[0].HintStringOverride = GetEnchantmentHoverText(1, topEnchantment.TranslationKey,    topEnchantmentLevel,    topXpLevelRequirement,    playerXpLevel, lapisCount);
                 currentButtons[0].MarkCursorTextDirty();
-                currentButtons[1].HintStringOverride = GetEnchantmentHoverText(2, middleEnchantment.TranslationKey, middleEnchantmentLevel, middleXpLevelRequirement, playerXpLevel, middleEnchantmentAffordable);
+                currentButtons[1].HintStringOverride = GetEnchantmentHoverText(2, middleEnchantment.TranslationKey, middleEnchantmentLevel, middleXpLevelRequirement, playerXpLevel, lapisCount);
                 currentButtons[1].MarkCursorTextDirty();
-                currentButtons[2].HintStringOverride = GetEnchantmentHoverText(3, bottomEnchantment.TranslationKey, bottomEnchantmentLevel, bottomXpLevelRequirement, playerXpLevel, bottomEnchantmentAffordable);
+                currentButtons[2].HintStringOverride = GetEnchantmentHoverText(3, bottomEnchantment.TranslationKey, bottomEnchantmentLevel, bottomXpLevelRequirement, playerXpLevel, lapisCount);
                 currentButtons[2].MarkCursorTextDirty();
             }
         }
