@@ -329,6 +329,12 @@ namespace CraftSharp.UI
         {
             cursorTextDirty = false;
 
+            if (HintStringOverride is not null)
+            {
+                cursorText = HintStringOverride;
+                return;
+            }
+
             if (HintTranslationKey is not null)
             {
                 cursorText = Translations.Get(HintTranslationKey);

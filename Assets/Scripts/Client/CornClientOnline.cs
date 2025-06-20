@@ -80,6 +80,7 @@ namespace CraftSharp
         private int currentHunger;
         private float currentSaturation;
         private int experienceLevel, totalExperience;
+        public override int ExperienceLevel => experienceLevel;
         private int activeInventoryId = -1;
         private readonly Dictionary<int, InventoryData> inventories = new();
         
@@ -1932,43 +1933,6 @@ namespace CraftSharp
                 return;
 
             inventory.Properties[propertyId] = propertyValue;
-
-            if (inventory.Type.TypeId == InventoryType.ENCHANTMENT_ID)
-            {
-                // We got the last property for enchantment
-                if (propertyId == 9 && propertyValue != -1)
-                {
-                    var topEnchantmentLevelRequirement = inventory.Properties[0];
-                    var middleEnchantmentLevelRequirement = inventory.Properties[1];
-                    var bottomEnchantmentLevelRequirement = inventory.Properties[2];
-
-                    var topEnchantment = EnchantmentTypePalette.INSTANCE.GetIdByNumId(inventory.Properties[4]);
-                    var middleEnchantment = EnchantmentTypePalette.INSTANCE.GetIdByNumId(inventory.Properties[5]);
-                    var bottomEnchantment = EnchantmentTypePalette.INSTANCE.GetIdByNumId(inventory.Properties[6]);
-                    var topEnchantmentLevel = inventory.Properties[7];
-                    var middleEnchantmentLevel = inventory.Properties[8];
-                    var bottomEnchantmentLevel = inventory.Properties[9];
-
-                    var lastEnchantment = new EnchantmentData
-                    {
-                        TopEnchantment = topEnchantment,
-                        MiddleEnchantment = middleEnchantment,
-                        BottomEnchantment = bottomEnchantment,
-
-                        Seed = inventory.Properties[3],
-
-                        TopEnchantmentLevel = topEnchantmentLevel,
-                        MiddleEnchantmentLevel = middleEnchantmentLevel,
-                        BottomEnchantmentLevel = bottomEnchantmentLevel,
-
-                        TopEnchantmentLevelRequirement = topEnchantmentLevelRequirement,
-                        MiddleEnchantmentLevelRequirement = middleEnchantmentLevelRequirement,
-                        BottomEnchantmentLevelRequirement = bottomEnchantmentLevelRequirement
-                    };
-
-                    // TODO: Broadcast enchantment event
-                }
-            }
 
             Loom.QueueOnMainThread(() =>
             {

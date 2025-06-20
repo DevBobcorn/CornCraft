@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace CraftSharp.Inventory
@@ -27,6 +28,20 @@ namespace CraftSharp.Inventory
                 Operator.LESS_EQUAL => propVal <= targetVal,
                 Operator.GREATER_EQUAL => propVal >= targetVal,
                 _ => throw new InvalidDataException($"Operator {op} cannot be checked!")
+            };
+        }
+
+        private static string OperatorToString(Operator op)
+        {
+            return op switch
+            {
+                Operator.EQUAL => "=",
+                Operator.NOT_EQUAL => "!=",
+                Operator.LESS => "<",
+                Operator.GREATER => ">",
+                Operator.LESS_EQUAL => "<=",
+                Operator.GREATER_EQUAL => ">=",
+                _ => throw new InvalidDataException($"Operator {op} is not defined!")
             };
         }
         
@@ -86,6 +101,11 @@ namespace CraftSharp.Inventory
                 }
             }
             return new InventoryPropertyPredicate(conditions);
+        }
+
+        public override string ToString()
+        {
+            return string.Join(',', conditions.Select(x => $"{x.Key}{OperatorToString(x.Value.Item1)}{x.Value.Item2}"));
         }
 
         public bool Check(Dictionary<string, short> propertyTable)

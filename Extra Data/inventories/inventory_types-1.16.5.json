@@ -295,16 +295,18 @@
         },
         "labels": [
             {
-                "pos_x": -0.5,
-                "pos_y": 4.5,
-                "width": 5,
+                "pos_x": 0,
+                "pos_y": 5,
+                "width": 4.5,
+                "height": 0.6,
                 "alignment": "center",
                 "translation_key": "block.minecraft.beacon.primary"
             },
             {
                 "pos_x": 4.5,
-                "pos_y": 4.5,
-                "width": 5,
+                "pos_y": 5,
+                "width": 4.5,
+                "height": 0.6,
                 "alignment": "center",
                 "translation_key": "block.minecraft.beacon.secondary"
             }
@@ -482,7 +484,167 @@
     },
     "minecraft:enchantment": {
         "protocol_id": 12,
-        "prepend_slot_count": 2
+        "prepend_slot_count": 2,
+        "slots": {
+            "0": {
+                "type_id": "minecraft:regular",
+                "pos_x": 0.5,
+                "pos_y": 1
+            },
+            "1": {
+                "type_id": "minecraft:enchantment_fuel_item",
+                "pos_x": 1.5,
+                "pos_y": 1,
+                "placeholder_type_id": "corncraft:empty_slot_lapis_lazuli"
+            }
+        },
+        "buttons": {
+            "0": {
+                "pos_x": 3,
+                "pos_y": 2,
+                "width": 6,
+                "height": 1,
+                "visible_predicate": "enchantment_id_top>=0",
+                "enabled_predicate": "enchantment_enabled_top>0",
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_enchantment_top_enabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_top>0"
+                    },
+                    {
+                        "type_id": "corncraft:gui_enchantment_top_disabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_top=0"
+                    }
+                ],
+                "labels": [
+                    {
+                        "pos_x": 1,
+                        "pos_y": 0.5,
+                        "width": 5,
+                        "height": 0.5,
+                        "alignment": "left",
+                        "content_property": "enchantment_id_top~enchantment_magic"
+                    },
+                    {
+                        "pos_x": 5,
+                        "pos_y": 0,
+                        "width": 1,
+                        "height": 0.5,
+                        "alignment": "right",
+                        "content_property": "enchantment_level_top"
+                    }
+                ]
+            },
+            "1": {
+                "pos_x": 3,
+                "pos_y": 1,
+                "width": 6,
+                "height": 1,
+                "visible_predicate": "enchantment_id_middle>=0,enchantment_level_middle>1",
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_enchantment_middle_enabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_middle>0"
+                    },
+                    {
+                        "type_id": "corncraft:gui_enchantment_middle_disabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_middle=0"
+                    }
+                ],
+                "labels": [
+                    {
+                        "pos_x": 1,
+                        "pos_y": 0.5,
+                        "width": 5,
+                        "height": 0.5,
+                        "alignment": "left",
+                        "content_property": "enchantment_id_middle~enchantment_magic"
+                    },
+                    {
+                        "pos_x": 5,
+                        "pos_y": 0,
+                        "width": 1,
+                        "height": 0.5,
+                        "alignment": "right",
+                        "content_property": "enchantment_level_middle"
+                    }
+                ]
+            },
+            "2": {
+                "pos_x": 3,
+                "pos_y": 0,
+                "width": 6,
+                "height": 1,
+                "visible_predicate": "enchantment_id_bottom>=0,enchantment_level_middle>=3",
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_enchantment_bottom_enabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_bottom>0"
+                    },
+                    {
+                        "type_id": "corncraft:gui_enchantment_bottom_disabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_bottom=0"
+                    }
+                ],
+                "labels": [
+                    {
+                        "pos_x": 1,
+                        "pos_y": 0.5,
+                        "width": 5,
+                        "height": 0.5,
+                        "alignment": "left",
+                        "content_property": "enchantment_id_bottom~enchantment_magic"
+                    },
+                    {
+                        "pos_x": 5,
+                        "pos_y": 0,
+                        "width": 1,
+                        "height": 0.5,
+                        "alignment": "right",
+                        "content_property": "enchantment_level_bottom"
+                    }
+                ]
+            }
+        },
+        "properties": {
+            "0": "xp_level_top",
+            "1": "xp_level_middle",
+            "2": "xp_level_bottom",
+            "3": "enchantment_seed",
+            "4": "enchantment_id_top",
+            "5": "enchantment_id_middle",
+            "6": "enchantment_id_bottom",
+            "7": "enchantment_level_top",
+            "8": "enchantment_level_middle",
+            "9": "enchantment_level_bottom",
+            "-1": "enchantment_enabled_top",
+            "-2": "enchantment_enabled_middle",
+            "-3": "enchantment_enabled_bottom"
+        }
     },
     "minecraft:furnace": {
         "protocol_id": 13,

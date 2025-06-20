@@ -242,17 +242,17 @@ namespace CraftSharp.Inventory
         }
 
         public record InventoryInputInfo(float PosX, float PosY, float Width,
-            string PlaceholderTranslationKey) : InventoryFragmentInfo
+            string? PlaceholderTranslationKey) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
             public float Width { get; } = Width;
-            public string PlaceholderTranslationKey { get; } = PlaceholderTranslationKey;
+            public string? PlaceholderTranslationKey { get; } = PlaceholderTranslationKey;
 
             public static InventoryInputInfo FromJson(Json.JSONData data)
             {
                 var translationKey = data.Properties.TryGetValue("translation_key", out var val) ?
-                    val.StringValue : "Placeholder Text";
+                    val.StringValue : null;
 
                 var x = data.Properties.TryGetValue("pos_x", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
@@ -284,19 +284,21 @@ namespace CraftSharp.Inventory
             };
         }
 
-        public record InventoryLabelInfo(float PosX, float PosY, float Width,
-            LabelAlignment Alignment, string TextTranslationKey) : InventoryFragmentInfo
+        public record InventoryLabelInfo(float PosX, float PosY, float Width, float Height,
+            LabelAlignment Alignment, string? TextTranslationKey, string? ContentProperty) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
             public float Width { get; } = Width;
+            public float Height { get; } = Height;
             public LabelAlignment Alignment { get; } = Alignment;
-            public string TextTranslationKey { get; } = TextTranslationKey;
+            public string? TextTranslationKey { get; } = TextTranslationKey;
+            public string? ContentProperty { get; } = ContentProperty;
 
             public static InventoryLabelInfo FromJson(Json.JSONData data)
             {
                 var translationKey = data.Properties.TryGetValue("translation_key", out var val) ?
-                    val.StringValue : "Label Text";
+                    val.StringValue : null;
 
                 var x = data.Properties.TryGetValue("pos_x", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
@@ -304,10 +306,14 @@ namespace CraftSharp.Inventory
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
                 var w = data.Properties.TryGetValue("width", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 6;
+                var h = data.Properties.TryGetValue("height", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
                 var alignment = data.Properties.TryGetValue("alignment", out val) ?
                     GetLabelAlignment(val.StringValue) : LabelAlignment.Left;
+                var contentProperty = data.Properties.TryGetValue("content_property", out val) ?
+                    val.StringValue : null;
                 
-                var labelInfo = new InventoryLabelInfo(x, y, w, alignment, translationKey);
+                var labelInfo = new InventoryLabelInfo(x, y, w, h, alignment, translationKey, contentProperty);
                 labelInfo.ReadBaseInfo(data);
 
                 return labelInfo;

@@ -16,6 +16,7 @@ namespace CraftSharp.UI
         protected Action<string>? cursorTextHandler;
         protected Action? hoverHandler;
         public string? HintTranslationKey { get; set; }
+        public string? HintStringOverride { get; set; }
         
         #nullable disable
         

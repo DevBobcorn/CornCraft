@@ -59,6 +59,8 @@ namespace CraftSharp.UI
         private readonly List<(string, SpriteType, Image)> currentPropertyFlipbookSprites = new();
         // (flipbook_timer, sprite_type, sprite_image)
         private readonly List<(SpriteType.FlipbookTimer, SpriteType, Image)> currentTimerFlipbookSprites = new();
+        // (content_property, text_handler, label_text)
+        private readonly List<(string, Func<short, string>, TMP_Text)> currentPropertyLabels = new();
         // (predicate_type, predicate, inventory_fragment)
         private readonly List<(InventoryType.PredicateType, InventoryPropertyPredicate, MonoBehaviour)> propertyDependents = new();
         
@@ -435,8 +437,8 @@ namespace CraftSharp.UI
             // Populate layout labels
             foreach (var labelInfo in layoutInfo.LabelInfo)
             {
-                var label = CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width,
-                    labelInfo.Alignment, labelInfo.TextTranslationKey);
+                var label = CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width, labelInfo.Height,
+                    labelInfo.Alignment, labelInfo.TextTranslationKey, labelInfo.ContentProperty);
                 RegisterPropertyDependent(labelInfo, label);
             }
 
@@ -483,7 +485,7 @@ namespace CraftSharp.UI
             }
         }
 
-        private TMP_Text CreateLabel(RectTransform parent, float x, float y, float w, InventoryType.LabelAlignment alignment, string translationKey)
+        private TMP_Text CreateLabel(RectTransform parent, float x, float y, float w, float h, InventoryType.LabelAlignment alignment, string translationKey, string contentProperty)
         {
             var labelObj = Instantiate(inventoryLabelPrefab, parent);
             var labelText = labelObj.GetComponent<TMP_Text>();
@@ -492,8 +494,9 @@ namespace CraftSharp.UI
             rectTransform.anchoredPosition =
                 new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
 
-            labelText.text = Translations.Get(translationKey);
+            labelText.text = translationKey is not null ? Translations.Get(translationKey) : string.Empty;
             labelText.horizontalAlignment = alignment switch
             {
                 InventoryType.LabelAlignment.Left => HorizontalAlignmentOptions.Left,
@@ -502,7 +505,30 @@ namespace CraftSharp.UI
                 _ => throw new InvalidDataException($"Label alignment {alignment} is not defined!"),
             };
 
+            SetupLabel(labelText, contentProperty);
+
             return labelText;
+        }
+
+        private void SetupLabel(TMP_Text labelText, string contentProperty)
+        {
+            if (contentProperty is not null)
+            {
+                if (contentProperty.Contains('~'))
+                {
+                    var parts = contentProperty.Split('~', 2);
+                    Func<short, string> textConverter = parts[1] switch
+                    {
+                        "enchantment_magic" => x => $"UwU {x}",
+                        _ => x => x.ToString()
+                    };
+                    currentPropertyLabels.Add((parts[0], textConverter, labelText));
+                }
+                else
+                {
+                    currentPropertyLabels.Add((contentProperty, x => x.ToString(), labelText));
+                }
+            }
         }
 
         private InventoryInput CreateInput(RectTransform parent, int inputId, float x, float y, float w,
@@ -517,7 +543,7 @@ namespace CraftSharp.UI
                 new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
 
-            input.SetPlaceholderText(Translations.Get(translationKey));
+            input.SetPlaceholderText(translationKey is not null ? Translations.Get(translationKey) : string.Empty);
 
             SetupInput(inputId, input);
 
@@ -748,6 +774,16 @@ namespace CraftSharp.UI
                     UpdatePredicateDependents();
                 }
             }
+
+            if (activeInventoryData.Type.TypeId == InventoryType.ENCHANTMENT_ID)
+            {
+                if (slotId == 1) // Lapis Lazuli item slot (Base item slot change will trigger property update)
+                {
+                    UpdateEnchantmentOptions();
+                    // Update property-dependent fragments
+                    UpdatePredicateDependents();
+                }
+            }
         }
         
         private void SetPseudoProperty(string propertyName, short propertyValue)
@@ -758,6 +794,83 @@ namespace CraftSharp.UI
             //Debug.Log($"Setting property [{activeInventoryId}]/[pseudo] {propertyName} to {propertyValue}");
         }
 
+        private static string GetEnchantmentHoverText(int cost, string enchantmentTranslationKey, short enchantmentLevel, short xpLevelRequirement, int playerXpLevel, bool affordable)
+        {
+            var enchantmentName = ChatParser.TranslateString(enchantmentTranslationKey);
+            var enchantmentLevelText = ChatParser.TranslateString($"enchantment.level.{enchantmentLevel}");
+
+            var enchantmentClue = ChatParser.TranslateString("container.enchant.clue", new() { $"{enchantmentName} {enchantmentLevelText}" });
+            string additionalInfoCode, additionalInfo;
+
+            if (xpLevelRequirement > playerXpLevel)
+            {
+                // Append unavailable hint (Red)
+                additionalInfoCode = "§c";
+                additionalInfo = ChatParser.TranslateString("container.enchant.level.requirement", new() { xpLevelRequirement.ToString() });
+            }
+            else
+            {
+                var lapisCostText = cost > 1
+                    ? ChatParser.TranslateString("container.enchant.lapis.many", new() { cost.ToString() })
+                    : ChatParser.TranslateString("container.enchant.lapis.one");
+                var levelCostText = cost > 1
+                    ? ChatParser.TranslateString("container.enchant.level.many", new() { cost.ToString() })
+                    : ChatParser.TranslateString("container.enchant.level.one");
+
+                // Append enchantment cost (Grey if affordable, Red otherwise)
+                additionalInfoCode = affordable ? "§7" : "§c";
+                additionalInfo = ChatParser.TranslateString("container.repair.cost", new()
+                {
+                    $"{lapisCostText} +\n{levelCostText}"
+                });
+            }
+
+            return TMPConverter.MC2TMP($"§7{enchantmentClue}\n\n{additionalInfoCode}{additionalInfo}");
+        }
+
+        private void UpdateEnchantmentOptions()
+        {
+            if (
+                propertyTable.TryGetValue("xp_level_top",     out var topXpLevelRequirement) &&
+                propertyTable.TryGetValue("xp_level_middle",  out var middleXpLevelRequirement) &&
+                propertyTable.TryGetValue("xp_level_bottom",  out var bottomXpLevelRequirement) &&
+                propertyTable.TryGetValue("enchantment_seed", out var enchantmentSeed) &&
+                propertyTable.TryGetValue("enchantment_id_top",    out var topEnchantmentId) &&
+                propertyTable.TryGetValue("enchantment_id_middle", out var middleEnchantmentId) &&
+                propertyTable.TryGetValue("enchantment_id_bottom", out var bottomEnchantmentId) &&
+                propertyTable.TryGetValue("enchantment_level_top",    out var topEnchantmentLevel) &&
+                propertyTable.TryGetValue("enchantment_level_middle", out var middleEnchantmentLevel) &&
+                propertyTable.TryGetValue("enchantment_level_bottom", out var bottomEnchantmentLevel))
+            {
+                var topEnchantment    = EnchantmentTypePalette.INSTANCE.GetByNumId(topEnchantmentId);
+                var middleEnchantment = EnchantmentTypePalette.INSTANCE.GetByNumId(middleEnchantmentId);
+                var bottomEnchantment = EnchantmentTypePalette.INSTANCE.GetByNumId(bottomEnchantmentId);
+
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+
+                var playerXpLevel = game.ExperienceLevel;
+                var lapisCount = activeInventoryData.Items.TryGetValue(1, out var lapisSlot) ? lapisSlot.Count : 0;
+
+                Debug.Log($"Lapis count: {lapisCount}");
+
+                var topEnchantmentAffordable    = playerXpLevel >= 1 && lapisCount >= 1;
+                var middleEnchantmentAffordable = playerXpLevel >= 2 && lapisCount >= 2;
+                var bottomEnchantmentAffordable = playerXpLevel >= 3 && lapisCount >= 3;
+
+                SetPseudoProperty("enchantment_enabled_top",    playerXpLevel >= topXpLevelRequirement    && topEnchantmentAffordable    ? (short) 1 : (short) 0);
+                SetPseudoProperty("enchantment_enabled_middle", playerXpLevel >= middleXpLevelRequirement && middleEnchantmentAffordable ? (short) 1 : (short) 0);
+                SetPseudoProperty("enchantment_enabled_bottom", playerXpLevel >= bottomXpLevelRequirement && bottomEnchantmentAffordable ? (short) 1 : (short) 0);
+                
+                currentButtons[0].HintStringOverride = GetEnchantmentHoverText(1, topEnchantment.TranslationKey,    topEnchantmentLevel,    topXpLevelRequirement,    playerXpLevel, topEnchantmentAffordable   );
+                currentButtons[0].MarkCursorTextDirty();
+                currentButtons[1].HintStringOverride = GetEnchantmentHoverText(2, middleEnchantment.TranslationKey, middleEnchantmentLevel, middleXpLevelRequirement, playerXpLevel, middleEnchantmentAffordable);
+                currentButtons[1].MarkCursorTextDirty();
+                currentButtons[2].HintStringOverride = GetEnchantmentHoverText(3, bottomEnchantment.TranslationKey, bottomEnchantmentLevel, bottomXpLevelRequirement, playerXpLevel, bottomEnchantmentAffordable);
+                currentButtons[2].MarkCursorTextDirty();
+            }
+        }
+        
         private void UpdatePseudoProperties(string propertyName, short value)
         {
             // Handle property change TODO: Move to separate class
@@ -801,11 +914,21 @@ namespace CraftSharp.UI
                     SetPseudoProperty("arrow_progress", (short) (400 - value));
                 }
             }
+        
+            if (activeInventoryData.Type.TypeId == InventoryType.ENCHANTMENT_ID)
+            {
+                // We got the last property for enchantment
+                if (propertyName == "enchantment_level_bottom" && value != -1)
+                {
+                    UpdateEnchantmentOptions();
+                }
+            }
         }
 
         private void UpdatePredicateDependents()
         {
             // TODO: Update only dependents affected by the change
+            Debug.Log("Update predicate dependents");
             
             foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
             {
@@ -1062,7 +1185,7 @@ namespace CraftSharp.UI
                 if (!IsActive) return;
                 if (e.InventoryId == activeInventoryId)
                 {
-                    var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, "unnamed");
+                    var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, $"prop_{e.Property}");
                     
                     //Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
                     propertyTable[propertyName] = e.Value;
@@ -1076,6 +1199,22 @@ namespace CraftSharp.UI
 
                     // Update property-dependent fragments
                     UpdatePredicateDependents();
+                    
+                    // Update property labels
+                    foreach (var (contPropName, textConverter, labelText) in currentPropertyLabels)
+                    {
+                        if (updatedPropertyNames.Contains(contPropName)) // This one needs to be updated
+                        {
+                            if (propertyTable.TryGetValue(contPropName, out var contPropValue))
+                            {
+                                labelText.text = textConverter(contPropValue);
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"Failed to get property slot for {contPropName}, check inventory definition");
+                            }
+                        }
+                    }
                     
                     // Update filled sprites
                     foreach (var (curPropName, maxPropName, spriteType, spriteImage) in currentFilledSprites)

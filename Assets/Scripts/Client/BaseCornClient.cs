@@ -152,6 +152,7 @@ namespace CraftSharp
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;
         public byte CurrentHotbarSlot { get; protected set; } = 0;
+        public abstract int ExperienceLevel { get; }
         public abstract bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate);
 
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;

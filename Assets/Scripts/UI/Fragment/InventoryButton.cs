@@ -36,7 +36,11 @@ namespace CraftSharp.UI
         {
             cursorTextDirty = false;
 
-            if (HintTranslationKey is not null)
+            if (HintStringOverride is not null)
+            {
+                cursorText = HintStringOverride;
+            }
+            else if (HintTranslationKey is not null)
             {
                 cursorText = Translations.Get(HintTranslationKey);
             }
