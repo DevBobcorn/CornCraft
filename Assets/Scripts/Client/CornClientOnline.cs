@@ -1353,6 +1353,15 @@ namespace CraftSharp
 
             return handler!.SendInventoryAction(inventoryId, slot, actionType, sendItem, changedSlots, stateId);
         }
+        
+        /// <summary>
+        /// Click a button in the specified inventory
+        /// </summary>
+        /// <returns>TRUE if the button was successfully clicked</returns>
+        public override bool DoInventoryButtonClick(int inventoryId, int buttonId)
+        {
+            return InvokeRequired ? InvokeOnNetMainThread(() => DoInventoryButtonClick(inventoryId, buttonId)) : handler!.SendInventoryButtonClick(inventoryId, buttonId);
+        }
 
         /// <summary>
         /// Give Creative Mode items into regular/survival Player Inventory

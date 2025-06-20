@@ -16,7 +16,7 @@ namespace CraftSharp
     [RequireComponent(typeof (InteractionUpdater))]
     public class CornClientOffline : BaseCornClient
     {
-#nullable enable
+        #nullable enable
 
         #region Login Information
         public static readonly int DUMMY_PROTOCOL_VERSION = ProtocolHandler.GetMinSupported();
@@ -394,6 +394,15 @@ namespace CraftSharp
         /// </summary>
         /// <returns>TRUE if the slot was successfully clicked</returns>
         public override bool DoInventoryAction(int inventoryId, int slot, InventoryActionType actionType)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Click a button in the specified inventory
+        /// </summary>
+        /// <returns>TRUE if the button was successfully clicked</returns>
+        public override bool DoInventoryButtonClick(int inventoryId, int buttonId)
         {
             return false;
         }

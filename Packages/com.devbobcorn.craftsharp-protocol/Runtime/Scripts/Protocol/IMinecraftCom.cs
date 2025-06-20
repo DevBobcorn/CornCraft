@@ -184,6 +184,14 @@ namespace CraftSharp.Protocol
         bool SendInventoryAction(int inventoryId, int slotId, InventoryActionType action, ItemStack? item, List<Tuple<short, ItemStack?>> changedSlots, int stateId);
 
         /// <summary>
+        /// Send a click inventory button packet to the server
+        /// </summary>
+        /// <param name="inventoryId">Id of the inventory being clicked</param>
+        /// <param name="buttonId">Id of the clicked button</param>
+        /// <returns>True if packet was successfully sent</returns>
+        bool SendInventoryButtonClick(int inventoryId, int buttonId);
+        
+        /// <summary>
         /// Request Creative Mode item creation into regular/survival Player Inventory
         /// </summary>
         /// <remarks>(obviously) requires to be in creative mode</remarks>

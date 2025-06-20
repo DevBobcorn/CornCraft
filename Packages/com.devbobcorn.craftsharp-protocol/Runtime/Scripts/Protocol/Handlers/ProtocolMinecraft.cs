@@ -1841,7 +1841,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.InventoryItems:
                     {
-                        var inventoryId = protocolVersion < MC_1_21_1_Version
+                        var inventoryId = protocolVersion <= MC_1_21_1_Version
                             ? DataTypes.ReadNextByte(packetData)
                             : DataTypes.ReadNextVarInt(packetData);
                         
@@ -1876,7 +1876,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.InventoryProperty:
                     {
-                        var inventoryId = protocolVersion < MC_1_21_1_Version
+                        var inventoryId = protocolVersion <= MC_1_21_1_Version
                             ? DataTypes.ReadNextByte(packetData)
                             : DataTypes.ReadNextVarInt(packetData);
                         
@@ -1888,7 +1888,7 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.SetSlot:
                     {
-                        var inventoryId = protocolVersion < MC_1_21_1_Version
+                        var inventoryId = protocolVersion <= MC_1_21_1_Version
                             ? DataTypes.ReadNextByte(packetData)
                             : DataTypes.ReadNextVarInt(packetData);
                         
@@ -3716,6 +3716,28 @@ namespace CraftSharp.Protocol.Handlers
             }
         }
 
+        public bool SendInventoryButtonClick(int inventoryId, int buttonId)
+        {
+            try
+            {
+                var packet = new List<byte>();
+
+                if (protocolVersion <= MC_1_21_1_Version)
+                    packet.Add((byte) inventoryId);
+                else
+                    packet.AddRange(DataTypes.GetVarInt(inventoryId));
+                
+                // TODO: Button id also seems to become a varint in future versions
+                packet.Add((byte) buttonId);
+                
+                SendPacket(PacketTypesOut.ClickInventoryButton, packet);
+                return true;
+            }
+            catch (SocketException) { return false; }
+            catch (System.IO.IOException) { return false; }
+            catch (ObjectDisposedException) { return false; }
+        }
+
         public bool SendCreativeInventoryAction(int slot, Item itemType, int count, Dictionary<string, object>? nbt)
         {
             try
@@ -3750,23 +3772,6 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 SendPacket(PacketTypesOut.AcknowledgeConfiguration, new List<byte>());
-                return true;
-            }
-            catch (SocketException) { return false; }
-            catch (System.IO.IOException) { return false; }
-            catch (ObjectDisposedException) { return false; }
-        }
-
-        public bool ClickInventoryButton(int inventoryId, int buttonId)
-        {
-            try
-            {
-                var packet = new List<byte>
-                {
-                    (byte)inventoryId,
-                    (byte)buttonId
-                };
-                SendPacket(PacketTypesOut.ClickInventoryButton, packet);
                 return true;
             }
             catch (SocketException) { return false; }

@@ -745,6 +745,14 @@ namespace CraftSharp.UI
                     CloseInventory();
                 }
             }
+
+            if (activeInventoryData.Type.TypeId == InventoryType.ENCHANTMENT_ID)
+            {
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+
+                game.DoInventoryButtonClick(activeInventoryId, buttonId);
+            }
         }
 
         private void HandleInputValueChange(int inputId, string text)
