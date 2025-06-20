@@ -94,6 +94,13 @@ namespace CraftSharp.UI
                 ShowPlaceholderImage();
         }
         
+        private static readonly Color LOW_OPACITY = new(1F, 1F, 1F, 0.25F);
+
+        public void SetSlotBorderVisibility(bool visible)
+        {
+            slotImage.color = visible ? Color.white : LOW_OPACITY;
+        }
+        
         public static string GetItemDisplayText(ItemStack? itemStack)
         {
             if (itemStack == null || itemStack.ItemType.ItemId == Item.AIR_ID)

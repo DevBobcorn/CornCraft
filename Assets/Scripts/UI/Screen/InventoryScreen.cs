@@ -282,6 +282,9 @@ namespace CraftSharp.UI
             if (previewItem is not null)
             {
                 slot.UpdateItemStack(previewItem);
+
+                // Hide border to avoid confusion with interactable slots
+                slot.SetSlotBorderVisibility(false);
             }
 
             SetupSlot(slotId, slot);
