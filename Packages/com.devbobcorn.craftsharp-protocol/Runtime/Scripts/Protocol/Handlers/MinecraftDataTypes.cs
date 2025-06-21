@@ -2,13 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
 using CraftSharp.Protocol.Message;
-using System.Linq;
 
 namespace CraftSharp.Protocol.Handlers
 {
@@ -356,10 +357,8 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
-        /// Read an array of particle extra data (Added in 1.20.5)
+        /// Read an array of particles with optional extra data (Added in 1.20.5)
         /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="itemPalette"></param>
         private ParticleExtraData[] ReadParticlesData(Queue<byte> cache, ItemPalette itemPalette)
         {
             var count = DataTypes.ReadNextVarInt(cache);
@@ -374,10 +373,8 @@ namespace CraftSharp.Protocol.Handlers
         }
 
         /// <summary>
-        /// Read particle extra data
+        /// Read particle with optional extra data
         /// </summary>
-        /// <param name="cache"></param>
-        /// <param name="itemPalette"></param>
         public ParticleExtraData ReadParticleData(Queue<byte> cache, ItemPalette itemPalette)
         {
             var particleNumId = DataTypes.ReadNextVarInt(cache);
@@ -551,6 +548,156 @@ namespace CraftSharp.Protocol.Handlers
             }
         }
 
+        /// <summary>
+        /// Read recipe with optional extra data
+        /// </summary>
+        public RecipeExtraData ReadRecipeData(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            BaseRecipeType recipeType;
+
+            if (protocolVersion < ProtocolMinecraft.MC_1_20_6_Version) // Prior to 1.20.5, sent as id
+            {
+                var recipeTypeId = ResourceLocation.FromString(DataTypes.ReadNextString(cache));
+                recipeType = RecipeTypePalette.INSTANCE.GetById(recipeTypeId);
+            }
+            else // 1.20.5+, sent as num id
+            {
+                var recipeTypeNumId = DataTypes.ReadNextVarInt(cache);
+                recipeType = RecipeTypePalette.INSTANCE.GetByNumId(recipeTypeNumId);
+            }
+
+            return recipeType.ExtraDataType switch
+            {
+                RecipeExtraDataType.CraftingShapeless     => ReadCraftingShapelessRecipe(cache, itemPalette),
+                RecipeExtraDataType.CraftingShaped        => ReadCraftingShapedRecipe(cache, itemPalette),
+                RecipeExtraDataType.Cooking               => ReadCookingRecipe(cache, itemPalette),
+                RecipeExtraDataType.Stonecutting          => ReadStonecuttingRecipe(cache, itemPalette),
+                RecipeExtraDataType.Smithing              => ReadLegacySmithingRecipe(cache, itemPalette),
+                RecipeExtraDataType.SmithingTransform     => ReadSmithingTransformRecipe(cache, itemPalette),
+                RecipeExtraDataType.SmithingTrim          => ReadSmithingTrimRecipe(cache, itemPalette),
+                _                                         => ReadSpecialRecipe(cache)
+            };
+        }
+
+        private ItemStack?[] ReadIngredient(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            int count = DataTypes.ReadNextVarInt(cache);
+            ItemStack?[] ingredient = new ItemStack?[count];
+
+            for (int i = 0; i < count; i++)
+                ingredient[i] = ReadNextItemSlot(cache, itemPalette);
+            
+            return ingredient;
+        }
+
+        private CraftingShapelessExtraData ReadCraftingShapelessRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var group = DataTypes.ReadNextString(cache);
+            var category = protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
+                ? (CraftingRecipeCategory) DataTypes.ReadNextVarInt(cache) : CraftingRecipeCategory.Misc;
+            
+            var ingredientCount = DataTypes.ReadNextVarInt(cache);
+            
+            var ingredients = new List<ItemStack?[]>(ingredientCount);
+            for (int i = 0; i < ingredientCount; i++)
+                ingredients.Add(ReadIngredient(cache, itemPalette));
+            
+            var result = ReadNextItemSlot(cache, itemPalette)!;
+            
+            return new CraftingShapelessExtraData(group, category, ingredientCount, ingredients, result);
+        }
+        
+        private CraftingShapedExtraData ReadCraftingShapedRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            int width = 0, height = 0;
+            
+            if (protocolVersion < ProtocolMinecraft.MC_1_20_4_Version)
+            {
+                width = DataTypes.ReadNextVarInt(cache);
+                height = DataTypes.ReadNextVarInt(cache);
+            }
+            
+            var group = DataTypes.ReadNextString(cache);
+            // Category field added in 1.19.3
+            var category = protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
+                ? (CraftingRecipeCategory) DataTypes.ReadNextVarInt(cache) : CraftingRecipeCategory.Misc;
+            
+            if (protocolVersion >= ProtocolMinecraft.MC_1_20_4_Version)
+            {
+                width = DataTypes.ReadNextVarInt(cache);
+                height = DataTypes.ReadNextVarInt(cache);
+            }
+            
+            var ingredients = new List<ItemStack?[]>(width * height);
+            for (int i = 0; i < width * height; i++)
+                ingredients.Add(ReadIngredient(cache, itemPalette));
+            
+            var result = ReadNextItemSlot(cache, itemPalette)!;
+            // ShowNotification field added in 1.19.4, use true for previous versions
+            var showNotification = protocolVersion < ProtocolMinecraft.MC_1_19_4_Version || DataTypes.ReadNextBool(cache);
+            
+            return new CraftingShapedExtraData(group, category, width, height, ingredients, result, showNotification);
+        }
+
+        private CookingExtraData ReadCookingRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var group = DataTypes.ReadNextString(cache);
+            var category = protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
+                ? (CookingRecipeCategory) DataTypes.ReadNextVarInt(cache) : CookingRecipeCategory.Misc;
+
+            var ingredient = ReadIngredient(cache, itemPalette);
+            var result = ReadNextItemSlot(cache, itemPalette)!;
+            var experience = DataTypes.ReadNextFloat(cache);
+            var cookingTime = DataTypes.ReadNextVarInt(cache);
+
+            return new CookingExtraData(group, category, ingredient, result, experience, cookingTime);
+        }
+
+        private StonecuttingExtraData ReadStonecuttingRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var group = DataTypes.ReadNextString(cache);
+            var ingredient = ReadIngredient(cache, itemPalette);
+            var result = ReadNextItemSlot(cache, itemPalette)!;
+            
+            return new StonecuttingExtraData(group, ingredient, result);
+        }
+        
+        private SmithingExtraData ReadLegacySmithingRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var @base = ReadIngredient(cache, itemPalette);
+            var addition = ReadIngredient(cache, itemPalette);
+            var result = ReadNextItemSlot(cache, itemPalette)!;
+            
+            return new SmithingExtraData(@base, addition, result);
+        }
+        
+        private SmithingTransformExtraData ReadSmithingTransformRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var template = ReadIngredient(cache, itemPalette);
+            var @base = ReadIngredient(cache, itemPalette);
+            var addition = ReadIngredient(cache, itemPalette);
+            var result = ReadNextItemSlot(cache, itemPalette)!;
+            
+            return new SmithingTransformExtraData(template, @base, addition, result);
+        }
+        
+        private SmithingTrimExtraData ReadSmithingTrimRecipe(Queue<byte> cache, ItemPalette itemPalette)
+        {
+            var template = ReadIngredient(cache, itemPalette);
+            var @base = ReadIngredient(cache, itemPalette);
+            var addition = ReadIngredient(cache, itemPalette);
+            
+            return new SmithingTrimExtraData(template, @base, addition);
+        }
+        
+        private SpecialRecipeExtraData ReadSpecialRecipe(Queue<byte> cache)
+        {
+            var category = protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
+                ? (CraftingRecipeCategory) DataTypes.ReadNextVarInt(cache) : CraftingRecipeCategory.Misc;
+            
+            return new SpecialRecipeExtraData(category);
+        }
+        
         /// <summary>
         /// Read a single villager trade from a cache of bytes and remove it from the cache
         /// </summary>

@@ -26,7 +26,7 @@
         ChunksBiomes,               // Added in 1.19.4
         ChunkData,                  //
         ClearTiles,                 //
-        CloseInventory,                //
+        CloseInventory,             //
         CollectItem,                //
         CombatEvent,                //
         CookieRequest,              // Added in 1.20.6
@@ -75,7 +75,7 @@
         OpenBook,                   //
         OpenHorseWindow,            //
         OpenSignEditor,             //
-        OpenInventory,                 //
+        OpenInventory,              //
         Particle,                   //
         Ping,                       //
         PingResponse,               // Added in 1.20.2
@@ -142,9 +142,9 @@
         UpdateViewPosition,         //
         UseBed,                     // For 1.13.2 or below
         VehicleMove,                //
-        InventoryConfirmation,         //
-        InventoryItems,                //
-        InventoryProperty,             //
+        InventoryConfirmation,      //
+        InventoryItems,             //
+        InventoryProperty,          //
         WorldBorder,                //
         WorldBorderCenter,          //
         WorldBorderLerpSize,        //

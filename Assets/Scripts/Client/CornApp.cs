@@ -8,10 +8,13 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 using CraftSharp.Event;
 using CraftSharp.Control;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Protocol.Handlers;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
@@ -20,8 +23,6 @@ using CraftSharp.Protocol.Message;
 using CraftSharp.Resource;
 using CraftSharp.UI;
 using CraftSharp.Protocol.ProtoDef;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 namespace CraftSharp
 {
@@ -195,9 +196,14 @@ namespace CraftSharp
             Task.Run(() => BlockEntityTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
-            // Load particle definitions
+            // Load particle type definitions
             loadFlag.Finished = false;
             Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
+            while (!loadFlag.Finished) yield return null;
+            
+            // Load recipe type definitions
+            loadFlag.Finished = false;
+            Task.Run(() => RecipeTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
             
             // Load inventory slot definitions (vanilla doesn't have this)

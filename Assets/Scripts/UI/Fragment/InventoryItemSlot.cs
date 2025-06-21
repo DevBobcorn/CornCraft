@@ -2,18 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcomponents;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Unity.Mathematics;
 using TMPro;
 
+using CraftSharp.Inventory;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components.Subcomponents;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+using CraftSharp.Protocol.Message;
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
-using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.UI
 {
