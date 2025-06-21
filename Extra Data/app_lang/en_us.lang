@@ -74,12 +74,9 @@ error.auth=Got error code from server while refreshing authentication: {0}
 # Exception messages threw by MCC
 exception.user_logout=User-initiated logout should be done by calling Disconnect()
 exception.unknown_direction=Unknown direction
-exception.palette.block=Please update block types handling for this Minecraft version. See Material.cs
-exception.palette.entity=Please update entity types handling for this Minecraft version. See EntityType.cs
-exception.palette.item=Please update item types handling for this Minecraft version. See ItemType.cs
 exception.palette.packet=Please update packet type palette for this Minecraft version. See PacketTypePalette.cs
 exception.packet_process=Failed to process incoming packet of type {0}. (PacketID: {1}, Protocol: {2}, LoginPhase: {3}, InnerException: {4}).
-exception.version_unsupport=The protocol version {0} is not supported.
+exception.version_unsupported=The protocol version {0} is not supported.
 
 [filemonitor]
 # FileMonitor

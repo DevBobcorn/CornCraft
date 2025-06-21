@@ -194,7 +194,7 @@ namespace CraftSharp
         #endregion
 
         #region Getters: Retrieve data for use in other methods
-#nullable enable
+        #nullable enable
 
         // Retrieve client connection info
         public abstract string GetServerHost();

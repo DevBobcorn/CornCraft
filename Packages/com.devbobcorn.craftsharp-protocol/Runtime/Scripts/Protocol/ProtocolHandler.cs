@@ -140,7 +140,7 @@ namespace CraftSharp.Protocol
         {
             if (IsProtocolSupported(protocolVersion))
                 return new ProtocolMinecraft(client, protocolVersion, handler, forgeInfo);
-            throw new NotSupportedException(Translations.Get("exception.version_unsupport", protocolVersion));
+            throw new NotSupportedException(Translations.Get("exception.version_unsupported", protocolVersion));
         }
 
         /// <summary>

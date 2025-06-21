@@ -74,12 +74,9 @@ error.auth=在刷新身份验证时接收到服务器错误：{0}
 # Exception messages threw by MCC
 exception.user_logout=用户发起的注销应该通过调用Disconnect()来完成
 exception.unknown_direction=未知方向
-exception.palette.block=请为此Minecraft版本更新方块类型处理。详细请参考 Material.cs
-exception.palette.entity=请为此Minecraft版本更新实体类型处理。详细请参考 EntityType.cs
-exception.palette.item=请为此Minecraft版本更新物品类型处理。详细请参考 ItemType.cs
 exception.palette.packet=请为此Minecraft版本更新数据包类型调色板。详细请参考 PacketTypePalette.cs
 exception.packet_process=无法处理传入的{0}类型的数据包。(数据包ID：{1}，协议：{2}，登陆阶段：{3}，内部异常：{4})。
-exception.version_unsupport=版本{0}的协议未被支持。
+exception.version_unsupported=版本{0}的协议未被支持。
 
 [filemonitor]
 # FileMonitor
