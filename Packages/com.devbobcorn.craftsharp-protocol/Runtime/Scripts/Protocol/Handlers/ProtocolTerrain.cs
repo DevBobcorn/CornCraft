@@ -565,7 +565,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <returns>Indices of chunk sections whose light data is included</returns>
         private int[] ReadChunkColumnLightData17(ref byte[] skyLight, ref byte[] blockLight, Queue<byte> cache)
         {
-            if (protocolVersion < ProtocolMinecraft.MC_1_20_Version)
+            if (protocolVersion < ProtocolMinecraft.MC_1_20_1_Version)
                 DataTypes.ReadNextBool(cache); // Trust edges
 
             // Sky Light Mask

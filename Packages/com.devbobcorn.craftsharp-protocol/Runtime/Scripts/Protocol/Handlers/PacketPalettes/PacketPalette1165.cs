@@ -2,7 +2,7 @@
 
 namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
-    public class PacketPalette1162 : PacketTypePalette
+    public class PacketPalette1165 : PacketTypePalette
     {
         private readonly Dictionary<int, PacketTypesIn> typeIn = new()
         {

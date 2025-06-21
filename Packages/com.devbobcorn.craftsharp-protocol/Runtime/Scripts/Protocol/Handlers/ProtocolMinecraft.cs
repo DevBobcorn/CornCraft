@@ -31,8 +31,6 @@ namespace CraftSharp.Protocol.Handlers
     /// </remarks>
     public class ProtocolMinecraft : IMinecraftCom
     {
-        public const int MC_1_16_2_Version = 751;
-        public const int MC_1_16_3_Version = 753;
         public const int MC_1_16_5_Version = 754;
         public const int MC_1_17_Version   = 755;
         public const int MC_1_17_1_Version = 756;
@@ -42,7 +40,7 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_19_2_Version = 760;
         public const int MC_1_19_3_Version = 761;
         public const int MC_1_19_4_Version = 762;
-        public const int MC_1_20_Version   = 763;
+        public const int MC_1_20_1_Version = 763;
         public const int MC_1_20_2_Version = 764;
         public const int MC_1_20_4_Version = 765;
         public const int MC_1_20_6_Version = 766;
@@ -671,7 +669,7 @@ namespace CraftSharp.Protocol.Handlers
                                 }
                             }
 
-                            if (protocolVersion >= MC_1_20_Version)
+                            if (protocolVersion >= MC_1_20_1_Version)
                                 DataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
                         }
                         else
@@ -1083,7 +1081,7 @@ namespace CraftSharp.Protocol.Handlers
                     DataTypes.SkipNextVarInt(packetData);
 
                     handler.OnPlayerKilled(
-                        protocolVersion >= MC_1_20_Version ? -1 : DataTypes.ReadNextInt(packetData),
+                        protocolVersion >= MC_1_20_1_Version ? -1 : DataTypes.ReadNextInt(packetData),
                         ChatParser.ParseText(dataTypes.ReadNextChat(packetData))
                     );
 
@@ -1202,7 +1200,7 @@ namespace CraftSharp.Protocol.Handlers
                             }
                         }
 
-                        if (protocolVersion >= MC_1_20_Version)
+                        if (protocolVersion >= MC_1_20_1_Version)
                             DataTypes.ReadNextVarInt(packetData); // Portal Cooldown - 1.20 and above
 
                         if (protocolVersion >= MC_1_20_2_Version)
@@ -1472,7 +1470,7 @@ namespace CraftSharp.Protocol.Handlers
                         var sectionY = (int)((chunkSection << 44) >> 44);
                         var sectionZ = (int)((chunkSection << 22) >> 42);
                             
-                        if(protocolVersion < MC_1_20_Version)
+                        if(protocolVersion < MC_1_20_1_Version)
                             DataTypes.ReadNextBool(packetData); // Useless boolean (Related to light update)
 
                         var blocksSize = DataTypes.ReadNextVarInt(packetData);
@@ -2368,7 +2366,7 @@ namespace CraftSharp.Protocol.Handlers
                         var signLocation = DataTypes.ReadNextBlockLoc(packetData);
                         var isFrontText = true;
 
-                        if (protocolVersion >= MC_1_20_Version)
+                        if (protocolVersion >= MC_1_20_1_Version)
                             isFrontText = DataTypes.ReadNextBool(packetData);
                     }
                     break;

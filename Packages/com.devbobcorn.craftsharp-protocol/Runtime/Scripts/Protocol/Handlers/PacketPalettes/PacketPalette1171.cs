@@ -2,7 +2,7 @@
 
 namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
-    public class PacketPalette118 : PacketTypePalette
+    public class PacketPalette1171 : PacketTypePalette
     {
         private readonly Dictionary<int, PacketTypesIn> typeIn = new()
         {
@@ -93,23 +93,22 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x54, PacketTypesIn.SetPassengers },
             { 0x55, PacketTypesIn.Teams },
             { 0x56, PacketTypesIn.UpdateScore },
-            { 0x57, PacketTypesIn.UpdateSimulationDistance },
-            { 0x58, PacketTypesIn.SetTitleSubTitle },
-            { 0x59, PacketTypesIn.TimeUpdate },
-            { 0x5A, PacketTypesIn.SetTitleText },
-            { 0x5B, PacketTypesIn.SetTitleTime },
-            { 0x5C, PacketTypesIn.EntitySoundEffect },
-            { 0x5D, PacketTypesIn.SoundEffect },
-            { 0x5E, PacketTypesIn.StopSound },
-            { 0x5F, PacketTypesIn.PlayerListHeaderAndFooter },
-            { 0x60, PacketTypesIn.NBTQueryResponse },
-            { 0x61, PacketTypesIn.CollectItem },
-            { 0x62, PacketTypesIn.EntityTeleport },
-            { 0x63, PacketTypesIn.Advancements },
-            { 0x64, PacketTypesIn.EntityProperties },
-            { 0x65, PacketTypesIn.EntityEffect },
-            { 0x66, PacketTypesIn.DeclareRecipes },
-            { 0x67, PacketTypesIn.Tags },
+            { 0x57, PacketTypesIn.SetTitleSubTitle },
+            { 0x58, PacketTypesIn.TimeUpdate },
+            { 0x59, PacketTypesIn.SetTitleText },
+            { 0x5A, PacketTypesIn.SetTitleTime },
+            { 0x5B, PacketTypesIn.EntitySoundEffect },
+            { 0x5C, PacketTypesIn.SoundEffect },
+            { 0x5D, PacketTypesIn.StopSound },
+            { 0x5E, PacketTypesIn.PlayerListHeaderAndFooter },
+            { 0x5F, PacketTypesIn.NBTQueryResponse },
+            { 0x60, PacketTypesIn.CollectItem },
+            { 0x61, PacketTypesIn.EntityTeleport },
+            { 0x62, PacketTypesIn.Advancements },
+            { 0x63, PacketTypesIn.EntityProperties },
+            { 0x64, PacketTypesIn.EntityEffect },
+            { 0x65, PacketTypesIn.DeclareRecipes },
+            { 0x66, PacketTypesIn.Tags },
         };
 
         private readonly Dictionary<int, PacketTypesOut> typeOut = new()

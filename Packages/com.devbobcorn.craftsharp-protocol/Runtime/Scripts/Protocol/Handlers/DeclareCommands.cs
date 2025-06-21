@@ -104,7 +104,7 @@ namespace CraftSharp.Protocol.Handlers
                             50 => protocolVersion == ProtocolMinecraft.MC_1_19_4_Version ?
                               new ParserForgeEnum(dataTypes, packetData) :
                               new ParserEmpty(dataTypes, packetData),   
-                            51 => (protocolVersion >= ProtocolMinecraft.MC_1_20_Version &&
+                            51 => (protocolVersion >= ProtocolMinecraft.MC_1_20_1_Version &&
                                    protocolVersion <= ProtocolMinecraft.MC_1_20_2_Version) ? // 1.20 - 1.20.2
                               new ParserForgeEnum(dataTypes, packetData) :
                               new ParserEmpty(dataTypes, packetData),
