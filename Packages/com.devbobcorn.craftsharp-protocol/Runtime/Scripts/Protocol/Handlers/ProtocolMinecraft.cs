@@ -719,6 +719,22 @@ namespace CraftSharp.Protocol.Handlers
                             handler.SetCanSendMessage(true);
                     }
                     break;
+                case PacketTypesIn.DeclareRecipes:
+                    if (protocolVersion >= MC_1_21_3_Version)
+                    {
+                        Debug.LogWarning("Not implemented for 1.21.2+ yet");
+                    }
+                    else // Up to 1.21.1
+                    {
+                        int recipeCount = DataTypes.ReadNextVarInt(packetData);
+                        Debug.Log($"Received {recipeCount} recipes from server");
+
+                        for (int i = 0; i < recipeCount; i++)
+                        {
+                            dataTypes.ReadRecipeData(packetData, ItemPalette.INSTANCE);
+                        }
+                    }
+                    break;
                 case PacketTypesIn.ChatMessage:
                     {
                         int messageType;

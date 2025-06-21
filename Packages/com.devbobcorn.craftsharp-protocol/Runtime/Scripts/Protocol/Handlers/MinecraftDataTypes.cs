@@ -554,16 +554,25 @@ namespace CraftSharp.Protocol.Handlers
         public RecipeExtraData ReadRecipeData(Queue<byte> cache, ItemPalette itemPalette)
         {
             BaseRecipeType recipeType;
+            ResourceLocation recipeId;
 
             if (protocolVersion < ProtocolMinecraft.MC_1_20_6_Version) // Prior to 1.20.5, sent as id
             {
                 var recipeTypeId = ResourceLocation.FromString(DataTypes.ReadNextString(cache));
                 recipeType = RecipeTypePalette.INSTANCE.GetById(recipeTypeId);
+                
+                recipeId = ResourceLocation.FromString(DataTypes.ReadNextString(cache));
+                
+                //Debug.Log($"Reading recipe {recipeId} of type {recipeTypeId}");
             }
             else // 1.20.5+, sent as num id
             {
+                recipeId = ResourceLocation.FromString(DataTypes.ReadNextString(cache));
+                
                 var recipeTypeNumId = DataTypes.ReadNextVarInt(cache);
                 recipeType = RecipeTypePalette.INSTANCE.GetByNumId(recipeTypeNumId);
+                
+                //Debug.Log($"Reading recipe {recipeId} of type {recipeTypeNumId}");
             }
 
             return recipeType.ExtraDataType switch
