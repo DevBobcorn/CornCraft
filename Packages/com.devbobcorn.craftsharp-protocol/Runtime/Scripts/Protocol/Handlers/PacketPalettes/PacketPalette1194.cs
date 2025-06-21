@@ -8,7 +8,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
         {
             { 0x00, PacketTypesIn.Bundle },                     // Added in 1.19.4
             { 0x01, PacketTypesIn.SpawnEntity },                // Changed in 1.19 (Wiki name: Spawn Entity) 
-            { 0x02, PacketTypesIn.SpawnExperienceOrb },         // (Wiki name: Spawn Exeprience Orb)
+            { 0x02, PacketTypesIn.SpawnExperienceOrb },         // (Wiki name: Spawn Experience Orb)
             { 0x03, PacketTypesIn.SpawnPlayer },                //
             { 0x04, PacketTypesIn.EntityAnimation },            // (Wiki name: Entity Animation (clientbound))
             { 0x05, PacketTypesIn.Statistics },                 // (Wiki name: Award Statistics)
@@ -68,7 +68,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x3B, PacketTypesIn.FacePlayer },                 // (Wiki name: Player Look At)
             { 0x3C, PacketTypesIn.PlayerPositionAndLook },      // (Wiki name: Player Position)
             { 0x3D, PacketTypesIn.UnlockRecipes },              // (Wiki name: Recipe)
-            { 0x3E, PacketTypesIn.DestroyEntities },            // (Wiki name: Remove Entites)
+            { 0x3E, PacketTypesIn.DestroyEntities },            // (Wiki name: Remove Entities)
             { 0x3F, PacketTypesIn.RemoveEntityEffect },         //
             { 0x40, PacketTypesIn.ResourcePackSend },           // (Wiki name: Resource Pack)
             { 0x41, PacketTypesIn.Respawn },                    // Changed in 1.19 (Heavy changes) 
@@ -123,7 +123,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
         {
             { 0x00, PacketTypesOut.TeleportConfirm },             // (Wiki name: Confirm Teleportation)
             { 0x01, PacketTypesOut.QueryBlockNBT },               // (Wiki name: Query Block Entity Tag)
-            { 0x02, PacketTypesOut.SetDifficulty },               // (Wiki name: Change Difficutly)
+            { 0x02, PacketTypesOut.SetDifficulty },               // (Wiki name: Change Difficulty)
             { 0x03, PacketTypesOut.MessageAcknowledgment },       // Added in 1.19.1
             { 0x04, PacketTypesOut.ChatCommand },                 // Added in 1.19
             { 0x05, PacketTypesOut.ChatMessage },                 // Changed in 1.19 (Completely changed) (Wiki name: Chat)

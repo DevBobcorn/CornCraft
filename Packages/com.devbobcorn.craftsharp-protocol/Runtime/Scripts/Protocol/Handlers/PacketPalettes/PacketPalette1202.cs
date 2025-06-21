@@ -8,7 +8,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
         {
             { 0x00, PacketTypesIn.Bundle },                     // Added in 1.19.4
             { 0x01, PacketTypesIn.SpawnEntity },                // Changed in 1.19 (Wiki name: Spawn Entity) 
-            { 0x02, PacketTypesIn.SpawnExperienceOrb },         // (Wiki name: Spawn Exeprience Orb)
+            { 0x02, PacketTypesIn.SpawnExperienceOrb },         // (Wiki name: Spawn Experience Orb)
             { 0x03, PacketTypesIn.EntityAnimation },            // (Wiki name: Entity Animation (clientbound))
             { 0x04, PacketTypesIn.Statistics },                 // (Wiki name: Award Statistics)
             { 0x05, PacketTypesIn.BlockChangedAck },            // Added 1.19 (Wiki name: Acknowledge Block Change)  
@@ -70,7 +70,7 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x3D, PacketTypesIn.FacePlayer },                 // (Wiki name: Player Look At)
             { 0x3E, PacketTypesIn.PlayerPositionAndLook },      // (Wiki name: Synchronize Player Position)
             { 0x3F, PacketTypesIn.UnlockRecipes },              // (Wiki name: Update Recipe Book)
-            { 0x40, PacketTypesIn.DestroyEntities },            // (Wiki name: Remove Entites)
+            { 0x40, PacketTypesIn.DestroyEntities },            // (Wiki name: Remove Entities)
             { 0x41, PacketTypesIn.RemoveEntityEffect },         //
             { 0x42, PacketTypesIn.ResourcePackSend },           // (Wiki name: Resource Pack)
             { 0x43, PacketTypesIn.Respawn },                    // Changed in 1.20.2 
