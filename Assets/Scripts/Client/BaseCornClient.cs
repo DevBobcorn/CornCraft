@@ -7,6 +7,7 @@ using CraftSharp.Protocol;
 using CraftSharp.Rendering;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using UnityEngine.Serialization;
 
 namespace CraftSharp
@@ -155,6 +156,8 @@ namespace CraftSharp
         public abstract int ExperienceLevel { get; }
         public abstract bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate);
 
+        public abstract List<RecipeExtraData> GetReceivedRecipes(ResourceLocation recipeTypeId);
+        
         public Vector3Int WorldOriginOffset { get; private set; } = Vector3Int.zero;
         public int RenderDistance { get; protected set; }
 

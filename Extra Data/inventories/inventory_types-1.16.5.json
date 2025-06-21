@@ -878,6 +878,18 @@
     },
     "minecraft:stonecutter": {
         "protocol_id": 23,
-        "prepend_slot_count": 2
+        "prepend_slot_count": 2,
+        "slots": {
+            "0": {
+                "type_id": "minecraft:stonecutter_base_item",
+                "pos_x": 0.5,
+                "pos_y": 1
+            },
+            "1": {
+                "type_id": "minecraft:output",
+                "pos_x": 7.5,
+                "pos_y": 1
+            }
+        }
     }
 }

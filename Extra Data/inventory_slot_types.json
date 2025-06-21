@@ -69,6 +69,9 @@
     "minecraft:smithing_additional_item": {
         "place_predicate": "id=minecraft:amethyst_shard|minecraft:copper_ingot|minecraft:diamond|minecraft:emerald|minecraft:gold_ingot|minecraft:iron_ingot|minecraft:lapis_lazuli|minecraft:quartz|minecraft:netherite_ingot|minecraft:redstone|minecraft:resin_brick"
     },
+    "minecraft:stonecutter_base_item": {
+        "place_predicate": "always"
+    },
     "minecraft:preview": {
         "interactable": false,
         "place_predicate": "never"

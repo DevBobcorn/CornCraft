@@ -8,6 +8,7 @@ using CraftSharp.Event;
 using CraftSharp.Protocol;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Rendering;
 using CraftSharp.Protocol.Message;
 
@@ -31,6 +32,11 @@ namespace CraftSharp
         private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private readonly Dictionary<int, InventoryData> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
+        
+        public override List<RecipeExtraData> GetReceivedRecipes(ResourceLocation recipeTypeId)
+        {
+            return new List<RecipeExtraData>(0);
+        }
 
         public override int ExperienceLevel => 42;
         public override bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate) => false;

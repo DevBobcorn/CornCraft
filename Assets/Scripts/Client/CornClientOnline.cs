@@ -16,6 +16,7 @@ using CraftSharp.Protocol.Message;
 using CraftSharp.Proxy;
 using CraftSharp.UI;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Rendering;
 using CraftSharp.Protocol.Session;
 
@@ -83,6 +84,12 @@ namespace CraftSharp
         public override int ExperienceLevel => experienceLevel;
         private int activeInventoryId = -1;
         private readonly Dictionary<int, InventoryData> inventories = new();
+        private readonly Dictionary<ResourceLocation, List<RecipeExtraData>> receivedRecipes = new();
+
+        public override List<RecipeExtraData> GetReceivedRecipes(ResourceLocation recipeTypeId)
+        {
+            return receivedRecipes.TryGetValue(recipeTypeId, out var list) ? list : new List<RecipeExtraData>(0);
+        }
         
         private ItemStack dragStartCursorItemClone; // Keep a copy of cursor item before drag start
         private readonly Dictionary<int, int> draggedSlots = new(); // And keep track of the initial count of each dragged slot
@@ -1688,6 +1695,23 @@ namespace CraftSharp
                 handler.SendPlayerSession(playerKeyPair);
 
             ClearInventories();
+        }
+
+        /// <summary>
+        /// Called when the protocol handler receives a recipe declaration
+        /// </summary>
+        /// <param name="recipeType">Recipe type</param>
+        /// <param name="recipeData">Recipe data</param>
+        public void OnDeclareRecipe(BaseRecipeType recipeType, RecipeExtraData recipeData)
+        {
+            if (receivedRecipes.TryGetValue(recipeType.TypeId, out var recipeDataList))
+            {
+                recipeDataList.Add(recipeData);
+            }
+            else
+            {
+                receivedRecipes.Add(recipeType.TypeId, new List<RecipeExtraData> { recipeData });
+            }
         }
 
         /// <summary>

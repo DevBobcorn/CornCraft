@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Protocol.Handlers;
 
 namespace CraftSharp.Protocol
@@ -75,6 +76,13 @@ namespace CraftSharp.Protocol
         /// Called when a server was successfully joined
         /// </summary>
         void OnGameJoined(bool isOnlineMode);
+
+        /// <summary>
+        /// Called when the protocol handler receives a recipe declaration
+        /// </summary>
+        /// <param name="recipeType">Recipe type</param>
+        /// <param name="recipeData">Recipe data</param>
+        public void OnDeclareRecipe(BaseRecipeType recipeType, RecipeExtraData recipeData);
 
         /// <summary>
         /// Called when the protocol handler receives a chat message

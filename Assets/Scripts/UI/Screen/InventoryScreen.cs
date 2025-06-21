@@ -10,6 +10,7 @@ using TMPro;
 
 using CraftSharp.Event;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.UI
@@ -793,6 +794,34 @@ namespace CraftSharp.UI
                     UpdateEnchantmentOptions();
                     // Update property-dependent fragments
                     UpdatePredicateDependents();
+                }
+            }
+
+            if (activeInventoryData.Type.TypeId == InventoryType.STONECUTTER_ID)
+            {
+                if (slotId == 0) // Stonecutter base item slot
+                {
+                    if (itemStack is null)
+                    {
+                        // TODO: Clear list
+                        return;
+                    }
+                    
+                    var game = CornApp.CurrentClient;
+                    if (!game) return;
+
+                    var recipes = game.GetReceivedRecipes(RecipeTypePalette.STONECUTTING)
+                        .Select(r => (StonecuttingExtraData) r)
+                        .Where(r => r.Ingredient.Any(x => x!.ItemType == itemStack.ItemType))
+                        // Sort by translation key of result items
+                        .OrderBy(x => x.Result.ItemType.ItemId.GetTranslationKey("block"));
+
+                    int index = 0;
+                    foreach (var recipe in recipes)
+                    {
+                        Debug.Log($"Recipe [{index}]: {recipe.Result}");
+                        index++;
+                    }
                 }
             }
         }

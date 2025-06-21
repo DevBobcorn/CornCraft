@@ -551,7 +551,7 @@ namespace CraftSharp.Protocol.Handlers
         /// <summary>
         /// Read recipe with optional extra data
         /// </summary>
-        public RecipeExtraData ReadRecipeData(Queue<byte> cache, ItemPalette itemPalette)
+        public (BaseRecipeType, ResourceLocation, RecipeExtraData) ReadRecipeData(Queue<byte> cache, ItemPalette itemPalette)
         {
             BaseRecipeType recipeType;
             ResourceLocation recipeId;
@@ -575,7 +575,7 @@ namespace CraftSharp.Protocol.Handlers
                 //Debug.Log($"Reading recipe {recipeId} of type {recipeTypeNumId}");
             }
 
-            return recipeType.ExtraDataType switch
+            RecipeExtraData recipeData = recipeType.ExtraDataType switch
             {
                 RecipeExtraDataType.CraftingShaped        => ReadCraftingShapedRecipe(cache, itemPalette),
                 RecipeExtraDataType.CraftingShapeless     => ReadCraftingShapelessRecipe(cache, itemPalette),
@@ -586,6 +586,8 @@ namespace CraftSharp.Protocol.Handlers
                 RecipeExtraDataType.SmithingTrim          => ReadSmithingTrimRecipe(cache, itemPalette),
                 _                                         => ReadCraftingSpecialRecipe(cache)
             };
+
+            return (recipeType, recipeId, recipeData);
         }
 
         private ItemStack?[] ReadIngredient(Queue<byte> cache, ItemPalette itemPalette)

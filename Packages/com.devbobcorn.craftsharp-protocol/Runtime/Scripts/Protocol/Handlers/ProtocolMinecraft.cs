@@ -12,6 +12,7 @@ using UnityEngine;
 using CraftSharp.Crypto;
 using CraftSharp.Proxy;
 using CraftSharp.Inventory;
+using CraftSharp.Inventory.Recipe;
 using CraftSharp.Protocol.Handlers.PacketPalettes;
 using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
@@ -722,7 +723,7 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.DeclareRecipes:
                     if (protocolVersion >= MC_1_21_3_Version)
                     {
-                        Debug.LogWarning("Not implemented for 1.21.2+ yet");
+                        Debug.LogWarning("Recipe parsing not implemented for 1.21.2+ yet");
                     }
                     else // Up to 1.21.1
                     {
@@ -731,7 +732,9 @@ namespace CraftSharp.Protocol.Handlers
 
                         for (int i = 0; i < recipeCount; i++)
                         {
-                            dataTypes.ReadRecipeData(packetData, ItemPalette.INSTANCE);
+                            var (recipeType, _, recipeData) = dataTypes.ReadRecipeData(packetData, ItemPalette.INSTANCE);
+                            
+                            handler.OnDeclareRecipe(recipeType, recipeData);
                         }
                     }
                     break;
