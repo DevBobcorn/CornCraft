@@ -1,0 +1,98 @@
+{
+  "minecraft:crafting_shaped": {
+    "protocol_id": 0,
+    "extra_data": "crafting_shaped"
+  },
+  "minecraft:crafting_shapeless": {
+    "protocol_id": 1,
+    "extra_data": "crafting_shapeless"
+  },
+  "minecraft:crafting_special_armordye": {
+    "protocol_id": 2,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_bookcloning": {
+    "protocol_id": 3,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_mapcloning": {
+    "protocol_id": 4,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_mapextending": {
+    "protocol_id": 5,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_firework_rocket": {
+    "protocol_id": 6,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_firework_star": {
+    "protocol_id": 7,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_firework_star_fade": {
+    "protocol_id": 8,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_tippedarrow": {
+    "protocol_id": 9,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_bannerduplicate": {
+    "protocol_id": 10,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_shielddecoration": {
+    "protocol_id": 11,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_shulkerboxcoloring": {
+    "protocol_id": 12,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_suspiciousstew": {
+    "protocol_id": 13,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:crafting_special_repairitem": {
+    "protocol_id": 14,
+    "extra_data": "crafting_special"
+  },
+  "minecraft:smelting": {
+    "protocol_id": 15,
+    "extra_data": "cooking"
+  },
+  "minecraft:blasting": {
+    "protocol_id": 16,
+    "extra_data": "cooking"
+  },
+  "minecraft:smoking": {
+    "protocol_id": 17,
+    "extra_data": "cooking"
+  },
+  "minecraft:campfire_cooking": {
+    "protocol_id": 18,
+    "extra_data": "cooking"
+  },
+  "minecraft:stonecutting": {
+    "protocol_id": 19,
+    "extra_data": "stonecutting"
+  },
+  "minecraft:smithing": {
+    "protocol_id": 20,
+    "extra_data": "smithing"
+  },
+  "minecraft:smithing_transform": {
+    "protocol_id": 21,
+    "extra_data": "smithing_transform"
+  },
+  "minecraft:smithing_trim": {
+    "protocol_id": 22,
+    "extra_data": "smithing_trim"
+  },
+  "minecraft:crafting_decorated_pot": {
+    "protocol_id": 23,
+    "extra_data": "crafting_special"
+  }
+}
