@@ -9,11 +9,21 @@
         /// Left click with mouse on a slot: grab or drop a whole item stack
         /// </summary>
         LeftClick,
+        
+        /// <summary>
+        /// Left click with mouse outside inventory: drop a whole item stack outside
+        /// </summary>
+        LeftClickDropOutside,
 
         /// <summary>
         /// Right click with mouse on a slot: grab half a stack or drop a single item
         /// </summary>
         RightClick,
+        
+        /// <summary>
+        /// Right click with mouse outside inventory: drop a single item outside
+        /// </summary>
+        RightClickDropOutside,
 
         /// <summary>
         /// Middle click with mouse on a slot: grab a full stack from creative inventory

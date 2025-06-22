@@ -3593,8 +3593,19 @@ namespace CraftSharp.Protocol.Handlers
                     case InventoryActionType.LeftClick:
                         button = 0;
                         break;
+                    case InventoryActionType.LeftClickDropOutside:
+                        button = 0;
+                        item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
+                        break;
                     case InventoryActionType.RightClick:
                         button = 1;
+                        break;
+                    case InventoryActionType.RightClickDropOutside:
+                        button = 1;
+                        if (item is null || item.Count <= 0)
+                            item = new ItemStack(Item.NULL, 0);
+                        slotId = -999;
                         break;
                     case InventoryActionType.MiddleClick:
                         button = 2;

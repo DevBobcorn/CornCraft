@@ -1198,24 +1198,24 @@ namespace CraftSharp
                         // TODO: Implement
                         break;
                     case InventoryActionType.DropItem:
-                        if (inventory.Items.ContainsKey(slot))
+                        if (inventory.Items.TryGetValue(slot, out var stack2Drop1))
                         {
-                            inventory.Items[slot].Count--;
-                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, inventory.Items[slot]));
+                            stack2Drop1.Count--;
+                            if (stack2Drop1.Count <= 0)
+                            {
+                                inventory.Items.Remove(slot);
+                                changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
+                            }
+                            else
+                            {
+                                changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, stack2Drop1));
+                            }
                         }
-
-                        if (inventory.Items[slot].Count <= 0)
-                        {
-                            inventory.Items.Remove(slot);
-                            changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
-                        }
-
                         break;
                     case InventoryActionType.DropItemStack:
                         inventory.Items.Remove(slot);
                         changedSlots.Add(new Tuple<short, ItemStack?>((short)slot, null));
                         break;
-
                     case InventoryActionType.StartDragLeft: // Distribute evenly
                     case InventoryActionType.StartDragRight: // Drop 1 in each
                         draggedSlots.Clear();
@@ -1305,6 +1305,25 @@ namespace CraftSharp
                         if (ProtocolSettings.DebugMode)
                             Debug.Log($"[{actionType}] End");
                         
+                        break;
+                    case InventoryActionType.LeftClickDropOutside:
+                        inventory.Items.Remove(-1);
+                        changedSlots.Add(new Tuple<short, ItemStack?>(-1, null));
+                        break;
+                    case InventoryActionType.RightClickDropOutside:
+                        if (inventory.Items.TryGetValue(-1, out var stack2Drop2))
+                        {
+                            stack2Drop2.Count--;
+                            if (stack2Drop2.Count <= 0)
+                            {
+                                inventory.Items.Remove(-1);
+                                changedSlots.Add(new Tuple<short, ItemStack?>(-1, null));
+                            }
+                            else
+                            {
+                                changedSlots.Add(new Tuple<short, ItemStack?>(-1, stack2Drop2));
+                            }
+                        }
                         break;
                     case InventoryActionType.MiddleClick:
                     case InventoryActionType.StartDragMiddle:

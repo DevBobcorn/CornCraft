@@ -746,6 +746,7 @@ GameObject:
   - component: {fileID: 5417065915789025213}
   - component: {fileID: 6360942881174069391}
   - component: {fileID: 2733263639828520915}
+  - component: {fileID: 3360354018744402747}
   m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
@@ -810,6 +811,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3360354018744402747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5437550358028689972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f5880f7c19e46bf8de4e4367b3f002f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5532167446990042701
 GameObject:
   m_ObjectHideFlags: 0
@@ -1139,6 +1152,7 @@ MonoBehaviour:
   inventoryButtonPrefab: {fileID: 5928234479986686403, guid: 9cf94b8ea09d3e749b1714750b9ce96a, type: 3}
   inventorySpritePrefab: {fileID: 1333662668710857103, guid: b82bd2acb025a7f489ee66de14323f4f, type: 3}
   inventoryScrollViewPrefab: {fileID: 7225990310070280167, guid: 517cb881fe6fcf4478c150bf15532dfe, type: 3}
+  inventoryBackground: {fileID: 3360354018744402747}
   leftScrollViewObject: {fileID: 5824794012251845441}
   listPanel: {fileID: 6488089169064416592}
   rightScrollViewObject: {fileID: 5532167446990042701}
@@ -3442,6 +3456,18 @@ PrefabInstance:
       value: Cursor Item Slot
       objectReference: {fileID: 0}
     - target: {fileID: 2725278365976862297, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2725278365976862297, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2725278365976862297, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2725278365976862297, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
@@ -3485,9 +3511,7 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 2725278365976862297, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
-    - {fileID: 4882996761713949506, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 116644182159741648, guid: 695e1c33d314efb4c8050a0f2f408535, type: 3}

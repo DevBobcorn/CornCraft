@@ -35,6 +35,7 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject inventoryButtonPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
         [SerializeField] private GameObject inventoryScrollViewPrefab;
+        [SerializeField] private InventoryBackground inventoryBackground;
         [SerializeField] private GameObject leftScrollViewObject;
         [SerializeField] private RectTransform listPanel;
         [SerializeField] private GameObject rightScrollViewObject;
@@ -1144,6 +1145,54 @@ namespace CraftSharp.UI
             // Initialize controls and add listeners
             closeButton.onClick.AddListener(CloseInventory);
             
+            inventoryBackground.SetEnterHandler(() =>
+            {
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+                
+                var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
+                if (cursor is null) return;
+                
+                if (cursorRect && cursorRect.TryGetComponent<Image>(out var image))
+                {
+                    image.enabled = true; // Display cursor frame
+                }
+            });
+            
+            inventoryBackground.SetExitHandler(() =>
+            {
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+                
+                if (cursorRect && cursorRect.TryGetComponent<Image>(out var image))
+                {
+                    image.enabled = false; // Hide cursor frame
+                }
+            });
+            
+            inventoryBackground.SetClickHandler(button =>
+            {
+                if (button == PointerEventData.InputButton.Middle) return;
+                
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+                
+                var cursor = game.GetInventory(0)?.Items.GetValueOrDefault(-1);
+                if (cursor is null) return;
+
+                try
+                {
+                    game.DoInventoryAction(activeInventoryId, -1,
+                        button == PointerEventData.InputButton.Left ?
+                            InventoryActionType.LeftClickDropOutside : InventoryActionType.RightClickDropOutside);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    throw;
+                }
+            });
+            
             mobEffectUpdateCallback = e =>
             {
                 var effectId = e.Effect.EffectId;
@@ -1222,6 +1271,14 @@ namespace CraftSharp.UI
                         
                             // Handle change with custom logic
                             HandleSlotChange(e.SlotId, e.ItemStack);
+
+                            if (e.SlotId == -1) // Update cursor slot
+                            {
+                                if ((e.ItemStack is null || e.ItemStack.Count <= 0) && cursorRect && cursorRect.TryGetComponent<Image>(out var image))
+                                {
+                                    image.enabled = false; // Hide cursor frame
+                                }
+                            }
                         }
                     }
                     else
@@ -1234,6 +1291,11 @@ namespace CraftSharp.UI
                     if (e.SlotId == -1) // Update cursor slot
                     {
                         currentSlots[-1].UpdateItemStack(e.ItemStack);
+
+                        if ((e.ItemStack is null || e.ItemStack.Count <= 0) && cursorRect && cursorRect.TryGetComponent<Image>(out var image))
+                        {
+                            image.enabled = false; // Hide cursor frame
+                        }
                     }
                     else
                     {
