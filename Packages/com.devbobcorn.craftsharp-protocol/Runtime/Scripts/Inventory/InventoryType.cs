@@ -67,61 +67,64 @@ namespace CraftSharp.Inventory
         public Dictionary<string, int> PropertySlots = new();
 
         public record InventoryLayoutInfo(
-            List<InventorySpriteInfo> SpriteInfo,
-            Dictionary<int, InventorySlotInfo> SlotInfo,
-            Dictionary<int, InventoryInputInfo> InputInfo,
-            List<InventoryLabelInfo> LabelInfo,
-            Dictionary<int, InventoryButtonInfo> ButtonInfo) : InventoryFragmentInfo
+            List<InventorySpriteInfo>? SpriteInfo,
+            Dictionary<int, InventorySlotInfo>? SlotInfo,
+            Dictionary<int, InventoryInputInfo>? InputInfo,
+            List<InventoryLabelInfo>? LabelInfo,
+            Dictionary<int, InventoryButtonInfo>? ButtonInfo,
+            Dictionary<int, InventoryScrollViewInfo>? ScrollViewInfo = null) : InventoryFragmentInfo
         {
-            public List<InventorySpriteInfo> SpriteInfo { get; } = SpriteInfo;
-            public Dictionary<int, InventorySlotInfo> SlotInfo { get; } = SlotInfo;
-            public Dictionary<int, InventoryInputInfo> InputInfo { get; } = InputInfo;
-            public List<InventoryLabelInfo> LabelInfo { get; } = LabelInfo;
-            public Dictionary<int, InventoryButtonInfo> ButtonInfo { get; } = ButtonInfo;
+            public List<InventorySpriteInfo>? SpriteInfo { get; } = SpriteInfo;
+            public Dictionary<int, InventorySlotInfo>? SlotInfo { get; } = SlotInfo;
+            public Dictionary<int, InventoryInputInfo>? InputInfo { get; } = InputInfo;
+            public List<InventoryLabelInfo>? LabelInfo { get; } = LabelInfo;
+            public Dictionary<int, InventoryButtonInfo>? ButtonInfo { get; } = ButtonInfo;
+            public Dictionary<int, InventoryScrollViewInfo>? ScrollViewInfo { get; } = ScrollViewInfo;
 
             public static InventoryLayoutInfo FromJson(Json.JSONData data)
             {
-                var slotInfo = new Dictionary<int, InventorySlotInfo>();
-                var inputInfo = new Dictionary<int, InventoryInputInfo>();
-                var labelInfo = new List<InventoryLabelInfo>();
-                var buttonInfo = new Dictionary<int, InventoryButtonInfo>();
-                var spriteInfo = new List<InventorySpriteInfo>();
-
-                if (data.Properties.TryGetValue("slots", out var val))
+                List<InventorySpriteInfo>? spriteInfo = null;
+                Dictionary<int, InventorySlotInfo>? slotInfo = null;
+                Dictionary<int, InventoryInputInfo>? inputInfo = null;
+                List<InventoryLabelInfo>? labelInfo = null;
+                Dictionary<int, InventoryButtonInfo>? buttonInfo = null;
+                Dictionary<int, InventoryScrollViewInfo>? scrollViewInfo = null;
+                
+                if (data.Properties.TryGetValue("sprites", out var val))
                 {
-                    foreach (var (key, propVal) in val.Properties)
-                    {
-                        slotInfo[int.Parse(key)] = InventorySlotInfo.FromJson(propVal);
-                    }
+                    spriteInfo = val.DataArray.Select(InventorySpriteInfo.FromJson).ToList();
+                }
+
+                if (data.Properties.TryGetValue("slots", out val))
+                {
+                    slotInfo = val.Properties.ToDictionary(x => int.Parse(x.Key),
+                        x => InventorySlotInfo.FromJson(x.Value));
                 }
 
                 if (data.Properties.TryGetValue("inputs", out val))
                 {
-                    foreach (var (key, propVal) in val.Properties)
-                    {
-                        inputInfo[int.Parse(key)] = InventoryInputInfo.FromJson(propVal);
-                    }
+                    inputInfo = val.Properties.ToDictionary(x => int.Parse(x.Key),
+                        x => InventoryInputInfo.FromJson(x.Value));
                 }
 
                 if (data.Properties.TryGetValue("labels", out val))
                 {
-                    labelInfo.AddRange(val.DataArray.Select(InventoryLabelInfo.FromJson));
+                    labelInfo = val.DataArray.Select(InventoryLabelInfo.FromJson).ToList();
                 }
 
                 if (data.Properties.TryGetValue("buttons", out val))
                 {
-                    foreach (var (key, propVal) in val.Properties)
-                    {
-                        buttonInfo[int.Parse(key)] = InventoryButtonInfo.FromJson(propVal);
-                    }
+                    buttonInfo = val.Properties.ToDictionary(x => int.Parse(x.Key),
+                        x => InventoryButtonInfo.FromJson(x.Value));
                 }
                 
-                if (data.Properties.TryGetValue("sprites", out val))
+                if (data.Properties.TryGetValue("scroll_views", out val))
                 {
-                    spriteInfo.AddRange(val.DataArray.Select(InventorySpriteInfo.FromJson));
+                    scrollViewInfo = val.Properties.ToDictionary(x => int.Parse(x.Key),
+                        x => InventoryScrollViewInfo.FromJson(x.Value));
                 }
 
-                var layoutInfo = new InventoryLayoutInfo(spriteInfo, slotInfo, inputInfo, labelInfo, buttonInfo);
+                var layoutInfo = new InventoryLayoutInfo(spriteInfo, slotInfo, inputInfo, labelInfo, buttonInfo, scrollViewInfo);
                 layoutInfo.ReadBaseInfo(data);
 
                 return layoutInfo;
@@ -348,6 +351,32 @@ namespace CraftSharp.Inventory
             }
         }
 
+        public record InventoryScrollViewInfo(float PosX, float PosY, float Width,
+            float Height) : InventoryFragmentInfo
+        {
+            public float PosX { get; } = PosX;
+            public float PosY { get; } = PosY;
+            public float Width { get; } = Width;
+            public float Height { get; } = Height;
+
+            public static InventoryScrollViewInfo FromJson(Json.JSONData data)
+            {
+                var x = data.Properties.TryGetValue("pos_x", out var val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var y = data.Properties.TryGetValue("pos_y", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
+                var w = data.Properties.TryGetValue("width", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+                var h = data.Properties.TryGetValue("height", out val) ?
+                    float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 1;
+                
+                var scrollViewInfo = new InventoryScrollViewInfo(x, y, w, h);
+                scrollViewInfo.ReadBaseInfo(data);
+
+                return scrollViewInfo;
+            }
+        }
+        
         public InventorySlotInfo GetWorkPanelSlotInfo(int slot)
         {
             return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info :

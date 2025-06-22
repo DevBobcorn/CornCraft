@@ -52,7 +52,7 @@ namespace CraftSharp
 
                         [45] = new(4, 0, InventorySlotType.SLOT_TYPE_OFFHAND_ITEM_ID, null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
-                    }, new(), new(), new()
+                    }, null, null, null
                 ))
             {
                 WorkPanelHeight = 4
@@ -61,13 +61,11 @@ namespace CraftSharp
             HORSE_REGULAR = new(InventoryType.HORSE_ID,
                 2, 0, 0, true, true, 0,
                 new InventoryType.InventoryLayoutInfo(
-                    new(),
-                    new()
+                    null, new()
                     {
                         [0] = new(0, 2, InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID, null, null),
                         [1] = new(0, 2, InventorySlotType.SLOT_TYPE_SADDLE_ID, null, null)
-                    },
-                    new(), new(), new()
+                    }, null, null, null
                 ))
             {
                 MainPosX = 4,
@@ -77,13 +75,11 @@ namespace CraftSharp
             HORSE_CHESTED = new(InventoryType.HORSE_ID,
                 2, 5, 3, true, true, 0,
                 new InventoryType.InventoryLayoutInfo(
-                    new(),
-                    new()
+                    null, new()
                     {
                         [0] = new(0, 2, InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID, null, null),
                         [1] = new(0, 2, InventorySlotType.SLOT_TYPE_SADDLE_ID, null, null)
-                    },
-                    new(), new(), new()
+                    }, null, null, null
                 ))
             {
                 MainPosX = 4,

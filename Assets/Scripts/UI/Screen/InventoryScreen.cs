@@ -145,12 +145,6 @@ namespace CraftSharp.UI
             
             // Populate work panel controls, except slots
             CreateLayout(workPanel, inventoryType.WorkPanelLayout, false);
-            
-            // Create a scroll view for Stonecutter or Loom TODO: Also read from layout info
-            if (inventoryType.TypeId == InventoryType.STONECUTTER_ID || inventoryType.TypeId == InventoryType.LOOM_ID)
-            {
-                CreateScrollView(workPanel, 0, 2, 0, 5, 3);
-            }
 
             // Populate work panel slots
             for (int i = 0; i < inventoryType.PrependSlotCount; i++)
@@ -417,7 +411,6 @@ namespace CraftSharp.UI
                         game.CheckAddDragged(target, slotType.PlacePredicate)) // Add this slot
                     {
                         currentSlots[slotId].Dragged = true;
-                        Debug.Log($"Adding {slotId}, Dragged slots: {string.Join(", ", draggedSlots)}");
                         draggedSlots.Add(slotId);
                         var action = mouseButton switch
                         {
@@ -437,43 +430,55 @@ namespace CraftSharp.UI
         private void CreateLayout(RectTransform parent, InventoryType.InventoryLayoutInfo layoutInfo, bool createSlots)
         {
             // Populate layout sprites
-            foreach (var spriteInfo in layoutInfo.SpriteInfo)
-            {
-                var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
-                var sprite = CreateSprite(parent, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
-                    spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty, spriteInfo.FlipIdxProperty);
-                RegisterPropertyDependent(spriteInfo, sprite);
-            }
+            if (layoutInfo.SpriteInfo is not null)
+                foreach (var spriteInfo in layoutInfo.SpriteInfo)
+                {
+                    var spriteType = SpriteTypePalette.INSTANCE.GetById(spriteInfo.TypeId);
+                    var sprite = CreateSprite(parent, spriteInfo.PosX, spriteInfo.PosY, spriteInfo.Width, spriteInfo.Height,
+                        spriteType, spriteInfo.CurFillProperty, spriteInfo.MaxFillProperty, spriteInfo.FlipIdxProperty);
+                    RegisterPropertyDependent(spriteInfo, sprite);
+                }
 
             // Populate layout labels
-            foreach (var labelInfo in layoutInfo.LabelInfo)
-            {
-                var label = CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width, labelInfo.Height,
-                    labelInfo.Alignment, labelInfo.TextTranslationKey, labelInfo.ContentProperty);
-                RegisterPropertyDependent(labelInfo, label);
-            }
+            if (layoutInfo.LabelInfo is not null)
+                foreach (var labelInfo in layoutInfo.LabelInfo)
+                {
+                    var label = CreateLabel(parent, labelInfo.PosX, labelInfo.PosY, labelInfo.Width, labelInfo.Height,
+                        labelInfo.Alignment, labelInfo.TextTranslationKey, labelInfo.ContentProperty);
+                    RegisterPropertyDependent(labelInfo, label);
+                }
 
             // Populate layout inputs
-            foreach (var (inputId, inputInfo) in layoutInfo.InputInfo)
-            {
-                var input = CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
-                    inputInfo.Width, inputInfo.PlaceholderTranslationKey, $"Input [{inputId}]");
-                RegisterPropertyDependent(inputInfo, input);
-                input.SetHintTranslationFromInfo(inputInfo);
-            }
+            if (layoutInfo.InputInfo is not null)
+                foreach (var (inputId, inputInfo) in layoutInfo.InputInfo)
+                {
+                    var input = CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
+                        inputInfo.Width, inputInfo.PlaceholderTranslationKey, $"Input [{inputId}]");
+                    RegisterPropertyDependent(inputInfo, input);
+                    input.SetHintTranslationFromInfo(inputInfo);
+                }
 
             // Populate layout buttons
-            foreach (var (buttonId, buttonInfo) in layoutInfo.ButtonInfo)
-            {
-                var button = CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
-                    buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo, $"Button [{buttonId}]");
-                RegisterPropertyDependent(buttonInfo, button);
-                button.SetHintTranslationFromInfo(buttonInfo);
-            }
+            if (layoutInfo.ButtonInfo is not null)
+                foreach (var (buttonId, buttonInfo) in layoutInfo.ButtonInfo)
+                {
+                    var button = CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
+                        buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo, $"Button [{buttonId}]");
+                    RegisterPropertyDependent(buttonInfo, button);
+                    button.SetHintTranslationFromInfo(buttonInfo);
+                }
+            
+            // Populate layout scroll views
+            if (layoutInfo.ScrollViewInfo is not null)
+                foreach (var (scrollViewId, scrollViewInfo) in layoutInfo.ScrollViewInfo)
+                {
+                    var scrollView = CreateScrollView(parent, scrollViewId, scrollViewInfo.PosX, scrollViewInfo.PosY,
+                        scrollViewInfo.Width, scrollViewInfo.Height, $"Scroll View [{scrollViewId}]");
+                    RegisterPropertyDependent(scrollViewInfo, scrollView);
+                }
 
-            if (createSlots)
-            {
-                // Populate layout slots
+            // Populate layout slots
+            if (createSlots && layoutInfo.SlotInfo is not null)
                 foreach (var (slotId, slotInfo) in layoutInfo.SlotInfo)
                 {
                     var slot = CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.TypeId,
@@ -481,7 +486,6 @@ namespace CraftSharp.UI
                     RegisterPropertyDependent(slotInfo, slot);
                     slot.SetHintTranslationFromInfo(slotInfo);
                 }
-            }
         }
 
         private TMP_Text CreateLabel(RectTransform parent, float x, float y, float w, float h, InventoryType.LabelAlignment alignment, string translationKey, string contentProperty)
@@ -653,11 +657,13 @@ namespace CraftSharp.UI
             }
         }
 
-        private InventoryScrollView CreateScrollView(RectTransform parent, int scrollViewId, float x, float y, float w, float h)
+        private InventoryScrollView CreateScrollView(RectTransform parent, int scrollViewId, float x, float y, float w, float h, string scrollViewName)
         {
             var scrollViewObj = Instantiate(inventoryScrollViewPrefab, parent);
             var scrollView = scrollViewObj.GetComponent<InventoryScrollView>();
             var rectTransform = scrollViewObj.GetComponent<RectTransform>();
+
+            scrollViewObj.name = scrollViewName;
             
             rectTransform.anchoredPosition = new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
