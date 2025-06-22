@@ -44,7 +44,7 @@ namespace CraftSharp.UI
         #nullable enable
 
         // Use null for empty items
-        private ItemStack? itemStack = null;
+        private ItemStack? currentItemStack = null;
         private bool hasVisibleItem = false;
 
         private bool hovered = false;
@@ -99,6 +99,7 @@ namespace CraftSharp.UI
 
         public void SetSlotBorderVisibility(bool visible)
         {
+            slotImage.raycastTarget = visible;
             slotImage.color = visible ? Color.white : LOW_OPACITY;
         }
         
@@ -350,13 +351,38 @@ namespace CraftSharp.UI
             }
 
             // Update item cursor text
-            cursorText = GetItemDisplayText(itemStack);
+            cursorText = GetItemDisplayText(currentItemStack);
         }
 
-        public void UpdateItemStack(ItemStack? newItemStack)
+        /// <summary>
+        /// Update slot item display, and returns if item is actually changed
+        /// </summary>
+        public bool UpdateItemStack(ItemStack? newItemStack)
         {
-            itemStack = newItemStack;
-            var newItemType = newItemStack?.ItemType ?? Item.NULL;
+            // Update item count text separately
+            var oldItemStackCount = currentItemStack?.Count ?? 0;
+            var newItemStackCount = newItemStack?.Count ?? 0;
+            itemText.text = newItemStackCount > 1 ? newItemStackCount.ToString() : string.Empty;
+            
+            // Check whether item data is updated, count change is NOT considered as data change
+            bool itemDataUnchanged;
+            if (currentItemStack is null)
+            {
+                itemDataUnchanged = newItemStack is null;
+            }
+            else // Current item stack is not null
+            {
+                itemDataUnchanged = newItemStack is not null && InventoryData.CheckStackable(currentItemStack, newItemStack);
+            }
+            
+            //Debug.Log($"{gameObject.name} Previous: {currentItemStack}, New: {newItemStack}, Data changed: {!itemDataUnchanged}");
+            currentItemStack = newItemStack;
+
+            // If no item data is changed, there's no need to update item mesh, item damage or display text
+            if (itemDataUnchanged)
+            {
+                return newItemStackCount != oldItemStackCount;
+            }
             
             // Update item mesh
             UpdateItemMesh();
@@ -380,6 +406,8 @@ namespace CraftSharp.UI
             }
             
             cursorTextDirty = true;
+            
+            return true;
         }
 
         #nullable disable
@@ -469,7 +497,7 @@ namespace CraftSharp.UI
 
         private void UpdateItemMesh()
         {
-            var result = ItemMeshBuilder.BuildItem(itemStack, true);
+            var result = ItemMeshBuilder.BuildItem(currentItemStack, true);
 
             if (result != null) // If build succeeded
             {
@@ -478,8 +506,6 @@ namespace CraftSharp.UI
 
                 // Handle GUI display transform
                 bool hasGUITransform = result.Value.transforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
-                // Make use of the debug text
-                itemText.text = itemStack!.Count > 1 ? itemStack.Count.ToString() : string.Empty;
 
                 if (hasGUITransform) // Apply specified local transform
                 {

@@ -36,21 +36,21 @@ namespace CraftSharp
                     },
                     new()
                     {
-                        [0] = new(8, 2, getType(InventorySlotType.SLOT_TYPE_OUTPUT_ID), null, null),
-                        [1] = new(5, 2.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
-                        [2] = new(6, 2.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
-                        [3] = new(5, 1.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
-                        [4] = new(6, 1.5F, getType(InventorySlotType.SLOT_TYPE_REGULAR_ID), null, null),
-                        [5] = new(0, 3, getType(InventorySlotType.SLOT_TYPE_HEAD_ITEM_ID), null,
+                        [0] = new(8, 2, InventorySlotType.SLOT_TYPE_OUTPUT_ID, null, null),
+                        [1] = new(5, 2.5F, InventorySlotType.SLOT_TYPE_REGULAR_ID, null, null),
+                        [2] = new(6, 2.5F, InventorySlotType.SLOT_TYPE_REGULAR_ID, null, null),
+                        [3] = new(5, 1.5F, InventorySlotType.SLOT_TYPE_REGULAR_ID, null, null),
+                        [4] = new(6, 1.5F, InventorySlotType.SLOT_TYPE_REGULAR_ID, null, null),
+                        [5] = new(0, 3, InventorySlotType.SLOT_TYPE_HEAD_ITEM_ID, null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_helmet")),
-                        [6] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_CHEST_ITEM_ID), null,
+                        [6] = new(0, 2, InventorySlotType.SLOT_TYPE_CHEST_ITEM_ID, null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_chestplate")),
-                        [7] = new(0, 1, getType(InventorySlotType.SLOT_TYPE_LEGS_ITEM_ID), null,
+                        [7] = new(0, 1, InventorySlotType.SLOT_TYPE_LEGS_ITEM_ID, null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_leggings")),
-                        [8] = new(0, 0, getType(InventorySlotType.SLOT_TYPE_FEET_ITEM_ID), null,
+                        [8] = new(0, 0, InventorySlotType.SLOT_TYPE_FEET_ITEM_ID, null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_boots")),
 
-                        [45] = new(4, 0, getType(InventorySlotType.SLOT_TYPE_OFFHAND_ITEM_ID), null,
+                        [45] = new(4, 0, InventorySlotType.SLOT_TYPE_OFFHAND_ITEM_ID, null,
                             ResourceLocation.FromString("corncraft:empty_armor_slot_shield"))
                     }, new(), new(), new()
                 ))
@@ -64,8 +64,8 @@ namespace CraftSharp
                     new(),
                     new()
                     {
-                        [0] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID), null, null),
-                        [1] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_SADDLE_ID), null, null)
+                        [0] = new(0, 2, InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID, null, null),
+                        [1] = new(0, 2, InventorySlotType.SLOT_TYPE_SADDLE_ID, null, null)
                     },
                     new(), new(), new()
                 ))
@@ -80,8 +80,8 @@ namespace CraftSharp
                     new(),
                     new()
                     {
-                        [0] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID), null, null),
-                        [1] = new(0, 2, getType(InventorySlotType.SLOT_TYPE_SADDLE_ID), null, null)
+                        [0] = new(0, 2, InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID, null, null),
+                        [1] = new(0, 2, InventorySlotType.SLOT_TYPE_SADDLE_ID, null, null)
                     },
                     new(), new(), new()
                 ))
@@ -89,13 +89,6 @@ namespace CraftSharp
                 MainPosX = 4,
                 MainPosY = 0
             };
-
-            return;
-
-            static InventorySlotType getType(ResourceLocation typeId)
-            {
-                return InventorySlotTypePalette.INSTANCE.GetById(typeId);
-            }
         }
 
         /// <summary>

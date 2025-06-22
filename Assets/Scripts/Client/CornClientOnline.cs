@@ -919,7 +919,8 @@ namespace CraftSharp
             if (inventory != null)
             {
                 var inventoryType = inventory.Type;
-                var slotType = inventoryType.GetInventorySlotType(slot);
+                var slotInfo = inventoryType.GetWorkPanelSlotInfo(slot);
+                var slotType = InventorySlotTypePalette.INSTANCE.GetById(slotInfo.TypeId);
 
                 if (!slotType.Interactable)
                 {

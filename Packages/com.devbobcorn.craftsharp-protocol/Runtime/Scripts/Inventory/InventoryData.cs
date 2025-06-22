@@ -56,11 +56,25 @@ namespace CraftSharp.Inventory
             Items = new Dictionary<int, ItemStack>();
             Properties = new Dictionary<int, short>();
         }
+
+        private static bool CheckHashSetEquality<T>(HashSet<T>? setA, HashSet<T>? setB)
+        {
+            if (setA is null)
+            {
+                return setB is null;
+            }
+            return setB is not null && setA.SetEquals(setB);
+        }
         
+        /// <summary>
+        /// Check if data of two item stacks are the same, except the count number
+        /// </summary>
         public static bool CheckStackable(ItemStack stackA, ItemStack stackB)
         {
             return stackA.ItemType == stackB.ItemType &&
-                   DictionaryUtil.DeepCompareDictionaries(stackA.NBT, stackB.NBT);
+                   DictionaryUtil.DeepCompareDictionaries(stackA.NBT, stackB.NBT) &&
+                   DictionaryUtil.DeepCompareDictionaries(stackA.ReceivedComponentsToAdd, stackB.ReceivedComponentsToAdd) &&
+                   CheckHashSetEquality(stackA.ReceivedComponentsToRemove, stackB.ReceivedComponentsToRemove);
         }
 
         /// <summary>

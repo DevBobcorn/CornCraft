@@ -34,6 +34,7 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject inventoryLabelPrefab;
         [SerializeField] private GameObject inventoryButtonPrefab;
         [SerializeField] private GameObject inventorySpritePrefab;
+        [SerializeField] private GameObject inventoryScrollViewPrefab;
         [SerializeField] private GameObject leftScrollViewObject;
         [SerializeField] private RectTransform listPanel;
         [SerializeField] private GameObject rightScrollViewObject;
@@ -53,6 +54,7 @@ namespace CraftSharp.UI
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
         private readonly Dictionary<int, InventoryInput> currentInputs = new();
         private readonly Dictionary<int, InventoryButton> currentButtons = new();
+        private readonly Dictionary<int, InventoryScrollView> currentScrollViews = new();
 
         // (cur_value_property, max_value_property, sprite_type, sprite_image)
         private readonly List<(string, string, SpriteType, Image)> currentFilledSprites = new();
@@ -143,15 +145,20 @@ namespace CraftSharp.UI
             
             // Populate work panel controls, except slots
             CreateLayout(workPanel, inventoryType.WorkPanelLayout, false);
+            
+            // Create a scroll view for Stonecutter or Loom TODO: Also read from layout info
+            if (inventoryType.TypeId == InventoryType.STONECUTTER_ID || inventoryType.TypeId == InventoryType.LOOM_ID)
+            {
+                CreateScrollView(workPanel, 0, 2, 0, 5, 3);
+            }
 
             // Populate work panel slots
             for (int i = 0; i < inventoryType.PrependSlotCount; i++)
             {
-                var slotPos = inventoryType.GetInventorySlotPos(i);
+                var slotInfo = inventoryType.GetWorkPanelSlotInfo(i);
                 
-                CreateSlot(workPanel, i, slotPos.x, slotPos.y, inventoryType.GetInventorySlotPreviewItem(i),
-                    inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
-                    $"Slot [{i}] (Work Prepend) [{inventoryType.GetInventorySlotType(i).TypeId}]");
+                CreateSlot(workPanel, i, slotInfo.PosX, slotInfo.PosY, slotInfo.TypeId, slotInfo.PreviewItemStack,
+                    slotInfo.PlaceholderTypeId, $"Slot [{i}] (Work Prepend) [{slotInfo.TypeId}]");
             }
             
             var workMainStart = inventoryType.PrependSlotCount;
@@ -161,7 +168,7 @@ namespace CraftSharp.UI
                 for (int x = 0; x < inventoryType.MainSlotWidth; x++, i++)
                 {
                     CreateSlot(workPanel, workMainStart + i, x + workMainPosX,
-                        workMainPosY + inventoryType.MainSlotHeight - y - 1,
+                        workMainPosY + inventoryType.MainSlotHeight - y - 1, InventorySlotType.SLOT_TYPE_REGULAR_ID,
                         null, null, $"Slot [{workMainStart + i}] (Work Main)");
                 }
 
@@ -206,11 +213,10 @@ namespace CraftSharp.UI
             var workAppendStart = inventoryType.SlotCount - inventoryType.AppendSlotCount;
             for (int i = workAppendStart; i < workAppendStart + inventoryType.AppendSlotCount; i++)
             {
-                var slotPos = inventoryType.GetInventorySlotPos(i);
+                var slotInfo = inventoryType.GetWorkPanelSlotInfo(i);
                 
-                CreateSlot(workPanel, i, slotPos.x, slotPos.y, inventoryType.GetInventorySlotPreviewItem(i),
-                    inventoryType.GetInventorySlotPlaceholderSpriteTypeId(i),
-                    $"Slot [{i}] (Work Append) [{inventoryType.GetInventorySlotType(i).TypeId}]");
+                CreateSlot(workPanel, i, slotInfo.PosX, slotInfo.PosY, slotInfo.TypeId, slotInfo.PreviewItemStack,
+                    slotInfo.PlaceholderTypeId, $"Slot [{i}] (Work Append) [{slotInfo.TypeId}]");
             }
 
             // Initialize cursor slot
@@ -259,14 +265,14 @@ namespace CraftSharp.UI
             return false;
         }
 
-        private InventoryItemSlot CreateSlot(RectTransform parent, int slotId, float x, float y, ItemStack previewItem,
-                ResourceLocation? placeholderSpriteTypeId, string slotName)
+        private InventoryItemSlot CreateSlot(RectTransform parent, int slotId, float x, float y, ResourceLocation typeId,
+                ItemStack previewItem, ResourceLocation? placeholderSpriteTypeId, string slotName)
         {
             var slotObj = Instantiate(inventorySlotPrefab, parent);
             var slot = slotObj.GetComponent<InventoryItemSlot>();
+            var rectTransform = slotObj.GetComponent<RectTransform>();
             
-            slotObj.GetComponent<RectTransform>().anchoredPosition =
-                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.anchoredPosition = new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             slotObj.name = slotName;
 
             if (placeholderSpriteTypeId.HasValue) // Set placeholder sprite
@@ -280,7 +286,7 @@ namespace CraftSharp.UI
                 SetupSprite(placeholderSpriteType, placeholderImage, null, null, null);
             }
 
-            if (previewItem is not null)
+            if (typeId == InventorySlotType.SLOT_TYPE_PREVIEW_ID && previewItem is not null)
             {
                 slot.UpdateItemStack(previewItem);
 
@@ -296,7 +302,8 @@ namespace CraftSharp.UI
         private void SetupSlot(int slotId, InventoryItemSlot slot)
         {
             currentSlots[slotId] = slot;
-            var slotType = activeInventoryData.Type.GetInventorySlotType(slotId);
+            var slotInfo = activeInventoryData.Type.GetWorkPanelSlotInfo(slotId);
+            var slotType = InventorySlotTypePalette.INSTANCE.GetById(slotInfo.TypeId);
 
             var game = CornApp.CurrentClient;
             if (!game) return;
@@ -452,11 +459,7 @@ namespace CraftSharp.UI
                 var input = CreateInput(parent, inputId, inputInfo.PosX, inputInfo.PosY,
                     inputInfo.Width, inputInfo.PlaceholderTranslationKey, $"Input [{inputId}]");
                 RegisterPropertyDependent(inputInfo, input);
-                if (inputInfo.HintTranslationKey is not null)
-                {
-                    input.HintTranslationKey = inputInfo.HintTranslationKey;
-                    input.MarkCursorTextDirty();
-                }
+                input.SetHintTranslationFromInfo(inputInfo);
             }
 
             // Populate layout buttons
@@ -465,11 +468,7 @@ namespace CraftSharp.UI
                 var button = CreateButton(parent, buttonId, buttonInfo.PosX, buttonInfo.PosY,
                     buttonInfo.Width, buttonInfo.Height, buttonInfo.LayoutInfo, $"Button [{buttonId}]");
                 RegisterPropertyDependent(buttonInfo, button);
-                if (buttonInfo.HintTranslationKey is not null)
-                {
-                    button.HintTranslationKey = buttonInfo.HintTranslationKey;
-                    button.MarkCursorTextDirty();
-                }
+                button.SetHintTranslationFromInfo(buttonInfo);
             }
 
             if (createSlots)
@@ -477,14 +476,10 @@ namespace CraftSharp.UI
                 // Populate layout slots
                 foreach (var (slotId, slotInfo) in layoutInfo.SlotInfo)
                 {
-                    var slot = CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.PreviewItemStack,
-                        slotInfo.PlaceholderTypeId, $"Slot [{slotId}] (Nested)");
+                    var slot = CreateSlot(parent, slotId, slotInfo.PosX, slotInfo.PosY, slotInfo.TypeId,
+                        slotInfo.PreviewItemStack, slotInfo.PlaceholderTypeId, $"Slot [{slotId}] (Nested)");
                     RegisterPropertyDependent(slotInfo, slot);
-                    if (slotInfo.HintTranslationKey is not null)
-                    {
-                        slot.HintTranslationKey = slotInfo.HintTranslationKey;
-                        slot.MarkCursorTextDirty();
-                    }
+                    slot.SetHintTranslationFromInfo(slotInfo);
                 }
             }
         }
@@ -495,8 +490,7 @@ namespace CraftSharp.UI
             var labelText = labelObj.GetComponent<TMP_Text>();
             var rectTransform = labelObj.GetComponent<RectTransform>();
 
-            rectTransform.anchoredPosition =
-                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.anchoredPosition = new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
 
@@ -543,8 +537,7 @@ namespace CraftSharp.UI
             var rectTransform = inputObj.GetComponent<RectTransform>();
 
             inputObj.name = inputName;
-            rectTransform.anchoredPosition =
-                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.anchoredPosition = new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
 
             input.SetPlaceholderText(translationKey is not null ? Translations.Get(translationKey) : string.Empty);
@@ -601,8 +594,7 @@ namespace CraftSharp.UI
 
             SpriteType.SetupSpriteImage(spriteType, spriteImage);
             
-            rectTransform.anchoredPosition =
-                new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.anchoredPosition = new Vector2(x * inventorySlotSize, y * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
             
@@ -661,6 +653,26 @@ namespace CraftSharp.UI
             }
         }
 
+        private InventoryScrollView CreateScrollView(RectTransform parent, int scrollViewId, float x, float y, float w, float h)
+        {
+            var scrollViewObj = Instantiate(inventoryScrollViewPrefab, parent);
+            var scrollView = scrollViewObj.GetComponent<InventoryScrollView>();
+            var rectTransform = scrollViewObj.GetComponent<RectTransform>();
+            
+            rectTransform.anchoredPosition = new Vector2(x * inventorySlotSize, y * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w * inventorySlotSize);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h * inventorySlotSize);
+            
+            SetupScrollView(scrollViewId, scrollView);
+
+            return scrollView;
+        }
+        
+        private void SetupScrollView(int scrollViewId, InventoryScrollView scrollView)
+        {
+            currentScrollViews[scrollViewId] = scrollView;
+        }
+        
         private void RegisterPropertyDependent(InventoryType.InventoryFragmentInfo fragmentInfo, MonoBehaviour inventoryFragment)
         {
             foreach (var (predicateType, predicate) in fragmentInfo.Predicates)
@@ -801,11 +813,15 @@ namespace CraftSharp.UI
             {
                 if (slotId == 0) // Stonecutter base item slot
                 {
-                    if (itemStack is null)
-                    {
-                        // TODO: Clear list
-                        return;
-                    }
+                    var scrollView = currentScrollViews[0];
+                    var grid = scrollView.ItemGridLayoutGroup;
+                    var gridRectTransform = grid.GetComponent<RectTransform>();
+                    
+                    // Clear current list first
+                    scrollView.ClearAllItems();
+                    currentButtons.Clear();
+                    
+                    if (itemStack is null) return;
                     
                     var game = CornApp.CurrentClient;
                     if (!game) return;
@@ -819,8 +835,14 @@ namespace CraftSharp.UI
                     int index = 0;
                     foreach (var recipe in recipes)
                     {
-                        Debug.Log($"Recipe [{index}]: {recipe.Result}");
-                        index++;
+                        var nestedLayout = new InventoryType.InventoryLayoutInfo(new(),
+                            new()
+                            {
+                                [1000 + index] = new InventoryType.InventorySlotInfo(
+                                    0, 0, InventorySlotType.SLOT_TYPE_PREVIEW_ID, recipe.Result, null)
+                            }, new(), new(), new());
+
+                        CreateButton(gridRectTransform, index, 0, 0, 1, 1, nestedLayout, $"Recipe [{index++}]");
                     }
                 }
             }
@@ -1070,9 +1092,14 @@ namespace CraftSharp.UI
             }
             
             currentSlots.Clear();
+            currentButtons.Clear();
+            currentInputs.Clear();
+            currentScrollViews.Clear();
             currentFilledSprites.Clear();
             currentTimerFlipbookSprites.Clear();
             currentPropertyFlipbookSprites.Clear();
+            currentPropertyLabels.Clear();
+            
             propertyDependents.Clear();
             propertyTable.Clear();
             
@@ -1154,35 +1181,37 @@ namespace CraftSharp.UI
                 
                 if (e.InventoryId == activeInventoryId)
                 {
-                    if (currentSlots.TryGetValue(e.Slot, out var slot))
+                    if (currentSlots.TryGetValue(e.SlotId, out var slot))
                     {
-                        slot.UpdateItemStack(e.ItemStack);
+                        var itemActuallyChanged = slot.UpdateItemStack(e.ItemStack);
+                        if (itemActuallyChanged)
+                        {
+                            // Collect updated property names
+                            updatedPropertyNames.Clear();
                         
-                        // Collect updated property names
-                        updatedPropertyNames.Clear();
-                        
-                        // Handle change with custom logic
-                        HandleSlotChange(e.Slot, e.ItemStack);
+                            // Handle change with custom logic
+                            HandleSlotChange(e.SlotId, e.ItemStack);
+                        }
                     }
                     else
                     {
-                        Debug.LogWarning($"Slot {e.Slot} is not available!");
+                        Debug.LogWarning($"Slot {e.SlotId} is not available!");
                     }
                 }
                 else if (e.InventoryId == 0)
                 {
-                    if (e.Slot == -1) // Update cursor slot
+                    if (e.SlotId == -1) // Update cursor slot
                     {
                         currentSlots[-1].UpdateItemStack(e.ItemStack);
                     }
                     else
                     {
-                        Debug.LogWarning($"Unhandled update Inventory [0]/[{e.Slot}], Item {e.ItemStack}");
+                        Debug.LogWarning($"Unhandled update Inventory [0]/[{e.SlotId}], Item {e.ItemStack}");
                     }
                 }
                 else // Not current inventory, and not player inventory either
                 {
-                    Debug.LogWarning($"Invalid Inventory [{e.InventoryId}]/[{e.Slot}], Item {e.ItemStack}");
+                    Debug.LogWarning($"Invalid Inventory [{e.InventoryId}]/[{e.SlotId}], Item {e.ItemStack}");
                 }
             };
             
@@ -1197,9 +1226,15 @@ namespace CraftSharp.UI
                     {
                         if (currentSlots.TryGetValue(slotId, out var slot))
                         {
-                            slot.UpdateItemStack(itemStack);
-                            // Handle change with custom logic
-                            HandleSlotChange(slotId, itemStack);
+                            var itemActuallyChanged = slot.UpdateItemStack(itemStack);
+                            if (itemActuallyChanged)
+                            {
+                                // Collect updated property names
+                                updatedPropertyNames.Clear();
+                        
+                                // Handle change with custom logic
+                                HandleSlotChange(slotId, itemStack);
+                            }
                         }
                         else
                         {
@@ -1246,6 +1281,16 @@ namespace CraftSharp.UI
                             {
                                 Debug.LogWarning($"Failed to get property slot for {contPropName}, check inventory definition");
                             }
+                        }
+                    }
+                    
+                    // Update property flipbook sprites
+                    foreach (var (propName, spriteType, spriteImage) in currentPropertyFlipbookSprites)
+                    {
+                        if (propertyTable.TryGetValue(propName, out var propValue) &&
+                            propValue >= 0 && propValue < spriteType.FlipbookSprites.Length)
+                        {
+                            spriteImage.overrideSprite = spriteType.FlipbookSprites[propValue];
                         }
                     }
                     
@@ -1314,20 +1359,6 @@ namespace CraftSharp.UI
                     }
                     
                     spriteImage.overrideSprite = spriteType.FlipbookSprites[timer.Frame];
-                }
-            }
-
-            if (currentPropertyFlipbookSprites.Count > 0) // Update property flipbook sprites
-            {
-                foreach (var tuple in currentPropertyFlipbookSprites)
-                {
-                    var (propertyName, spriteType, spriteImage) = tuple;
-
-                    if (propertyTable.TryGetValue(propertyName, out var propertyValue) &&
-                        propertyValue >= 0 && propertyValue < spriteType.FlipbookSprites.Length)
-                    {
-                        spriteImage.overrideSprite = spriteType.FlipbookSprites[propertyValue];
-                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using CraftSharp.Inventory;
 
 namespace CraftSharp.UI
 {
@@ -31,6 +32,15 @@ namespace CraftSharp.UI
         public void SetHoverHandler(Action handler)
         {
             hoverHandler = handler;
+        }
+        
+        public void SetHintTranslationFromInfo(InventoryType.InventoryFragmentInfo info)
+        {
+            if (info.HintTranslationKey is not null)
+            {
+                HintTranslationKey = info.HintTranslationKey;
+                MarkCursorTextDirty();
+            }
         }
 
         public void MarkCursorTextDirty()

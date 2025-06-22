@@ -16,6 +16,7 @@ namespace CraftSharp.Inventory
         
         public static readonly ResourceLocation SLOT_TYPE_HORSE_ARMOR_ID = new("horse_armor");
         public static readonly ResourceLocation SLOT_TYPE_SADDLE_ID = new("saddle");
+        public static readonly ResourceLocation SLOT_TYPE_PREVIEW_ID = new("preview");
         
         public readonly ResourceLocation TypeId;
 

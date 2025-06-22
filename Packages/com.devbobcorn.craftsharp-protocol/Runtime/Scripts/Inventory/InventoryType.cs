@@ -164,12 +164,12 @@ namespace CraftSharp.Inventory
             }
         }
 
-        public record InventorySlotInfo(float PosX, float PosY, InventorySlotType Type,
+        public record InventorySlotInfo(float PosX, float PosY, ResourceLocation TypeId,
             ItemStack? PreviewItemStack, ResourceLocation? PlaceholderTypeId) : InventoryFragmentInfo
         {
             public float PosX { get; } = PosX;
             public float PosY { get; } = PosY;
-            public InventorySlotType Type { get; } = Type;
+            public ResourceLocation TypeId { get; } = TypeId;
             public ItemStack? PreviewItemStack { get; } = PreviewItemStack;
             public ResourceLocation? PlaceholderTypeId { get; } = PlaceholderTypeId;
 
@@ -177,7 +177,6 @@ namespace CraftSharp.Inventory
             {
                 var typeId = data.Properties.TryGetValue("type_id", out var val) ?
                     ResourceLocation.FromString(val.StringValue) : InventorySlotType.SLOT_TYPE_REGULAR_ID;
-                var type = InventorySlotTypePalette.INSTANCE.GetById(typeId);
                 
                 var x = data.Properties.TryGetValue("pos_x", out val) ?
                     float.Parse(val.StringValue, CultureInfo.InvariantCulture.NumberFormat) : 0;
@@ -190,7 +189,7 @@ namespace CraftSharp.Inventory
                 ResourceLocation? placeholderTypeId = data.Properties.TryGetValue("placeholder_type_id", out val) ?
                     ResourceLocation.FromString(val.StringValue) : null;
 
-                var slotInfo = new InventorySlotInfo(x, y, type, previewItem, placeholderTypeId);
+                var slotInfo = new InventorySlotInfo(x, y, typeId, previewItem, placeholderTypeId);
                 slotInfo.ReadBaseInfo(data);
 
                 return slotInfo;
@@ -349,25 +348,11 @@ namespace CraftSharp.Inventory
             }
         }
 
-        public Vector2 GetInventorySlotPos(int slot)
+        public InventorySlotInfo GetWorkPanelSlotInfo(int slot)
         {
-            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? new(info.PosX, info.PosY) : Vector2.zero;
-        }
-        
-        public ItemStack? GetInventorySlotPreviewItem(int slot)
-        {
-            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info.PreviewItemStack : null;
-        }
-        
-        public ResourceLocation? GetInventorySlotPlaceholderSpriteTypeId(int slot)
-        {
-            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info.PlaceholderTypeId : null;
-        }
-        
-        public InventorySlotType GetInventorySlotType(int slot)
-        {
-            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ?
-                info.Type : InventorySlotTypePalette.INSTANCE.GetById(InventorySlotType.SLOT_TYPE_REGULAR_ID);
+            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info :
+                // ReSharper disable once PossibleLossOfFraction
+                new(slot % 9, slot / 9, InventorySlotType.SLOT_TYPE_REGULAR_ID, null, null);
         }
         
         // UI Layout settings
