@@ -890,6 +890,14 @@
                 "pos_x": 7.5,
                 "pos_y": 1
             }
+        },
+        "scroll_views": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 0,
+                "width": 5,
+                "height": 3
+            }
         }
     }
 }
