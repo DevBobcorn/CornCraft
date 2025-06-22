@@ -46,6 +46,7 @@
         "place_predicate": "id=minecraft:filled_map"
     },
     "minecraft:enchantment_base_item": {
+        "max_count": 1,
         "place_predicate": "always"
     },
     "minecraft:enchantment_fuel_item": {

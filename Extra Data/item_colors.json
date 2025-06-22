@@ -82,6 +82,11 @@
             128,
             167,
             55
+        ],
+        "minecraft:stonecutter": [
+            255,
+            255,
+            255
         ]
     },
     "fixed_multicolor": {

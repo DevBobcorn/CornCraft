@@ -898,6 +898,9 @@
                 "width": 5,
                 "height": 3
             }
+        },
+        "properties": {
+            "0": "selected_recipe"
         }
     }
 }
