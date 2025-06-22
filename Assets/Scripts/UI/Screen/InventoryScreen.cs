@@ -772,6 +772,14 @@ namespace CraftSharp.UI
 
                 game.DoInventoryButtonClick(activeInventoryId, buttonId);
             }
+
+            if (activeInventoryData.Type.TypeId == InventoryType.STONECUTTER_ID)
+            {
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+                
+                game.DoInventoryButtonClick(activeInventoryId, buttonId);
+            }
         }
 
         private void HandleInputValueChange(int inputId, string text)
@@ -826,6 +834,7 @@ namespace CraftSharp.UI
                     // Clear current list first
                     scrollView.ClearAllItems();
                     currentButtons.Clear();
+                    propertyDependents.Clear();
                     
                     if (itemStack is null) return;
                     
@@ -838,17 +847,33 @@ namespace CraftSharp.UI
                         // Sort by translation key of result items
                         .OrderBy(x => x.Result.ItemType.ItemId.GetTranslationKey("block"));
 
+                    if (!propertyTable.TryGetValue("selected_recipe", out var currentSelected))
+                    {
+                        currentSelected = -1;
+                    }
+
                     int index = 0;
                     foreach (var recipe in recipes)
                     {
-                        var nestedLayout = new InventoryType.InventoryLayoutInfo(new(),
-                            new()
+                        var nestedLayout = new InventoryType.InventoryLayoutInfo(
+                            null, new()
                             {
                                 [1000 + index] = new InventoryType.InventorySlotInfo(
                                     0, 0, InventorySlotType.SLOT_TYPE_PREVIEW_ID, recipe.Result, null)
-                            }, new(), new(), new());
+                            }, null, null, null);
 
-                        CreateButton(gridRectTransform, index, 0, 0, 1, 1, nestedLayout, $"Recipe [{index++}]");
+                        var recipeButton = CreateButton(gridRectTransform, index, 0, 0, 1, 1, nestedLayout, $"Recipe [{index}]");
+                        propertyDependents.Add((InventoryType.PredicateType.Selected,
+                            new InventoryPropertyPredicate(new()
+                            {
+                                ["selected_recipe"] = (InventoryPropertyPredicate.Operator.EQUAL, index.ToString())
+                            }), recipeButton));
+                        recipeButton.HintTranslationKey = recipe.Result.ItemType.ItemId.GetTranslationKey("block");
+                        recipeButton.MarkCursorTextDirty();
+
+                        if (currentSelected == index) recipeButton.Selected = true;
+
+                        index++;
                     }
                 }
             }

@@ -392,17 +392,22 @@ namespace CraftSharp.UI
             
             if (newItemStack is null || !newItemStack.IsDamageable || damage == 0)
             {
-                damageBarTransform.gameObject.SetActive(false);
+                if (damageBarTransform && damageBarTransform.gameObject)
+                    damageBarTransform.gameObject.SetActive(false);
             }
             else
             {
                 var maxDamage = (float) newItemStack.MaxDamage; // TODO: Check enchantment
+
+                if (damageBarFillImage)
+                {
+                    damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);
+                    var hue = Mathf.Lerp(0.33333334F, 0F, damage / maxDamage);
+                    damageBarFillImage.color = Color.HSVToRGB(hue, 1f, 1f);
+                }
                 
-                damageBarFillImage.fillAmount = Mathf.Clamp01(1F - damage / maxDamage);
-                var hue = Mathf.Lerp(0.33333334F, 0F, damage / maxDamage);
-                damageBarFillImage.color = Color.HSVToRGB(hue, 1f, 1f);
-                
-                damageBarTransform.gameObject.SetActive(true);
+                if (damageBarTransform && damageBarTransform.gameObject)
+                    damageBarTransform.gameObject.SetActive(true);
             }
             
             cursorTextDirty = true;
@@ -499,7 +504,7 @@ namespace CraftSharp.UI
         {
             var result = ItemMeshBuilder.BuildItem(currentItemStack, true);
 
-            if (result != null) // If build succeeded
+            if (result != null && itemMeshFilter && itemMeshRenderer) // If build succeeded
             {
                 itemMeshFilter.sharedMesh = result.Value.mesh;
                 itemMeshRenderer.sharedMaterial = result.Value.material;
@@ -507,7 +512,7 @@ namespace CraftSharp.UI
                 // Handle GUI display transform
                 bool hasGUITransform = result.Value.transforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
 
-                if (hasGUITransform) // Apply specified local transform
+                if (hasGUITransform && modelObject && modelObject.transform) // Apply specified local transform
                 {
                     // Apply local translation, '1' in translation field means 0.1 unit in local space, so multiply with 0.1
                     modelObject.transform.localPosition = t.c0 * 0.1F;
@@ -537,8 +542,11 @@ namespace CraftSharp.UI
             }
             else // If build failed (item is empty or invalid)
             {
-                itemMeshFilter.sharedMesh = null;
-                itemText.text = string.Empty;
+                if (itemMeshFilter)
+                    itemMeshFilter.sharedMesh = null;
+                
+                if (itemText)
+                    itemText.text = string.Empty;
 
                 hasVisibleItem = false;
                 ShowPlaceholderImage();
