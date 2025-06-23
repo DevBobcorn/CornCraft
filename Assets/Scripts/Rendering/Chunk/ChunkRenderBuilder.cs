@@ -49,6 +49,8 @@ namespace CraftSharp.Rendering
         };
         
         private static readonly ResourceLocation ICE_BLOCK_ID = new("ice");
+        
+        private static readonly ResourceLocation BUBBLE_COLUMN_ID = new("bubble_column");
 
         public ChunkRenderBuilder(Dictionary<int, BlockStateModel> modelTable)
         {
@@ -71,6 +73,12 @@ namespace CraftSharp.Rendering
 
             foreach (var stateId in palette.GetAllNumIds(ICE_BLOCK_ID))
                 cullingRules[stateId] = iceNeighborCheck;
+            
+            // Bubble column block
+            BlockNeighborCheck bubbleColumnNeighborCheck = BlockNeighborChecks.WATER_SURFACE;
+            
+            foreach (var stateId in palette.GetAllNumIds(BUBBLE_COLUMN_ID))
+                cullingRules[stateId] = bubbleColumnNeighborCheck;
         }
 
         private static long GetSeedForCoords(int i, int j, int k)
