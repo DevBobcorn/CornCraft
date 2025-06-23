@@ -20,6 +20,10 @@
     ],
     "redstone": [
       "minecraft:redstone_wire"
+    ],
+    "water": [
+      "minecraft:cauldron",
+      "minecraft:water_cauldron"
     ]
   },
   "fixed": {
