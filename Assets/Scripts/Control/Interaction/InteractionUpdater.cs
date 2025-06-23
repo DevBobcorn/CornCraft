@@ -168,21 +168,51 @@ namespace CraftSharp.Control
         }
 
         private static readonly ResourceLocation COCOA_ID = new("cocoa");
+        
+        private static readonly HashSet<ResourceLocation> ANVIL_IDS = new()
+        {
+            new("anvil"), new("chipped_anvil"), new("damaged_anvil")
+        };
 
-        private void UpdateBlockPlacementPrediction(BlockLoc newBlockLoc, ResourceLocation blockId, Direction targetDirection, float cameraYaw, float cameraPitch, bool clickedTopHalf)
+        private static readonly HashSet<ResourceLocation> REPLACEABLE_BLOCK_IDS = new()
+        {
+            new("air"), new("water"), new("lava"),
+            new("short_grass"), new("grass"), new("fern"),
+            new("dead_bush"), new("seagrass"), new("tall_seagrass"),
+            new("fire"), new("soul_fire"), new("snow"),
+            new("vine"), new("glow_lichen"), new("light"),
+            new("tall_grass"), new("large_fern"), new("structure_void"),
+            new("void_air"), new("cave_air"), new("bubble_column"),
+            new("warped_roots"), new("nether_sprouts"), new("crimson_roots"),
+            new("hanging_roots")
+        };
+
+        private static bool CheckBlockReplacement(BlockState targetBlockState,
+            ResourceLocation blockId, Direction targetDirection)
+        {
+            if (REPLACEABLE_BLOCK_IDS.Contains(targetBlockState.BlockId) && targetBlockState.BlockId != blockId)
+            {
+                return true;
+            }
+            
+            // Stacking a slab to a single slab of the same type
+            if (targetBlockState.BlockId.Path.EndsWith("_slab") && targetBlockState.BlockId == blockId)
+            {
+                if (targetBlockState.Properties.TryGetValue("type", out var typeVal))
+                {
+                    return (typeVal == "bottom" && targetDirection == Direction.Up) || (typeVal == "top" && targetDirection == Direction.Down);
+                }
+            }
+            
+            return false;
+        }
+
+        private void UpdateBlockPlacementPrediction(BlockLoc newBlockLoc, ResourceLocation blockId,
+            Direction targetDirection, float cameraYaw, float cameraPitch, bool clickedTopHalf, bool replace)
         {
             if (!client) return;
 
-            while (cameraYaw >= 360F) cameraYaw -= 360F;
-            while (cameraYaw < 0F) cameraYaw += 360F;
-            var cameraYawDir = cameraYaw switch
-            {
-                > 315 or <= 45 => Direction.East,
-                > 45 and <= 135 => Direction.South,
-                > 135 and <= 225 => Direction.West,
-                > 225 and <= 315 => Direction.North,
-                _ => throw new InvalidDataException($"Invalid yaw angle: {cameraYaw}!")
-            };
+            var cameraYawDir = PlayerStatus.GetYawDirection(cameraYaw);
 
             // Create selection box if not present
             if (!blockSelectionBox)
@@ -236,6 +266,17 @@ namespace CraftSharp.Control
                 {
                     predicateProps["facing"] = "down";
                 }
+                else if (ANVIL_IDS.Contains(blockId))
+                {
+                    predicateProps["facing"] = cameraYawDir switch
+                    {
+                        Direction.North => "east",
+                        Direction.East => "south",
+                        Direction.South => "west",
+                        Direction.West => "north",
+                        _ => throw new InvalidDataException($"Undefined direction {targetDirection}!")
+                    };
+                }
                 else
                 {
                     predicateProps["facing"] = targetDirection switch
@@ -260,7 +301,7 @@ namespace CraftSharp.Control
             {
                 if (possibleValues.Contains("bottom"))
                 {
-                    predicateProps["type"] = clickedTopHalf ? "top" : "bottom";
+                    predicateProps["type"] = replace ? "double" : clickedTopHalf ? "top" : "bottom";
                 }
             }
 
@@ -522,11 +563,12 @@ namespace CraftSharp.Control
                 ParticleTypePalette.INSTANCE.GetNumIdById(BLOCK_PARTICLE_ID), new BlockParticleExtraDataWithColor(block.StateId, blockColor), 16));
         }
 
-        private static BlockLoc PlaceBlock(BaseCornClient client, BlockLoc targetBlockLoc, float inBlockX, float inBlockY, float inBlockZ, Direction targetDirection)
+        private static BlockLoc PlaceBlock(BaseCornClient client, bool replace, BlockLoc targetBlockLoc, float inBlockX, float inBlockY, float inBlockZ, Direction targetDirection)
         {
-            var placeBlockLoc = GetPlaceBlockLoc(targetBlockLoc, targetDirection);
-
+            var placeBlockLoc = replace ? targetBlockLoc : GetPlaceBlockLoc(targetBlockLoc, targetDirection);
             client.PlaceBlock(targetBlockLoc, targetDirection, inBlockX, inBlockY, inBlockZ, Inventory.Hand.MainHand);
+            
+            Debug.Log($"Replace: {replace}, New Block: {placeBlockLoc}");
 
             return placeBlockLoc;
         }
@@ -641,7 +683,7 @@ namespace CraftSharp.Control
                                 var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
 
                                 // Interact with target block
-                                PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+                                PlaceBlock(client, true, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
                             }
                         }
                         else if (currentActionType == ItemActionType.Block) // Check if holding a block item
@@ -652,13 +694,17 @@ namespace CraftSharp.Control
                                 var cameraPitch = client.GetCameraPitch();
 
                                 var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
-                                var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+                                var blockId = currentItemStack!.ItemType.ItemBlock!.Value;
+                                var targetBlockState = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value).State;
+                                var replace = CheckBlockReplacement(targetBlockState, blockId, TargetDirection.Value);
+                                Debug.Log($"Replace: {replace}");
+                                var placeLoc = PlaceBlock(client, replace, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                                 inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
                                 var clickedTopHalf = inBlockLoc.Y >= 0.5;
 
                                 placeBlockCooldown = PLACE_BLOCK_COOLDOWN;
-                                UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYaw, cameraPitch, clickedTopHalf);
+                                UpdateBlockPlacementPrediction(placeLoc, blockId, TargetDirection.Value, cameraYaw, cameraPitch, clickedTopHalf, replace);
                             }
                         }
                     }
@@ -948,13 +994,17 @@ namespace CraftSharp.Control
                             var cameraPitch = client.GetCameraPitch();
 
                             var inBlockLoc = TargetExactLoc.Value - TargetBlockLoc.Value.ToLocation();
-                            var placeLoc = PlaceBlock(client, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
+                            var blockId = currentItemStack!.ItemType.ItemBlock!.Value;
+                            var targetBlockState = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value).State;
+                            var replace = CheckBlockReplacement(targetBlockState, blockId, TargetDirection.Value);
+                            Debug.Log($"Replace: {replace}");
+                            var placeLoc = PlaceBlock(client, replace, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                             inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
                             var clickedTopHalf = inBlockLoc.Y >= 0.5;
 
                             placeBlockCooldown = PLACE_BLOCK_COOLDOWN;
-                            UpdateBlockPlacementPrediction(placeLoc, currentItemStack!.ItemType.ItemBlock!.Value, TargetDirection.Value, cameraYaw, cameraPitch, clickedTopHalf);
+                            UpdateBlockPlacementPrediction(placeLoc, blockId, TargetDirection.Value, cameraYaw, cameraPitch, clickedTopHalf, replace);
                         }
                     }
                 }
