@@ -37,6 +37,21 @@ namespace CraftSharp.Rendering
             return nbt.Count == 0;
         }
 
+        private static void ClearItemVisual(GameObject modelObject)
+        {
+            // Clear mesh if present
+            if (modelObject.TryGetComponent<MeshFilter>(out var meshFilter))
+            {
+                meshFilter.sharedMesh = null;
+            }
+            
+            // Clear children if present
+            foreach (Transform t in modelObject.transform)
+            {
+                Object.Destroy(t.gameObject);
+            }
+        }
+
         /// <summary>
         /// Build item object from item stack. Returns true if item is not empty and successfully built
         /// </summary>
@@ -44,6 +59,8 @@ namespace CraftSharp.Rendering
             DisplayPosition displayPosition, bool useInventoryMaterial,
             Mesh? defaultMesh = null, Material? defaultMaterial = null)
         {
+            ClearItemVisual(modelObject);
+            
             if (itemStack is null || itemStack.Count <= 0) return false;
             
             var itemId = itemStack.ItemType.ItemId;
@@ -65,8 +82,14 @@ namespace CraftSharp.Rendering
 
             if (packManager.BuiltinEntityModels.Contains(itemModelId)) // Use embedded entity render
             {
-                var type = BlockEntityTypePalette.INSTANCE.GetById(itemId);
-                client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, type);
+                if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(itemId, out BlockEntityType blockEntityType))
+                {
+                    client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockEntityType);
+                }
+                else
+                {
+                    Debug.LogWarning($"Item model {itemModelId} is specified to use entity render model, but no suitable entity render model is found!");
+                }
             }
             else // Use regular mesh
             {

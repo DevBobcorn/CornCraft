@@ -1103,6 +1103,8 @@ namespace CraftSharp.Rendering
             
             // Register entity render prefabs ===========================================
             blockEntityPrefabs.Add(BlockEntityType.CHEST_ID,             chestPrefab);
+            blockEntityPrefabs.Add(BlockEntityType.ENDER_CHEST_ID,       chestPrefab);
+            blockEntityPrefabs.Add(BlockEntityType.TRAPPED_CHEST_ID,     chestPrefab);
             
             client = CornApp.CurrentClient;
 

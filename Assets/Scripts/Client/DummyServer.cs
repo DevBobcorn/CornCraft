@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CraftSharp.Inventory;
-using CraftSharp.Protocol;
 using CraftSharp.Protocol.Message;
 
 
@@ -202,6 +201,8 @@ namespace CraftSharp
             {
                 client.DummyOnInventorySlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
                 client.DummyOnInventorySlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
+                client.DummyOnInventorySlot(0, 38, new ItemStack(ItemPalette.INSTANCE.GetById(new("chest")), 1), 0);
+                client.DummyOnInventorySlot(0, 39, new ItemStack(ItemPalette.INSTANCE.GetById(new("ender_chest")), 1), 0);
             }
         }
 

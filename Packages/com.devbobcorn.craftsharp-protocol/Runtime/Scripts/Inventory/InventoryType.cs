@@ -379,7 +379,7 @@ namespace CraftSharp.Inventory
         
         public InventorySlotInfo GetWorkPanelSlotInfo(int slot)
         {
-            return WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info :
+            return WorkPanelLayout.SlotInfo is not null && WorkPanelLayout.SlotInfo.TryGetValue(slot, out var info) ? info :
                 // ReSharper disable once PossibleLossOfFraction
                 new(slot % 9, slot / 9, InventorySlotType.SLOT_TYPE_REGULAR_ID, null, null);
         }
