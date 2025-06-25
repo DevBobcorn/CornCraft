@@ -567,8 +567,6 @@ namespace CraftSharp.Control
         {
             var placeBlockLoc = replace ? targetBlockLoc : GetPlaceBlockLoc(targetBlockLoc, targetDirection);
             client.PlaceBlock(targetBlockLoc, targetDirection, inBlockX, inBlockY, inBlockZ, Inventory.Hand.MainHand);
-            
-            Debug.Log($"Replace: {replace}, New Block: {placeBlockLoc}");
 
             return placeBlockLoc;
         }
@@ -697,7 +695,6 @@ namespace CraftSharp.Control
                                 var blockId = currentItemStack!.ItemType.ItemBlock!.Value;
                                 var targetBlockState = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value).State;
                                 var replace = CheckBlockReplacement(targetBlockState, blockId, TargetDirection.Value);
-                                Debug.Log($"Replace: {replace}");
                                 var placeLoc = PlaceBlock(client, replace, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                                 inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
@@ -997,7 +994,6 @@ namespace CraftSharp.Control
                             var blockId = currentItemStack!.ItemType.ItemBlock!.Value;
                             var targetBlockState = client.ChunkRenderManager.GetBlock(TargetBlockLoc.Value).State;
                             var replace = CheckBlockReplacement(targetBlockState, blockId, TargetDirection.Value);
-                            Debug.Log($"Replace: {replace}");
                             var placeLoc = PlaceBlock(client, replace, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
 
                             inBlockLoc = TargetExactLoc.Value - placeLoc.ToLocation();
