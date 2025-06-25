@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using Unity.Mathematics;
@@ -14,6 +13,8 @@ namespace CraftSharp.Rendering
 {
     public class BedrockModelEntityRender : EntityRender
     {
+        
+        
         #nullable enable
         
         private EntityRenderDefinition? entityDefinition = null;
@@ -21,7 +22,10 @@ namespace CraftSharp.Rendering
         private readonly Dictionary<string, GameObject> boneObjects = new();
 
         public string[] TextureNames = { };
-        private readonly Dictionary<string, Texture2D> textures = new();
+        public EntityRenderType RenderType;
+        private EntityMaterialManager? materialManager;
+        
+        private readonly List<MeshRenderer> renderers = new();
 
         private EntityGeometry? geometry = null;
 
@@ -34,18 +38,6 @@ namespace CraftSharp.Rendering
         
         #nullable disable
 
-        private Material currentMaterial = null;
-
-        private static string GetImagePathFromFileName(string name)
-        {
-            // Image could be either tga or png
-            if (File.Exists($"{name}.png"))
-            {
-                return $"{name}.png";
-            }
-            return File.Exists($"{name}.tga") ? $"{name}.tga" : name;
-        }
-
         public void SetDefinitionData(EntityRenderDefinition def)
         {
             entityDefinition = def;
@@ -53,6 +45,10 @@ namespace CraftSharp.Rendering
 
         public void BuildEntityModel(BedrockEntityResourceManager entityResManager, EntityMaterialManager matManager)
         {
+            renderers.Clear();
+
+            materialManager = matManager;
+            
             if (entityDefinition is null)
             {
                 Debug.LogError("Entity definition not assigned!");
@@ -73,78 +69,10 @@ namespace CraftSharp.Rendering
                 // TODO: Debug.LogWarning($"Entity geometry [{geometryName}] not loaded!");
                 return;
             }
-
-            foreach (var tex in entityDefinition.TexturePaths)
-            {
-                var fileName = GetImagePathFromFileName(tex.Value);
-                // Load texture from file
-                Texture2D texture;
-                var imageBytes = File.ReadAllBytes(fileName);
-                if (fileName.EndsWith(".tga")) // Read as tga image
-                {
-                    texture = TGALoader.TextureFromTGA(imageBytes);
-                }
-                else // Read as png image
-                {
-                    texture = new Texture2D(2, 2);
-                    texture.LoadImage(imageBytes);
-                }
-
-                texture.filterMode = FilterMode.Point;
-                //Debug.Log($"Loaded texture from {fileName} ({texture.width}x{texture.height})");
-
-                if (geometry!.TextureWidth != texture.width || geometry.TextureHeight != texture.height)
-                {
-                    if (geometry.TextureWidth == 0 && geometry.TextureHeight == 0) // Not specified, just use the size we have
-                    {
-                        geometry.TextureWidth = texture.width;
-                        geometry.TextureHeight = texture.height;
-                    }
-                    else // The sizes doesn't match, use specified texture size
-                    {
-                        Debug.LogWarning($"Specified texture size({geometry.TextureWidth}x{geometry.TextureHeight}) doesn't match image file {tex.Value} ({texture.width}x{texture.height})! Resizing...");
-
-                        var textureWithRightSize = new Texture2D(geometry.TextureWidth, geometry.TextureHeight)
-                        {
-                            filterMode = FilterMode.Point
-                        };
-
-                        var fillColor = Color.clear;
-                        Color[] pixels = new Color[geometry.TextureHeight * geometry.TextureWidth];
-                        for (int i = 0; i < pixels.Length; i++)
-                            pixels[i] = fillColor;
-                        
-                        textureWithRightSize.SetPixels(pixels);
-
-                        var blitHeight = Mathf.Min(texture.height, geometry.TextureHeight);
-                        var blitOffset = geometry.TextureHeight > texture.height ? geometry.TextureHeight - texture.height : 0;
-
-                        for (int y = 0; y < blitHeight; y++)
-                            for (int x = 0; x < Mathf.Min(texture.width, geometry.TextureWidth); x++)
-                            {
-                                textureWithRightSize.SetPixel(x, y + blitOffset, texture.GetPixel(x, y));
-                            }
-                        
-                        textureWithRightSize.Apply();
-
-                        texture = textureWithRightSize;
-                    }
-                }
             
-                textures.Add(tex.Key, texture);
-            }
-            TextureNames = textures.Select(x => x.Key).ToArray();
-            SetTexture(0);
-
+            TextureNames = entityDefinition.TexturePaths.Select(x => x.Key).ToArray();
             var matId = entityDefinition.MaterialIdentifiers.First().Value;
-            var renderType = entityResManager.MaterialRenderTypes.GetValueOrDefault(matId);
-            var materialTemplate = matManager.GetBedrockEntityMaterialTemplate(renderType);
-            // Make a copy of the material
-            currentMaterial = new Material(materialTemplate)
-            {
-                name = matId,
-                mainTexture = textures.First().Value
-            };
+            RenderType = entityResManager.MaterialRenderTypes.GetValueOrDefault(matId);
 
             // Build mesh for each bone
             foreach (var bone in geometry!.Bones.Values)
@@ -166,7 +94,7 @@ namespace CraftSharp.Rendering
                 }
 
                 boneMeshFilter!.sharedMesh = EntityVertexBufferBuilder.BuildMesh(visualBuffer);
-                boneMeshRenderer!.sharedMaterial = currentMaterial;
+                renderers.Add(boneMeshRenderer);
 
                 boneObjects.Add(bone.Name, boneObj);
             }
@@ -194,7 +122,10 @@ namespace CraftSharp.Rendering
                     boneTransform.localRotation = Rotations.RotationFromEulersXYZ(bone.Rotation);
                 }
             }
-        
+            
+            // Load first texture
+            SetTexture(0);
+            
             // Prepare animations
             AnimationNames = entityDefinition.AnimationNames.Select(x => $"{x.Key} ({x.Value})").ToArray();
             animations = entityDefinition.AnimationNames.Select(x => 
@@ -208,11 +139,15 @@ namespace CraftSharp.Rendering
 
         public void SetTexture(int index)
         {
-            if (index >= 0 && index < TextureNames.Length)
+            if (index >= 0 && index < TextureNames.Length &&
+                geometry is not null && materialManager && renderers.Any())
             {
-                if (currentMaterial)
+                foreach (var _renderer in renderers)
                 {
-                    currentMaterial.mainTexture = textures[TextureNames[index]];
+                    materialManager.ApplyBedrockMaterial(RenderType, TextureNames[index], mat =>
+                    {
+                        _renderer.sharedMaterial = mat;
+                    }, geometry.TextureWidth, geometry.TextureHeight);
                 }
             }
             else

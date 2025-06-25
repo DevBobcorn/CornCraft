@@ -497,6 +497,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 2689602071572206800, guid: cc86897375396434c8dd1b69218db138, type: 3}
   arrowPrefab: {fileID: 2689602071572206800, guid: 986313fb3599f44428afb02dcb218f5c, type: 3}
   experienceOrbPrefab: {fileID: 2689602071572206800, guid: fc8187110a91fb04d996d6bcf65e9aa5, type: 3}
+  thrownItemPrefab: {fileID: 2689602071572206800, guid: c2fcdd7789414174f980f748f702cdfe, type: 3}
 --- !u!114 &2213449558319468516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,6 +611,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockEntityParent: {fileID: 2739710459597838504}
   defaultPrefab: {fileID: 2689602071572206800, guid: a6ce74dd043f42f44892d3a7ed5af9af, type: 3}
+  chestPrefab: {fileID: 2689602071572206800, guid: 3e865739b0415ec438d1ffc780e5e626, type: 3}
 --- !u!1 &7198898926437285478
 GameObject:
   m_ObjectHideFlags: 0

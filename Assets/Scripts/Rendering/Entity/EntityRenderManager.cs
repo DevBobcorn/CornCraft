@@ -11,7 +11,6 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject defaultPrefab;
 
         [SerializeField] private GameObject serverPlayerPrefab;
-
         [SerializeField] private GameObject skeletonPrefab;
         [SerializeField] private GameObject witherSkeletonPrefab;
         [SerializeField] private GameObject strayPrefab;
@@ -26,6 +25,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject itemPrefab;
         [SerializeField] private GameObject arrowPrefab;
         [SerializeField] private GameObject experienceOrbPrefab;
+        [SerializeField] private GameObject thrownItemPrefab;
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> entityPrefabs = new();
@@ -265,6 +265,8 @@ namespace CraftSharp.Rendering
             entityPrefabs.Clear();
 
             // Register entity render prefabs ===========================================
+            // Server player
+            entityPrefabs.Add(EntityType.PLAYER_ID,            serverPlayerPrefab);
             // Hostile Mobs
             entityPrefabs.Add(EntityType.SKELETON_ID,          skeletonPrefab);
             entityPrefabs.Add(EntityType.WITHER_SKELETON_ID,   witherSkeletonPrefab);
@@ -285,7 +287,12 @@ namespace CraftSharp.Rendering
             entityPrefabs.Add(EntityType.ARROW_ID,             arrowPrefab);
             entityPrefabs.Add(EntityType.ITEM_ID,              itemPrefab);
             entityPrefabs.Add(EntityType.EXPERIENCE_ORB_ID,    experienceOrbPrefab);
-            entityPrefabs.Add(EntityType.EXPERIENCE_BOTTLE_ID, experienceOrbPrefab);
+            entityPrefabs.Add(EntityType.EXPERIENCE_BOTTLE_ID, thrownItemPrefab);
+            entityPrefabs.Add(EntityType.EGG_ID,               thrownItemPrefab);
+            entityPrefabs.Add(EntityType.ENDER_PEARL_ID,       thrownItemPrefab);
+            entityPrefabs.Add(EntityType.FIREBALL_ID,          thrownItemPrefab);
+            entityPrefabs.Add(EntityType.SMALL_FIREBALL_ID,    thrownItemPrefab);
+            entityPrefabs.Add(EntityType.SNOWBALL_ID,          thrownItemPrefab);
             // ...
 
             foreach (var prefabItem in entityPrefabs)

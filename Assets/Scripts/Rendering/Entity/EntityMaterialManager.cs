@@ -8,12 +8,16 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 using CraftSharp.Resource;
+using CraftSharp.Resource.BedrockEntity;
 
 namespace CraftSharp.Rendering
 {
     public class EntityMaterialManager : MonoBehaviour
     {
+        private const string BEDROCK_ENTITY_NAMESPACE = "bedrock_entity";
+        private const string SKIN_NAMESPACE = "skin";
         private static readonly int BASE_MAP = Shader.PropertyToID("_BaseMap");
+        
         [SerializeField] private Color m_EntityBaseColor = new(220F / 255F, 220F / 255F, 220F / 255F);
         public Color EntityBaseColor => m_EntityBaseColor;
         [SerializeField] private Material m_EntityDissolveMaterial;
@@ -34,8 +38,7 @@ namespace CraftSharp.Rendering
         /// This helps to avoid unnecessary copies of materials and makes
         /// texture updates much easier.
         /// </summary>
-        public readonly Dictionary<EntityRenderType, Dictionary<ResourceLocation,
-                Material>> EntityMaterials = InitializeTables();
+        private readonly Dictionary<(EntityRenderType, ResourceLocation), Material> CachedEntityMaterials = new();
         
         public readonly Dictionary<ResourceLocation, bool> SkinModels = new();
 
@@ -46,16 +49,21 @@ namespace CraftSharp.Rendering
         /// <param name="textureId">Texture identifier</param>
         /// <param name="defaultMaterial">The material template to be used if this material is not yet present in table</param>
         /// <param name="callback">Callback to be invoked after applying the material</param>
-        public void ApplyMaterial(EntityRenderType renderType, ResourceLocation textureId, Material defaultMaterial, Action<Material> callback)
+        /// <param name="expectedWidth">Expected texture width, used for Bedrock entity model textures</param>
+        /// <param name="expectedHeight">Expected texture height, used for Bedrock entity model textures</param>
+        public void ApplyMaterial(EntityRenderType renderType, ResourceLocation textureId, Material defaultMaterial,
+            Action<Material> callback, int expectedWidth = 0, int expectedHeight = 0)
         {
-            if (!EntityMaterials[renderType].ContainsKey(textureId))
+            var key = (renderType, textureId);
+            
+            if (!CachedEntityMaterials.TryGetValue(key, out var material))
             {
                 // This entry is not present, instantiate it
                 //Debug.Log($"Creating entity material {textureId} ({renderType})");
 
                 ApplyTextureOrSkin(textureId, tex =>
                 {
-                    var matInstance = new Material(defaultMaterial)
+                    material = new Material(defaultMaterial)
                     {
                         // Read and apply textures from ResourcePackManager
                         mainTexture = tex,
@@ -63,16 +71,31 @@ namespace CraftSharp.Rendering
                         color = EntityBaseColor
                     };
 
-                    matInstance.SetTexture(BASE_MAP, tex);
+                    material.SetTexture(BASE_MAP, tex);
 
-                    EntityMaterials[renderType].Add(textureId, matInstance);
-                    callback.Invoke(matInstance);
-                });
+                    CachedEntityMaterials.Add(key, material);
+                    callback.Invoke(material);
+                }, expectedWidth, expectedHeight);
             }
             else
             {
-                callback.Invoke(EntityMaterials[renderType][textureId]);
+                callback.Invoke(material);
             }
+        }
+
+        /// <summary>
+        /// Map a material to an instance in the global entity material table.
+        /// </summary>
+        /// <param name="renderType">Render type of this material</param>
+        /// <param name="textureName">Texture name</param>
+        /// <param name="callback">Callback to be invoked after applying the material</param>
+        /// <param name="expectedWidth">Texture width defined in Bedrock geometry file</param>
+        /// <param name="expectedHeight">Texture height defined in Bedrock geometry file</param>
+        public void ApplyBedrockMaterial(EntityRenderType renderType, string textureName,
+            Action<Material> callback, int expectedWidth, int expectedHeight)
+        {
+            ApplyMaterial(renderType, new(BEDROCK_ENTITY_NAMESPACE, textureName),
+                GetBedrockEntityMaterialTemplate(renderType), callback, expectedWidth, expectedHeight);
         }
 
         /// <summary>
@@ -80,13 +103,22 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="textureId">Texture identifier</param>
         /// <param name="callback">Callback to be invoked after applying the texture</param>
-        public void ApplyTextureOrSkin(ResourceLocation textureId, Action<Texture2D> callback)
+        /// <param name="expectedWidth">Expected texture width, used for Bedrock entity model textures</param>
+        /// <param name="expectedHeight">Expected texture height, used for Bedrock entity model textures</param>
+        public void ApplyTextureOrSkin(ResourceLocation textureId, Action<Texture2D> callback,
+            int expectedWidth = 0, int expectedHeight = 0)
         {
             var resManager = ResourcePackManager.Instance;
             
-            if (textureId.Namespace == "skin")
+            if (textureId.Namespace == SKIN_NAMESPACE)
             {
                 StartCoroutine(ApplyPlayerSkin(textureId, callback));
+            }
+            else if (textureId.Namespace == BEDROCK_ENTITY_NAMESPACE)
+            {
+                var tex = BedrockEntityResourceManager.Instance
+                    .LoadBedrockEntityTexture(expectedWidth, expectedHeight, textureId.Path);
+                callback.Invoke(tex);
             }
             else
             {
@@ -170,7 +202,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private IEnumerator DownloadPlayerSkin(string skinUrl, string cachePath)
+        private static IEnumerator DownloadPlayerSkin(string skinUrl, string cachePath)
         {
             if (skinUrl.StartsWith("http:"))
             {
@@ -195,7 +227,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public IEnumerator ApplyPlayerSkin(ResourceLocation textureId, Action<Texture2D> callback)
+        private IEnumerator ApplyPlayerSkin(ResourceLocation textureId, Action<Texture2D> callback)
         {
             var playerUUID = Guid.Parse(textureId.Path);
             var cachePath = PathHelper.GetRootDirectory() + Path.DirectorySeparatorChar + "Cached" + Path.DirectorySeparatorChar + "skins";
@@ -314,7 +346,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public Material GetBedrockEntityMaterialTemplate(EntityRenderType renderType)
+        private Material GetBedrockEntityMaterialTemplate(EntityRenderType renderType)
         {
             return renderType switch
             {
@@ -335,15 +367,7 @@ namespace CraftSharp.Rendering
         public void ClearTables()
         {
             playerUUID2TextureInfo.Clear();
-            EntityMaterials.Clear();
-            Enum.GetValues(typeof (EntityRenderType)).OfType<EntityRenderType>()
-                    .ToList().ForEach(x => EntityMaterials.Add(x, new Dictionary<ResourceLocation, Material>()));
-        }
-
-        private static Dictionary<EntityRenderType, Dictionary<ResourceLocation, Material>> InitializeTables()
-        {
-            return Enum.GetValues(typeof (EntityRenderType)).OfType<EntityRenderType>()
-                    .ToDictionary(x => x, _ => new Dictionary<ResourceLocation, Material>() );
+            CachedEntityMaterials.Clear();
         }
     }
 }

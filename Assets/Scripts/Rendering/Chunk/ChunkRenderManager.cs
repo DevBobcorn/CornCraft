@@ -25,6 +25,8 @@ namespace CraftSharp.Rendering
 
         #region GameObject Prefabs for each block entity type
         [SerializeField] private GameObject defaultPrefab;
+        
+        [SerializeField] private GameObject chestPrefab;
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> blockEntityPrefabs = new();

@@ -22,7 +22,7 @@ namespace CraftSharp.Rendering.Editor
         private Dictionary<MoPath, float> variableTable = new();
         private string animationDescription = string.Empty;
 
-        private readonly static GUILayoutOption[] ANIMATION_DESCRIPTION_LAYOUT_OPTIONS = { GUILayout.Height(270F) };
+        private static readonly GUILayoutOption[] ANIMATION_DESCRIPTION_LAYOUT_OPTIONS = { GUILayout.Height(270F) };
 
         public override void OnInspectorGUI()
         {
@@ -43,9 +43,7 @@ namespace CraftSharp.Rendering.Editor
 
                 if (animation is not null)
                 {
-                    StringBuilder animationDesc;
-
-                    animationDesc = new($"===========\n* Loop: {animation.Loop}\n* Length: {animation.Length}\n===========\n");
+                    var animationDesc = new StringBuilder($"===========\n* Loop: {animation.Loop}\n* Length: {animation.Length}\n===========\n");
                     animationDesc.AppendLine("* Bones:");
 
                     HashSet<MoPath> allVariables = new()

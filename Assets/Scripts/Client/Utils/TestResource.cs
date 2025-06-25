@@ -458,10 +458,7 @@ namespace CraftSharp
 
         private IEnumerator DoEntityBuild()
         {
-            var entityResPath = PathHelper.GetPackDirectoryNamed("bedrock_res");
-            var playerModelsPath = PathHelper.GetPackDirectoryNamed("player_models");
-
-            var entityResManager = new BedrockEntityResourceManager(entityResPath, playerModelsPath);
+            var entityResManager = BedrockEntityResourceManager.Instance;
 
             yield return StartCoroutine(entityResManager.LoadEntityResources(new(),
                     (status) => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status))));
