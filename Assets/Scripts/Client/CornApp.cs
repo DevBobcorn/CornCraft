@@ -23,6 +23,7 @@ using CraftSharp.Protocol.Message;
 using CraftSharp.Resource;
 using CraftSharp.UI;
 using CraftSharp.Protocol.ProtoDef;
+using CraftSharp.Resource.BedrockEntity;
 
 namespace CraftSharp
 {
@@ -127,7 +128,7 @@ namespace CraftSharp
             catch (Exception e)
             {
                 Debug.LogWarning($"Data for protocol version {protocolVersion} is not available: {e.Message}");
-                Notify(Translations.Get("login.data_not_availale"), Notification.Type.Error);
+                Notify(Translations.Get("login.data_unavailable"), Notification.Type.Error);
                 updateStatus("login.result.login_failed", string.Empty);
                 startUpFlag.Failed = true;
                 yield break;
@@ -273,6 +274,11 @@ namespace CraftSharp
                 }
             });
             while (!loadFlag.Finished) yield return null;
+
+            var entityResManager = BedrockEntityResourceManager.Instance;
+            
+            yield return StartCoroutine(entityResManager.LoadEntityResources(new(),
+                status => Loom.QueueOnMainThread(() => updateStatus(status, string.Empty))));
 
             // Load in-game translations (loaded AFTER resource files)
             var s = Path.DirectorySeparatorChar;
