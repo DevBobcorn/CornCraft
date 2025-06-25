@@ -1,6 +1,7 @@
 {
     "agent": "solid",
     "allay": "cutout_culloff",
+    "armadillo": "cutout",
     "armor_stand": "cutout",
     "arrow": "cutout_culloff",
     "axolotl": "cutout",
