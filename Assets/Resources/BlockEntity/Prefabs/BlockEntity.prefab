@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9031981989446184402}
   - component: {fileID: 6165186651380798616}
   - component: {fileID: 7253784668836425740}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: CubeFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58,6 +58,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
