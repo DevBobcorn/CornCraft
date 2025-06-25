@@ -184,8 +184,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modelObject: {fileID: 2939716011902131228}
   itemText: {fileID: 2880921485298370084}
-  itemMeshFilter: {fileID: 4811868574071064193}
-  itemMeshRenderer: {fileID: 6061594878036035745}
   slotCenterRef: {fileID: 7578773966599338794}
   hoveredSprite: {fileID: 21300000, guid: 80b1666e635a0c54893225c057849245, type: 3}
   draggedSprite: {fileID: 21300000, guid: 41d0db0f11f33dd4c908cc48774f213a, type: 3}
@@ -480,7 +478,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: a
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9baf05edbcb5b8a4caaa1987e9d8cb2a, type: 2}
   m_sharedMaterial: {fileID: -8751252669686695664, guid: 9baf05edbcb5b8a4caaa1987e9d8cb2a, type: 2}
