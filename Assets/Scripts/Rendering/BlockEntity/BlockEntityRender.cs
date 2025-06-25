@@ -20,7 +20,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// BlockEntity NBT tags
         /// </summary>
-        public Dictionary<string, object>? BlockEntityTags;
+        public Dictionary<string, object>? BlockEntityNBT;
         
         #nullable disable
 
@@ -42,7 +42,7 @@ namespace CraftSharp.Rendering
         {
             Location = blockLoc;
             Type = blockEntityType;
-            BlockEntityTags = tags;
+            BlockEntityNBT = tags;
         }
 
         public virtual void ManagedUpdate(float tickMilSec)

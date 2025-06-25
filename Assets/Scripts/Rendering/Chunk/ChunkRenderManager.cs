@@ -295,7 +295,7 @@ namespace CraftSharp.Rendering
             var chunkX = blockLoc.GetChunkX();
             var chunkZ = blockLoc.GetChunkZ();
             var column = GetChunkColumn(chunkX, chunkZ);
-            bool shouldRecalculateLight = false;
+            bool shouldRecalculateLight;
 
             if (column != null)
             {
@@ -306,6 +306,10 @@ namespace CraftSharp.Rendering
                 chunk[blockLoc.GetChunkBlockX(), blockLoc.GetChunkBlockY(), blockLoc.GetChunkBlockZ()] = block;
                 // Update ambient occlusion and light data cache
                 shouldRecalculateLight = column.UpdateCachedBlockData(blockLoc, block.State);
+            }
+            else
+            {
+                return;
             }
 
             // Block render is considered separately even if chunk data is not present
@@ -494,14 +498,42 @@ namespace CraftSharp.Rendering
         {
             return blockEntityRenders.GetValueOrDefault(blockLoc);
         }
+        
+        private static bool NBTDoesntAffectMesh(Dictionary<string, object> nbt)
+        {
+            return nbt.Count == 0;
+        }
+        
+        /// <summary>
+        /// Create a new block entity render for use with item models
+        /// </summary>
+        /// <param name="parent">Model object transform</param>
+        /// <param name="blockEntityType">Type of the block entity</param>
+        /// /// <param name="nbt">Pass in null if auto-creating this block entity</param>
+        public void CreateBlockEntityRenderForItemModel(Transform parent, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
+        {
+            GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.TypeId);
+
+            if (blockEntityPrefab)
+            {
+                var blockEntityObj = Instantiate(blockEntityPrefab, parent);
+                var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
+
+                blockEntityObj.name = $"[Item Model] {blockEntityType}";
+                blockEntityObj.transform.localPosition = Vector3.zero;
+
+                // Initialize the entity
+                blockEntityRender.Initialize(BlockLoc.Zero, blockEntityType, new());
+            }
+        }
 
         /// <summary>
         /// Add a new block entity render to the world
         /// </summary>
         /// <param name="blockLoc">Location of the block entity</param>
         /// <param name="blockEntityType">Type of the block entity</param>
-        /// <param name="tags">Pass in null if auto-creating this block entity</param>
-        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> tags = null)
+        /// <param name="nbt">Pass in null if auto-creating this block entity</param>
+        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
         {
             // If the location is occupied by a block entity already
             if (blockEntityRenders.TryGetValue(blockLoc, out var prevBlockEntity))
@@ -510,7 +542,7 @@ namespace CraftSharp.Rendering
                 {
                     // Update block entity data tags
                     // Auto-creating a block entity while it is already created
-                    prevBlockEntity.BlockEntityTags = tags ?? new();
+                    prevBlockEntity.BlockEntityNBT = nbt ?? new();
                     // TODO: Update render with updated data tags
                     return;
                 }
@@ -522,7 +554,7 @@ namespace CraftSharp.Rendering
 
             if (blockEntityPrefab)
             {
-                var blockEntityObj = Instantiate(blockEntityPrefab, blockEntityParent, true);
+                var blockEntityObj = Instantiate(blockEntityPrefab, blockEntityParent);
                 var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
 
                 blockEntityRenders.Add(blockLoc, blockEntityRender);
@@ -531,7 +563,7 @@ namespace CraftSharp.Rendering
                 blockEntityObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, blockLoc.ToCenterLocation());
 
                 // Initialize the entity
-                blockEntityRender.Initialize(blockLoc, blockEntityType, tags ?? new());
+                blockEntityRender.Initialize(blockLoc, blockEntityType, nbt ?? new());
             }
         }
 
@@ -1066,6 +1098,12 @@ namespace CraftSharp.Rendering
 
         private void Start()
         {
+            // Clear loaded things
+            blockEntityPrefabs.Clear();
+            
+            // Register entity render prefabs ===========================================
+            blockEntityPrefabs.Add(BlockEntityType.CHEST_ID,             chestPrefab);
+            
             client = CornApp.CurrentClient;
 
             var modelTable = ResourcePackManager.Instance.StateModelTable;

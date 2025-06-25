@@ -79,15 +79,12 @@ namespace CraftSharp.Rendering
                 layer = gameObject.layer
             };
 
-            (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)? meshData = null;
-
             switch (actionType)
             {
                 case ItemActionType.Sword:
                     _currentItem = itemObj.AddComponent<MeleeWeapon>();
-                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
-                    // Use dummy material and mesh if failed to build for item
-                    meshData ??= (psi.DummySwordItemMesh!, psi.DummyItemMaterial!, new());
+                    ItemMeshBuilder.BuildItemGameObject(itemObj, itemStack, DisplayPosition.Unknown,
+                        false, psi.DummySwordItemMesh, psi.DummyItemMaterial);
 
                     _itemMountSlot!.localEulerAngles = psi.SwordMountEulerAngles;
                     _itemMountSlot!.localPosition = psi.SwordMountPosition;
@@ -95,23 +92,13 @@ namespace CraftSharp.Rendering
                     _mainHandSlot!.localEulerAngles = psi.SwordMainHandEulerAngles;
                     _mainHandSlot!.localPosition = psi.SwordMainHandPosition;
 
-                    /*
-                    var trailObj = GameObject.Instantiate(psi.SwordTrailPrefab);
-                    trailObj.transform.parent = itemObj.transform;
-                    trailObj.transform.localPosition = new(0.5F, 0.65F, 0.65F);
-
-                    var sword = _currentItem as MeleeWeapon;
-                    sword!.SlashTrail = trailObj.GetComponent<TrailRenderer>();
-                    */
-
                     itemObj.transform.localScale = psi.SwordLocalScale;
 
                     break;
                 case ItemActionType.Bow:
                     _currentItem = itemObj.AddComponent<UselessActionItem>();
-                    meshData = ItemMeshBuilder.BuildItem(itemStack, false);
-                    // Use dummy material and mesh if failed to build for item
-                    meshData ??= (psi.DummyBowItemMesh!, psi.DummyItemMaterial!, new());
+                    ItemMeshBuilder.BuildItemGameObject(itemObj, itemStack, DisplayPosition.Unknown,
+                        false, psi.DummyBowItemMesh, psi.DummyItemMaterial);
 
                     _itemMountSlot!.localEulerAngles = psi.BowMountEulerAngles;
                     _itemMountSlot!.localPosition = psi.BowMountPosition;
@@ -121,18 +108,6 @@ namespace CraftSharp.Rendering
                     
                     itemObj.transform.localScale = psi.BowLocalScale;
                     break;
-                default:
-                    // No visual
-                    break;
-            }
-
-            if (meshData is not null) // In case of invalid items, meshData can be null
-            {
-                var mesh = itemObj.AddComponent<MeshFilter>();
-                mesh.mesh = meshData.Value.mesh;
-
-                var renderer = itemObj.AddComponent<MeshRenderer>();
-                renderer.sharedMaterial = meshData.Value.material;
             }
 
             // Set weapon mount pivot position

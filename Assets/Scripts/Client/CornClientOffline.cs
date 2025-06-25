@@ -578,7 +578,8 @@ namespace CraftSharp
                 {
                     PlayerController.EnablePhysics();
                 }
-
+                // Update nearby chunk render list
+                ChunkRenderManager.UpdateNearbyChunkCoordList(0, 0);
                 // Update camera yaw (convert to Unity yaw)
                 CameraController.SetYaw(yaw + 90F);
             }
@@ -625,7 +626,6 @@ namespace CraftSharp
                                 var block = new Block(blockStateIds[curIndex][(blockY << 8) | (blockZ << 4) | blockX]);
                                 chunk.SetWithoutCheck(blockX, blockY, blockZ, block);
                             }
-                    
 
                     chunksManager.StoreChunk(chunkX, chunkYIndex, chunkZ, chunkColumnSize, chunk);
 

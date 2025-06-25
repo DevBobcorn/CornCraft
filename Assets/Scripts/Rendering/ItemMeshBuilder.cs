@@ -38,40 +38,114 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
-        /// Build item mesh, material and transforms from given item stack.
+        /// Build item object from item stack. Returns true if item is not empty and successfully built
         /// </summary>
-        public static (Mesh mesh, Material material, Dictionary<DisplayPosition, float3x3> transforms)?
-                BuildItem(ItemStack? itemStack, bool useInventoryMaterial)
+        public static bool BuildItemGameObject(GameObject modelObject, ItemStack? itemStack,
+            DisplayPosition displayPosition, bool useInventoryMaterial,
+            Mesh? defaultMesh = null, Material? defaultMaterial = null)
         {
-            if (itemStack is null) return null;
-
-            var packManager = ResourcePackManager.Instance;
+            if (itemStack is null || itemStack.Count <= 0) return false;
+            
             var itemId = itemStack.ItemType.ItemId;
+            var itemNumId = ItemPalette.INSTANCE.GetNumIdById(itemId);
+            var itemModelId = new ResourceLocation(itemId.Namespace, $"item/{itemId.Path}");
 
+            var client = CornApp.CurrentClient;
+            if (!client) return false;
+            
             // Use mesh cache if possible
             var shouldUseCache = itemStack.NBT is null || NBTDoesntAffectMesh(itemStack.NBT);
-
-            var itemNumId = ItemPalette.INSTANCE.GetNumIdById(itemId);
+            
+            var packManager = ResourcePackManager.Instance;
             packManager.ItemModelTable.TryGetValue(itemNumId, out ItemModel? itemModel);
-
-            if (itemModel is null) return null;
-
-            var material = CornApp.CurrentClient!.ChunkMaterialManager
-                .GetAtlasMaterial(itemModel.RenderType, useInventoryMaterial);
-
-            if (shouldUseCache && DEFAULT_MESH_CACHE.TryGetValue(itemId, out var defaultMesh))
-            {
-                return (defaultMesh, material, itemModel.Geometry.DisplayTransforms);
-            }
-
-            // Make and set mesh...
-
-            var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemId);
-            var colors = tintFunc is null ? new float3[] { new(1F, 0F, 0F), new(0F, 0F, 1F), new(0F, 1F, 0F) } : tintFunc.Invoke(itemStack);
-
-            // TODO Get and build the right geometry (base or override)
+            if (itemModel is null) return false;
+            
+            // TODO: Get and build the right geometry (base or override)
             var itemGeometry = itemModel.Geometry;
 
+            if (packManager.BuiltinEntityModels.Contains(itemModelId)) // Use embedded entity render
+            {
+                var type = BlockEntityTypePalette.INSTANCE.GetById(itemId);
+                client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, type);
+            }
+            else // Use regular mesh
+            {
+                if (!modelObject.TryGetComponent<MeshFilter>(out var meshFilter))
+                {
+                    meshFilter = modelObject.AddComponent<MeshFilter>();
+                }
+
+                if (!modelObject.TryGetComponent<MeshRenderer>(out var meshRenderer))
+                {
+                    meshRenderer = modelObject.AddComponent<MeshRenderer>();
+                }
+            
+                var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemId);
+                var colors = tintFunc is null ? new float3[] { new(1F, 0F, 0F), new(0F, 0F, 1F), new(0F, 1F, 0F) } : tintFunc.Invoke(itemStack);
+            
+                var mesh = BuildItemMeshAndCache(itemGeometry, itemId, shouldUseCache, colors);
+                if (mesh is not null)
+                {
+                    meshFilter.sharedMesh = mesh;
+                    meshRenderer.sharedMaterial = client.ChunkMaterialManager
+                        .GetAtlasMaterial(itemModel.RenderType, useInventoryMaterial);
+                }
+                else if (defaultMesh is not null && defaultMaterial is not null)
+                {
+                    meshFilter.sharedMesh = defaultMesh;
+                    meshRenderer.sharedMaterial = defaultMaterial;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            switch (displayPosition)
+            {
+                case DisplayPosition.GUI:
+                    // Handle GUI display transform
+                    bool hasGUITransform = itemGeometry.DisplayTransforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
+
+                    if (hasGUITransform) // Apply specified local transform
+                    {
+                        // Apply local translation, '1' in translation field means 0.1 unit in local space, so multiply with 0.1
+                        modelObject.transform.localPosition = t.c0 * 0.1F;
+                        // Apply local rotation
+                        modelObject.transform.localEulerAngles = Vector3.zero;
+                        // - MC ROT X
+                        modelObject.transform.Rotate(Vector3.back, t.c1.x, Space.Self);
+                        // - MC ROT Y
+                        modelObject.transform.Rotate(Vector3.down, t.c1.y, Space.Self);
+                        // - MC ROT Z
+                        modelObject.transform.Rotate(Vector3.left, t.c1.z, Space.Self);
+                        // Apply local scale
+                        modelObject.transform.localScale = t.c2;
+                    }
+                    else // Apply uniform local transform
+                    {
+                        // Apply local translation, set to zero
+                        modelObject.transform.localPosition = Vector3.zero;
+                        // Apply local rotation
+                        modelObject.transform.localEulerAngles = Vector3.zero;
+                        // Apply local scale
+                        modelObject.transform.localScale = Vector3.one;
+                    }
+                    break;
+            }
+            
+            return true;
+        }
+
+        /// <summary>
+        /// Build item mesh and cache it(if applicable)
+        /// </summary>
+        public static Mesh? BuildItemMeshAndCache(ItemGeometry itemGeometry, ResourceLocation itemId, bool shouldUseCache, float3[] colors)
+        {
+            if (shouldUseCache && DEFAULT_MESH_CACHE.TryGetValue(itemId, out var defaultMesh))
+            {
+                return defaultMesh;
+            }
             var mesh = BuildItemMesh(itemGeometry, colors);
 
             // Store in cache if applicable
@@ -84,7 +158,7 @@ namespace CraftSharp.Rendering
                 UNCACHED_ITEM_MESHES.Add(mesh);
             }
 
-            return (mesh, material, itemGeometry.DisplayTransforms);
+            return mesh;
         }
 
         /// <summary>

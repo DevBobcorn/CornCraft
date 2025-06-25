@@ -1,24 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using Unity.Collections;
 using Unity.Mathematics;
-using TMPro;
 
 using CraftSharp.Molang.Runtime;
-using CraftSharp.Protocol.Handlers;
 using CraftSharp.Resource;
 using CraftSharp.Rendering;
 using CraftSharp.Resource.BedrockEntity;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Registries;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Registries.Subcomponents;
 
 namespace CraftSharp
 {
@@ -26,20 +19,11 @@ namespace CraftSharp
     {
         private static readonly byte[] FLUID_HEIGHTS = { 15, 15, 15, 15, 15, 15, 15, 15, 15 };
 
-        public TMP_Text InfoText;
-        public Animator CrosshairAnimator;
         [SerializeField] private ChunkMaterialManager chunkMaterialManager;
         [SerializeField] private EntityMaterialManager entityMaterialManager;
         [SerializeField] private Material particleMaterial;
 
-        [SerializeField] private RectTransform inventory;
-        [SerializeField] private GameObject inventoryItemPrefab;
-        public int[] InventoryBuildList = { };
-
-        [SerializeField] private Viewer viewer;
-
-        private bool loaded;
-        private readonly List<Transform> billBoardTransforms = new();
+        private readonly List<Transform> billboardTransforms = new();
 
         // Runs before a scene gets loaded
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -47,9 +31,7 @@ namespace CraftSharp
 
         private static readonly float[] DUMMY_BLOCK_VERT_LIGHT = Enumerable.Repeat(0F, 8).ToArray();
 
-        private static readonly ResourceLocation BLOCK_PARTICLE_ID = new("block");
         private static readonly int BASE_MAP_NAME = Shader.PropertyToID("_BaseMap");
-        private static readonly int SHOW_NAME = Animator.StringToHash("Show");
 
         private void TestBuildState(string stateName, int stateId, BlockState state, BlockStateModel stateModel, int cullFlags, World world, float3 pos)
         {
@@ -202,103 +184,19 @@ namespace CraftSharp
             }
         }
 
-        private void TestBuildItem(string itemName, ItemStack itemStack, ItemModel itemModel, float3 pos)
+        private void TestBuildItem(string itemName, ItemStack itemStack, float3 pos)
         {
-            // Gather all geometries of this model
-            Dictionary<ItemModelPredicate, ItemGeometry> buildDict = new()
+            var coord = pos + new float3(0.5F, 0.5F, 0.5F);
+            var modelObject = new GameObject(itemName)
             {
-                { ItemModelPredicate.EMPTY, itemModel.Geometry }
+                transform =
+                {
+                    parent = transform,
+                    localPosition = coord
+                }
             };
-            foreach (var pair in itemModel.Overrides)
-                buildDict.TryAdd(pair.Key, pair.Value);
 
-            int altitude = 0;
-            foreach (var pair in buildDict)
-            {
-                var coord = pos + new float3(0.5F, altitude * 1.25F + 0.5F, 0.5F);
-
-                var modelObject = new GameObject(pair.Key == ItemModelPredicate.EMPTY ? itemName : $"{itemName}{pair.Key}")
-                    {
-                        transform =
-                        {
-                            parent = transform,
-                            localPosition = coord
-                        }
-                    };
-
-                var filter = modelObject.AddComponent<MeshFilter>();
-                var render = modelObject.AddComponent<MeshRenderer>();
-                var meshCollider = modelObject.AddComponent<MeshCollider>();
-
-                var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemStack.ItemType.ItemId);
-                // Use high-contrast colors for troubleshooting and debugging
-                //colors = new float3[]{ new(1F, 0F, 0F), new(0F, 1F, 0F), new(0F, 0F, 1F) };
-                // Or use white colors to make sure models with mis-tagged tinted faces still look right
-                var colors = tintFunc is null ? new float3[] { new(1F, 1F, 1F), new(1F, 1F, 1F), new(1F, 1F, 1F) } : tintFunc.Invoke(itemStack);
-
-                var itemMesh = ItemMeshBuilder.BuildItemMesh(pair.Value, colors);
-
-                filter.sharedMesh = itemMesh;
-                meshCollider.sharedMesh = itemMesh;
-                render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType);
-
-                altitude += 1;
-            }
-        }
-
-        private void TestBuildInventoryItem(string itemName, ItemStack itemStack, ItemModel itemModel)
-        {
-            var invItemObj = Instantiate(inventoryItemPrefab);
-            invItemObj.name = itemName;
-            invItemObj.GetComponent<RectTransform>().SetParent(inventory, false);
-
-            var filter = invItemObj.GetComponentInChildren<MeshFilter>();
-            var modelObject = filter.gameObject;
-
-            var render = modelObject.GetComponent<MeshRenderer>();
-            var itemGeometry = itemModel.Geometry;
-
-            var tintFunc = ItemPalette.INSTANCE.GetTintRule(itemStack.ItemType.ItemId);
-            // Use high-contrast colors for troubleshooting and debugging
-            //colors = new float3[]{ new(1F, 0F, 0F), new(0F, 1F, 0F), new(0F, 0F, 1F) };
-            // Or use white colors to make sure models with mis-tagged tinted faces still look right
-            var colors = tintFunc is null ? new float3[] { new(1F, 1F, 1F), new(1F, 1F, 1F), new(1F, 1F, 1F) } : tintFunc.Invoke(itemStack);
-
-            var itemMesh = ItemMeshBuilder.BuildItemMesh(itemGeometry, colors);
-
-            // Handle GUI display transform
-            bool hasGUITransform = itemGeometry.DisplayTransforms.TryGetValue(DisplayPosition.GUI, out float3x3 t);
-
-            // Make use of the debug text
-            invItemObj.GetComponentInChildren<TMP_Text>().text = hasGUITransform ? $"{t.c1.x} {t.c1.y} {t.c1.z}" : string.Empty;
-
-            if (hasGUITransform) // Apply specified local transform
-            {
-                // Apply local translation, '1' in translation field means 0.1 unit in local space, so multiply with 0.1
-                modelObject.transform.localPosition = t.c0 * 0.1F;
-                // Apply local rotation
-                modelObject.transform.localEulerAngles = Vector3.zero;
-                // - MC ROT X
-                modelObject.transform.Rotate(Vector3.back, t.c1.x, Space.Self);
-                // - MC ROT Y
-                modelObject.transform.Rotate(Vector3.down, t.c1.y, Space.Self);
-                // - MC ROT Z
-                modelObject.transform.Rotate(Vector3.left, t.c1.z, Space.Self);
-                // Apply local scale
-                modelObject.transform.localScale = t.c2;
-            }
-            else // Apply uniform local transform
-            {
-                // Apply local translation, set to zero
-                modelObject.transform.localPosition = Vector3.zero;
-                // Apply local rotation
-                modelObject.transform.localEulerAngles = Vector3.zero;
-                // Apply local scale
-                modelObject.transform.localScale = Vector3.one;
-            }
-
-            filter.sharedMesh = itemMesh;
-            render.sharedMaterial = chunkMaterialManager.GetAtlasMaterial(itemModel.RenderType, true);
+            ItemMeshBuilder.BuildItemGameObject(modelObject, itemStack, DisplayPosition.Ground, false);
         }
 
         private void TestBuildParticle(string particleName, Mesh[] meshes, Material material, float3 pos)
@@ -325,57 +223,16 @@ namespace CraftSharp
                 var meshCollider = particleObject.AddComponent<MeshCollider>();
                 meshCollider.sharedMesh = meshes[i];
 
-                billBoardTransforms.Add(particleObject.transform);
+                billboardTransforms.Add(particleObject.transform);
             }
         }
 
-        private IEnumerator DoBuild(string dataVersion, string resourceVersion, string[] resourceOverrides)
+        private IEnumerator DoBuild()
         {
-            // Load block/blockstate definitions
-            var loadFlag = new DataLoadFlag();
-            Task.Run(() => BlockStatePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
-            while (!loadFlag.Finished) yield return null;
-
-            // Load item definitions
-            var dataTypes = new MinecraftDataTypes(ProtocolMinecraft.MC_1_16_5_Version);
-            var componentRegistry = new StructuredComponentsRegistry1206(
-                dataTypes, ItemPalette.INSTANCE, new SubComponentRegistry1206(dataTypes));
-            
-            loadFlag.Finished = false;
-            Task.Run(() => ItemPalette.INSTANCE.PrepareData(componentRegistry, dataVersion, loadFlag));
-            while (!loadFlag.Finished) yield return null;
-
-            // Load particle definitions
-            loadFlag.Finished = false;
-            Task.Run(() => ParticleTypePalette.INSTANCE.PrepareData(dataVersion, loadFlag));
-            while (!loadFlag.Finished) yield return null;
-
-            // Load resource packs
             var packManager = ResourcePackManager.Instance;
-            packManager.ClearPacks();
-
-            // First add base resources
-            ResourcePack basePack = new($"vanilla-{resourceVersion}");
-            packManager.AddPack(basePack);
-
-            // Then append overrides
-            foreach (var packName in resourceOverrides)
-                packManager.AddPack(new(packName));
-
-            // Load valid packs...
-            loadFlag.Finished = false;
-            Task.Run(() => packManager.LoadPacks(loadFlag,
-                (status, progress) => InfoText.text = Translations.Get(status) + progress,
-                loadParticles: true));
-            while (!loadFlag.Finished) yield return null;
-
-            // Loading complete!
-            loaded = true;
             
             // Create a dummy world as provider of block colors
             var world = new World();
-
-            float startTime = Time.realtimeSinceStartup;
 
             const int start = 0;
             const int limit = 4096;
@@ -396,6 +253,8 @@ namespace CraftSharp
                 if (count >= start + limit)
                     break;
             }
+            
+            yield return null;
 
             count = 0; width = 32;
             foreach (var pair in packManager.ItemModelTable)
@@ -406,15 +265,16 @@ namespace CraftSharp
                     var item = ItemPalette.INSTANCE.GetByNumId(pair.Key);
                     var itemStack = new ItemStack(item, 1, null);
 
-                    TestBuildItem($"Item [{pair.Key}] {item}", itemStack, pair.Value, new(-(index % width) * 1.5F - 1.5F, 0F, index / width * 1.5F));
+                    TestBuildItem($"Item [{pair.Key}] {item}", itemStack, new(-(index % width) * 1.5F - 1.5F, 0F, index / width * 1.5F));
                 }
 
                 count++;
 
                 if (count >= start + limit)
                     break;
-
             }
+            
+            yield return null;
 
             count = 0; width = 32;
             var particleMaterialInstance = new Material(particleMaterial);
@@ -432,8 +292,8 @@ namespace CraftSharp
 
                 count++;
             }
-
-            InfoText.text = $"Meshes built in {Time.realtimeSinceStartup - startTime} second(s).";
+            
+            yield return null;
         }
 
         private void TestAnimation(string jsonStr)
@@ -459,18 +319,12 @@ namespace CraftSharp
         private IEnumerator DoEntityBuild()
         {
             var entityResManager = BedrockEntityResourceManager.Instance;
-
-            yield return StartCoroutine(entityResManager.LoadEntityResources(new(),
-                    (status) => Loom.QueueOnMainThread(() => InfoText.text = Translations.Get(status))));
             
             var testmentObj = new GameObject("[Entity Testment]");
             const int entityPerRow = 10;
             int index = 0;
-            foreach (var pair in entityResManager.EntityRenderDefinitions)
+            foreach (var (entityType, entityDef) in entityResManager.EntityRenderDefinitions)
             {
-                var entityType = pair.Key;
-                var entityDef = pair.Value;
-
                 int i = index / entityPerRow;
                 int j = index % entityPerRow;
 
@@ -491,97 +345,27 @@ namespace CraftSharp
                 
                 index++;
             }
+            
+            yield return null;
         }
 
         private void Start()
         {
-            var overrides = new[] { "vanilla_fix"/*, "3D Default 1.16.2+ v1.6.0"*/ };
-            const string resVersion = "1.16.5";
-            const string dataVersion = "1.16.5";
+            mainCamera = Camera.main;
 
-            if (!Directory.Exists(PathHelper.GetPackDirectoryNamed($"vanilla-{resVersion}"))) // Prepare resources first
-            {
-                Debug.Log($"Resources for {resVersion} not present. Downloading...");
-
-                StartCoroutine(ResourceDownloader.DownloadResource(resVersion,
-                        (status, progress) => InfoText.text = Translations.Get(status) + progress,
-                        () => { }, succeeded => {
-                            if (succeeded) // Resources ready, do build
-                                StartCoroutine(DoBuild(dataVersion, resVersion, overrides));
-                            else // Failed to download resources
-                                InfoText.text = $"Failed to download resources for {resVersion}.";
-                        }));
-            }
-            else // Resources ready, do build
-            {
-                StartCoroutine(DoBuild(dataVersion, resVersion, overrides));
-            }
-
+            StartCoroutine(DoBuild());
             StartCoroutine(DoEntityBuild());
-
-            IsPaused = false;
         }
 
-        private bool isPaused = false;
-        public bool IsPaused
-        {
-            get => isPaused;
-            set {
-                isPaused = value;
-                // Update cursor lock
-                Cursor.lockState = value ? CursorLockMode.None : CursorLockMode.Locked;
-                // Update crosshair visibility
-                CrosshairAnimator.SetBool(SHOW_NAME, !value);
-                // Update viewer
-                if (viewer)
-                {
-                    viewer.enabled = !IsPaused;
-                }
-            }
-        }
+        private Camera mainCamera;
 
         private void Update()
         {
-            if (billBoardTransforms != null)
+            if (billboardTransforms != null)
             {
-                foreach (var t in billBoardTransforms)
+                foreach (var t in billboardTransforms)
                 {
-                    t.localEulerAngles = Camera.main.transform.localEulerAngles;
-                }
-            }
-
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                IsPaused = !IsPaused;
-            }
-
-            if (Keyboard.current.qKey.wasPressedThisFrame) // Rebuild inventory items
-            {
-                if (!loaded)
-                {
-                    Debug.LogWarning($"Resource loading in progress, please wait...");
-                    return;
-                }
-
-                var items = new List<Transform>();
-                foreach (Transform item in inventory.transform)
-                {
-                    items.Add(item);
-                }
-                
-                foreach (var item in items)
-                {
-                    Destroy(item.gameObject);
-                }
-
-                var packManager = ResourcePackManager.Instance;
-
-                foreach (var itemNumId in InventoryBuildList)
-                {
-                    var item = ItemPalette.INSTANCE.GetByNumId(itemNumId);
-                    var itemStack = new ItemStack(item, 1, null);
-
-                    TestBuildInventoryItem($"Item [{itemNumId}] {item}", itemStack, packManager.ItemModelTable[itemNumId]);
+                    t.localEulerAngles = mainCamera.transform.localEulerAngles;
                 }
             }
         }
