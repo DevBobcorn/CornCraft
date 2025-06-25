@@ -22,6 +22,8 @@ def cpdir(datadir, target_folder):
 
                 print(f'{path_in_folder} -> {target_folder}/{rel_path}')
 
+                os.makedirs(os.path.dirname(f'{target_folder}/{rel_path}'), exist_ok=True)
+
                 shutil.copy(path_in_folder, f'{target_folder}/{rel_path}')
             else:
                 print(f'Excluding file {file}')
