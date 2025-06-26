@@ -47,7 +47,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void Initialize(BlockLoc blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> tags)
+        public virtual void Initialize(BlockLoc blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> tags)
         {
             Location = blockLoc;
             Type = blockEntityType;

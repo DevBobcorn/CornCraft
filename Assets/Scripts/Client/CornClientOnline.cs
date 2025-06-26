@@ -1937,12 +1937,16 @@ namespace CraftSharp
 
             Loom.QueueOnMainThread(() =>
             {
+                var blockLoc = ConsumeLastInteractionBlockLoc();
+
                 // Set inventory id before opening the screen
                 ScreenControl.SetScreenData<InventoryScreen>(screen =>
                 {
                     screen.SetActiveInventory(inventoryData);
                 });
                 ScreenControl.PushScreen<InventoryScreen>();
+
+                EventManager.Instance.Broadcast(new InventoryOpenEvent(inventoryId, inventoryData, blockLoc));
             });
         }
 
@@ -1970,6 +1974,8 @@ namespace CraftSharp
             {
                 Debug.Log(Translations.Get("extra.inventory_close", inventoryId));
             }
+
+            EventManager.Instance.BroadcastOnUnityThread(new InventoryCloseEvent(inventoryId));
         }
 
         /// <summary>
@@ -2137,7 +2143,7 @@ namespace CraftSharp
                 uuid = player.UUID;
                 // Also update client entity uuid
                 clientEntity.UUID = uuid;
-                Debug.Log($"Updated client uuid: {this.uuid}");
+                Debug.Log($"Updated client uuid: {uuid}");
             }
 
             lock (onlinePlayers)

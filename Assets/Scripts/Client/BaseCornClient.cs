@@ -256,6 +256,38 @@ namespace CraftSharp
         public abstract bool SwapItemOnHands();
         public abstract bool ChangeHotbarSlot(short slot);
 
+        private BlockLoc? lastInteractionBlockLoc;
+
+        public void SetLastInteractionBlockLoc(BlockLoc blockLoc, BlockState blockState)
+        {
+            if (blockState.Properties.TryGetValue("type",
+                    out var typeVal) && typeVal == "right") // Use location of the left part instead
+            {
+                if (blockState.Properties.TryGetValue("facing", out var facingVal))
+                {
+                    blockLoc = facingVal switch
+                    {
+                        "north" => blockLoc.East(),
+                        "east" => blockLoc.South(),
+                        "south" => blockLoc.West(),
+                        "west" => blockLoc.North(),
+                        _ => throw new System.IO.InvalidDataException($"Facing {facingVal} is not valid!")
+                    };
+                }
+            }
+            
+            lastInteractionBlockLoc = blockLoc;
+        }
+
+        protected BlockLoc? ConsumeLastInteractionBlockLoc()
+        {
+            var li = lastInteractionBlockLoc;
+            
+            lastInteractionBlockLoc = null;
+            
+            return li;
+        }
+
         public bool ChangeHotbarSlotBy(short offset)
         {
             var index = CurrentHotbarSlot + offset;

@@ -31,8 +31,10 @@ namespace CraftSharp.Control
                 {
                     case InteractionType.Interact:
                     {
-                        // TODO: Check interact location
                         client.PlaceBlock(blockLoc, Direction.Down, 0.5F, 0.5F, 0.5F);
+
+                        var blockState = client.GetChunkRenderManager().GetBlock(blockLoc).State;
+                        client.SetLastInteractionBlockLoc(blockLoc, blockState);
 
                         break;
                     }

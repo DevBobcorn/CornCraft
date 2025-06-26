@@ -1103,6 +1103,8 @@ namespace CraftSharp.UI
             if (activeInventoryId != 0) // Don't close player inventory
             {
                 client.CloseInventory(activeInventoryId);
+                
+                EventManager.Instance.Broadcast(new InventoryCloseEvent(activeInventoryId));
             }
             
             client.ScreenControl.TryPopScreen();

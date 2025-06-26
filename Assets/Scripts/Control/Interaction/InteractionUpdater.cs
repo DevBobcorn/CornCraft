@@ -567,6 +567,9 @@ namespace CraftSharp.Control
         {
             var placeBlockLoc = replace ? targetBlockLoc : GetPlaceBlockLoc(targetBlockLoc, targetDirection);
             client.PlaceBlock(targetBlockLoc, targetDirection, inBlockX, inBlockY, inBlockZ, Inventory.Hand.MainHand);
+            
+            var blockState = client.GetChunkRenderManager().GetBlock(targetBlockLoc).State;
+            client.SetLastInteractionBlockLoc(targetBlockLoc, blockState);
 
             return placeBlockLoc;
         }
