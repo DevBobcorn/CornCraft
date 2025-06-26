@@ -58,6 +58,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -140,8 +143,7 @@ MonoBehaviour:
   _visualTransform: {fileID: 4934986444833276686}
   ragdollPrefab: {fileID: 0}
   FloatingInfoPrefab: {fileID: 0}
-  itemMeshFilter: {fileID: 5779943884144255316}
-  itemMeshRenderer: {fileID: 8177037134279263917}
+  ItemObject: {fileID: 2071987950562115949}
 --- !u!1 &2716930875251792988
 GameObject:
   m_ObjectHideFlags: 0
