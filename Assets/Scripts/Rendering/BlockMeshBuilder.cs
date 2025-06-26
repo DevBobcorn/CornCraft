@@ -63,9 +63,7 @@ namespace CraftSharp.Rendering
 
             if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(blockId, out BlockEntityType blockEntityType)) // Use embedded entity render
             {
-                var blockEntityRender = client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockEntityType);
-
-                blockEntityRender.UpdateBlockState(blockState);
+                client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockState, blockEntityType);
             }
             
             var color = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, BlockLoc.Zero);

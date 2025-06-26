@@ -1523,6 +1523,7 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.BlockEntityData:
                     {
                         var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
+                        var blockState = handler.GetChunkRenderManager().GetBlock(blockLoc).State;
                         var ttt = DataTypes.ReadNextVarInt(packetData);
                         var tag = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT);
                             
@@ -1533,7 +1534,7 @@ namespace CraftSharp.Protocol.Handlers
                             var type = BlockEntityTypePalette.INSTANCE.GetById(typeId);
                             //UnityEngine.Debug.Log($"Single [{blockLoc}] {Json.Object2Json(tag)}");
                             Loom.QueueOnMainThread(() => {
-                                handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
+                                handler.GetChunkRenderManager().AddOrUpdateBlockEntityRender(blockLoc, blockState, type, tag);
                             });
                         }
                         else
@@ -1541,7 +1542,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Block entity id is sent as varint
                             var type = BlockEntityTypePalette.INSTANCE.GetByNumId(ttt);
                             Loom.QueueOnMainThread(() => {
-                                handler.GetChunkRenderManager().AddBlockEntityRender(blockLoc, type, tag);
+                                handler.GetChunkRenderManager().AddOrUpdateBlockEntityRender(blockLoc, blockState, type, tag);
                             });
                         }
                     }

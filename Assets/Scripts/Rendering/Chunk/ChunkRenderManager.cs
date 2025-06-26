@@ -315,12 +315,14 @@ namespace CraftSharp.Rendering
             // Block render is considered separately even if chunk data is not present
             Loom.QueueOnMainThread(() =>
             {
-                // Check if the location has a block entity and remove it
-                RemoveBlockEntityRender(blockLoc);
                 // Auto-create block entity if present
                 if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(block.BlockId, out BlockEntityType blockEntityType))
                 {
-                    AddBlockEntityRender(blockLoc, blockEntityType);
+                    AddOrUpdateBlockEntityRender(blockLoc, block.State, blockEntityType);
+                }
+                else
+                {
+                    RemoveBlockEntityRender(blockLoc);
                 }
 
                 var chunkYIndex = blockLoc.GetChunkYIndex(column.MinimumY);
@@ -508,42 +510,46 @@ namespace CraftSharp.Rendering
         /// Create a new block entity render for use with item models
         /// </summary>
         /// <param name="parent">Model object transform</param>
+        /// <param name="blockState">BlockState of the block entity</param>
         /// <param name="blockEntityType">Type of the block entity</param>
-        /// /// <param name="nbt">Pass in null if auto-creating this block entity</param>
-        public void CreateBlockEntityRenderForItemModel(Transform parent, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
+        /// <param name="nbt">Pass in null if auto-creating this block entity</param>
+        public BlockEntityRender CreateBlockEntityRenderForItemModel(Transform parent, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
         {
             GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.TypeId);
+            var blockEntityObj = Instantiate(blockEntityPrefab, parent);
+            var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
 
-            if (blockEntityPrefab)
-            {
-                var blockEntityObj = Instantiate(blockEntityPrefab, parent);
-                var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
+            blockEntityObj.name = $"[Item Model] {blockEntityType}";
+            blockEntityObj.transform.localPosition = Vector3.zero;
+            blockEntityObj.transform.localEulerAngles = new Vector3(0, 180F, 0);
 
-                blockEntityObj.name = $"[Item Model] {blockEntityType}";
-                blockEntityObj.transform.localPosition = Vector3.zero;
-
-                // Initialize the entity
-                blockEntityRender.Initialize(BlockLoc.Zero, blockEntityType, new());
-            }
+            // Initialize the entity
+            blockEntityRender.Initialize(BlockLoc.Zero, blockState, blockEntityType, new());
+                
+            return blockEntityRender;
         }
 
         /// <summary>
         /// Add a new block entity render to the world
         /// </summary>
         /// <param name="blockLoc">Location of the block entity</param>
+        /// <param name="blockState">BlockState of the block entity</param>
         /// <param name="blockEntityType">Type of the block entity</param>
         /// <param name="nbt">Pass in null if auto-creating this block entity</param>
-        public void AddBlockEntityRender(BlockLoc blockLoc, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
+        public void AddOrUpdateBlockEntityRender(BlockLoc blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
         {
             // If the location is occupied by a block entity already
-            if (blockEntityRenders.TryGetValue(blockLoc, out var prevBlockEntity))
+            if (blockEntityRenders.TryGetValue(blockLoc, out var prevBlockEntityRender))
             {
-                if (prevBlockEntity.Type == blockEntityType) // Auto-created, keep it but replace data tags
+                if (prevBlockEntityRender.Type == blockEntityType) // Auto-created, keep it but replace data tags
                 {
                     // Update block entity data tags
                     // Auto-creating a block entity while it is already created
-                    prevBlockEntity.BlockEntityNBT = nbt ?? new();
+                    prevBlockEntityRender.BlockEntityNBT = nbt ?? new();
+                    
                     // TODO: Update render with updated data tags
+                    prevBlockEntityRender.UpdateBlockState(blockState);
+                    
                     return;
                 }
                 // Remove it otherwise
@@ -551,20 +557,16 @@ namespace CraftSharp.Rendering
             }
 
             GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.TypeId);
+            var blockEntityObj = Instantiate(blockEntityPrefab, blockEntityParent);
+            var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
 
-            if (blockEntityPrefab)
-            {
-                var blockEntityObj = Instantiate(blockEntityPrefab, blockEntityParent);
-                var blockEntityRender = blockEntityObj!.GetComponent<BlockEntityRender>();
+            blockEntityRenders.Add(blockLoc, blockEntityRender);
 
-                blockEntityRenders.Add(blockLoc, blockEntityRender);
+            blockEntityObj.name = $"[{blockLoc}] {blockEntityType}";
+            blockEntityObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, blockLoc.ToCenterLocation());
 
-                blockEntityObj.name = $"[{blockLoc}] {blockEntityType}";
-                blockEntityObj.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, blockLoc.ToCenterLocation());
-
-                // Initialize the entity
-                blockEntityRender.Initialize(blockLoc, blockEntityType, nbt ?? new());
-            }
+            // Initialize the entity
+            blockEntityRender.Initialize(blockLoc, blockState, blockEntityType, nbt ?? new());
         }
 
         /// <summary>
@@ -577,10 +579,7 @@ namespace CraftSharp.Rendering
                 blockEntityRenders[blockLoc].Unload();
                 blockEntityRenders.Remove(blockLoc);
 
-                if (nearbyBlockEntities.ContainsKey(blockLoc))
-                {
-                    nearbyBlockEntities.Remove(blockLoc);
-                }
+                nearbyBlockEntities.Remove(blockLoc);
             }
         }
         #endregion

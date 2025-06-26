@@ -184,12 +184,12 @@ namespace CraftSharp
             var testmentObj = new GameObject("[Entity Testment]");
             const int entityPerRow = 10;
             int index = 0;
-            foreach (var (entityType, entityDef) in entityResManager.EntityRenderDefinitions)
+            foreach (var (entityTypeId, entityDef) in entityResManager.EntityRenderDefinitions)
             {
                 int i = index / entityPerRow;
                 int j = index % entityPerRow;
 
-                var entityRenderObj = new GameObject($"{index} {entityType}");
+                var entityRenderObj = new GameObject($"{index} {entityTypeId}");
                 entityRenderObj.transform.SetParent(testmentObj.transform);
                 entityRenderObj.transform.localPosition= new(i * 2, 0, - (entityPerRow - j) * 2);
 
@@ -201,7 +201,7 @@ namespace CraftSharp
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning($"An exception occurred building model for entity {entityType}: {e}");
+                    Debug.LogWarning($"An exception occurred building model for entity {entityTypeId}: {e}");
                 }
                 
                 index++;

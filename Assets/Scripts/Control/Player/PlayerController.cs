@@ -472,13 +472,13 @@ namespace CraftSharp.Control
         {
             var prevState = CurrentState;
 
-            Debug.Log($"Exit state [{CurrentState}]");
+            //Debug.Log($"Exit state [{CurrentState}]");
             CurrentState.OnExit(state, m_StatusUpdater.Status, Motor, this);
 
             // Exit previous state and enter this state
             CurrentState = state;
             
-            Debug.Log($"Enter state [{CurrentState}]");
+            //Debug.Log($"Enter state [{CurrentState}]");
             CurrentState.OnEnter(prevState, m_StatusUpdater.Status, Motor, this);
         }
 

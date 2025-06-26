@@ -13,8 +13,6 @@ namespace CraftSharp.Rendering
 {
     public class BedrockModelEntityRender : EntityRender
     {
-        
-        
         #nullable enable
         
         private EntityRenderDefinition? entityDefinition = null;
