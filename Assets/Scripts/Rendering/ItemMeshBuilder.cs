@@ -84,7 +84,10 @@ namespace CraftSharp.Rendering
             {
                 if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(itemId, out BlockEntityType blockEntityType))
                 {
-                    client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockEntityType);
+                    var blockEntityRender = client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockEntityType);
+
+                    var blockState = BlockStatePalette.INSTANCE.GetDefault(itemId);
+                    blockEntityRender.UpdateBlockState(blockState);
                 }
                 else
                 {
