@@ -61,18 +61,11 @@ namespace CraftSharp.Rendering
             
             var blockGeometry = stateModel.Geometries[0];
 
-            if (packManager.BuiltinEntityModels.Intersect(stateModel.ModelIds).Any()) // Use embedded entity render
+            if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(blockId, out BlockEntityType blockEntityType)) // Use embedded entity render
             {
-                if (BlockEntityTypePalette.INSTANCE.GetBlockEntityForBlock(blockId, out BlockEntityType blockEntityType))
-                {
-                    var blockEntityRender = client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockEntityType);
+                var blockEntityRender = client.ChunkRenderManager.CreateBlockEntityRenderForItemModel(modelObject.transform, blockEntityType);
 
-                    blockEntityRender.UpdateBlockState(blockState);
-                }
-                else
-                {
-                    Debug.LogWarning($"One of {blockState}'s block models is specified to use entity render model, but no suitable entity render model is found!");
-                }
+                blockEntityRender.UpdateBlockState(blockState);
             }
             
             var color = BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, BlockLoc.Zero);
