@@ -193,6 +193,16 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="dist">New render distance (2-32)</param>
         void OnViewDistance(int dist);
+        
+        /// <summary>
+        /// Called when a block action is triggered
+        /// <br/>
+        /// See https://minecraft.wiki/w/Java_Edition_protocol/Block_actions
+        /// </summary>
+        /// <param name="blockLoc">Block location</param>
+        /// <param name="actionId">Action id</param>
+        /// <param name="actionParam">Action parameter</param>
+        void OnBlockAction(BlockLoc blockLoc, byte actionId, byte actionParam);
 
         /// <summary>
         /// Called when an entity has spawned

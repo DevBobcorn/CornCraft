@@ -1547,6 +1547,15 @@ namespace CraftSharp.Protocol.Handlers
                         }
                     }
                     break;
+                case PacketTypesIn.BlockAction:
+                    {
+                        var blockLoc = DataTypes.ReadNextBlockLoc(packetData);
+                        var actionId = DataTypes.ReadNextByte(packetData);
+                        var actionParam = DataTypes.ReadNextByte(packetData);
+                        
+                        handler.OnBlockAction(blockLoc, actionId, actionParam);
+                    }
+                    break;
                 case PacketTypesIn.UnloadChunk:
                     {
                         // Warning: It is legal to include unloaded chunks in the UnloadChunk packet.

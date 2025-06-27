@@ -14,57 +14,34 @@ namespace CraftSharp.Rendering
 
 #nullable enable
 
-        private Action<InventoryOpenEvent>? inventoryOpenCallback;
-        private Action<InventoryCloseEvent>? inventoryCloseCallback;
-
-        // Used when this chest is open by this client
-        private int openedInventoryId = -1;
-        // Count of players using this chest
-        public int openCount = 0;
+        private Action<BlockActionEvent>? blockActionCallback;
 
         public Transform? lidTransform;
 
+        private bool isOpened = false;
+
 #nullable disable
 
-        public override void Initialize(BlockLoc blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> tags)
+        public override void Initialize(BlockLoc? blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> tags)
         {
-            inventoryOpenCallback = e =>
+            blockActionCallback = e =>
             {
-                if (e.BlockLoc == Location)
+                if (Location is not null && e.BlockLoc == Location)
                 {
-                    openedInventoryId = e.InventoryId;
-
-                    openCount++;
-                    Debug.Log($"Open chest at {Location}: {e.InventoryId}, Open count: {openCount}");
+                    isOpened = e.ActionParam > 0;
                 }
-            };
-
-            inventoryCloseCallback = e =>
-            {
-                if (openedInventoryId == e.InventoryId)
-                {
-                    openCount--;
-                    Debug.Log($"Close chest at {Location}: {e.InventoryId}, Close count: {openCount}");
-                }
-                openedInventoryId = -1;
             };
             
-            EventManager.Instance.Register(inventoryOpenCallback);
-            EventManager.Instance.Register(inventoryCloseCallback);
+            EventManager.Instance.Register(blockActionCallback);
 
             base.Initialize(blockLoc, blockState, blockEntityType, tags);
         }
 
         private void OnDestroy()
         {
-            if (inventoryOpenCallback is not null)
+            if (blockActionCallback is not null)
             {
-                EventManager.Instance.Unregister(inventoryOpenCallback);
-            }
-
-            if (inventoryCloseCallback is not null)
-            {
-                EventManager.Instance.Unregister(inventoryCloseCallback);
+                EventManager.Instance.Unregister(blockActionCallback);
             }
         }
 
@@ -123,25 +100,30 @@ namespace CraftSharp.Rendering
         
         public override void ManagedUpdate(float tickMilSec)
         {
-            if (lidTransform)
+            if (lidTransform && Location != null)
             {
+                var client = CornApp.CurrentClient;
+
+                if (!client) // Game is not ready, cancel update
+                    return;
+                
                 var curAngle = lidTransform.localEulerAngles.z;
                 
-                if (openCount > 0) // Should open
+                if (isOpened) // Should open
                 {
                     if (Mathf.DeltaAngle(-90F, curAngle) != 0)
                     {
                         curAngle = Mathf.MoveTowardsAngle(curAngle, -90F, 180F * Time.deltaTime);
+                        lidTransform.localEulerAngles = new(0F, 0F, curAngle);
                     }
-                    lidTransform.localEulerAngles = new(0F, 0F, curAngle);
                 }
                 else // Should close
                 {
                     if (Mathf.DeltaAngle(0F, curAngle) != 0)
                     {
                         curAngle = Mathf.MoveTowardsAngle(curAngle, 0F, 180F * Time.deltaTime);
+                        lidTransform.localEulerAngles = new(0F, 0F, curAngle);
                     }
-                    lidTransform.localEulerAngles = new(0F, 0F, curAngle);
                 }
             }
         }

@@ -17,7 +17,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// BlockEntity location
         /// </summary>
-        public BlockLoc Location;
+        public BlockLoc? Location;
         
         /// <summary>
         /// BlockState at BlockEntity location
@@ -47,7 +47,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public virtual void Initialize(BlockLoc blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> tags)
+        public virtual void Initialize(BlockLoc? blockLoc, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> tags)
         {
             Location = blockLoc;
             Type = blockEntityType;
@@ -66,7 +66,7 @@ namespace CraftSharp.Rendering
             // Clear children if present
             foreach (Transform t in transform)
             {
-                Object.Destroy(t.gameObject);
+                Destroy(t.gameObject);
             }
         }
 

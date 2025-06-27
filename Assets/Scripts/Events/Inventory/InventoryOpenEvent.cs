@@ -7,13 +7,11 @@ namespace CraftSharp.Event
     {
         public int InventoryId { get; }
         public InventoryData InventoryData { get; }
-        public BlockLoc? BlockLoc { get; }
 
-        public InventoryOpenEvent(int inventoryId, InventoryData inventoryData, BlockLoc? blockLoc)
+        public InventoryOpenEvent(int inventoryId, InventoryData inventoryData)
         {
             InventoryId = inventoryId;
             InventoryData = inventoryData;
-            BlockLoc = blockLoc;
         }
     }
 }

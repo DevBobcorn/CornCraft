@@ -1015,8 +1015,6 @@ namespace CraftSharp.UI
         private void UpdatePredicateDependents()
         {
             // TODO: Update only dependents affected by the change
-            Debug.Log("Update predicate dependents");
-            
             foreach (var (predicateType, predicate, inventoryFragment) in propertyDependents)
             {
                 var predicateResult = predicate.Check(propertyTable);

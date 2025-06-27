@@ -566,10 +566,7 @@ namespace CraftSharp.Control
         private static BlockLoc PlaceBlock(BaseCornClient client, bool replace, BlockLoc targetBlockLoc, float inBlockX, float inBlockY, float inBlockZ, Direction targetDirection)
         {
             var placeBlockLoc = replace ? targetBlockLoc : GetPlaceBlockLoc(targetBlockLoc, targetDirection);
-            client.PlaceBlock(targetBlockLoc, targetDirection, inBlockX, inBlockY, inBlockZ, Inventory.Hand.MainHand);
-            
-            var blockState = client.GetChunkRenderManager().GetBlock(targetBlockLoc).State;
-            client.SetLastInteractionBlockLoc(targetBlockLoc, blockState);
+            client.PlaceBlock(targetBlockLoc, targetDirection, inBlockX, inBlockY, inBlockZ);
 
             return placeBlockLoc;
         }

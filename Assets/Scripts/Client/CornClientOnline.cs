@@ -1745,6 +1745,19 @@ namespace CraftSharp
         }
 
         /// <summary>
+        /// Called when a block action is triggered
+        /// <br/>
+        /// See https://minecraft.wiki/w/Java_Edition_protocol/Block_actions
+        /// </summary>
+        /// <param name="blockLoc">Block location</param>
+        /// <param name="actionId">Action id</param>
+        /// <param name="actionParam">Action parameter</param>
+        public void OnBlockAction(BlockLoc blockLoc, byte actionId, byte actionParam)
+        {
+            EventManager.Instance.BroadcastOnUnityThread(new BlockActionEvent(blockLoc, actionId, actionParam));
+        }
+
+        /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.
         /// </summary>
         public void OnRespawn()
@@ -1937,8 +1950,6 @@ namespace CraftSharp
 
             Loom.QueueOnMainThread(() =>
             {
-                var blockLoc = ConsumeLastInteractionBlockLoc();
-
                 // Set inventory id before opening the screen
                 ScreenControl.SetScreenData<InventoryScreen>(screen =>
                 {
@@ -1946,7 +1957,7 @@ namespace CraftSharp
                 });
                 ScreenControl.PushScreen<InventoryScreen>();
 
-                EventManager.Instance.Broadcast(new InventoryOpenEvent(inventoryId, inventoryData, blockLoc));
+                EventManager.Instance.Broadcast(new InventoryOpenEvent(inventoryId, inventoryData));
             });
         }
 

@@ -512,8 +512,7 @@ namespace CraftSharp.Rendering
         /// <param name="parent">Model object transform</param>
         /// <param name="blockState">BlockState of the block entity</param>
         /// <param name="blockEntityType">Type of the block entity</param>
-        /// <param name="nbt">Pass in null if auto-creating this block entity</param>
-        public BlockEntityRender CreateBlockEntityRenderForItemModel(Transform parent, BlockState blockState, BlockEntityType blockEntityType, Dictionary<string, object> nbt = null)
+        public BlockEntityRender CreateBlockEntityRenderForItemModel(Transform parent, BlockState blockState, BlockEntityType blockEntityType)
         {
             GameObject blockEntityPrefab = GetPrefabForType(blockEntityType.TypeId);
             var blockEntityObj = Instantiate(blockEntityPrefab, parent);
@@ -524,7 +523,7 @@ namespace CraftSharp.Rendering
             blockEntityObj.transform.localEulerAngles = new Vector3(0, 180F, 0);
 
             // Initialize the entity
-            blockEntityRender.Initialize(BlockLoc.Zero, blockState, blockEntityType, new());
+            blockEntityRender.Initialize(null, blockState, blockEntityType, new());
                 
             return blockEntityRender;
         }
