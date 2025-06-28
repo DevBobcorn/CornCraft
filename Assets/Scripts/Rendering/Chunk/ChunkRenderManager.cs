@@ -27,6 +27,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject defaultPrefab;
         
         [SerializeField] private GameObject chestPrefab;
+        [SerializeField] private GameObject shulkerBoxPrefab;
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> blockEntityPrefabs = new();
@@ -1103,6 +1104,7 @@ namespace CraftSharp.Rendering
             blockEntityPrefabs.Add(BlockEntityType.CHEST_ID,             chestPrefab);
             blockEntityPrefabs.Add(BlockEntityType.ENDER_CHEST_ID,       chestPrefab);
             blockEntityPrefabs.Add(BlockEntityType.TRAPPED_CHEST_ID,     chestPrefab);
+            blockEntityPrefabs.Add(BlockEntityType.SHULKER_BOX_ID,       shulkerBoxPrefab);
             
             client = CornApp.CurrentClient;
 
