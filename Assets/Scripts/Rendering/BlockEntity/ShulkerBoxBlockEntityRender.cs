@@ -17,6 +17,7 @@ namespace CraftSharp.Rendering
         public Transform? lidTransform;
 
         private bool isOpened = false;
+        private float openness = 0F;
 
 #nullable disable
 
@@ -102,22 +103,26 @@ namespace CraftSharp.Rendering
                 if (!client) // Game is not ready, cancel update
                     return;
                 
-                var curAngle = lidTransform.localEulerAngles.z;
-                
                 if (isOpened) // Should open
                 {
-                    if (Mathf.DeltaAngle(-90F, curAngle) != 0)
+                    if (openness < 1F)
                     {
-                        curAngle = Mathf.MoveTowardsAngle(curAngle, -90F, 180F * Time.deltaTime);
-                        lidTransform.localEulerAngles = new(0F, 0F, curAngle);
+                        openness = Mathf.MoveTowards(openness, 1F, Time.deltaTime * 2F);
+                        // Move base upwards a bit to make sure bottom face is visible
+                        lidTransform.parent.localPosition = new(0F, openness * 0.015625F, 0F);
+                        lidTransform.localPosition = new(0F, openness * 0.5F, 0F);
+                        lidTransform.localEulerAngles = new(0F, openness * 360F, 0F);
                     }
                 }
                 else // Should close
                 {
-                    if (Mathf.DeltaAngle(0F, curAngle) != 0)
+                    if (openness > 0F)
                     {
-                        curAngle = Mathf.MoveTowardsAngle(curAngle, 0F, 180F * Time.deltaTime);
-                        lidTransform.localEulerAngles = new(0F, 0F, curAngle);
+                        openness = Mathf.MoveTowards(openness, 0F, Time.deltaTime * 2F);
+                        // Move base upwards a bit to make sure bottom face is visible
+                        lidTransform.parent.localPosition = new(0F, openness * 0.015625F, 0F);
+                        lidTransform.localPosition = new(0F, openness * 0.5F, 0F);
+                        lidTransform.localEulerAngles = new(0F, openness * 360F, 0F);
                     }
                 }
             }

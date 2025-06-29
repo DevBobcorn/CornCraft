@@ -19,6 +19,7 @@ namespace CraftSharp.Rendering
         public Transform? lidTransform;
 
         private bool isOpened = false;
+        private float openAngle = 0F;
 
 #nullable disable
 
@@ -107,22 +108,20 @@ namespace CraftSharp.Rendering
                 if (!client) // Game is not ready, cancel update
                     return;
                 
-                var curAngle = lidTransform.localEulerAngles.z;
-                
                 if (isOpened) // Should open
                 {
-                    if (Mathf.DeltaAngle(-90F, curAngle) != 0)
+                    if (Mathf.DeltaAngle(-90F, openAngle) != 0)
                     {
-                        curAngle = Mathf.MoveTowardsAngle(curAngle, -90F, 180F * Time.deltaTime);
-                        lidTransform.localEulerAngles = new(0F, 0F, curAngle);
+                        openAngle = Mathf.MoveTowardsAngle(openAngle, -90F, 180F * Time.deltaTime);
+                        lidTransform.localEulerAngles = new(0F, 0F, openAngle);
                     }
                 }
                 else // Should close
                 {
-                    if (Mathf.DeltaAngle(0F, curAngle) != 0)
+                    if (Mathf.DeltaAngle(0F, openAngle) != 0)
                     {
-                        curAngle = Mathf.MoveTowardsAngle(curAngle, 0F, 180F * Time.deltaTime);
-                        lidTransform.localEulerAngles = new(0F, 0F, curAngle);
+                        openAngle = Mathf.MoveTowardsAngle(openAngle, 0F, 180F * Time.deltaTime);
+                        lidTransform.localEulerAngles = new(0F, 0F, openAngle);
                     }
                 }
             }
