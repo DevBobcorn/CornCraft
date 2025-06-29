@@ -34,9 +34,13 @@ namespace CraftSharp
         private const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
-        public const int    CORN_CRAFT_BUILTIN_VERSION = 28;
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 29;
         private const string VANILLA_FIX_FILE_NAME = "VanillaFix";
-        private const int    VANILLA_FIX_VERSION = 6;
+        private const int    VANILLA_FIX_VERSION = 7;
+        public const string BEDROCK_RES_FILE_NAME = "BedrockRes";
+        public const int    BEDROCK_RES_VERSION = 1;
+        private const string BLOCK_ENTITY_MODELS_FILE_NAME = "BlockEntityModels";
+        private const int    BLOCK_ENTITY_MODELS_VERSION = 1;
         
         public const string RESOURCE_LOCATION_NAMESPACE = "corncraft";
 
@@ -244,6 +248,18 @@ namespace CraftSharp
             var vanillaFixDir = PathHelper.GetPackDirectoryNamed("vanilla_fix");
             yield return StartCoroutine(BuiltinResourceHelper.ReadyBuiltinResource(
                     VANILLA_FIX_FILE_NAME, VANILLA_FIX_VERSION, vanillaFixDir,
+                    _ => { }, () => { }, _ => { }));
+            
+            // Generate bedrock_res or check update
+            var bedrockResDir = PathHelper.GetPackDirectoryNamed("bedrock_res");
+            yield return StartCoroutine(BuiltinResourceHelper.ReadyBuiltinResource(
+                    BEDROCK_RES_FILE_NAME, BEDROCK_RES_VERSION, bedrockResDir,
+                    _ => { }, () => { }, _ => { }));
+            
+            // Generate block_entity_models or check update
+            var blockEntityModelsDir = PathHelper.GetPackDirectoryNamed("block_entity_models");
+            yield return StartCoroutine(BuiltinResourceHelper.ReadyBuiltinResource(
+                    BLOCK_ENTITY_MODELS_FILE_NAME, BLOCK_ENTITY_MODELS_VERSION, blockEntityModelsDir,
                     _ => { }, () => { }, _ => { }));
 
             // First add base resources
