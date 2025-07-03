@@ -1,0 +1,449 @@
+{
+  "minecraft:angry_villager": {
+    "protocol_id": 0,
+    "render_always": false
+  },
+  "minecraft:block": {
+    "protocol_id": 1,
+    "render_always": false,
+    "extra_data": "block"
+  },
+  "minecraft:block_marker": {
+    "protocol_id": 2,
+    "render_always": true,
+    "extra_data": "block"
+  },
+  "minecraft:bubble": {
+    "protocol_id": 3,
+    "render_always": false
+  },
+  "minecraft:cloud": {
+    "protocol_id": 4,
+    "render_always": false
+  },
+  "minecraft:crit": {
+    "protocol_id": 5,
+    "render_always": false
+  },
+  "minecraft:damage_indicator": {
+    "protocol_id": 6,
+    "render_always": true
+  },
+  "minecraft:dragon_breath": {
+    "protocol_id": 7,
+    "render_always": false
+  },
+  "minecraft:dripping_lava": {
+    "protocol_id": 8,
+    "render_always": false
+  },
+  "minecraft:falling_lava": {
+    "protocol_id": 9,
+    "render_always": false
+  },
+  "minecraft:landing_lava": {
+    "protocol_id": 10,
+    "render_always": false
+  },
+  "minecraft:dripping_water": {
+    "protocol_id": 11,
+    "render_always": false
+  },
+  "minecraft:falling_water": {
+    "protocol_id": 12,
+    "render_always": false
+  },
+  "minecraft:dust": {
+    "protocol_id": 13,
+    "render_always": false,
+    "extra_data": "dust"
+  },
+  "minecraft:dust_color_transition": {
+    "protocol_id": 14,
+    "render_always": false,
+    "extra_data": "dust_color_transition"
+  },
+  "minecraft:effect": {
+    "protocol_id": 15,
+    "render_always": false
+  },
+  "minecraft:elder_guardian": {
+    "protocol_id": 16,
+    "render_always": true
+  },
+  "minecraft:enchanted_hit": {
+    "protocol_id": 17,
+    "render_always": false
+  },
+  "minecraft:enchant": {
+    "protocol_id": 18,
+    "render_always": false
+  },
+  "minecraft:end_rod": {
+    "protocol_id": 19,
+    "render_always": false
+  },
+  "minecraft:entity_effect": {
+    "protocol_id": 20,
+    "render_always": false,
+    "extra_data": "color"
+  },
+  "minecraft:explosion_emitter": {
+    "protocol_id": 21,
+    "render_always": true
+  },
+  "minecraft:explosion": {
+    "protocol_id": 22,
+    "render_always": true
+  },
+  "minecraft:gust": {
+    "protocol_id": 23,
+    "render_always": true
+  },
+  "minecraft:small_gust": {
+    "protocol_id": 24,
+    "render_always": false
+  },
+  "minecraft:gust_emitter_large": {
+    "protocol_id": 25,
+    "render_always": true
+  },
+  "minecraft:gust_emitter_small": {
+    "protocol_id": 26,
+    "render_always": true
+  },
+  "minecraft:sonic_boom": {
+    "protocol_id": 27,
+    "render_always": true
+  },
+  "minecraft:falling_dust": {
+    "protocol_id": 28,
+    "render_always": false,
+    "extra_data": "block"
+  },
+  "minecraft:firework": {
+    "protocol_id": 29,
+    "render_always": false
+  },
+  "minecraft:fishing": {
+    "protocol_id": 30,
+    "render_always": false
+  },
+  "minecraft:flame": {
+    "protocol_id": 31,
+    "render_always": false
+  },
+  "minecraft:infested": {
+    "protocol_id": 32,
+    "render_always": false
+  },
+  "minecraft:cherry_leaves": {
+    "protocol_id": 33,
+    "render_always": false
+  },
+  "minecraft:sculk_soul": {
+    "protocol_id": 34,
+    "render_always": false
+  },
+  "minecraft:sculk_charge": {
+    "protocol_id": 35,
+    "render_always": true,
+    "extra_data": "sculk_charge"
+  },
+  "minecraft:sculk_charge_pop": {
+    "protocol_id": 36,
+    "render_always": true
+  },
+  "minecraft:soul_fire_flame": {
+    "protocol_id": 37,
+    "render_always": false
+  },
+  "minecraft:soul": {
+    "protocol_id": 38,
+    "render_always": false
+  },
+  "minecraft:flash": {
+    "protocol_id": 39,
+    "render_always": false
+  },
+  "minecraft:happy_villager": {
+    "protocol_id": 40,
+    "render_always": false
+  },
+  "minecraft:composter": {
+    "protocol_id": 41,
+    "render_always": false
+  },
+  "minecraft:heart": {
+    "protocol_id": 42,
+    "render_always": false
+  },
+  "minecraft:instant_effect": {
+    "protocol_id": 43,
+    "render_always": false
+  },
+  "minecraft:item": {
+    "protocol_id": 44,
+    "render_always": false,
+    "extra_data": "item"
+  },
+  "minecraft:vibration": {
+    "protocol_id": 45,
+    "render_always": true,
+    "extra_data": "vibration"
+  },
+  "minecraft:item_slime": {
+    "protocol_id": 46,
+    "render_always": false
+  },
+  "minecraft:item_cobweb": {
+    "protocol_id": 47,
+    "render_always": false
+  },
+  "minecraft:item_snowball": {
+    "protocol_id": 48,
+    "render_always": false
+  },
+  "minecraft:large_smoke": {
+    "protocol_id": 49,
+    "render_always": false
+  },
+  "minecraft:lava": {
+    "protocol_id": 50,
+    "render_always": false
+  },
+  "minecraft:mycelium": {
+    "protocol_id": 51,
+    "render_always": false
+  },
+  "minecraft:note": {
+    "protocol_id": 52,
+    "render_always": false
+  },
+  "minecraft:poof": {
+    "protocol_id": 53,
+    "render_always": true
+  },
+  "minecraft:portal": {
+    "protocol_id": 54,
+    "render_always": false
+  },
+  "minecraft:rain": {
+    "protocol_id": 55,
+    "render_always": false
+  },
+  "minecraft:smoke": {
+    "protocol_id": 56,
+    "render_always": false
+  },
+  "minecraft:white_smoke": {
+    "protocol_id": 57,
+    "render_always": false
+  },
+  "minecraft:sneeze": {
+    "protocol_id": 58,
+    "render_always": false
+  },
+  "minecraft:spit": {
+    "protocol_id": 59,
+    "render_always": true
+  },
+  "minecraft:squid_ink": {
+    "protocol_id": 60,
+    "render_always": true
+  },
+  "minecraft:sweep_attack": {
+    "protocol_id": 61,
+    "render_always": true
+  },
+  "minecraft:totem_of_undying": {
+    "protocol_id": 62,
+    "render_always": false
+  },
+  "minecraft:underwater": {
+    "protocol_id": 63,
+    "render_always": false
+  },
+  "minecraft:splash": {
+    "protocol_id": 64,
+    "render_always": false
+  },
+  "minecraft:witch": {
+    "protocol_id": 65,
+    "render_always": false
+  },
+  "minecraft:bubble_pop": {
+    "protocol_id": 66,
+    "render_always": false
+  },
+  "minecraft:current_down": {
+    "protocol_id": 67,
+    "render_always": false
+  },
+  "minecraft:bubble_column_up": {
+    "protocol_id": 68,
+    "render_always": false
+  },
+  "minecraft:nautilus": {
+    "protocol_id": 69,
+    "render_always": false
+  },
+  "minecraft:dolphin": {
+    "protocol_id": 70,
+    "render_always": false
+  },
+  "minecraft:campfire_cosy_smoke": {
+    "protocol_id": 71,
+    "render_always": true
+  },
+  "minecraft:campfire_signal_smoke": {
+    "protocol_id": 72,
+    "render_always": true
+  },
+  "minecraft:dripping_honey": {
+    "protocol_id": 73,
+    "render_always": false
+  },
+  "minecraft:falling_honey": {
+    "protocol_id": 74,
+    "render_always": false
+  },
+  "minecraft:landing_honey": {
+    "protocol_id": 75,
+    "render_always": false
+  },
+  "minecraft:falling_nectar": {
+    "protocol_id": 76,
+    "render_always": false
+  },
+  "minecraft:falling_spore_blossom": {
+    "protocol_id": 77,
+    "render_always": false
+  },
+  "minecraft:ash": {
+    "protocol_id": 78,
+    "render_always": false
+  },
+  "minecraft:crimson_spore": {
+    "protocol_id": 79,
+    "render_always": false
+  },
+  "minecraft:warped_spore": {
+    "protocol_id": 80,
+    "render_always": false
+  },
+  "minecraft:spore_blossom_air": {
+    "protocol_id": 81,
+    "render_always": false
+  },
+  "minecraft:dripping_obsidian_tear": {
+    "protocol_id": 82,
+    "render_always": false
+  },
+  "minecraft:falling_obsidian_tear": {
+    "protocol_id": 83,
+    "render_always": false
+  },
+  "minecraft:landing_obsidian_tear": {
+    "protocol_id": 84,
+    "render_always": false
+  },
+  "minecraft:reverse_portal": {
+    "protocol_id": 85,
+    "render_always": false
+  },
+  "minecraft:white_ash": {
+    "protocol_id": 86,
+    "render_always": false
+  },
+  "minecraft:small_flame": {
+    "protocol_id": 87,
+    "render_always": false
+  },
+  "minecraft:snowflake": {
+    "protocol_id": 88,
+    "render_always": false
+  },
+  "minecraft:dripping_dripstone_lava": {
+    "protocol_id": 89,
+    "render_always": false
+  },
+  "minecraft:falling_dripstone_lava": {
+    "protocol_id": 90,
+    "render_always": false
+  },
+  "minecraft:dripping_dripstone_water": {
+    "protocol_id": 91,
+    "render_always": false
+  },
+  "minecraft:falling_dripstone_water": {
+    "protocol_id": 92,
+    "render_always": false
+  },
+  "minecraft:glow_squid_ink": {
+    "protocol_id": 93,
+    "render_always": true
+  },
+  "minecraft:glow": {
+    "protocol_id": 94,
+    "render_always": true
+  },
+  "minecraft:wax_on": {
+    "protocol_id": 95,
+    "render_always": true
+  },
+  "minecraft:wax_off": {
+    "protocol_id": 96,
+    "render_always": true
+  },
+  "minecraft:electric_spark": {
+    "protocol_id": 97,
+    "render_always": true
+  },
+  "minecraft:scrape": {
+    "protocol_id": 98,
+    "render_always": true
+  },
+  "minecraft:shriek": {
+    "protocol_id": 99,
+    "render_always": false,
+    "extra_data": "shriek"
+  },
+  "minecraft:egg_crack": {
+    "protocol_id": 100,
+    "render_always": false
+  },
+  "minecraft:dust_plume": {
+    "protocol_id": 101,
+    "render_always": false
+  },
+  "minecraft:trial_spawner_detection": {
+    "protocol_id": 102,
+    "render_always": true
+  },
+  "minecraft:trial_spawner_detection_ominous": {
+    "protocol_id": 103,
+    "render_always": true
+  },
+  "minecraft:vault_connection": {
+    "protocol_id": 104,
+    "render_always": true
+  },
+  "minecraft:dust_pillar": {
+    "protocol_id": 105,
+    "render_always": false,
+    "extra_data": "block"
+  },
+  "minecraft:ominous_spawning": {
+    "protocol_id": 106,
+    "render_always": true
+  },
+  "minecraft:raid_omen": {
+    "protocol_id": 107,
+    "render_always": false
+  },
+  "minecraft:trial_omen": {
+    "protocol_id": 108,
+    "render_always": false
+  }
+}

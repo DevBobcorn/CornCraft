@@ -1,0 +1,911 @@
+{
+    "minecraft:generic_9x1": {
+        "protocol_id": 0,
+        "main_slot_width": 9,
+        "main_slot_height": 1,
+        "work_panel_height": 1
+    },
+    "minecraft:generic_9x2": {
+        "protocol_id": 1,
+        "main_slot_width": 9,
+        "main_slot_height": 2,
+        "work_panel_height": 2
+    },
+    "minecraft:generic_9x3": {
+        "protocol_id": 2,
+        "main_slot_width": 9,
+        "main_slot_height": 3
+    },
+    "minecraft:generic_9x4": {
+        "protocol_id": 3,
+        "main_slot_width": 9,
+        "main_slot_height": 4,
+        "work_panel_height": 4
+    },
+    "minecraft:generic_9x5": {
+        "protocol_id": 4,
+        "main_slot_width": 9,
+        "main_slot_height": 5,
+        "work_panel_height": 5
+    },
+    "minecraft:generic_9x6": {
+        "protocol_id": 5,
+        "main_slot_width": 9,
+        "main_slot_height": 6,
+        "work_panel_height": 6
+    },
+    "minecraft:generic_3x3": {
+        "protocol_id": 6,
+        "main_slot_width": 3,
+        "main_slot_height": 3
+    },
+    "minecraft:crafter_3x3": {
+        "protocol_id": 7,
+        "main_slot_width": 3,
+        "main_slot_height": 3,
+        "append_slot_count": 1
+    },
+    "minecraft:anvil": {
+        "protocol_id": 8,
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_iron_hammer",
+                "pos_x": 0.5,
+                "pos_y": 1.5,
+                "width": 2,
+                "height": 2
+            },
+            {
+                "type_id": "corncraft:plus",
+                "pos_x": 2.5,
+                "pos_y": 0
+            },
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5.5,
+                "pos_y": 0
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 1,
+                "pos_y": 0
+            },
+            "1": {
+                "pos_x": 4,
+                "pos_y": 0
+            },
+            "2": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 0
+            }
+        },
+        "inputs": {
+            "0": {
+                "pos_x": 3,
+                "pos_y": 2,
+                "width": 5,
+                "translation_key": "gameplay.ui.anvil_input"
+            }
+        },
+        "work_panel_height": 4
+    },
+    "minecraft:beacon": {
+        "protocol_id": 9,
+        "prepend_slot_count": 1,
+        "append_slot_count": 5,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_beacon",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 5
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:beacon_activation_item",
+                "pos_x": 6,
+                "pos_y": 0
+            },
+            "37": {
+                "type_id": "minecraft:preview",
+                "preview_item": {
+                    "item_id": "minecraft:netherite_ingot"
+                },
+                "pos_x": 0,
+                "pos_y": 0
+            },
+            "38": {
+                "type_id": "minecraft:preview",
+                "preview_item": {
+                    "item_id": "minecraft:emerald"
+                },
+                "pos_x": 1,
+                "pos_y": 0
+            },
+            "39": {
+                "type_id": "minecraft:preview",
+                "preview_item": {
+                    "item_id": "minecraft:diamond"
+                },
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "40": {
+                "type_id": "minecraft:preview",
+                "preview_item": {
+                    "item_id": "minecraft:gold_ingot"
+                },
+                "pos_x": 3,
+                "pos_y": 0
+            },
+            "41": {
+                "type_id": "minecraft:preview",
+                "preview_item": {
+                    "item_id": "minecraft:iron_ingot"
+                },
+                "pos_x": 4,
+                "pos_y": 0
+            }
+        },
+        "buttons": {
+            "0": {
+                "pos_x": 1,
+                "pos_y": 3,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_speed",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "power_level>0",
+                "selected_predicate": "first_potion_effect_index=0",
+                "hint_translation_key": "effect.minecraft.speed"
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 3,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_haste",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "power_level>0",
+                "selected_predicate": "first_potion_effect_index=1",
+                "hint_translation_key": "effect.minecraft.haste"
+            },
+            "2": {
+                "pos_x": 1,
+                "pos_y": 2,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_resistance",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "power_level>1",
+                "selected_predicate": "first_potion_effect_index=2",
+                "hint_translation_key": "effect.minecraft.resistance"
+            },
+            "3": {
+                "pos_x": 2,
+                "pos_y": 2,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_jump_boost",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "power_level>1",
+                "selected_predicate": "first_potion_effect_index=3",
+                "hint_translation_key": "effect.minecraft.jump_boost"
+            },
+            "4": {
+                "pos_x": 1.5,
+                "pos_y": 1,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_strength",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "power_level>2",
+                "selected_predicate": "first_potion_effect_index=4",
+                "hint_translation_key": "effect.minecraft.strength"
+            },
+            "5": {
+                "pos_x": 6,
+                "pos_y": 2,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_regeneration",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "power_level>3",
+                "selected_predicate": "second_potion_effect_index=0",
+                "hint_translation_key": "effect.minecraft.regeneration"
+            },
+            "6": {
+                "pos_x": 7,
+                "pos_y": 2,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_mob_effect_level_up",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "flipbook_index_property": "first_potion_effect_index"
+                    }
+                ],
+                "visible_predicate": "first_potion_effect_index>=0",
+                "enabled_predicate": "power_level>3",
+                "selected_predicate": "second_potion_effect_index=1",
+                "hint_translation_key": "gameplay.ui.beacon_levelup"
+            },
+            "7": {
+                "pos_x": 7,
+                "pos_y": 0,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:check",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "enabled_predicate": "activation_item_ready=1",
+                "hint_translation_key": "gui.done"
+            },
+            "8": {
+                "pos_x": 8,
+                "pos_y": 0,
+                "sprites": [
+                    {
+                        "type_id": "corncraft:cross",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75
+                    }
+                ],
+                "hint_translation_key": "gui.cancel"
+            }
+        },
+        "labels": [
+            {
+                "pos_x": 0,
+                "pos_y": 5,
+                "width": 4.5,
+                "height": 0.6,
+                "alignment": "center",
+                "translation_key": "block.minecraft.beacon.primary"
+            },
+            {
+                "pos_x": 4.5,
+                "pos_y": 5,
+                "width": 4.5,
+                "height": 0.6,
+                "alignment": "center",
+                "translation_key": "block.minecraft.beacon.secondary"
+            }
+        ],
+        "properties": {
+            "0": "power_level",
+            "1": "first_potion_effect",
+            "2": "second_potion_effect",
+            "-1": "activation_item_ready",
+            "-2": "first_potion_effect_index",
+            "-3": "second_potion_effect_index"
+        },
+        "work_panel_height": 6
+    },
+    "minecraft:blast_furnace": {
+        "protocol_id": 10,
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_progress",
+                "pos_x": 2,
+                "pos_y": 1,
+                "cur_value_property": "fuel_left",
+                "max_value_property": "maximum_fuel_burn_time"
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1,
+                "cur_value_property": "progress_arrow",
+                "max_value_property": "maximum_progress"
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        },
+        "properties": {
+            "0": "fuel_left",
+            "1": "maximum_fuel_burn_time",
+            "2": "progress_arrow",
+            "3": "maximum_progress"
+        }
+    },
+    "minecraft:brewing_stand": {
+        "protocol_id": 11,
+        "prepend_slot_count": 5,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_brewing",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 4
+            },
+            {
+                "type_id": "corncraft:gui_brewing_fuel_progress",
+                "pos_x": 3,
+                "pos_y": 2,
+                "cur_value_property": "fuel_time",
+                "max_value_property": "20"
+            },
+            {
+                "type_id": "corncraft:gui_brewing_bubbles_empty",
+                "pos_x": 3,
+                "pos_y": 2,
+                "height": 2
+            },
+            {
+                "type_id": "corncraft:gui_brewing_bubbles_progress",
+                "pos_x": 3,
+                "pos_y": 2,
+                "height": 2,
+                "cur_value_property": "bubble_progress",
+                "max_value_property": "40"
+            },
+            {
+                "type_id": "corncraft:gui_brewing_arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1.5,
+                "width": 0.5,
+                "height": 1.5
+            },
+            {
+                "type_id": "corncraft:gui_brewing_arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1.5,
+                "width": 0.5,
+                "height": 1.5,
+                "cur_value_property": "arrow_progress",
+                "max_value_property": "400"
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:brewing_bottle_item",
+                "pos_x": 2.5,
+                "pos_y": 0.5,
+                "placeholder_type_id": "corncraft:empty_slot_bottle"
+            },
+            "1": {
+                "type_id": "minecraft:brewing_bottle_item",
+                "pos_x": 4,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_bottle"
+            },
+            "2": {
+                "type_id": "minecraft:brewing_bottle_item",
+                "pos_x": 5.5,
+                "pos_y": 0.5,
+                "placeholder_type_id": "corncraft:empty_slot_bottle"
+            },
+            "3": {
+                "type_id": "minecraft:brewing_material_item",
+                "pos_x": 4,
+                "pos_y": 2.5
+            },
+            "4": {
+                "type_id": "minecraft:brewing_fuel_item",
+                "pos_x": 1.5,
+                "pos_y": 2.0,
+                "placeholder_type_id": "corncraft:empty_slot_blaze_powder"
+            }
+        },
+        "properties": {
+            "0": "brew_time",
+            "1": "fuel_time",
+            "-1": "bubble_progress",
+            "-2": "arrow_progress"
+        },
+        "work_panel_height": 4
+    },
+    "minecraft:crafting": {
+        "protocol_id": 12,
+        "prepend_slot_count": 1,
+        "main_slot_width": 3,
+        "main_slot_height": 3,
+        "main_pos_x": 1,
+        "main_pos_y": 0,
+        "sprites": [
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5,
+                "pos_y": 1
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        }
+    },
+    "minecraft:enchantment": {
+        "protocol_id": 13,
+        "prepend_slot_count": 2,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_enchantment",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 3
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:enchantment_base_item",
+                "pos_x": 0.5,
+                "pos_y": 1.5
+            },
+            "1": {
+                "type_id": "minecraft:enchantment_fuel_item",
+                "pos_x": 1.5,
+                "pos_y": 0.5,
+                "placeholder_type_id": "corncraft:empty_slot_lapis_lazuli"
+            }
+        },
+        "buttons": {
+            "0": {
+                "pos_x": 3,
+                "pos_y": 2,
+                "width": 6,
+                "height": 1,
+                "visible_predicate": "enchantment_id_top>=0",
+                "enabled_predicate": "enchantment_enabled_top>0",
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_enchantment_top_enabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_top>0"
+                    },
+                    {
+                        "type_id": "corncraft:gui_enchantment_top_disabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_top=0"
+                    }
+                ],
+                "labels": [
+                    {
+                        "pos_x": 1,
+                        "pos_y": 0.5,
+                        "width": 5,
+                        "height": 0.5,
+                        "alignment": "left",
+                        "content_property": "enchantment_id_top~enchantment_magic"
+                    },
+                    {
+                        "pos_x": 5,
+                        "pos_y": 0,
+                        "width": 1,
+                        "height": 0.5,
+                        "alignment": "right",
+                        "content_property": "xp_level_top"
+                    }
+                ]
+            },
+            "1": {
+                "pos_x": 3,
+                "pos_y": 1,
+                "width": 6,
+                "height": 1,
+                "visible_predicate": "enchantment_id_middle>=0,enchantment_level_middle>1",
+                "enabled_predicate": "enchantment_enabled_middle>0",
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_enchantment_middle_enabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_middle>0"
+                    },
+                    {
+                        "type_id": "corncraft:gui_enchantment_middle_disabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_middle=0"
+                    }
+                ],
+                "labels": [
+                    {
+                        "pos_x": 1,
+                        "pos_y": 0.5,
+                        "width": 5,
+                        "height": 0.5,
+                        "alignment": "left",
+                        "content_property": "enchantment_id_middle~enchantment_magic"
+                    },
+                    {
+                        "pos_x": 5,
+                        "pos_y": 0,
+                        "width": 1,
+                        "height": 0.5,
+                        "alignment": "right",
+                        "content_property": "xp_level_middle"
+                    }
+                ]
+            },
+            "2": {
+                "pos_x": 3,
+                "pos_y": 0,
+                "width": 6,
+                "height": 1,
+                "visible_predicate": "enchantment_id_bottom>=0,enchantment_level_bottom>=3",
+                "enabled_predicate": "enchantment_enabled_bottom>0",
+                "sprites": [
+                    {
+                        "type_id": "corncraft:gui_enchantment_bottom_enabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_bottom>0"
+                    },
+                    {
+                        "type_id": "corncraft:gui_enchantment_bottom_disabled",
+                        "pos_x": 0.125,
+                        "pos_y": 0.125,
+                        "width": 0.75,
+                        "height": 0.75,
+                        "visible_predicate": "enchantment_enabled_bottom=0"
+                    }
+                ],
+                "labels": [
+                    {
+                        "pos_x": 1,
+                        "pos_y": 0.5,
+                        "width": 5,
+                        "height": 0.5,
+                        "alignment": "left",
+                        "content_property": "enchantment_id_bottom~enchantment_magic"
+                    },
+                    {
+                        "pos_x": 5,
+                        "pos_y": 0,
+                        "width": 1,
+                        "height": 0.5,
+                        "alignment": "right",
+                        "content_property": "xp_level_bottom"
+                    }
+                ]
+            }
+        },
+        "properties": {
+            "0": "xp_level_top",
+            "1": "xp_level_middle",
+            "2": "xp_level_bottom",
+            "3": "enchantment_seed",
+            "4": "enchantment_id_top",
+            "5": "enchantment_id_middle",
+            "6": "enchantment_id_bottom",
+            "7": "enchantment_level_top",
+            "8": "enchantment_level_middle",
+            "9": "enchantment_level_bottom",
+            "-1": "enchantment_enabled_top",
+            "-2": "enchantment_enabled_middle",
+            "-3": "enchantment_enabled_bottom"
+        }
+    },
+    "minecraft:furnace": {
+        "protocol_id": 14,
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_progress",
+                "pos_x": 2,
+                "pos_y": 1,
+                "cur_value_property": "fuel_left",
+                "max_value_property": "maximum_fuel_burn_time"
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1,
+                "cur_value_property": "progress_arrow",
+                "max_value_property": "maximum_progress"
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        },
+        "properties": {
+            "0": "fuel_left",
+            "1": "maximum_fuel_burn_time",
+            "2": "progress_arrow",
+            "3": "maximum_progress"
+        }
+    },
+    "minecraft:grindstone": {
+        "protocol_id": 15,
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_grindstone",
+                "pos_x": 1,
+                "pos_y": 0,
+                "width": 3,
+                "height": 3
+            },
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5,
+                "pos_y": 1
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:grindstone_base_item",
+                "pos_x": 2,
+                "pos_y": 0.5
+            },
+            "1": {
+                "type_id": "minecraft:grindstone_base_item",
+                "pos_x": 2,
+                "pos_y": 1.5
+            },
+            "2": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        }
+    },
+    "minecraft:hopper": {
+        "protocol_id": 16,
+        "main_slot_width": 5,
+        "main_slot_height": 1,
+        "main_pos_x": 2,
+        "main_pos_y": 1
+    },
+    "minecraft:lectern": {
+        "protocol_id": 17,
+        "has_backpack_slots": false,
+        "has_hotbar_slots": false
+    },
+    "minecraft:loom": {
+        "protocol_id": 18,
+        "prepend_slot_count": 4
+    },
+    "minecraft:merchant": {
+        "protocol_id": 19,
+        "prepend_slot_count": 3,
+        "list_panel_width": 4
+    },
+    "minecraft:shulker_box": {
+        "protocol_id": 20,
+        "main_slot_width": 9,
+        "main_slot_height": 3
+    },
+    "minecraft:smithing": {
+        "protocol_id": 21,
+        "prepend_slot_count": 4,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_netherite_hammer",
+                "pos_x": 0.5,
+                "pos_y": 1.5,
+                "width": 2,
+                "height": 2
+            },
+            {
+                "type_id": "corncraft:arrow",
+                "pos_x": 5.5,
+                "pos_y": 0
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:smithing_template_item",
+                "pos_x": 1,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_smithing_template_item"
+            },
+            "1": {
+                "type_id": "minecraft:smithing_base_item",
+                "pos_x": 2.5,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_smithing_base_item"
+            },
+            "2": {
+                "type_id": "minecraft:smithing_additional_item",
+                "pos_x": 4,
+                "pos_y": 0,
+                "placeholder_type_id": "corncraft:empty_slot_ingot"
+            },
+            "3": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 0
+            }
+        },
+        "labels": [
+            {
+                "pos_x": 3,
+                "pos_y": 2,
+                "width": 5,
+                "alignment": "left",
+                "translation_key": "container.upgrade"
+            }
+        ],
+        "work_panel_height": 4
+    },
+    "minecraft:smoker": {
+        "protocol_id": 22,
+        "prepend_slot_count": 3,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_furnace_fire_empty",
+                "pos_x": 2,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:gui_furnace_fire_progress",
+                "pos_x": 2,
+                "pos_y": 1,
+                "cur_value_property": "fuel_left",
+                "max_value_property": "maximum_fuel_burn_time"
+            },
+            {
+                "type_id": "corncraft:arrow_empty",
+                "pos_x": 5,
+                "pos_y": 1
+            },
+            {
+                "type_id": "corncraft:arrow_progress",
+                "pos_x": 5,
+                "pos_y": 1,
+                "cur_value_property": "progress_arrow",
+                "max_value_property": "maximum_progress"
+            }
+        ],
+        "slots": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 2
+            },
+            "1": {
+                "pos_x": 2,
+                "pos_y": 0
+            },
+            "2": {
+                "type_id": "minecraft:output",
+                "pos_x": 7,
+                "pos_y": 1
+            }
+        },
+        "properties": {
+            "0": "fuel_left",
+            "1": "maximum_fuel_burn_time",
+            "2": "progress_arrow",
+            "3": "maximum_progress"
+        }
+    },
+    "minecraft:cartography_table": {
+        "protocol_id": 23,
+        "prepend_slot_count": 3
+    },
+    "minecraft:stonecutter": {
+        "protocol_id": 24,
+        "prepend_slot_count": 2,
+        "slots": {
+            "0": {
+                "type_id": "minecraft:stonecutter_base_item",
+                "pos_x": 0.5,
+                "pos_y": 1
+            },
+            "1": {
+                "type_id": "minecraft:output",
+                "pos_x": 7.5,
+                "pos_y": 1
+            }
+        },
+        "scroll_views": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        "properties": {
+            "0": "selected_recipe"
+        }
+    }
+}

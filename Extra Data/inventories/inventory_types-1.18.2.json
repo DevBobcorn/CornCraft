@@ -793,7 +793,7 @@
         ],
         "slots": {
             "0": {
-                "type_id": "minecraft:smithing_base_item",
+                "type_id": "minecraft:smithing_base_item_legacy",
                 "pos_x": 1,
                 "pos_y": 0,
                 "placeholder_type_id": "corncraft:empty_slot_smithing_base_item"
