@@ -2150,10 +2150,11 @@ namespace CraftSharp.Protocol.Handlers
                             List<double> op1 = new();
                             List<double> op2 = new();
 
-                            var NumberOfModifiers = DataTypes.ReadNextVarInt(packetData);
-                            for (var j = 0; j < NumberOfModifiers; j++)
+                            var numberOfModifiers = DataTypes.ReadNextVarInt(packetData);
+                            for (var j = 0; j < numberOfModifiers; j++)
                             {
-                                DataTypes.ReadNextUUID(packetData);
+                                var modifierId = protocolVersion < MC_1_21_1_Version ?
+                                    DataTypes.ReadNextUUID(packetData).ToString() : DataTypes.ReadNextString(packetData);
                                 var amount = DataTypes.ReadNextDouble(packetData);
                                 var operation = DataTypes.ReadNextByte(packetData);
                                 switch (operation)

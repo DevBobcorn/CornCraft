@@ -4,7 +4,7 @@ English | [简体中文](README.zh-CN.md)
 A Minecraft **Java Edition** client implementation made with Unity.
 
 ## > About
-**CornCraft** is a Unity version of Minecraft. It connects to Java Edition servers(version 1.16.2 to 1.20.6) and provides basic graphical gameplay support.
+**CornCraft** is a Unity version of Minecraft. It connects to Java Edition servers(version 1.16.2 to 1.21.1) and provides basic graphical gameplay support.
 
 This project does not mean to be a Minecraft "clone", but rather an attempt to recreate the game in a somewhat different way, with the overall look and feel distinct from the original one.
 

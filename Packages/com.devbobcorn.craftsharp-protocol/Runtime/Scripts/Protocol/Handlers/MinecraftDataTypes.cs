@@ -23,7 +23,7 @@ namespace CraftSharp.Protocol.Handlers
         public bool UseAnonymousNBT => protocolVersion >= ProtocolMinecraft.MC_1_20_2_Version;
 
         public bool UseResourceLocationForMobAttributeModifierId =>
-                protocolVersion >= ProtocolMinecraft.MC_1_21_4_Version;
+                protocolVersion >= ProtocolMinecraft.MC_1_21_1_Version;
         
         /// <summary>
         /// Initialize a new MinecraftDataTypes instance
