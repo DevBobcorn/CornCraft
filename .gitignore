@@ -19,6 +19,8 @@
 # Third party resources & utils
 /[Aa]ssets/Plugins/
 /[Aa]ssets/Plugins.meta
+/[Aa]ssets/Samples/
+/[Aa]ssets/Samples.meta
 /[Aa]ssets/AnimeAnimations
 /[Aa]ssets/AnimeAnimations.meta
 /[Aa]ssets/AnimeModels
