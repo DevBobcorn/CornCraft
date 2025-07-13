@@ -28,6 +28,7 @@ namespace CraftSharp.Rendering
         
         [SerializeField] private GameObject chestPrefab;
         [SerializeField] private GameObject shulkerBoxPrefab;
+        [SerializeField] private GameObject bannerPrefab;
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> blockEntityPrefabs = new();
@@ -521,7 +522,7 @@ namespace CraftSharp.Rendering
 
             blockEntityObj.name = $"[Item Model] {blockEntityType}";
             blockEntityObj.transform.localPosition = Vector3.zero;
-            blockEntityObj.transform.localEulerAngles = new Vector3(0, 180F, 0);
+            blockEntityObj.transform.localEulerAngles = Vector3.zero;
 
             // Initialize the entity
             blockEntityRender.Initialize(null, blockState, blockEntityType, new());
@@ -548,7 +549,7 @@ namespace CraftSharp.Rendering
                     prevBlockEntityRender.BlockEntityNBT = nbt ?? new();
                     
                     // TODO: Update render with updated data tags
-                    prevBlockEntityRender.UpdateBlockState(blockState);
+                    prevBlockEntityRender.UpdateBlockState(blockState, false);
                     
                     return;
                 }
@@ -1105,6 +1106,7 @@ namespace CraftSharp.Rendering
             blockEntityPrefabs.Add(BlockEntityType.ENDER_CHEST_ID,       chestPrefab);
             blockEntityPrefabs.Add(BlockEntityType.TRAPPED_CHEST_ID,     chestPrefab);
             blockEntityPrefabs.Add(BlockEntityType.SHULKER_BOX_ID,       shulkerBoxPrefab);
+            blockEntityPrefabs.Add(BlockEntityType.BANNER_ID,            bannerPrefab);
             
             client = CornApp.CurrentClient;
 

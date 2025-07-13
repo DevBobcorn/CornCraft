@@ -46,7 +46,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public override void UpdateBlockState(BlockState blockState)
+        public override void UpdateBlockState(BlockState blockState, bool isItemPreview)
         {
             if (blockState != BlockState)
             {
@@ -72,8 +72,12 @@ namespace CraftSharp.Rendering
                     render.transform.localPosition = BEDROCK_BLOCK_ENTITY_OFFSET;
 
                     lidTransform = render.transform.GetChild(1); // Get 2nd child
-                    
-                    if (blockState.Properties.TryGetValue("facing", out var facingVal))
+
+                    if (isItemPreview)
+                    {
+                        render.transform.localEulerAngles = new(0F, 180F, 0F);
+                    }
+                    else if (blockState.Properties.TryGetValue("facing", out var facingVal))
                     {
                         int rotationDeg = facingVal switch
                         {
@@ -96,18 +100,13 @@ namespace CraftSharp.Rendering
                 }
             }
             
-            base.UpdateBlockState(blockState);
+            base.UpdateBlockState(blockState, isItemPreview);
         }
         
         public override void ManagedUpdate(float tickMilSec)
         {
             if (lidTransform && Location != null)
             {
-                var client = CornApp.CurrentClient;
-
-                if (!client) // Game is not ready, cancel update
-                    return;
-                
                 if (isOpened) // Should open
                 {
                     if (Mathf.DeltaAngle(-90F, openAngle) != 0)

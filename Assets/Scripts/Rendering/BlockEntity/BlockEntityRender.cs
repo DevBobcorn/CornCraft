@@ -53,10 +53,10 @@ namespace CraftSharp.Rendering
             Type = blockEntityType;
             BlockEntityNBT = tags;
             
-            UpdateBlockState(blockState);
+            UpdateBlockState(blockState, blockLoc is null);
         }
 
-        public virtual void UpdateBlockState(BlockState blockState)
+        public virtual void UpdateBlockState(BlockState blockState, bool isItemPreview)
         {
             BlockState = blockState;
         }

@@ -274,6 +274,7 @@ MonoBehaviour:
   defaultPrefab: {fileID: 2689602071572206800, guid: a6ce74dd043f42f44892d3a7ed5af9af, type: 3}
   chestPrefab: {fileID: 2689602071572206800, guid: 3e865739b0415ec438d1ffc780e5e626, type: 3}
   shulkerBoxPrefab: {fileID: 2689602071572206800, guid: 0503dc99568a37c4c8dba43cc50c96b2, type: 3}
+  bannerPrefab: {fileID: 2689602071572206800, guid: c75aaedd3b4d97f458ad6ae57c6aafcc, type: 3}
 --- !u!1 &1662238532019271137
 GameObject:
   m_ObjectHideFlags: 0

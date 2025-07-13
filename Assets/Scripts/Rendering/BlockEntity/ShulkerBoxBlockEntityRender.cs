@@ -44,7 +44,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public override void UpdateBlockState(BlockState blockState)
+        public override void UpdateBlockState(BlockState blockState, bool isItemPreview)
         {
             if (blockState != BlockState)
             {
@@ -91,18 +91,13 @@ namespace CraftSharp.Rendering
                 SetBedrockBlockEntityRenderTexture(render, $"shulker/{textureName}");
             }
             
-            base.UpdateBlockState(blockState);
+            base.UpdateBlockState(blockState, isItemPreview);
         }
         
         public override void ManagedUpdate(float tickMilSec)
         {
             if (lidTransform && Location != null)
             {
-                var client = CornApp.CurrentClient;
-
-                if (!client) // Game is not ready, cancel update
-                    return;
-                
                 if (isOpened) // Should open
                 {
                     if (openness < 1F)

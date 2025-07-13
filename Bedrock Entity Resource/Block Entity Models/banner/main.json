@@ -1,0 +1,32 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.unknown",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 3,
+				"visible_bounds_height": 6.5,
+				"visible_bounds_offset": [0, 2.75, 0]
+			},
+			"bones": [
+				{
+					"name": "Face",
+					"pivot": [0, 44, 0],
+					"cubes": [
+						{"origin": [-10, 4, -1], "size": [20, 40, 1], "uv": [0, 0]}
+					]
+				},
+				{
+					"name": "Frame",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-1, 0, 0], "size": [2, 42, 2], "uv": [44, 0]},
+						{"origin": [-10, 42, 0], "size": [20, 2, 2], "uv": [0, 42]}
+					]
+				}
+			]
+		}
+	]
+}
