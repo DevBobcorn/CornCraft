@@ -41,6 +41,8 @@ namespace CraftSharp.Rendering
         private readonly Dictionary<(EntityRenderType, ResourceLocation), Material> CachedEntityMaterials = new();
         
         public readonly Dictionary<ResourceLocation, bool> SkinModels = new();
+        
+        private readonly Dictionary<int, Texture2D> CachedBannerTextures = new();
 
         /// <summary>
         /// Map a material to an instance in the global entity material table.
@@ -127,6 +129,130 @@ namespace CraftSharp.Rendering
             }
         }
 
+        private static Texture2D ColorizeTexture(Texture2D sourceTexture, Color color)
+        {
+            // Create a new texture to preserve the original
+            var coloredTexture = new Texture2D(sourceTexture.width, sourceTexture.height, sourceTexture.format, false);
+        
+            // Get all pixels from the source texture
+            Color[] pixels = sourceTexture.GetPixels();
+        
+            // Apply color tint to each pixel
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                // Multiply the color values (preserves alpha)
+                pixels[i] = new Color(
+                    pixels[i].r * color.r,
+                    pixels[i].g * color.g,
+                    pixels[i].b * color.b,
+                    1F
+                );
+            }
+        
+            // Apply the modified pixels to the new texture
+            coloredTexture.SetPixels(pixels);
+            coloredTexture.Apply();
+        
+            return coloredTexture;
+        }
+        
+        private static Texture2D ColorizeTextureAndStackToBase(Texture2D sourceTexture, Texture2D baseTexture, Color color)
+        {
+            // Create a new texture to preserve the original
+            var coloredTexture = new Texture2D(sourceTexture.width, sourceTexture.height, sourceTexture.format, false);
+        
+            // Get all pixels from the source texture
+            Color[] pixels = sourceTexture.GetPixels();
+            Color[] basePixels = baseTexture.GetPixels();
+
+            // Apply color tint to each pixel
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                var colorizedPixel = new Color(
+                    pixels[i].r * color.r,
+                    pixels[i].g * color.g,
+                    pixels[i].b * color.b,
+                    1F
+                );
+                // Multiply the color values (preserves alpha)
+                pixels[i] = Color32.Lerp(basePixels[i], colorizedPixel, pixels[i].a);
+            }
+        
+            // Apply the modified pixels to the new texture
+            coloredTexture.SetPixels(pixels);
+            coloredTexture.Apply();
+        
+            return coloredTexture;
+        }
+
+        public void ApplyBannerTexture(BannerPatternSequence patterns, Action<Texture2D> callback)
+        {
+            int patternsHash = patterns.GetHashCode();
+
+            if (CachedBannerTextures.TryGetValue(patternsHash, out var bannerTexture))
+            {
+                callback.Invoke(bannerTexture);
+
+                return;
+            }
+            
+            // Patterns not cached, generate it
+            var resManager = ResourcePackManager.Instance;
+
+            int step = 0, stepPatternsHash = 0;
+            // Base texture with longest common subsequence which can be used
+            // as a base for creating texture for current pattern sequence
+            Texture2D baseTexture = null;
+            
+            while (step < patterns.records.Length)
+            {
+                var patternRecord = patterns.records[step];
+                var newBaseHash = HashCode.Combine(patternRecord, stepPatternsHash);
+                
+                if (CachedBannerTextures.TryGetValue(newBaseHash, out var newBaseTexture))
+                {
+                    baseTexture = newBaseTexture;
+                    stepPatternsHash = newBaseHash;
+                    step++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            for (; step < patterns.records.Length; step++)
+            {
+                var patternRecord = patterns.records[step];
+                var patternTexture = resManager.GetEntityTextureFromTable(
+                    new(patternRecord.Type.Namespace, $"entity/banner/{patternRecord.Type.Path}"));
+                var patternColor = patternRecord.Color.GetColor32();
+                
+                stepPatternsHash = HashCode.Combine(patternRecord, stepPatternsHash);
+
+                var generatedTexture = baseTexture == null ?
+                    // Use colorized pattern texture
+                    ColorizeTexture(patternTexture, patternColor) :
+                    // Stack colorized pattern texture onto base texture
+                    ColorizeTextureAndStackToBase(patternTexture, baseTexture, patternColor);
+
+                generatedTexture.filterMode = FilterMode.Point;
+                
+                // Cache generated texture
+                CachedBannerTextures[stepPatternsHash] = generatedTexture;
+                
+                Debug.Log($"Generating texture for pattern sequence... Step {step}/{patterns.records.Length} Hash: {stepPatternsHash}");
+                
+                // Use current texture as base in next iteration
+                baseTexture = generatedTexture;
+            }
+            
+            callback.Invoke(baseTexture);
+            
+            // Final iteration gives us the final texture
+            Debug.Log($"Generated texture for pattern sequence {patterns}. Actual Hash: {stepPatternsHash}");
+        }
+        
         /// <summary>
         /// Only kept for current session
         /// </summary>

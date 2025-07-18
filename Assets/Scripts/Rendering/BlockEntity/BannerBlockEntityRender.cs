@@ -15,14 +15,25 @@ namespace CraftSharp.Rendering
         public Transform? faceTransform;
 
         private float waveTime = 0F;
+        private float textureUpdateCooldown = 0F;
+
+        private bool isItem;
+        private bool isDirty = false;
+        private CommonColors baseColor;
 
 #nullable disable
 
         public override void UpdateBlockState(BlockState blockState, bool isItemPreview)
         {
+            isItem = isItemPreview;
+            
             if (blockState != BlockState)
             {
-                var isWall = blockState.BlockId.Path.EndsWith("wall_banner");
+                var idPath = blockState.BlockId.Path;
+                var isWall = idPath.EndsWith("_wall_banner");
+                var colorName = isWall ? idPath[..^"_wall_banner".Length] : idPath[..^"_banner".Length];
+                
+                baseColor = CommonColorsHelper.GetCommonColor(colorName);
 
                 faceTransform = null;
                 ClearBedrockBlockEntityRender();
@@ -42,7 +53,8 @@ namespace CraftSharp.Rendering
                 {
                     float rotationDeg = (short.Parse(rotationVal) + 8) % 16 * 22.5F;
                     render.transform.localEulerAngles = new(0F, rotationDeg, 0F);
-                } else if (blockState.Properties.TryGetValue("facing", out var facingVal))
+                }
+                else if (blockState.Properties.TryGetValue("facing", out var facingVal))
                 {
                     int rotationDeg = facingVal switch
                     {
@@ -59,14 +71,114 @@ namespace CraftSharp.Rendering
             }
             
             base.UpdateBlockState(blockState, isItemPreview);
+            
+            // Schedule an initial update
+            isDirty = true;
+        }
+
+        private void UpdateBannerFaceTexture()
+        {
+            var client = CornApp.CurrentClient;
+            if (!client || !faceTransform || textureUpdateCooldown > 0F) return;
+            
+            textureUpdateCooldown = 0.5F;
+            isDirty = false;
+            
+            var patternRecords = new List<BannerPatternRecord>
+            {
+                // Base pattern is specified by the block/item id
+                new(BannerPatternType.BASE_ID, baseColor)
+            };
+
+            if (isItem) // Get pattern data from item slot or item entity
+            {
+                // TODO
+            }
+            else // Get pattern data from block entity
+            {
+                if (BlockEntityNBT is not null)
+                {
+                    if (BlockEntityNBT.TryGetValue("patterns", out var patterns) && patterns is object[] patternList)
+                    {
+                        // New format. e.g. "{patterns:{pattern:"right_stripe",color:"white"} }"
+                        foreach (Dictionary<string, object> patternData in patternList)
+                        {
+                            var color = CommonColorsHelper.GetCommonColor((string) patternData["color"]);
+                            ResourceLocation patternId;
+
+                            var pattern = patternData["pattern"];
+                            if (pattern is string patternStr) // Given as an id
+                            {
+                                patternId = ResourceLocation.FromString(patternStr);
+                            }
+                            else if (pattern is Dictionary<string, object> patternDef) // Given as an inline definition
+                            {
+                                patternId = ResourceLocation.FromString((string) patternDef["asset_id"]);
+                                var translationKey = (string) patternDef.GetValueOrDefault("translation_key", string.Empty);
+                                var newEntry = new BannerPatternType(patternId, translationKey);
+                                BannerPatternPalette.INSTANCE.AddOrUpdateEntry(patternId, newEntry);
+                            }
+                            else
+                            {
+                                patternId = ResourceLocation.INVALID;
+                                Debug.LogWarning("Unexpected pattern NBT format: " + pattern.GetType().Name);
+                            }
+                            
+                            patternRecords.Add(new(patternId, color));
+                        }
+                    }
+                    else if (BlockEntityNBT.TryGetValue("Patterns", out patterns) && patterns is object[] oldPatternList)
+                    {
+                        // Old format. e.g. "{Patterns:{Pattern:"rs",Color:0} }"
+                        foreach (Dictionary<string, object> patternData in oldPatternList)
+                        {
+                            // Encoded as enum int (probably as a string)
+                            var color = (CommonColors) int.Parse(patternData["Color"].ToString());
+
+                            var patternCode = (string) patternData["Pattern"];
+                            var patternId = BannerPatternType.GetIdFromCode(patternCode);
+                            
+                            patternRecords.Add(new(patternId, color));
+                        }
+                    }
+                    else
+                    {
+                        //Debug.LogWarning($"Patterns tag not found. Tags: {Json.Object2Json(BlockEntityNBT)}");
+                        isDirty = true;
+                    }
+                }
+            }
+
+            var patternSeq = new BannerPatternSequence(patternRecords.ToArray());
+            Debug.Log($"Pattern sequence at {Location} {patternSeq}");
+
+            var matManager = client.EntityMaterialManager;
+            
+            matManager.ApplyBannerTexture(patternSeq, bannerFaceTexture =>
+            {
+                var faceRenderer = faceTransform.GetComponent<MeshRenderer>();
+                
+                // Make a copy of the material
+                faceRenderer.sharedMaterial = new Material(faceRenderer.sharedMaterial)
+                {
+                    // And apply generated banner face texture to the material
+                    mainTexture = bannerFaceTexture
+                };
+            });
         }
         
         public override void ManagedUpdate(float tickMilSec)
         {
-            if (faceTransform && Location != null)
+            if (faceTransform)
             {
                 waveTime += Time.deltaTime;
                 faceTransform.localEulerAngles = new(0F, 0F, (Mathf.Sin(waveTime) - 1F) * 5F);
+                
+                textureUpdateCooldown -= Time.deltaTime;
+                if (isDirty && textureUpdateCooldown <= 0F)
+                {
+                    UpdateBannerFaceTexture();
+                }
             }
         }
     }
