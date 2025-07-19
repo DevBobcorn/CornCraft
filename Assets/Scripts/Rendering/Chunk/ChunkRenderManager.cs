@@ -546,7 +546,10 @@ namespace CraftSharp.Rendering
                 {
                     // Update block entity data tags
                     // Auto-creating a block entity while it is already created
-                    prevBlockEntityRender.BlockEntityNBT = nbt ?? new();
+                    if (nbt is not null) // Don't update if new data is null
+                    {
+                        prevBlockEntityRender.BlockEntityNBT = nbt;
+                    }
                     
                     // TODO: Update render with updated data tags
                     prevBlockEntityRender.UpdateBlockState(blockState, false);

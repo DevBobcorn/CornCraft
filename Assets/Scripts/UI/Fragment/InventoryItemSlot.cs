@@ -48,6 +48,11 @@ namespace CraftSharp.UI
         private bool hovered = false;
         private bool dragged = false;
 
+        public ItemStack? GetItemStack()
+        {
+            return currentItemStack;
+        }
+
         public bool Dragged
         {
             get => dragged;
@@ -222,6 +227,33 @@ namespace CraftSharp.UI
                     var slotTranslationKey = $"item.modifiers.{group.Key.GetEquipmentSlotName()}";
                     text.Append(TMPConverter.MC2TMP($"\n\n§7{ChatParser.TranslateString(slotTranslationKey)}"));
                     text.Append(getAttributeModifiers(group.Select(MobAttributeModifier.FromComponent).ToArray(), 1));
+                }
+            }
+            
+            if (itemStack.TryGetComponent<BannerPatternsComponent>(
+                    StructuredComponentIds.BANNER_PATTERNS_ID, out var bannerPatternsComponent))
+            {
+                foreach (var patternData in bannerPatternsComponent.Layers)
+                {
+                    // Encoded as enum int (probably as a string)
+                    var colorName = patternData.DyeColor.GetName();
+                    string translationKey;
+                        
+                    if (patternData.PatternType > 0) // Given as an id
+                    {
+                        var patternId = BannerPatternType.GetIdFromIndex(patternData.PatternType);
+                        translationKey = $"block.{patternId.Namespace}.banner.{patternId.Path}";
+                    }
+                    else if (patternData.PatternType == 0) // Given as an inline definition
+                    {
+                        translationKey = patternData.TranslationKey!;
+                    }
+                    else
+                    {
+                        translationKey = $"block.{ResourceLocation.INVALID.Namespace}.banner.{ResourceLocation.INVALID.Path}";
+                    }
+                    
+                    text.Append(TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString($"{translationKey}.{colorName}")}"));
                 }
             }
             

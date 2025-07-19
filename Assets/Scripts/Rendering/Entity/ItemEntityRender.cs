@@ -10,7 +10,12 @@ namespace CraftSharp.Rendering
         
         #nullable enable
 
-        private ItemStack? EntityItemStack;
+        private ItemStack? currentItemStack;
+
+        public ItemStack? GetItemStack()
+        {
+            return currentItemStack;
+        }
 
         public override void UpdateMetadata(Dictionary<int, object?> updatedMeta)
         {
@@ -22,7 +27,7 @@ namespace CraftSharp.Rendering
             {
                 if (Metadata!.TryGetValue(metaSlot1, out var value) && value is ItemStack itemStack)
                 {
-                    EntityItemStack = itemStack;
+                    currentItemStack = itemStack;
 
                     if (ItemObject)
                     {

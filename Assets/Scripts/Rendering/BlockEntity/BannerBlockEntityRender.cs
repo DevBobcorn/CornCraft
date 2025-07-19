@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using CraftSharp.Event;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
+using CraftSharp.UI;
 using UnityEngine;
 
 namespace CraftSharp.Rendering
@@ -71,9 +74,18 @@ namespace CraftSharp.Rendering
             }
             
             base.UpdateBlockState(blockState, isItemPreview);
-            
-            // Schedule an initial update
-            isDirty = true;
+
+            if (isItem)
+            {
+                // Update immediately because data is already present,
+                // plus block entity update is not called for items
+                UpdateBannerFaceTexture();
+            }
+            else
+            {
+                // Schedule an initial update
+                isDirty = true;
+            }
         }
 
         private void UpdateBannerFaceTexture()
@@ -92,7 +104,48 @@ namespace CraftSharp.Rendering
 
             if (isItem) // Get pattern data from item slot or item entity
             {
-                // TODO
+                ItemEntityRender itemEntityRender;
+                InventoryItemSlot inventoryItemSlot;
+                ItemStack itemStack = null;
+                
+                if (itemEntityRender = GetComponentInParent<ItemEntityRender>())
+                {
+                    itemStack = itemEntityRender.GetItemStack();
+                }
+                if (inventoryItemSlot = GetComponentInParent<InventoryItemSlot>())
+                {
+                    itemStack = inventoryItemSlot.GetItemStack();
+                }
+
+                if (itemStack is not null && itemStack.TryGetComponent<BannerPatternsComponent>(
+                        StructuredComponentIds.BANNER_PATTERNS_ID, out var bannerPatternsComponent))
+                {
+                    foreach (var patternData in bannerPatternsComponent.Layers)
+                    {
+                        // Encoded as enum int (probably as a string)
+                        var color = patternData.DyeColor;
+                        ResourceLocation patternId;
+                        
+                        if (patternData.PatternType > 0) // Given as an id
+                        {
+                            patternId = BannerPatternType.GetIdFromIndex(patternData.PatternType);
+                        }
+                        else if (patternData.PatternType == 0) // Given as an inline definition
+                        {
+                            patternId = patternData.AssetId!.Value;
+                            var translationKey = patternData.TranslationKey!;
+                            var newEntry = new BannerPatternType(patternId, translationKey);
+                            BannerPatternPalette.INSTANCE.AddOrUpdateEntry(patternId, newEntry);
+                        }
+                        else
+                        {
+                            patternId = ResourceLocation.INVALID;
+                            Debug.LogWarning("Unexpected pattern type: " + patternData.PatternType);
+                        }
+                            
+                        patternRecords.Add(new(patternId, color));
+                    }
+                }
             }
             else // Get pattern data from block entity
             {

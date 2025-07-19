@@ -241,16 +241,16 @@ namespace CraftSharp.Rendering
                 // Cache generated texture
                 CachedBannerTextures[stepPatternsHash] = generatedTexture;
                 
-                Debug.Log($"Generating texture for pattern sequence... Step {step}/{patterns.records.Length} Hash: {stepPatternsHash}");
+                //Debug.Log($"Generating texture for pattern sequence... Step {step}/{patterns.records.Length} Hash: {stepPatternsHash}");
                 
                 // Use current texture as base in next iteration
                 baseTexture = generatedTexture;
             }
             
+            // Final iteration gives us the final texture
             callback.Invoke(baseTexture);
             
-            // Final iteration gives us the final texture
-            Debug.Log($"Generated texture for pattern sequence {patterns}. Actual Hash: {stepPatternsHash}");
+            //Debug.Log($"Generated texture for pattern sequence {patterns}. Actual Hash: {stepPatternsHash}");
         }
         
         /// <summary>
