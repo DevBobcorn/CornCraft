@@ -55,6 +55,9 @@
     "minecraft:grindstone_base_item": {
         "place_predicate": "is=damageable|enchanted"
     },
+    "minecraft:shulker_box_main_item": {
+        "place_predicate": "id_path_ends_with!=shulker_box|bundle"
+    },
     "minecraft:smithing_additional_item_legacy": {
         "place_predicate": "id=minecraft:netherite_ingot"
     },

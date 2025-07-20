@@ -771,7 +771,8 @@
     "minecraft:shulker_box": {
         "protocol_id": 20,
         "main_slot_width": 9,
-        "main_slot_height": 3
+        "main_slot_height": 3,
+        "main_slot_type_id": "minecraft:shulker_box_main_item"
     },
     "minecraft:smithing": {
         "protocol_id": 21,
