@@ -157,15 +157,13 @@ namespace CraftSharp.UI
             }
             
             var workMainStart = inventoryType.PrependSlotCount;
-            var workMainPosX = inventoryType.MainPosX;
-            var workMainPosY = inventoryType.MainPosY;
-            for (int y = 0, i = 0; y < inventoryType.MainSlotHeight; y++)
-                for (int x = 0; x < inventoryType.MainSlotWidth; x++, i++)
-                {
-                    CreateSlot(workPanel, workMainStart + i, x + workMainPosX,
-                        workMainPosY + inventoryType.MainSlotHeight - y - 1, InventorySlotType.SLOT_TYPE_REGULAR_ID,
-                        null, null, $"Slot [{workMainStart + i}] (Work Main)");
-                }
+            for (int i = workMainStart; i < workMainStart + inventoryType.MainSlotWidth * inventoryType.MainSlotHeight; i++)
+            {
+                var slotInfo = inventoryType.GetWorkPanelSlotInfo(i);
+                
+                CreateSlot(workPanel, i, slotInfo.PosX, slotInfo.PosY, slotInfo.TypeId, slotInfo.PreviewItemStack,
+                    slotInfo.PlaceholderTypeId, $"Slot [{workMainStart + i}] (Work Main) [{slotInfo.TypeId}]");
+            }
 
             if (inventoryType.HasBackpackSlots)
             {

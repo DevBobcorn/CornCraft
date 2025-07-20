@@ -70,11 +70,6 @@ namespace CraftSharp.Inventory
                     keyVal = src.Split("<=", 2);
                     conditions.Add(keyVal[0], (Operator.LESS_EQUAL, keyVal[1]));
                 }
-                else if (src.Contains('='))
-                {
-                    keyVal = src.Split('=', 2);
-                    conditions.Add(keyVal[0], (Operator.EQUAL, keyVal[1]));
-                }
                 else if (src.Contains("=="))
                 {
                     keyVal = src.Split("==", 2);
@@ -84,6 +79,11 @@ namespace CraftSharp.Inventory
                 {
                     keyVal = src.Split("!=", 2);
                     conditions.Add(keyVal[0], (Operator.NOT_EQUAL, keyVal[1]));
+                }
+                else if (src.Contains('='))
+                {
+                    keyVal = src.Split('=', 2);
+                    conditions.Add(keyVal[0], (Operator.EQUAL, keyVal[1]));
                 }
                 else if (src.Contains('>'))
                 {

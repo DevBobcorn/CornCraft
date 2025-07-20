@@ -66,11 +66,7 @@ namespace CraftSharp
                         [0] = new(0, 2, InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID, null, null),
                         [1] = new(0, 2, InventorySlotType.SLOT_TYPE_SADDLE_ID, null, null)
                     }, null, null, null
-                ))
-            {
-                MainPosX = 4,
-                MainPosY = 0,
-            };
+                ), 4, 0);
 
             HORSE_CHESTED = new(InventoryType.HORSE_ID,
                 2, 5, 3, true, true, 0,
@@ -80,11 +76,7 @@ namespace CraftSharp
                         [0] = new(0, 2, InventorySlotType.SLOT_TYPE_HORSE_ARMOR_ID, null, null),
                         [1] = new(0, 2, InventorySlotType.SLOT_TYPE_SADDLE_ID, null, null)
                     }, null, null, null
-                ))
-            {
-                MainPosX = 4,
-                MainPosY = 0
-            };
+                ), 4, 0);
         }
 
         /// <summary>
@@ -126,21 +118,22 @@ namespace CraftSharp
                         var hb = !inventoryDef.Properties.TryGetValue("has_backpack_slots", out val) || bool.Parse(val.StringValue); // True if not specified
                         var hh = !inventoryDef.Properties.TryGetValue("has_hotbar_slots", out val) || bool.Parse(val.StringValue); // True if not specified
 
+                        var mx = inventoryDef.Properties.TryGetValue("main_pos_x", out val) ? int.Parse(val.StringValue) : 0;
+                        var my = inventoryDef.Properties.TryGetValue("main_pos_y", out val) ? int.Parse(val.StringValue) : 0;
+                        
+                        ResourceLocation? mt = inventoryDef.Properties.TryGetValue("main_slot_type_id", out val) ?
+                            ResourceLocation.FromString(val.StringValue) : null;
+                        
                         var workPanelLayout = InventoryType.InventoryLayoutInfo.FromJson(inventoryDef);
                         
-                        var t = new InventoryType(inventoryTypeId, p, w, h, hb, hh, a, workPanelLayout);
+                        var t = new InventoryType(inventoryTypeId, p, w, h,
+                            hb, hh, a, workPanelLayout, mx, my, mt);
                         
                         if (inventoryDef.Properties.TryGetValue("work_panel_height", out val))
                             t.WorkPanelHeight = int.Parse(val.StringValue);
                         
                         if (inventoryDef.Properties.TryGetValue("list_panel_width", out val))
                             t.ListPanelWidth = int.Parse(val.StringValue);
-                        
-                        if (inventoryDef.Properties.TryGetValue("main_pos_x", out val))
-                            t.MainPosX = int.Parse(val.StringValue);
-                        
-                        if (inventoryDef.Properties.TryGetValue("main_pos_y", out val))
-                            t.MainPosY = int.Parse(val.StringValue);
 
                         if (inventoryDef.Properties.TryGetValue("properties", out val))
                         {

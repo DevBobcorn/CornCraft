@@ -75,7 +75,7 @@ namespace CraftSharp.Inventory
             Dictionary<int, InventoryScrollViewInfo>? ScrollViewInfo = null) : InventoryFragmentInfo
         {
             public List<InventorySpriteInfo>? SpriteInfo { get; } = SpriteInfo;
-            public Dictionary<int, InventorySlotInfo>? SlotInfo { get; } = SlotInfo;
+            public Dictionary<int, InventorySlotInfo>? SlotInfo { get; set; } = SlotInfo;
             public Dictionary<int, InventoryInputInfo>? InputInfo { get; } = InputInfo;
             public List<InventoryLabelInfo>? LabelInfo { get; } = LabelInfo;
             public Dictionary<int, InventoryButtonInfo>? ButtonInfo { get; } = ButtonInfo;
@@ -387,11 +387,10 @@ namespace CraftSharp.Inventory
         // UI Layout settings
         public int WorkPanelHeight { get; set; } = 3;
         public int ListPanelWidth { get; set; } = 0;
-        public float MainPosX { get; set; } = 0;
-        public float MainPosY { get; set; } = 0;
         
         public InventoryType(ResourceLocation id, int prependSlotCount, int mainSlotWidth, int mainSlotHeight,
-            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount, InventoryLayoutInfo workPanelLayout)
+            bool hasBackpackSlots, bool hasHotbarSlots, int appendSlotCount, InventoryLayoutInfo workPanelLayout,
+            int mainSlotPosX = 0, int mainSlotPosY = 0, ResourceLocation? mainSlotTypeId = null)
         {
             TypeId = id;
             
@@ -402,6 +401,21 @@ namespace CraftSharp.Inventory
             HasHotbarSlots = hasHotbarSlots;
             AppendSlotCount = appendSlotCount;
             WorkPanelLayout = workPanelLayout;
+            
+            // Generate main slot infos
+            if (MainSlotHeight > 0 && MainSlotWidth > 0)
+            {
+                workPanelLayout.SlotInfo ??= new();
+                mainSlotTypeId ??= InventorySlotType.SLOT_TYPE_REGULAR_ID;
+            
+                for (int y = 0, i = 0; y < mainSlotHeight; y++)
+                for (int x = 0; x < mainSlotWidth; x++, i++)
+                {
+                    workPanelLayout.SlotInfo.Add(prependSlotCount + i, new(
+                        x + mainSlotPosX, mainSlotPosY + mainSlotHeight - y - 1,
+                        mainSlotTypeId.Value, null, null));
+                }
+            }
         }
 
         public override string ToString()
