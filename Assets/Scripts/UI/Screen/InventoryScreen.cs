@@ -49,8 +49,9 @@ namespace CraftSharp.UI
         [SerializeField] private InventoryItemSlot[] backpackSlots;
         [SerializeField] private InventoryItemSlot[] hotbarSlots;
         [SerializeField] private float inventorySlotSize = 90F;
-        
         [SerializeField] private TMP_Text propertyPreviewText;
+
+        private RectTransform screenRect;
 
         private readonly Dictionary<int, InventoryItemSlot> currentSlots = new();
         private readonly Dictionary<int, InventoryInput> currentInputs = new();
@@ -700,6 +701,8 @@ namespace CraftSharp.UI
             {
                 cursorText.text = str;
                 cursorTextPanel.gameObject.SetActive(true);
+                
+                LayoutRebuilder.ForceRebuildLayoutImmediate(cursorTextPanel);
             }
         }
 
@@ -1142,6 +1145,7 @@ namespace CraftSharp.UI
         {
             // Initialize controls and add listeners
             closeButton.onClick.AddListener(CloseInventory);
+            screenRect = GetComponent<RectTransform>();
             
             inventoryBackground.SetEnterHandler(() =>
             {
@@ -1427,14 +1431,21 @@ namespace CraftSharp.UI
             if (!game) return;
 
             // Update cursor slot position
+            var mousePos = Mouse.current.position.value;
+            
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                transform as RectTransform, Mouse.current.position.value,
-                game.UICamera, out Vector2 newPos);
+                screenRect, mousePos, game.UICamera, out Vector2 newPos);
+            
+            var tipPos = new Vector2(
+                Mathf.Min(screenRect.rect.width / 2 - cursorTextPanel.rect.width, newPos.x),
+                Mathf.Max(cursorTextPanel.rect.height - screenRect.rect.height / 2, newPos.y) );
             
             newPos = transform.TransformPoint(newPos);
+            tipPos = transform.TransformPoint(tipPos);
 
             // Don't modify z coordinate
             cursorRect.position = new Vector3(newPos.x, newPos.y, cursorRect.position.z);
+            cursorTextPanel.position = new Vector3(tipPos.x, tipPos.y, cursorTextPanel.position.z);
 
             if (currentTimerFlipbookSprites.Count > 0) // Update timer flipbook sprites
             {

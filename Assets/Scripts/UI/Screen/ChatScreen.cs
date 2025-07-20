@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Event;
@@ -39,8 +40,10 @@ namespace CraftSharp.UI
         [SerializeField] private GameObject chatMessagePrefab;
         [SerializeField] private RectTransform cursorTextPanel;
         [SerializeField] private TMP_Text cursorText;
-        private CanvasGroup screenGroup;
+        
         private readonly Queue<TMP_Text> chatMessages = new();
+        private CanvasGroup screenGroup;
+        private RectTransform screenRect;
 
         // Chat message data
         private readonly List<string> sentChatHistory = new();
@@ -246,6 +249,8 @@ namespace CraftSharp.UI
             {
                 cursorText.text = str;
                 cursorTextPanel.gameObject.SetActive(true);
+                
+                LayoutRebuilder.ForceRebuildLayoutImmediate(cursorTextPanel);
             }
         }
 
@@ -253,6 +258,7 @@ namespace CraftSharp.UI
         {
             // Initialize controls and add listeners
             screenGroup = GetComponent<CanvasGroup>();
+            screenRect = GetComponent<RectTransform>();
 
             if (chatMessages.Count > 0)
             {
@@ -348,14 +354,19 @@ namespace CraftSharp.UI
             if (!game) return;
 
             // Update cursor text position
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                transform as RectTransform, Mouse.current.position.value,
-                game.UICamera, out Vector2 newPos);
+            var mousePos = Mouse.current.position.value;
             
-            newPos = transform.TransformPoint(newPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                screenRect, mousePos, game.UICamera, out Vector2 newPos);
+            
+            var tipPos = new Vector2(
+                Mathf.Min(screenRect.rect.width / 2 - cursorTextPanel.rect.width, newPos.x),
+                Mathf.Max(cursorTextPanel.rect.height - screenRect.rect.height / 2, newPos.y) );
+            
+            tipPos = transform.TransformPoint(tipPos);
 
             // Don't modify z coordinate
-            cursorTextPanel.position = new Vector3(newPos.x, newPos.y, cursorTextPanel.position.z);
+            cursorTextPanel.position = new Vector3(tipPos.x, tipPos.y, cursorTextPanel.position.z);
 
             if (chatInput.IsActive())
             {
