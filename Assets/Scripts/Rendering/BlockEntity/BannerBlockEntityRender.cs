@@ -203,7 +203,7 @@ namespace CraftSharp.Rendering
             }
 
             var patternSeq = new BannerPatternSequence(patternRecords.ToArray());
-            Debug.Log($"Pattern sequence at {Location} {patternSeq}");
+            //Debug.Log($"Pattern sequence at {Location} {patternSeq}");
 
             var matManager = client.EntityMaterialManager;
             

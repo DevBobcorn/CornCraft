@@ -88,8 +88,20 @@
         "texture_id": "minecraft:item/empty_slot_bottle",
         "invert_color": true
     },
-    "corncraft:empty_slot_blaze_powder": {
-        "texture_id": "minecraft:item/empty_slot_blaze_powder",
+    "corncraft:empty_slot_banner": {
+        "texture_id": "minecraft:item/empty_slot_banner",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_banner_pattern": {
+        "texture_id": "minecraft:item/empty_slot_banner_pattern",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_banner_pattern_old": {
+        "texture_id": "minecraft:item/empty_slot_banner_pattern_old",
+        "invert_color": true
+    },
+    "corncraft:empty_slot_dye": {
+        "texture_id": "minecraft:item/empty_slot_dye",
         "invert_color": true
     },
     "corncraft:empty_slot_smithing_base_item": {
@@ -299,6 +311,9 @@
     },
     "corncraft:gui_background_enchantment": {
         "texture_id": "corncraft:background/background_enchantment"
+    },
+    "corncraft:gui_background_loom": {
+        "texture_id": "corncraft:background/background_loom"
     },
     "corncraft:gui_iron_hammer": {
         "texture_id": "corncraft:icon/gui_iron_hammer"

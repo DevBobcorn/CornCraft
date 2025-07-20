@@ -39,6 +39,8 @@ namespace CraftSharp.Rendering
 
         private static void ClearItemVisual(GameObject modelObject)
         {
+            if (!modelObject) return;
+            
             // Clear mesh if present
             if (modelObject.TryGetComponent<MeshFilter>(out var meshFilter))
             {

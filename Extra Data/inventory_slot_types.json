@@ -55,6 +55,15 @@
     "minecraft:grindstone_base_item": {
         "place_predicate": "is=damageable|enchanted"
     },
+    "minecraft:loom_base_item": {
+        "place_predicate": "id_path_ends_with=_banner"
+    },
+    "minecraft:loom_dye_item": {
+        "place_predicate": "id_path_ends_with=_dye"
+    },
+    "minecraft:loom_pattern_item": {
+        "place_predicate": "id_path_ends_with=_banner_pattern"
+    },
     "minecraft:shulker_box_main_item": {
         "place_predicate": "id_path_ends_with!=shulker_box|bundle"
     },

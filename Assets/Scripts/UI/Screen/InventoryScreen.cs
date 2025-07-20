@@ -781,6 +781,23 @@ namespace CraftSharp.UI
                 if (!game) return;
                 
                 game.DoInventoryButtonClick(activeInventoryId, buttonId);
+                
+                EventManager.Instance.Broadcast<InventoryPropertyUpdateEvent>(
+                    new(activeInventoryId, 0, (short) buttonId));
+            }
+            
+            if (activeInventoryData.Type.TypeId == InventoryType.LOOM_ID)
+            {
+                var game = CornApp.CurrentClient;
+                if (!game) return;
+
+                if (currentButtons.Count > 1) // i.e. Not using a pattern item
+                {
+                    game.DoInventoryButtonClick(activeInventoryId, buttonId);
+                
+                    EventManager.Instance.Broadcast<InventoryPropertyUpdateEvent>(
+                        new(activeInventoryId, 0, (short) buttonId));
+                }
             }
         }
 
@@ -877,6 +894,79 @@ namespace CraftSharp.UI
 
                         index++;
                     }
+                }
+            }
+            
+            if (activeInventoryData.Type.TypeId == InventoryType.LOOM_ID)
+            {
+                if (slotId is >= 0 and < 3) // Loom input item slot
+                {
+                    var scrollView = currentScrollViews[0];
+                    var grid = scrollView.ItemGridLayoutGroup;
+                    var gridRectTransform = grid.GetComponent<RectTransform>();
+                    
+                    // Clear current list first
+                    scrollView.ClearAllItems();
+                    currentButtons.Clear();
+                    propertyDependents.Clear();
+                    
+                    var bannerItem = currentSlots[0].GetItemStack();
+                    var dyeItem = currentSlots[1].GetItemStack();
+                    var bannerPatternItem = currentSlots[2].GetItemStack();
+
+                    if (bannerItem is null || dyeItem is null)
+                    {
+                        return;
+                    }
+
+                    var usingPatternItem = bannerPatternItem is not null;
+                    ResourceLocation[] patterns;
+
+                    if (usingPatternItem) // Use the pattern specified by pattern item
+                    {
+                        var patternId = BannerPatternType.GetIdFromItemId(bannerPatternItem.ItemType.ItemId);
+                        if (patternId == ResourceLocation.INVALID)
+                        {
+                            return;
+                        }
+                        
+                        patterns = new[] { patternId };
+                    }
+                    else // Use default pattern list
+                    {
+                        // TODO: Set this value based on protocol version
+                        patterns = BannerPatternType.GetDefaultPatternList();
+                    }
+
+                    if (!propertyTable.TryGetValue("selected_pattern", out var currentSelected))
+                    {
+                        currentSelected = usingPatternItem ? (short) 0 : (short) -1;
+                    }
+
+                    int index = 1; // Banner button index starts from 1
+                    foreach (var pattern in patterns)
+                    {
+                        var nestedLayout = new InventoryType.InventoryLayoutInfo(
+                            null, null, null, null, null);
+
+                        var recipeButton = CreateButton(gridRectTransform, index, 0, 0, 1, 1, nestedLayout, $"Pattern [{index}]");
+                        propertyDependents.Add((InventoryType.PredicateType.Selected,
+                            new InventoryPropertyPredicate(new()
+                            {
+                                ["selected_pattern"] = (InventoryPropertyPredicate.Operator.EQUAL, index.ToString())
+                            }), recipeButton));
+                        recipeButton.HintTranslationKey = $"block.{pattern.Namespace}.banner.{pattern.Path}";
+                        recipeButton.MarkCursorTextDirty();
+
+                        if (currentSelected == index) recipeButton.Selected = true;
+
+                        index++;
+                    }
+                }
+                else if (slotId == 3) // Loom output item slot
+                {
+                    // Update output preview
+                    
                 }
             }
         }
@@ -1350,7 +1440,7 @@ namespace CraftSharp.UI
                 {
                     var propertyName = activeInventoryData.Type.PropertyNames.GetValueOrDefault(e.Property, $"prop_{e.Property}");
                     
-                    //Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
+                    Debug.Log($"Setting property [{activeInventoryId}]/[{e.Property}] {propertyName} to {e.Value}");
                     propertyTable[propertyName] = e.Value;
                     
                     // Collect updated property names
