@@ -113,14 +113,9 @@ namespace CraftSharp.UI
                 return string.Empty;
             }
             
-            var itemId = itemStack.ItemType.ItemId;
-
-            // Block items might use block translation key
-            var text = new StringBuilder(getDisplayName() ?? ( ChatParser.TryTranslateString(itemId.GetTranslationKey("item"), out var translated) ?
-                translated : ChatParser.TranslateString(itemId.GetTranslationKey("block")) ) );
+            var text = new StringBuilder(GetDisplayNameOrDefault(itemStack));
             
             var rarity = itemStack.Rarity;
-            
             if (rarity != ItemRarity.Common)
             {
                 var colorPrefix = rarity switch
@@ -216,6 +211,32 @@ namespace CraftSharp.UI
                 }
             }
 
+            if (itemStack.TryGetComponent<ContainerComponent>(
+                    StructuredComponentIds.CONTAINER_ID, out var containerComp) && containerComp.Items.Any())
+            {
+                int count = 0, remaining = containerComp.Items.Count;
+                
+                foreach (var containedItemStack in containerComp.Items)
+                {
+                    var containedItemDisplayName = GetDisplayNameOrDefault(containedItemStack);
+                    text.Append('\n').Append(containedItemDisplayName).Append($" x{containedItemStack.Count}");
+
+                    count++;
+                    remaining--;
+                    // In case of exactly 6 item stacks, just display the 6th instead the 'xxx more' text
+                    if (count == 5 && remaining > 1)
+                    {
+                        break;
+                    }
+                }
+
+                if (remaining > 0)
+                {
+                    text.Append("\n<i>").Append(ChatParser.TranslateString("container.shulkerBox.more",
+                        new List<string> { remaining.ToString() })).Append("</i>");
+                }
+            }
+            
             if (itemStack.TryGetComponent<AttributeModifiersComponent>(
                     StructuredComponentIds.ATTRIBUTE_MODIFIERS_ID, out var attributeModifiersComp) &&
                 attributeModifiersComp is { ShowInTooltip: true, NumberOfModifiers: > 0 })
@@ -333,35 +354,43 @@ namespace CraftSharp.UI
                 }
                 return TMPConverter.MC2TMP(modifierText.ToString());
             }
+        }
 
-            string? getDisplayName()
+        public static string GetDisplayNameOrDefault(ItemStack itemStack)
+        {
+            // Block items might use block translation key
+            return GetDisplayName(itemStack) ??
+                   (ChatParser.TryTranslateString(itemStack.ItemType.ItemId.GetTranslationKey("item"), out var translated)
+                       ? translated : ChatParser.TranslateString(itemStack.ItemType.ItemId.GetTranslationKey("block")));
+        }
+
+        private static string? GetDisplayName(ItemStack itemStack)
+        {
+            if (itemStack.TryGetComponent<PotionContentsComponent>(
+                    StructuredComponentIds.POTION_CONTENTS_ID, out var potionContentsComp2))
             {
-                if (itemStack.TryGetComponent<PotionContentsComponent>(
-                        StructuredComponentIds.POTION_CONTENTS_ID, out var potionContentsComp2))
-                {
-                    var baseTranslationKey = itemStack.ItemType.ItemId.GetTranslationKey("item");
+                var baseTranslationKey = itemStack.ItemType.ItemId.GetTranslationKey("item");
                     
-                    if (potionContentsComp2.HasPotionId)
-                    {
-                        var potionTranslationKey = potionContentsComp2.PotionId.Path;
+                if (potionContentsComp2.HasPotionId)
+                {
+                    var potionTranslationKey = potionContentsComp2.PotionId.Path;
                         
-                        if (potionTranslationKey.StartsWith("strong_")) // Remove Enhanced (Level II) Prefix
-                            potionTranslationKey = potionTranslationKey["strong_".Length..];
+                    if (potionTranslationKey.StartsWith("strong_")) // Remove Enhanced (Level II) Prefix
+                        potionTranslationKey = potionTranslationKey["strong_".Length..];
                         
-                        if (potionTranslationKey.StartsWith("long_")) // Remove Extended Prefix
-                            potionTranslationKey = potionTranslationKey["long_".Length..];
+                    if (potionTranslationKey.StartsWith("long_")) // Remove Extended Prefix
+                        potionTranslationKey = potionTranslationKey["long_".Length..];
                         
-                        return ChatParser.TranslateString($"{baseTranslationKey}.effect.{potionTranslationKey}");
-                    }
-                    return ChatParser.TranslateString($"{baseTranslationKey}.effect.empty"); // Uncraftable potion
+                    return ChatParser.TranslateString($"{baseTranslationKey}.effect.{potionTranslationKey}");
                 }
-                
-                var displayNameJson = itemStack.CustomName;
-                if (string.IsNullOrEmpty(displayNameJson)) return null;
-                
-                var formattedName = ChatParser.ParseText(displayNameJson);
-                return TMPConverter.MC2TMP($"§o{formattedName}§r"); // Make the name italic
+                return ChatParser.TranslateString($"{baseTranslationKey}.effect.empty"); // Uncraftable potion
             }
+                
+            var displayNameJson = itemStack.CustomName;
+            if (string.IsNullOrEmpty(displayNameJson)) return null;
+                
+            var formattedName = ChatParser.ParseText(displayNameJson);
+            return TMPConverter.MC2TMP($"§o{formattedName}§r"); // Make the name italic
         }
 
         protected override void UpdateCursorText()
