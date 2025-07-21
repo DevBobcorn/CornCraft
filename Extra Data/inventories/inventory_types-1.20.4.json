@@ -761,7 +761,52 @@
     },
     "minecraft:loom": {
         "protocol_id": 18,
-        "prepend_slot_count": 4
+        "prepend_slot_count": 4,
+        "sprites": [
+            {
+                "type_id": "corncraft:gui_background_loom",
+                "pos_x": 0,
+                "pos_y": 0,
+                "width": 9,
+                "height": 3
+            }
+        ],
+        "slots": {
+            "0": {
+                "type_id": "minecraft:loom_base_item",
+                "pos_x": 0,
+                "pos_y": 1.5,
+                "placeholder_type_id": "corncraft:empty_slot_banner"
+            },
+            "1": {
+                "type_id": "minecraft:loom_dye_item",
+                "pos_x": 1,
+                "pos_y": 1.5,
+                "placeholder_type_id": "corncraft:empty_slot_dye"
+            },
+            "2": {
+                "type_id": "minecraft:loom_pattern_item",
+                "pos_x": 0.5,
+                "pos_y": 0.5,
+                "placeholder_type_id": "corncraft:empty_slot_banner_pattern_old"
+            },
+            "3": {
+                "type_id": "minecraft:output",
+                "pos_x": 7.5,
+                "pos_y": 1
+            }
+        },
+        "scroll_views": {
+            "0": {
+                "pos_x": 2,
+                "pos_y": 0,
+                "width": 5,
+                "height": 3
+            }
+        },
+        "properties": {
+            "0": "selected_pattern"
+        }
     },
     "minecraft:merchant": {
         "protocol_id": 19,

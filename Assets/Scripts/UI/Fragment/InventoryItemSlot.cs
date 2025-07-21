@@ -114,6 +114,7 @@ namespace CraftSharp.UI
             }
             
             var text = new StringBuilder(GetDisplayNameOrDefault(itemStack));
+            var itemId = itemStack.ItemType.ItemId;
             
             var rarity = itemStack.Rarity;
             if (rarity != ItemRarity.Common)
@@ -276,6 +277,12 @@ namespace CraftSharp.UI
                     
                     text.Append(TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString($"{translationKey}.{colorName}")}"));
                 }
+            }
+
+            if (itemId.Path.EndsWith("_banner_pattern"))
+            {
+                var translationKey = itemId.GetTranslationKey("item");
+                text.Append(TMPConverter.MC2TMP($"\n§7{ChatParser.TranslateString($"{translationKey}.desc")}"));
             }
             
             if (itemStack.Lores is not null && itemStack.Lores.Count > 0)

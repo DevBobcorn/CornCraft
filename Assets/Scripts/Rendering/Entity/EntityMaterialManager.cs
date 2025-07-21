@@ -184,6 +184,42 @@ namespace CraftSharp.Rendering
         
             return coloredTexture;
         }
+        
+        public static Sprite CreateSpriteFromTexturePart(
+            Texture2D sourceTexture, 
+            int x, 
+            int y, 
+            int width, 
+            int height,
+            Vector2? optionalPivot = null,
+            float pixelsPerUnit = 100.0f
+        ) {
+            // Validate bounds
+            if (x < 0 || y < 0 || width <= 0 || height <= 0 || 
+                x + width > sourceTexture.width || 
+                y + height > sourceTexture.height)
+            {
+                Debug.LogError("Region exceeds texture bounds.");
+                return null;
+            }
+
+            // Convert top-left y to bottom-left origin
+            float rectY = sourceTexture.height - (y + height);
+
+            // Define the texture region
+            Rect spriteRect = new Rect(x, rectY, width, height);
+        
+            // Use provided pivot or default to center
+            Vector2 pivot = optionalPivot ?? new Vector2(0.5f, 0.5f);
+        
+            // Create the sprite
+            return Sprite.Create(
+                sourceTexture, 
+                spriteRect, 
+                pivot, 
+                pixelsPerUnit
+            );
+        }
 
         public void ApplyBannerTexture(BannerPatternSequence patterns, Action<Texture2D> callback)
         {

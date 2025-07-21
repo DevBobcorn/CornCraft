@@ -118,9 +118,9 @@ namespace CraftSharp.Rendering
                 }
 
                 if (itemStack is not null && itemStack.TryGetComponent<BannerPatternsComponent>(
-                        StructuredComponentIds.BANNER_PATTERNS_ID, out var bannerPatternsComponent))
+                        StructuredComponentIds.BANNER_PATTERNS_ID, out var bannerPatternsComp))
                 {
-                    foreach (var patternData in bannerPatternsComponent.Layers)
+                    foreach (var patternData in bannerPatternsComp.Layers)
                     {
                         // Encoded as enum int (probably as a string)
                         var color = patternData.DyeColor;

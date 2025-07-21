@@ -11,7 +11,10 @@ using TMPro;
 using CraftSharp.Event;
 using CraftSharp.Inventory;
 using CraftSharp.Inventory.Recipe;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Components;
+using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.Message;
+using CraftSharp.Rendering;
 
 namespace CraftSharp.UI
 {
@@ -819,6 +822,18 @@ namespace CraftSharp.UI
             }
         }
 
+        private static void ApplyPreview(EntityMaterialManager matManager, BannerPatternSequence patternSeq, Action<Sprite> callback)
+        {
+            matManager.ApplyBannerTexture(patternSeq, texture =>
+            {
+                var sprite = EntityMaterialManager.CreateSpriteFromTexturePart(
+                    texture, 1 * texture.width / 64, 1 * texture.height / 64,
+                    20 * texture.width / 64, 40 * texture.height / 64);
+                
+                callback.Invoke(sprite);
+            });
+        }
+        
         private void HandleSlotChange(int slotId, ItemStack itemStack)
         {
             // Handle slot change TODO: Move to separate class
@@ -918,6 +933,9 @@ namespace CraftSharp.UI
                     {
                         return;
                     }
+                    
+                    var game = CornApp.CurrentClient;
+                    if (!game) return;
 
                     var usingPatternItem = bannerPatternItem is not null;
                     ResourceLocation[] patterns;
@@ -943,22 +961,36 @@ namespace CraftSharp.UI
                         currentSelected = usingPatternItem ? (short) 0 : (short) -1;
                     }
 
+                    var existingPatterns = GetBannerPatterns(bannerItem);
+                    var patternColor = CommonColorsHelper.GetCommonColor(
+                        dyeItem.ItemType.ItemId.Path[..^"_dye".Length]);
+
                     int index = 1; // Banner button index starts from 1
                     foreach (var pattern in patterns)
                     {
                         var nestedLayout = new InventoryType.InventoryLayoutInfo(
                             null, null, null, null, null);
 
-                        var recipeButton = CreateButton(gridRectTransform, index, 0, 0, 1, 1, nestedLayout, $"Pattern [{index}]");
+                        var previewSeq = new BannerPatternSequence(existingPatterns
+                            .Concat(new [] { new BannerPatternRecord(pattern, patternColor) }).ToArray());
+
+                        var patternButton = CreateButton(gridRectTransform, index, 0, 0, 1, 1, nestedLayout, $"Pattern [{index}]");
                         propertyDependents.Add((InventoryType.PredicateType.Selected,
                             new InventoryPropertyPredicate(new()
                             {
                                 ["selected_pattern"] = (InventoryPropertyPredicate.Operator.EQUAL, index.ToString())
-                            }), recipeButton));
-                        recipeButton.HintTranslationKey = $"block.{pattern.Namespace}.banner.{pattern.Path}";
-                        recipeButton.MarkCursorTextDirty();
+                            }), patternButton));
+                        patternButton.MarkCursorTextDirty();
 
-                        if (currentSelected == index) recipeButton.Selected = true;
+                        var spriteObj = new GameObject("Banner Pattern Sprite");
+                        spriteObj.transform.SetParent(patternButton.transform);
+                        spriteObj.transform.localPosition = Vector3.zero;
+                        spriteObj.transform.localScale = Vector3.one;
+                        var spriteImage = spriteObj.AddComponent<Image>();
+                        ApplyPreview(game.EntityMaterialManager, previewSeq, s => spriteImage.sprite = s);
+                        spriteImage.rectTransform.sizeDelta = new Vector2(40, 80);
+
+                        if (currentSelected == index) patternButton.Selected = true;
 
                         index++;
                     }
@@ -1047,6 +1079,51 @@ namespace CraftSharp.UI
                 currentButtons[2].HintStringOverride = GetEnchantmentHoverText(3, bottomEnchantment.TranslationKey, bottomEnchantmentLevel, bottomXpLevelRequirement, playerXpLevel, lapisCount);
                 currentButtons[2].MarkCursorTextDirty();
             }
+        }
+
+        private List<BannerPatternRecord> GetBannerPatterns(ItemStack bannerItem)
+        {
+            var idPath = bannerItem.ItemType.ItemId.Path;
+            var colorName = idPath[..^"_banner".Length];
+            var baseColor = CommonColorsHelper.GetCommonColor(colorName);
+
+            var patternRecords = new List<BannerPatternRecord>
+            {
+                // Base pattern is specified by the block/item id
+                new(BannerPatternType.BASE_ID, baseColor)
+            };
+
+            if (bannerItem.TryGetComponent<BannerPatternsComponent>(
+                    StructuredComponentIds.BANNER_PATTERNS_ID, out var bannerPatternsComp))
+            {
+                foreach (var patternData in bannerPatternsComp.Layers)
+                {
+                    // Encoded as enum int (probably as a string)
+                    var color = patternData.DyeColor;
+                    ResourceLocation patternId;
+            
+                    if (patternData.PatternType > 0) // Given as an id
+                    {
+                        patternId = BannerPatternType.GetIdFromIndex(patternData.PatternType);
+                    }
+                    else if (patternData.PatternType == 0) // Given as an inline definition
+                    {
+                        patternId = patternData.AssetId!.Value;
+                        var translationKey = patternData.TranslationKey!;
+                        var newEntry = new BannerPatternType(patternId, translationKey);
+                        BannerPatternPalette.INSTANCE.AddOrUpdateEntry(patternId, newEntry);
+                    }
+                    else
+                    {
+                        patternId = ResourceLocation.INVALID;
+                        Debug.LogWarning("Unexpected pattern type: " + patternData.PatternType);
+                    }
+                
+                    patternRecords.Add(new(patternId, color));
+                }
+            }
+
+            return patternRecords;
         }
         
         private void UpdatePseudoProperties(string propertyName, short value)
