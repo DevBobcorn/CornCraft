@@ -264,13 +264,14 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Change text on a sign
         /// </summary>
-        /// <param name="location">Location of Sign block</param>
+        /// <param name="blockLoc">Location of Sign block</param>
+        /// <param name="front">Front or back</param>
         /// <param name="line1">New line 1</param>
         /// <param name="line2">New line 2</param>
         /// <param name="line3">New line 3</param>
         /// <param name="line4">New line 4</param>
         /// <returns>True if packet was successfully sent</returns>
-        bool SendUpdateSign(Location location, string line1, string line2, string line3, string line4);
+        bool SendUpdateSign(BlockLoc blockLoc, bool front, string line1, string line2, string line3, string line4);
 
         /// <summary>
         /// Select villager trade

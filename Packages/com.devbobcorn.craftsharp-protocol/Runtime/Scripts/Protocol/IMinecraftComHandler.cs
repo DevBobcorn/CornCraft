@@ -145,6 +145,11 @@ namespace CraftSharp.Protocol
         /// Called when an inventory is closed
         /// </summary>
         void OnInventoryClose(int inventoryId);
+        
+        /// <summary>
+        /// Called when a sign editor is opened
+        /// </summary>
+        void OnSignEditorOpen(BlockLoc blockLoc, bool isFrontText);
 
         /// <summary>
         /// Called when the player respawns, which happens on login, respawn and world change.

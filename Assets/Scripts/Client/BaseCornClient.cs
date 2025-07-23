@@ -249,6 +249,8 @@ namespace CraftSharp
         public abstract bool SetBeaconEffects(int primary, int secondary);
         public abstract bool CloseInventory(int inventoryId);
         public abstract bool ClearInventories();
+        public abstract bool UpdateSign(BlockLoc blockLoc, bool isFrontText,
+            string line1, string line2, string line3, string line4);
         public abstract bool InteractEntity(int entityId, int type, Hand hand = Hand.MainHand);
         public abstract bool PlaceBlock(BlockLoc blockLoc, Direction blockFace, float x, float y, float z, Hand hand = Hand.MainHand);
         public abstract bool DigBlock(BlockLoc blockLoc, Direction blockFace, DiggingStatus status);

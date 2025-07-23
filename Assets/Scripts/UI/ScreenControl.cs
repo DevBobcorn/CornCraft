@@ -13,6 +13,7 @@ namespace CraftSharp.UI
         [SerializeField] private ChatScreen m_ChatScreen;
         [SerializeField] private InventoryScreen m_InventoryScreen;
         [SerializeField] private DeathScreen m_DeathScreen;
+        [SerializeField] private SignEditorScreen m_SignEditorScreen;
         [SerializeField] private HUDScreen m_HUDScreen;
         [SerializeField] private PacketScreen m_PacketScreen;
         [SerializeField] private LoadingScreen m_LoadingScreen;
@@ -28,13 +29,14 @@ namespace CraftSharp.UI
             client = curClient;
 
             // Initialize screens
-            screenRegistry.Add(typeof (ChatScreen),      m_ChatScreen);
-            screenRegistry.Add(typeof (InventoryScreen), m_InventoryScreen);
-            screenRegistry.Add(typeof (DeathScreen),     m_DeathScreen);
-            screenRegistry.Add(typeof (HUDScreen),       m_HUDScreen);
-            screenRegistry.Add(typeof (PacketScreen),    m_PacketScreen);
-            screenRegistry.Add(typeof (LoadingScreen),   m_LoadingScreen);
-            screenRegistry.Add(typeof (PauseScreen),     m_PauseScreen);
+            screenRegistry.Add(typeof (ChatScreen),       m_ChatScreen);
+            screenRegistry.Add(typeof (InventoryScreen),  m_InventoryScreen);
+            screenRegistry.Add(typeof (DeathScreen),      m_DeathScreen);
+            screenRegistry.Add(typeof (SignEditorScreen), m_SignEditorScreen);
+            screenRegistry.Add(typeof (HUDScreen),        m_HUDScreen);
+            screenRegistry.Add(typeof (PacketScreen),     m_PacketScreen);
+            screenRegistry.Add(typeof (LoadingScreen),    m_LoadingScreen);
+            screenRegistry.Add(typeof (PauseScreen),      m_PauseScreen);
 
             // Push HUD Screen on start, before pushing Loading Screen
             PushScreen<HUDScreen>();

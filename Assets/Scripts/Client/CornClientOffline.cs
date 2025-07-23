@@ -477,6 +477,21 @@ namespace CraftSharp
         {
             return false;
         }
+        
+        /// <summary>
+        /// Update sign text
+        /// </summary>
+        /// <param name="blockLoc">Sign location</param>
+        /// <param name="isFrontText">Update front text</param>
+        /// <param name="line1">Line 1</param>
+        /// <param name="line2">Line 2</param>
+        /// <param name="line3">Line 3</param>
+        /// <param name="line4">Line 4</param>
+        public override bool UpdateSign(BlockLoc blockLoc, bool isFrontText, string line1,
+            string line2, string line3, string line4)
+        {
+            return false;
+        }
 
         /// <summary>
         /// Interact with an entity

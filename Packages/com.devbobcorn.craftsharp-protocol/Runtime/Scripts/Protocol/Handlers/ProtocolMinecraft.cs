@@ -2391,13 +2391,15 @@ namespace CraftSharp.Protocol.Handlers
                         handler.OnEntityAnimation(playerId, animation);
                     }
                     break;
-                case PacketTypesIn.OpenSignEditor: // TODO: Use
+                case PacketTypesIn.OpenSignEditor:
                     {
                         var signLocation = DataTypes.ReadNextBlockLoc(packetData);
                         var isFrontText = true;
 
                         if (protocolVersion >= MC_1_20_1_Version)
                             isFrontText = DataTypes.ReadNextBool(packetData);
+                        
+                        handler.OnSignEditorOpen(signLocation, isFrontText);
                     }
                     break;
                 case PacketTypesIn.SetTickingState:
@@ -3894,7 +3896,7 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendUpdateSign(Location sign, string line1, string line2, string line3, string line4)
+        public bool SendUpdateSign(BlockLoc blockLoc, bool front, string line1, string line2, string line3, string line4)
         {
             try
             {
@@ -3908,7 +3910,9 @@ namespace CraftSharp.Protocol.Handlers
                     line4 = line1[..23];
 
                 List<byte> packet = new();
-                packet.AddRange(DataTypes.GetLocation(sign));
+                packet.AddRange(DataTypes.GetBlockLoc(blockLoc));
+                if (protocolVersion >= MC_1_21_1_Version)
+                    packet.AddRange(DataTypes.GetBool(front));
                 packet.AddRange(DataTypes.GetString(line1));
                 packet.AddRange(DataTypes.GetString(line2));
                 packet.AddRange(DataTypes.GetString(line3));

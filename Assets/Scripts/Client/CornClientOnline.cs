@@ -1469,6 +1469,23 @@ namespace CraftSharp
                 ChatParser.TranslateString("container.inventory"));
             return true;
         }
+        
+        /// <summary>
+        /// Update sign text
+        /// </summary>
+        /// <param name="blockLoc">Sign location</param>
+        /// <param name="isFrontText">Update front text</param>
+        /// <param name="line1">Line 1</param>
+        /// <param name="line2">Line 2</param>
+        /// <param name="line3">Line 3</param>
+        /// <param name="line4">Line 4</param>
+        public override bool UpdateSign(BlockLoc blockLoc, bool isFrontText, string line1,
+            string line2, string line3, string line4)
+        {
+            return InvokeRequired ? InvokeOnNetMainThread(() =>
+                    UpdateSign(blockLoc, isFrontText, line1, line2, line3, line4)) :
+                handler!.SendUpdateSign(blockLoc, isFrontText, line1, line2, line3, line4);
+        }
 
         /// <summary>
         /// Interact with an entity
@@ -1615,21 +1632,6 @@ namespace CraftSharp
                 new HeldItemUpdateEvent(CurrentHotbarSlot, true, curItem, PlayerActionHelper.GetItemActionType(curItem)));
 
             return handler!.SendHeldItemChange(slot);
-        }
-
-        /// <summary>
-        /// Update sign text
-        /// </summary>
-        /// <param name="location">sign location</param>
-        /// <param name="line1">text one</param>
-        /// <param name="line2">text two</param>
-        /// <param name="line3">text three</param>
-        /// <param name="line4">text four</param>
-        public bool UpdateSign(Location location, string line1, string line2, string line3, string line4)
-        {
-            // TODO Open sign editor first https://wiki.vg/Protocol#Open_Sign_Editor
-            return InvokeRequired ? InvokeOnNetMainThread(() => UpdateSign(location, line1, line2, line3, line4)) :
-                handler!.SendUpdateSign(location, line1, line2, line3, line4);
         }
 
         /// <summary>
@@ -2127,6 +2129,24 @@ namespace CraftSharp
             }
         }
 
+        /// <summary>
+        /// Called when an inventory is opened
+        /// </summary>
+        /// <param name="blockLoc">Location of the sign block</param>
+        /// <param name="isFrontText">Edit front text (1.21+)</param>
+        public void OnSignEditorOpen(BlockLoc blockLoc, bool isFrontText)
+        {
+            Loom.QueueOnMainThread(() =>
+            {
+                // Set inventory id before opening the screen
+                ScreenControl.SetScreenData<SignEditorScreen>(screen =>
+                {
+                    screen.SetSignInfo(blockLoc, isFrontText);
+                });
+                ScreenControl.PushScreen<SignEditorScreen>();
+            });
+        }
+        
         /// <summary>
         /// Set client player's Id for later receiving player's own properties
         /// </summary>

@@ -275,6 +275,7 @@ MonoBehaviour:
   chestPrefab: {fileID: 2689602071572206800, guid: 3e865739b0415ec438d1ffc780e5e626, type: 3}
   shulkerBoxPrefab: {fileID: 2689602071572206800, guid: 0503dc99568a37c4c8dba43cc50c96b2, type: 3}
   bannerPrefab: {fileID: 2689602071572206800, guid: c75aaedd3b4d97f458ad6ae57c6aafcc, type: 3}
+  signPrefab: {fileID: 2689602071572206800, guid: e0543ee9e84e5b84e875a32a4acdc8ec, type: 3}
 --- !u!1 &1662238532019271137
 GameObject:
   m_ObjectHideFlags: 0
@@ -1279,6 +1280,10 @@ PrefabInstance:
       propertyPath: m_Size
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 826612922178320399, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
+      propertyPath: m_Value
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 882427244307582951, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1491,6 +1496,10 @@ PrefabInstance:
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
       value: 1801810542
       objectReference: {fileID: 0}
+    - target: {fileID: 1597046326892836254, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
+      propertyPath: m_Value
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1597046327235566010, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
@@ -1650,6 +1659,10 @@ PrefabInstance:
     - target: {fileID: 2822901450681302376, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
       value: 1801810542
+      objectReference: {fileID: 0}
+    - target: {fileID: 2926282681348586010, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
+      propertyPath: m_Value
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3125822812499006133, guid: 3d95787b0db43f049bba22afe2b0b90e, type: 3}
       propertyPath: m_AnchorMax.y
