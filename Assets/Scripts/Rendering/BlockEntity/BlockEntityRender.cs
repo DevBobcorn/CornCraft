@@ -101,13 +101,15 @@ namespace CraftSharp.Rendering
                 catch (System.Exception e)
                 {
                     Debug.LogWarning($"An exception occurred building model for block entity {blockEntityModelId}: {e}");
+                    
+                    return blockEntityRender;
                 }
             }
 
             return null;
         }
 
-        protected bool SetBedrockBlockEntityRenderTexture(BedrockModelEntityRender render, string textureName)
+        protected static bool SetBedrockBlockEntityRenderTexture(BedrockModelEntityRender render, string textureName)
         {
             for (int i = 0; i < render.TextureNames.Length; i++)
             {

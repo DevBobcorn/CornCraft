@@ -51,7 +51,7 @@ namespace CraftSharp.UI
             else if (variant.EndsWith("_hanging_sign"))
             {
                 variant = variant[..^"_hanging_sign".Length];
-                isHanging = false;
+                isHanging = true;
             }
             else if (variant.EndsWith("_wall_sign")) variant = variant[..^"_wall_sign".Length];
             else if (variant.EndsWith("_sign")) variant = variant[..^"_sign".Length];

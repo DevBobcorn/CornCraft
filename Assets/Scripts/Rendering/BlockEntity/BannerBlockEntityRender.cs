@@ -70,7 +70,8 @@ namespace CraftSharp.Rendering
                     render.transform.localEulerAngles = new(0F, rotationDeg, 0F);
                 }
                 
-                SetBedrockBlockEntityRenderTexture(render, "banner/banner_base");
+                var entityName = isWall ? "wall_banner" : "banner";
+                SetBedrockBlockEntityRenderTexture(render, $"{entityName}/banner_base");
             }
             
             base.UpdateBlockState(blockState, isItemPreview);
