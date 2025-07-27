@@ -1,7 +1,0 @@
-{
-	"parent": "block/wall_sign/wall_sign",
-	"textures": {
-		"all": "entity/signs/mangrove",
-		"particle": "block/mangrove_planks"
-	}
-}
