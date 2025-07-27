@@ -821,18 +821,6 @@ namespace CraftSharp.UI
                 }
             }
         }
-
-        private static void ApplyPreview(EntityMaterialManager matManager, BannerPatternSequence patternSeq, Action<Sprite> callback)
-        {
-            matManager.ApplyBannerTexture(patternSeq, texture =>
-            {
-                var sprite = EntityMaterialManager.CreateSpriteFromTexturePart(
-                    texture, 1 * texture.width / 64, 1 * texture.height / 64,
-                    20 * texture.width / 64, 40 * texture.height / 64);
-                
-                callback.Invoke(sprite);
-            });
-        }
         
         private void HandleSlotChange(int slotId, ItemStack itemStack)
         {
@@ -987,8 +975,16 @@ namespace CraftSharp.UI
                         spriteObj.transform.localPosition = Vector3.zero;
                         spriteObj.transform.localScale = Vector3.one;
                         var spriteImage = spriteObj.AddComponent<Image>();
-                        ApplyPreview(game.EntityMaterialManager, previewSeq, s => spriteImage.sprite = s);
-                        spriteImage.rectTransform.sizeDelta = new Vector2(40, 80);
+                        
+                        game.EntityMaterialManager.ApplyBannerTexture(previewSeq, texture =>
+                        {
+                            var sprite = EntityMaterialManager.CreateSpriteFromTexturePart(
+                                texture, 1 * texture.width / 64, 1 * texture.height / 64,
+                                20 * texture.width / 64, 40 * texture.height / 64);
+                
+                            spriteImage.sprite = sprite;
+                            spriteImage.rectTransform.sizeDelta = new Vector2(40, 80);
+                        });
 
                         if (currentSelected == index) patternButton.Selected = true;
 
@@ -1081,7 +1077,7 @@ namespace CraftSharp.UI
             }
         }
 
-        private List<BannerPatternRecord> GetBannerPatterns(ItemStack bannerItem)
+        private static List<BannerPatternRecord> GetBannerPatterns(ItemStack bannerItem)
         {
             var idPath = bannerItem.ItemType.ItemId.Path;
             var colorName = idPath[..^"_banner".Length];

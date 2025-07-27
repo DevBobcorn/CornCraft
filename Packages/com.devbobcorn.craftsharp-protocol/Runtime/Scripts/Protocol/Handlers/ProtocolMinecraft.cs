@@ -3900,15 +3900,6 @@ namespace CraftSharp.Protocol.Handlers
         {
             try
             {
-                if (line1.Length > 23)
-                    line1 = line1[..23];
-                if (line2.Length > 23)
-                    line2 = line1[..23];
-                if (line3.Length > 23)
-                    line3 = line1[..23];
-                if (line4.Length > 23)
-                    line4 = line1[..23];
-
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetBlockLoc(blockLoc));
                 if (protocolVersion >= MC_1_21_1_Version)
