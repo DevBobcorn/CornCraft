@@ -260,7 +260,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d66d929ef48d4527b2229462965c16a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  centerTransform: {fileID: 0}
+  frontTextDisplay: {fileID: 6333486475327094522}
+  backTextDisplay: {fileID: 5703446359368966258}
+  centerTransform: {fileID: 6756573842341478171}
 --- !u!1 &3647197008584816825
 GameObject:
   m_ObjectHideFlags: 0

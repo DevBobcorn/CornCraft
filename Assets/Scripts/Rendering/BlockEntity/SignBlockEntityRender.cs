@@ -1,31 +1,37 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using TMPro;
+
+using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Rendering
 {
     public class SignBlockEntityRender : BlockEntityRender
     {
-#nullable enable
-
-        public Transform? centerTransform;
+        [SerializeField] private TMP_Text frontTextDisplay;
+        [SerializeField] private TMP_Text backTextDisplay;
+        [SerializeField] private Transform centerTransform;
 
         private float textUpdateCooldown = 0F;
 
         private bool isItem;
         private bool isDirty = false;
-
-#nullable disable
+        
+        private bool frontGlowing = false;
+        private CommonColors frontColor = CommonColors.Black;
+        private string[] frontLines = { };
+        private bool backGlowing = false;
+        private CommonColors backColor = CommonColors.Black;
+        private string[] backLines = { };
 
         public override void UpdateBlockState(BlockState blockState, bool isItemPreview)
         {
             isItem = isItemPreview;
             
-            Debug.Log($"New: {blockState}, Old: {BlockState}");
-            
             if (blockState != BlockState)
             {
                 centerTransform = transform.GetChild(0); // Get 1st child
-                
-                Debug.Log($"Center: {centerTransform}");
 
                 if (centerTransform)
                 {
@@ -33,7 +39,7 @@ namespace CraftSharp.Rendering
                     {
                         float rotationDeg = (short.Parse(rotationVal) + 4) % 16 * 22.5F;
                         centerTransform.localEulerAngles = new(0F, rotationDeg, 0F);
-                        centerTransform.localPosition = new(0F, 0.375F, 0F);
+                        centerTransform.localPosition = new(0F, 0.33334F, 0F);
                     }
                     else if (blockState.Properties.TryGetValue("facing", out var facingVal))
                     {
@@ -48,11 +54,11 @@ namespace CraftSharp.Rendering
                         centerTransform.localEulerAngles = new(0F, rotationDeg, 0F);
                         centerTransform.localPosition = facingVal switch
                         {
-                            "north" => new Vector3( 0.475F, 0.041F, 0F),
-                            "east"  => new Vector3(0F, 0.041F, -0.475F),
-                            "south" => new Vector3(-0.475F, 0.041F, 0F),
-                            "west"  => new Vector3(0F, 0.041F,  0.475F),
-                            _       => new Vector3(0F, 0.041F, 0F)
+                            "north" => new Vector3( 0.4375F, 0F, 0F),
+                            "east"  => new Vector3(0F, 0F, -0.4375F),
+                            "south" => new Vector3(-0.4375F, 0F, 0F),
+                            "west"  => new Vector3(0F, 0F,  0.4375F),
+                            _       => new Vector3(0F, 0F, 0F)
                         };
                     }   
                 }
@@ -67,10 +73,24 @@ namespace CraftSharp.Rendering
             }
         }
 
+        private static string ParseMessage(object message)
+        {
+            if (message is string s) // Plain text
+            {
+                return s;
+            }
+            if (message is Dictionary<string, object> d) // NBT text component
+            {
+                return ChatParser.ParseText(d);
+            }
+
+            return message.ToString();
+        }
+
         private void UpdateSignText()
         {
             var client = CornApp.CurrentClient;
-            if (!client || !centerTransform || textUpdateCooldown > 0F) return;
+            if (!client || textUpdateCooldown > 0F) return;
             
             textUpdateCooldown = 0.5F;
             isDirty = false;
@@ -79,27 +99,69 @@ namespace CraftSharp.Rendering
             {
                 if (BlockEntityNBT is not null)
                 {
-                    /*
-                    if (BlockEntityNBT.TryGetValue("Patterns", out patterns) && patterns is object[] oldPatternList)
+                    bool textFound = false;
+                    
+                    if (BlockEntityNBT.TryGetValue("front_text", out var frontText)
+                        && frontText is Dictionary<string, object> frontTextObj)
                     {
-                        // Old format. e.g. "{Patterns:{Pattern:"rs",Color:0} }"
-                        foreach (Dictionary<string, object> patternData in oldPatternList)
-                        {
-                            // Encoded as enum int (probably as a string)
-                            var color = (CommonColors) int.Parse(patternData["Color"].ToString());
+                        frontLines = ((object[]) frontTextObj["messages"])
+                            .Select(ParseMessage).ToArray();
+                        frontColor = frontTextObj.TryGetValue("color", out var fc)
+                                     ? CommonColorsHelper.GetCommonColor((string) fc)
+                                     : CommonColors.Black;
+                        frontGlowing = frontTextObj.TryGetValue("has_glowing_text", out var fg)
+                                       && byte.Parse(fg.ToString()) > 0;
+                        
+                        textFound = true;
+                    }
+                    
+                    if (BlockEntityNBT.TryGetValue("back_text", out var backText)
+                        && backText is Dictionary<string, object> backTextObj)
+                    {
+                        backLines = ((object[]) backTextObj["messages"])
+                            .Select(ParseMessage).ToArray();
+                        backColor = backTextObj.TryGetValue("color", out var bc)
+                                    ? CommonColorsHelper.GetCommonColor((string) bc)
+                                    : CommonColors.Black;
+                        backGlowing = backTextObj.TryGetValue("has_glowing_text", out var bg)
+                                      && byte.Parse(bg.ToString()) > 0;
+                        
+                        textFound = true;
+                    }
 
-                            var patternCode = (string) patternData["Pattern"];
-                            var patternId = BannerPatternType.GetIdFromCode(patternCode);
-                            
-                            patternRecords.Add(new(patternId, color));
-                        }
+                    if (BlockEntityNBT.TryGetValue("Text1", out var text1))
+                    {
+                        // Text components encoded as json string
+                        frontLines = new[]
+                        {
+                            ChatParser.ParseText((string) text1),
+                            ChatParser.ParseText((string) BlockEntityNBT["Text2"]),
+                            ChatParser.ParseText((string) BlockEntityNBT["Text3"]),
+                            ChatParser.ParseText((string) BlockEntityNBT["Text4"])
+                        };
+                        frontColor = BlockEntityNBT.TryGetValue("Color", out var c)
+                                     ? CommonColorsHelper.GetCommonColor((string) c)
+                                     : CommonColors.Black;
+                        frontGlowing = BlockEntityNBT.TryGetValue("GlowingText", out var g)
+                                       && byte.Parse(g.ToString()) > 0;
+                        
+                        textFound = true;
+                    }
+
+                    if (!textFound) // Come back later
+                    {
+                        isDirty = true;
+                        frontTextDisplay.text = string.Empty;
+                        backTextDisplay.text = string.Empty;
                     }
                     else
                     {
-                        //Debug.LogWarning($"Patterns tag not found. Tags: {Json.Object2Json(BlockEntityNBT)}");
-                        isDirty = true;
+                        string frontFull = string.Join("\n", frontLines);
+                        frontTextDisplay.text = $"<color=#{ColorConvert.GetHexRGBString(frontColor.GetColor32())}>{frontFull}</color>";
+                
+                        string backFull = string.Join("\n", backLines);
+                        backTextDisplay.text = $"<color=#{ColorConvert.GetHexRGBString(backColor.GetColor32())}>{backFull}</color>";
                     }
-                    */
                 }
             }
         }
