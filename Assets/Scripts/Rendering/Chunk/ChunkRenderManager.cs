@@ -30,6 +30,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject shulkerBoxPrefab;
         [SerializeField] private GameObject bannerPrefab;
         [SerializeField] private GameObject signPrefab;
+        [SerializeField] private GameObject hangingSignPrefab;
         #endregion
 
         private readonly Dictionary<ResourceLocation, GameObject> blockEntityPrefabs = new();
@@ -1112,6 +1113,7 @@ namespace CraftSharp.Rendering
             blockEntityPrefabs.Add(BlockEntityType.SHULKER_BOX_ID,       shulkerBoxPrefab);
             blockEntityPrefabs.Add(BlockEntityType.BANNER_ID,            bannerPrefab);
             blockEntityPrefabs.Add(BlockEntityType.SIGN_ID,              signPrefab);
+            blockEntityPrefabs.Add(BlockEntityType.HANGING_SIGN_ID,      hangingSignPrefab);
             
             client = CornApp.CurrentClient;
 

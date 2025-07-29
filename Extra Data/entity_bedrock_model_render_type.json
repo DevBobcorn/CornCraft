@@ -112,5 +112,8 @@
     "zombie": "cutout",
     "zombie_villager": "cutout",
     "zombie_villager_v2": "cutout",
-    "zombie_villager_v2_masked": "cutout"
+    "zombie_villager_v2_masked": "cutout",
+
+    "hanging_sign": "cutout_culloff",
+    "wall_hanging_sign": "cutout_culloff"
 }

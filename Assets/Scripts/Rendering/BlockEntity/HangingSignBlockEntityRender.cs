@@ -7,11 +7,11 @@ using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Rendering
 {
-    public class SignBlockEntityRender : BaseSignBlockEntityRender
+    public class HangingSignBlockEntityRender : BaseSignBlockEntityRender
     {
-        private static readonly ResourceLocation SIGN_ID = new("sign");
-        private static readonly ResourceLocation WALL_SIGN_ID = new("wall_sign");
-
+        private static readonly ResourceLocation HANGING_SIGN_ID = new("hanging_sign");
+        private static readonly ResourceLocation WALL_HANGING_SIGN_ID = new("wall_hanging_sign");
+        
         public override void UpdateBlockState(BlockState blockState, bool isItemPreview)
         {
             isItem = isItemPreview;
@@ -19,9 +19,9 @@ namespace CraftSharp.Rendering
             if (blockState != BlockState)
             {
                 var variant = blockState.BlockId.Path;
-                bool isWall = variant.EndsWith("_wall_sign");
+                bool isWall = variant.EndsWith("_wall_hanging_sign");
 
-                variant = isWall ? variant[..^"_wall_sign".Length] : variant[..^"_sign".Length];
+                variant = isWall ? variant[..^"_wall_hanging_sign".Length] : variant[..^"_hanging_sign".Length];
                 
                 centerTransform = transform.GetChild(0); // Get 1st child
                 // Destroy previous block entity render, but preserve the text object
@@ -31,10 +31,24 @@ namespace CraftSharp.Rendering
                         Destroy(t.gameObject);
                 }
 
-                var render = BuildBedrockBlockEntityRender(isWall ? WALL_SIGN_ID : SIGN_ID);
+                var render = BuildBedrockBlockEntityRender(isWall ? WALL_HANGING_SIGN_ID : HANGING_SIGN_ID);
                 
-                render.transform.localScale = Vector3.one * 2F / 3F;
+                render.transform.localScale = Vector3.one;
                 render.transform.localPosition = BEDROCK_BLOCK_ENTITY_OFFSET;
+
+                if (!isWall)
+                {
+                    bool attached = blockState.Properties.TryGetValue("attached", out var attachedVal) &&
+                                    attachedVal == "true";
+                    
+                    var chainAttached = render.transform.GetChild(1); // Get 2nd child
+                    var chainParallel = render.transform.GetChild(2); // Get 3rd child
+                    
+                    chainAttached.gameObject.SetActive(attached);
+                    chainParallel.gameObject.SetActive(!attached);
+                }
+                
+                centerTransform.localPosition = new(0F, -0.1875F, 0F);
 
                 if (centerTransform)
                 {
@@ -42,8 +56,6 @@ namespace CraftSharp.Rendering
                     {
                         float rotationDeg = (short.Parse(rotationVal) + 4) % 16 * 22.5F;
                         centerTransform.localEulerAngles = new(0F, rotationDeg, 0F);
-                        centerTransform.localPosition = new(0F, 0.33334F, 0F);
-                        
                         render.transform.localEulerAngles = new(0F, rotationDeg + 90, 0F);
                     }
                     else if (blockState.Properties.TryGetValue("facing", out var facingVal))
@@ -57,20 +69,11 @@ namespace CraftSharp.Rendering
                             _       => 0
                         };
                         centerTransform.localEulerAngles = new(0F, rotationDeg, 0F);
-                        centerTransform.localPosition = facingVal switch
-                        {
-                            "north" => new Vector3( 0.4375F, 0F, 0F),
-                            "east"  => new Vector3(0F, 0F, -0.4375F),
-                            "south" => new Vector3(-0.4375F, 0F, 0F),
-                            "west"  => new Vector3(0F, 0F,  0.4375F),
-                            _       => new Vector3(0F, 0F, 0F)
-                        };
-                        
                         render.transform.localEulerAngles = new(0F, rotationDeg + 90, 0F);
                     }   
                 }
                 
-                var entityName = isWall ? "wall_sign" : "sign";
+                var entityName = isWall ? "wall_hanging_sign" : "hanging_sign";
                 SetBedrockBlockEntityRenderTexture(render, $"{entityName}/{variant}");
             }
             

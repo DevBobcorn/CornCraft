@@ -3902,7 +3902,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetBlockLoc(blockLoc));
-                if (protocolVersion >= MC_1_21_1_Version)
+                if (protocolVersion >= MC_1_20_1_Version)
                     packet.AddRange(DataTypes.GetBool(front));
                 packet.AddRange(DataTypes.GetString(line1));
                 packet.AddRange(DataTypes.GetString(line2));

@@ -615,6 +615,7 @@ MonoBehaviour:
   shulkerBoxPrefab: {fileID: 2689602071572206800, guid: 0503dc99568a37c4c8dba43cc50c96b2, type: 3}
   bannerPrefab: {fileID: 2689602071572206800, guid: c75aaedd3b4d97f458ad6ae57c6aafcc, type: 3}
   signPrefab: {fileID: 2689602071572206800, guid: e0543ee9e84e5b84e875a32a4acdc8ec, type: 3}
+  hangingSignPrefab: {fileID: 2689602071572206800, guid: 15486256b4f244e4ea15db95aef26359, type: 3}
 --- !u!1 &7198898926437285478
 GameObject:
   m_ObjectHideFlags: 0
