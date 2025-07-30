@@ -100,6 +100,8 @@ gameplay.interaction.axe_harvest=破坏 {0}
 gameplay.interaction.hoe_harvest=破坏 {0}
 gameplay.interaction.pickaxe_harvest=破坏 {0}
 gameplay.interaction.shovel_harvest=破坏 {0}
+gameplay.interaction.dye_sign_text=染色文本
+gameplay.interaction.edit_sign_text=编辑文本
 gameplay.ui.anvil_input=重命名...
 gameplay.ui.beacon_levelup=提升等级
 

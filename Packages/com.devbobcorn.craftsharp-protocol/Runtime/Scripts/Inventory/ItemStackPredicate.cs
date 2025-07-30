@@ -117,7 +117,7 @@ namespace CraftSharp.Inventory
                                 Operator.NOT_EQUAL => "does not end",
                                 _ => "WTF"
                             };
-                            Debug.Log($"Checking if {itemIdPath} {o} with any of {string.Join(", ", allowedValues)}. Result: {conditionMet}");
+                            //Debug.Log($"Checking if {itemIdPath} {o} with any of {string.Join(", ", allowedValues)}. Result: {conditionMet}");
                         }
                         break;
                     case "equipment_slot":

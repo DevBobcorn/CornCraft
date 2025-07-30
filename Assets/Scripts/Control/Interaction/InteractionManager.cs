@@ -1,7 +1,9 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using CraftSharp.Inventory;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -86,6 +88,9 @@ namespace CraftSharp.Control
 
                         var showInList = !entryCont.TryGetValue("show_in_list", out var showInListData)
                             || bool.Parse(showInListData?.StringValue!); // true if not specified
+                        
+                        Func<ItemStack, bool>? heldItemPredicate = entryCont.TryGetValue("held_item_predicate", out var heldItemPredicateData)
+                            ? ItemStackPredicate.FromString(heldItemPredicateData.StringValue).Check : null; // null if not specified
 
                         foreach (var trigger in triggers.DataArray)
                         {
@@ -106,7 +111,7 @@ namespace CraftSharp.Control
                                     }
                                     else
                                     {
-                                        inters.Add(new TriggerInteraction(iconTypeId, blockId, reusable, interactionType, hintKey, tag, showInList));
+                                        inters.Add(new TriggerInteraction(iconTypeId, blockId, reusable, interactionType, hintKey, tag, showInList, heldItemPredicate));
                                     }
 
                                     if (InteractionTable.TryGetValue(stateId, out var definition))
@@ -126,7 +131,7 @@ namespace CraftSharp.Control
                         }
                     }
                     // else
-                    //    Debug.LogWarning($"Invalid special block interation definition: {entryName}");
+                    //    Debug.LogWarning($"Invalid special block interaction definition: {entryName}");
                 }
             }
 

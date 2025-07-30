@@ -9,6 +9,7 @@ using CraftSharp.Event;
 using CraftSharp.Rendering;
 using System.IO;
 using System.Threading.Tasks;
+using CraftSharp.Inventory;
 using CraftSharp.Protocol.Handlers;
 using CraftSharp.Resource;
 using Unity.Mathematics;
@@ -88,8 +89,10 @@ namespace CraftSharp.Control
         private readonly InteractionId interactionId = new();
 
         private LocalHarvestInteractionInfo? lastHarvestInteractionInfo;
-        private ItemStack? currentItemStack;
-        private ItemActionType currentActionType = ItemActionType.None;
+        private ItemStack? currentMainhandItemStack;
+        private ItemStack? currentOffhandItemStack;
+        private ItemActionType currentMainhandActionType = ItemActionType.None;
+        private ItemActionType currentOffhandActionType = ItemActionType.None;
 
         private readonly List<Vector3Int> rayCells = new();
         private static Ray ray;
@@ -332,7 +335,7 @@ namespace CraftSharp.Control
             }
 
             var (predictedStateId, predictedBlockState) = palette.GetBlockStateWithProperties(blockId, predicateProps);
-            //Debug.Log($"Predicted block state: {predictedBlockState}");
+            Debug.Log($"Predicted block state: {predictedBlockState}");
 
             // Doesn't seem to work very well
             //EventManager.Instance.Broadcast(new BlockPredictionEvent(newBlockLoc, predictedStateId));
@@ -401,38 +404,49 @@ namespace CraftSharp.Control
 
                 if (table.TryGetValue(block.StateId, out InteractionDefinition? newInteractionDefinition))
                 {
-                    var newTriggerInteraction = newInteractionDefinition?.Get<TriggerInteraction>();
-                    if (newTriggerInteraction is null) continue;
+                    var newTriggerInteractions = newInteractionDefinition?.Get<TriggerInteraction>();
+                    if (newTriggerInteractions is null || !newTriggerInteractions.Any()) continue;
 
                     var prevInfo = GetBlockTriggerInteractionsAt(blockLoc)?.FirstOrDefault();
-                    var newInfo = new BlockTriggerInteractionInfo(interactionId.AllocateID(), block, blockLoc, block.BlockId, newTriggerInteraction);
 
                     if (prevInfo is not null)
                     {
-                        var prevDefinition = prevInfo.Definition;
-                        if (prevDefinition != newTriggerInteraction) // Update this interaction
+                        if (prevInfo.Block.StateId != block.StateId) // Update this interaction
                         {
                             RemoveBlockTriggerInteractionsAt(blockLoc, info =>
                             {
                                 EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
                             });
-                            AddBlockTriggerInteractionAt(blockLoc, newInfo, info =>
+
+                            for (int i = 0; i < newTriggerInteractions.Length; i++)
                             {
-                                // Select this new item if it is at target location
-                                EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, TargetBlockLoc == blockLoc, false, info));
-                            });
-                            //Debug.Log($"Upd: [{blockLoc}] {prevDefinition.Identifier} => {newDefinition.Identifier}");
+                                var newInfo = new BlockTriggerInteractionInfo(interactionId.AllocateID(),
+                                    block, blockLoc, block.BlockId, newTriggerInteractions[i]);
+                                newInfo.Active = newInfo.Interaction.CheckHeldItems(currentMainhandItemStack,
+                                    currentOffhandItemStack);
+                            
+                                AddBlockTriggerInteractionAt(blockLoc, newInfo);
+                        
+                                //Debug.Log($"Upd: [{blockLoc}] {newTriggerInteraction.HintKey}");
+                            }
+                            
+                            UpdateBlockTriggerInteractionsActivityAt(blockLoc);
                         }
                         // Otherwise leave it unchanged
                     }
                     else // Add this interaction
                     {
-                        AddBlockTriggerInteractionAt(blockLoc, newInfo, info =>
+                        for (int i = 0; i < newTriggerInteractions.Length; i++)
                         {
-                            // Select this new item if it is at target location
-                            EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id, TargetBlockLoc == blockLoc, false, info));
-                        });
-                        //Debug.Log($"Add: [{blockLoc}] {newDefinition.Identifier}");
+                            var newInfo = new BlockTriggerInteractionInfo(interactionId.AllocateID(),
+                                block, blockLoc, block.BlockId, newTriggerInteractions[i]);
+                            
+                            AddBlockTriggerInteractionAt(blockLoc, newInfo);
+                        
+                            //Debug.Log($"Add: [{blockLoc}] {newTriggerInteraction.HintKey}");
+                        }
+
+                        UpdateBlockTriggerInteractionsActivityAt(blockLoc);
                     }
                 }
                 else
@@ -516,6 +530,75 @@ namespace CraftSharp.Control
             }
         }
 
+        private void UpdateBlockTriggerInteractionsActivity()
+        {
+            foreach (var blockLoc in blockTriggerInteractionInfos.Keys) // for a list of trigger interactions at each BlockLoc
+            {
+                UpdateBlockTriggerInteractionsActivityAt(blockLoc);
+            }
+        }
+        
+        private void UpdateBlockTriggerInteractionsActivityAt(BlockLoc blockLoc)
+        {
+            var list = blockTriggerInteractionInfos[blockLoc];
+            
+            // We can have multiple trigger interactions at one BlockLoc, but only one of them can be active
+            BlockTriggerInteractionInfo? defaultTriggerInfo = null;
+            bool defaultTriggerWasActive = false;
+            bool activeFound = false;
+            
+            foreach (var info in list)
+            {
+                bool prevActive = info.Active;
+                
+                if (info.Interaction.HeldItemPredicate is null)
+                {
+                    // We don't consider using default interaction first since there might be better options
+                    defaultTriggerWasActive = info.Active;
+                    info.Active = false;
+                    defaultTriggerInfo = info;
+                    
+                    continue;
+                }
+
+                info.Active = !activeFound && info.Interaction.CheckHeldItems(currentMainhandItemStack, currentOffhandItemStack);
+
+                if (info.Active) activeFound = true;
+                
+                if (info.Active != prevActive)
+                {
+                    if (info.Active)
+                    {
+                        EventManager.Instance.Broadcast<InteractionAddEvent>(new(info.Id,
+                            TargetBlockLoc == blockLoc, false, info));
+                    }
+                    else
+                    {
+                        EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(info.Id));
+                    }
+                }
+            }
+            
+            if (defaultTriggerInfo is not null)
+            {
+                // If no active interaction is determined, fallback to previously recorded default interaction
+                if (!activeFound)
+                {
+                    defaultTriggerInfo.Active = true;
+                
+                    if (!defaultTriggerWasActive) // Default trigger was not active before, make it active
+                    {
+                        EventManager.Instance.Broadcast<InteractionAddEvent>(new(defaultTriggerInfo.Id,
+                            TargetBlockLoc == blockLoc, false, defaultTriggerInfo));
+                    }
+                }
+                else if (defaultTriggerWasActive) // Got a better one, now remove the default option
+                {
+                    EventManager.Instance.Broadcast<InteractionRemoveEvent>(new(defaultTriggerInfo.Id));
+                }
+            }
+        }
+        
         private static BlockLoc GetPlaceBlockLoc(BlockLoc targetLoc, Direction targetDir)
         {
             return targetDir switch
@@ -586,14 +669,14 @@ namespace CraftSharp.Control
                 {
                     var status = playerController.Status;
 
-                    if (currentActionType == ItemActionType.Sword)
+                    if (currentMainhandActionType == ItemActionType.Sword)
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
                             // TODO: Implement
                         }
                     }
-                    else if (currentActionType == ItemActionType.Bow)
+                    else if (currentMainhandActionType == ItemActionType.Bow)
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
@@ -627,7 +710,7 @@ namespace CraftSharp.Control
                         // Check if we can initiate insta-break (if creative mode or break time is short enough)
                         StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status, true);
                     }
-                    else if (currentActionType == ItemActionType.Sword)
+                    else if (currentMainhandActionType == ItemActionType.Sword)
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
@@ -654,7 +737,7 @@ namespace CraftSharp.Control
                     
                     var status = playerController.Status;
 
-                    if (currentActionType == ItemActionType.Bow)
+                    if (currentMainhandActionType == ItemActionType.Bow)
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
@@ -684,10 +767,14 @@ namespace CraftSharp.Control
                                 PlaceBlock(client, true, TargetBlockLoc.Value, (float) inBlockLoc.X, (float) inBlockLoc.Y, (float) inBlockLoc.Z, TargetDirection.Value);
                             }
                         }
-                        else if (currentActionType == ItemActionType.Block) // Check if holding a block item
+                        else if (currentMainhandActionType == ItemActionType.Block ||
+                                 currentOffhandActionType == ItemActionType.Block) // Check if holding a block item
                         {
                             if (placeBlockCooldown < 0F)
                             {
+                                var currentItemStack = currentMainhandActionType == ItemActionType.Block
+                                    ? currentMainhandItemStack : currentOffhandItemStack;
+                                
                                 var cameraYaw = client.GetCameraYaw();
                                 var cameraPitch = client.GetCameraPitch();
 
@@ -755,7 +842,7 @@ namespace CraftSharp.Control
                                     
                                     client.DoCreativeGive(slotToUse, itemToPick, itemStackToPick.Count, itemStackToPick.NBT);
                                     client.ChangeHotbarSlot((short) hotbarSlotToUse);
-                                    EventManager.Instance.Broadcast(new HeldItemUpdateEvent(hotbarSlotToUse, true, itemStackToPick, itemToPick.ActionType));
+                                    EventManager.Instance.Broadcast(new HeldItemUpdateEvent(hotbarSlotToUse, Hand.MainHand, true, itemStackToPick, itemToPick.ActionType));
                                     
                                     //Debug.Log($"Slot to use for storing picked item: {hotbarSlotToUse}, Picked item: {itemToPick}");
                                 }
@@ -797,12 +884,12 @@ namespace CraftSharp.Control
         {
             heldItemChangeCallback = e =>
             {
-                if (playerController)
+                if (playerController && e.Hand == Hand.MainHand)
                 {
-                    if (e.HotbarSlotChanged || AffectsAttackBehaviour(e.ActionType) || AffectsAttackBehaviour(currentActionType))
+                    if (e.HotbarSlotChanged || AffectsAttackBehaviour(e.ActionType) || AffectsAttackBehaviour(currentMainhandActionType))
                     {
-                        // Exit attack state when active item action type is changed
-                        if (currentActionType != e.ActionType)
+                        // Exit attack state when active mainhand item action type is changed
+                        if (currentMainhandActionType != e.ActionType)
                         {
                             playerController.Status!.Attacking = false;
                         }
@@ -811,8 +898,19 @@ namespace CraftSharp.Control
                     playerController.ChangeCurrentItem(e.ItemStack, e.ActionType);
                 }
 
-                currentItemStack = e.ItemStack;
-                currentActionType = e.ActionType;
+                if (e.Hand == Hand.MainHand)
+                {
+                    currentMainhandItemStack = e.ItemStack;
+                    currentMainhandActionType = e.ActionType;
+                }
+                else
+                {
+                    currentOffhandItemStack = e.ItemStack;
+                    currentOffhandActionType = e.ActionType;
+                }
+                
+                // Held item changed, check for interaction activity change
+                UpdateBlockTriggerInteractionsActivity();
             };
             EventManager.Instance.Register(heldItemChangeCallback);
 
@@ -855,7 +953,7 @@ namespace CraftSharp.Control
         private void StartDiggingProcess(Block block, BlockLoc blockLoc, Direction direction, PlayerStatus status, bool instaBreakOnly = false)
         {
             var definition = InteractionManager.INSTANCE.InteractionTable
-                .GetValueOrDefault(block.StateId)?.Get<HarvestInteraction>();
+                .GetValueOrDefault(block.StateId)?.GetFirst<HarvestInteraction>();
             var blockState = block.State;
 
             if (blockState.BlockId == BlockState.AIR_ID)
@@ -885,7 +983,7 @@ namespace CraftSharp.Control
             }
 
             var newHarvestInteractionInfo = new LocalHarvestInteractionInfo(interactionId.AllocateID(), block, blockLoc, direction,
-                currentItemStack, blockState.Hardness, status.Floating, status.Grounded, definition);
+                currentMainhandItemStack, blockState.Hardness, status.Floating, status.Grounded, definition);
 
             // If this duration is too short, use insta break instead
             if (newHarvestInteractionInfo.Duration <= CREATIVE_INSTA_BREAK_COOLDOWN)
@@ -981,12 +1079,16 @@ namespace CraftSharp.Control
                     }
                     
                     // Check continuous block placement
-                    if (currentActionType == ItemActionType.Block &&
+                    if ((currentMainhandActionType == ItemActionType.Block ||
+                         currentOffhandActionType == ItemActionType.Block) &&
                         playerController.Actions.Interaction.UseNormalItem.IsPressed() &&
                         !blockTriggerInteractionInfos.ContainsKey(TargetBlockLoc.Value))
                     {
                         if (placeBlockCooldown <= 0F) // Cooldown for placing block
                         {
+                            var currentItemStack = currentMainhandActionType == ItemActionType.Block
+                                ? currentMainhandItemStack : currentOffhandItemStack;
+                            
                             var cameraYaw = client.GetCameraYaw();
                             var cameraPitch = client.GetCameraPitch();
 

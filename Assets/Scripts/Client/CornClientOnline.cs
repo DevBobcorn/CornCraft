@@ -1365,8 +1365,8 @@ namespace CraftSharp
 
                     if (hotbarSlot == CurrentHotbarSlot) // The currently held item is updated
                     {
-                        EventManager.Instance.BroadcastOnUnityThread(new HeldItemUpdateEvent(
-                            hotbarSlot, false, slotItem, PlayerActionHelper.GetItemActionType(slotItem)));
+                        EventManager.Instance.BroadcastOnUnityThread(new HeldItemUpdateEvent(hotbarSlot, Hand.MainHand,
+                            false, slotItem, PlayerActionHelper.GetItemActionType(slotItem)));
                     }
                 }
             }
@@ -1594,8 +1594,8 @@ namespace CraftSharp
                 {
                     EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(0, invSlot, updatedItem, true));
                     EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(CurrentHotbarSlot, updatedItem));
-                    EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
-                        CurrentHotbarSlot, false, updatedItem, PlayerActionHelper.GetItemActionType(updatedItem)));
+                    EventManager.Instance.Broadcast(new HeldItemUpdateEvent(CurrentHotbarSlot, Hand.MainHand,
+                        false, updatedItem, PlayerActionHelper.GetItemActionType(updatedItem)));
                 }
             }
 
@@ -1629,7 +1629,7 @@ namespace CraftSharp
             var curItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
-                new HeldItemUpdateEvent(CurrentHotbarSlot, true, curItem, PlayerActionHelper.GetItemActionType(curItem)));
+                new HeldItemUpdateEvent(CurrentHotbarSlot, Hand.MainHand, true, curItem, PlayerActionHelper.GetItemActionType(curItem)));
 
             return handler!.SendHeldItemChange(slot);
         }
@@ -2046,8 +2046,8 @@ namespace CraftSharp
                             EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentHotbarSlot) // Updating held item
                             {
-                                EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
-                                    CurrentHotbarSlot, false, itemStack, PlayerActionHelper.GetItemActionType(itemStack)));
+                                EventManager.Instance.Broadcast(new HeldItemUpdateEvent(CurrentHotbarSlot, Hand.MainHand,
+                                    false, itemStack, PlayerActionHelper.GetItemActionType(itemStack)));
                             }
                         }
                     }
@@ -2116,8 +2116,8 @@ namespace CraftSharp
                             EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentHotbarSlot) // Updating held item
                             {
-                                EventManager.Instance.Broadcast(new HeldItemUpdateEvent(
-                                    CurrentHotbarSlot, false, item, PlayerActionHelper.GetItemActionType(item)));
+                                EventManager.Instance.Broadcast(new HeldItemUpdateEvent(CurrentHotbarSlot, Hand.MainHand,
+                                    false, item, PlayerActionHelper.GetItemActionType(item)));
                             }
                         }
                     });
@@ -2530,7 +2530,7 @@ namespace CraftSharp
             var newItem = inventories[0].GetHotbarItem(slot);
             // Broad cast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
-                new HeldItemUpdateEvent(CurrentHotbarSlot, true, newItem,
+                new HeldItemUpdateEvent(CurrentHotbarSlot, Hand.MainHand, true, newItem,
                     PlayerActionHelper.GetItemActionType(newItem)));
         }
 

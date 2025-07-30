@@ -9,25 +9,28 @@ namespace CraftSharp.Control
 {
     public sealed class BlockTriggerInteractionInfo : BlockInteractionInfo, IIconProvider
     {
-        public TriggerInteraction Definition { get; }
+        public TriggerInteraction Interaction { get; }
 
-        public override string HintKey => Definition.HintKey;
+        public override string HintKey => Interaction.HintKey;
 
-        public ResourceLocation IconTypeId => Definition.IconTypeId;
+        public ResourceLocation IconTypeId => Interaction.IconTypeId;
 
-        public ResourceLocation IconItemId => Definition.IconItemId;
+        public ResourceLocation IconItemId => Interaction.IconItemId;
+
+        // Some trigger interactions are active only when player is holding certain items
+        public bool Active = false;
 
         public BlockTriggerInteractionInfo(int id, Block block, BlockLoc loc, ResourceLocation blockId, TriggerInteraction def) : base(id, block, loc)
         {
             ParamTexts = new[] { ChatParser.TranslateString(blockId.GetTranslationKey("block")) };
-            Definition = def;
+            Interaction = def;
         }
 
         protected override IEnumerator RunInteraction(BaseCornClient client)
         {
             while (true)
             {
-                switch (Definition.Type)
+                switch (Interaction.Type)
                 {
                     case InteractionType.Interact:
                     {
@@ -50,7 +53,7 @@ namespace CraftSharp.Control
                     }
                 }
 
-                if (Definition.Reusable) // Don't terminate execution
+                if (Interaction.Reusable) // Don't terminate execution
                 {
                     yield return null;
                 }

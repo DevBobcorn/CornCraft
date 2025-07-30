@@ -27,12 +27,35 @@ namespace CraftSharp.Control
         InteractionType Type,
         string HintKey,
         string Tag,
-        bool ShowInList)
+        bool ShowInList,
+        Func<ItemStack, bool>? HeldItemPredicate)
         : Interaction(Type, HintKey, Tag, ShowInList)
     {
         public ResourceLocation IconTypeId { get; } = IconTypeId;
         public ResourceLocation IconItemId { get; } = IconItemId;
         public bool Reusable { get; } = Reusable;
+        public Func<ItemStack, bool>? HeldItemPredicate { get; } = HeldItemPredicate;
+
+        public bool CheckHeldItem(ItemStack? heldItem)
+        {
+            if (HeldItemPredicate is null)
+            {
+                return true; // No check, empty item is also fine
+            }
+
+            if (heldItem is null)
+            {
+                var airItem = ItemPalette.INSTANCE.GetById(Item.AIR_ID);
+                return HeldItemPredicate.Invoke(new ItemStack(airItem, 0));
+            }
+
+            return HeldItemPredicate(heldItem);
+        }
+        
+        public bool CheckHeldItems(ItemStack? mainhandItem, ItemStack? offhandItem)
+        {
+            return CheckHeldItem(mainhandItem) || CheckHeldItem(offhandItem);
+        }
     }
 
     public record HarvestInteraction(
@@ -58,7 +81,9 @@ namespace CraftSharp.Control
     
         public InteractionDefinition(IEnumerable<Interaction> interactions) => Interactions.AddRange(interactions);
 
-        public T? Get<T>() where T : Interaction => Interactions.OfType<T>().FirstOrDefault();
+        public T? GetFirst<T>() where T : Interaction => Interactions.OfType<T>().FirstOrDefault();
+        
+        public T[] Get<T>() where T : Interaction => Interactions.OfType<T>().ToArray();
 
         public void Add(Interaction interaction) => Interactions.Add(interaction);
 
