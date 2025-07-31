@@ -42,6 +42,11 @@ namespace CraftSharp.Rendering
             return sss;
         }
 
+        public string[] GetLines(bool front)
+        {
+            return front ? frontLines : backLines;
+        }
+        
         protected void UpdateSignText()
         {
             var client = CornApp.CurrentClient;

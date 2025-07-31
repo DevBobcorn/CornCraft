@@ -176,7 +176,7 @@ namespace CraftSharp
 
             // Load interaction definitions AFTER block/blockstate definitions are loaded
             loadFlag.Finished = false;
-            Task.Run(() => InteractionManager.INSTANCE.PrepareData(loadFlag));
+            Task.Run(() => InteractionManager.INSTANCE.PrepareData(protocolVersion, loadFlag));
             while (!loadFlag.Finished) yield return null;
 
             // Load mob attribute definitions

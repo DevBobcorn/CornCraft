@@ -214,12 +214,7 @@ namespace CraftSharp.Protocol
         /// <returns>The 1.X.X version number, or unknown if could not determine protocol version</returns>
         public static string ProtocolVersion2MCVer(int protocol)
         {
-            if (ACCECPTED_VERSIONS.TryGetValue(protocol, out string versionName))
-            {
-                return versionName;
-            }
-
-            return "unknown";
+            return ACCECPTED_VERSIONS.GetValueOrDefault(protocol, "unknown");
         }
 
         /// <summary>

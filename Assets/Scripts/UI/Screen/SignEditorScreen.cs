@@ -90,6 +90,20 @@ namespace CraftSharp.UI
                 text3Input.text = string.Empty;
                 text4Input.text = string.Empty;
                 
+                var client = CornApp.CurrentClient;
+                if (!client || !signLoc.HasValue) return;
+                
+                var blockEntity = client.ChunkRenderManager.GetBlockEntityRender(signLoc.Value);
+                if (blockEntity && blockEntity is BaseSignBlockEntityRender signBlockEntity)
+                {
+                    var lines = signBlockEntity.GetLines(front);
+
+                    for (var i = 0; i < lines.Length && i < inputFields.Count; i++)
+                    {
+                        inputFields[i].text = lines[i];
+                    }
+                }
+                
                 // Select this text input
                 text1Input.Select();
             }

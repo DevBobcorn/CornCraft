@@ -23,7 +23,7 @@ namespace CraftSharp.Control
             return new HarvestInteraction(defaultHarvestIconTypeId, blockId, ItemActionType.None, InteractionType.Break, defaultHarvestHintKey, defaultHarvestTag, false);
         }
 
-        public void PrepareData(DataLoadFlag flag)
+        public void PrepareData(int protocolVersion, DataLoadFlag flag)
         {
             // Block interactions
             var interactionPath = PathHelper.GetExtraDataFile("block_interaction.json");
@@ -38,6 +38,12 @@ namespace CraftSharp.Control
 
             InteractionTable.Clear();
 
+            // Used for checking if a rule is enabled in this version
+            var versionPropertyTable = new Dictionary<string, short>()
+            {
+                ["protocol_version"] = (short) protocolVersion
+            };
+
             var interactions = Json.ParseJson(File.ReadAllText(interactionPath, Encoding.UTF8));
 
             var palette = BlockStatePalette.INSTANCE;
@@ -49,6 +55,17 @@ namespace CraftSharp.Control
                 foreach (var (entryName, value) in entries)
                 {
                     var entryCont = value.Properties;
+
+                    if (entryCont.TryGetValue("enabled_predicate", out var enabledPredicate))
+                    {
+                        bool isEnabled = InventoryPropertyPredicate
+                            .FromString(enabledPredicate.StringValue).Check(versionPropertyTable);
+
+                        if (!isEnabled) // Don't use for this version. Skip.
+                        {
+                            continue;
+                        }
+                    }
 
                     if (entryCont.TryGetValue("action", out var action) &&
                         entryCont.TryGetValue("triggers", out var triggers))
@@ -79,7 +96,7 @@ namespace CraftSharp.Control
 
                         var hintKey = entryCont.TryGetValue("hint", out var hint) ? hint.StringValue : null;
 
-                        var predicate = entryCont.TryGetValue("predicate", out var predicateData)
+                        var blockstatePredicate = entryCont.TryGetValue("blockstate_predicate", out var predicateData)
                             ? BlockStatePredicate.FromString(predicateData?.StringValue ?? string.Empty)
                             : BlockStatePredicate.EMPTY;
 
@@ -96,7 +113,7 @@ namespace CraftSharp.Control
                         {
                             var blockId = ResourceLocation.FromString(trigger.StringValue);
 
-                            if (palette.TryGetAllNumIds(blockId, out var stateIds, x => predicate.Check(x)))
+                            if (palette.TryGetAllNumIds(blockId, out var stateIds, x => blockstatePredicate.Check(x)))
                             {
                                 foreach (var stateId in stateIds)
                                 {

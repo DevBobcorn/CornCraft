@@ -895,7 +895,7 @@
     "pick_up": {
       "action": "break",
       "hint": "gameplay.interaction.pick_up",
-      "predicate": "",
+      "blockstate_predicate": "",
       "icon_type_id": "corncraft:item_icon",
       "triggers": [
         "minecraft:dandelion",
@@ -916,7 +916,7 @@
     "go_to_bed": {
       "action": "interact",
       "hint": "gameplay.interaction.go_to_bed",
-      "predicate": "occupied=false,part=head",
+      "blockstate_predicate": "occupied=false,part=head",
       "icon_type_id": "corncraft:enter_location",
       "reusable": true,
       "triggers": [
@@ -941,7 +941,7 @@
     "go_to_bed_hidden": {
       "action": "interact",
       "hint": "gameplay.interaction.go_to_bed",
-      "predicate": "occupied=false,part=foot",
+      "blockstate_predicate": "occupied=false,part=foot",
       "icon_type_id": "corncraft:enter_location",
       "reusable": true,
       "show_in_list": false,
@@ -967,7 +967,7 @@
     "open_door": {
       "action": "interact",
       "hint": "gameplay.interaction.open_door",
-      "predicate": "open=false,half=lower",
+      "blockstate_predicate": "open=false,half=lower",
       "icon_type_id": "corncraft:enter_location",
       "triggers": [
         "minecraft:oak_door",
@@ -995,7 +995,7 @@
     "open_door_hidden": {
       "action": "interact",
       "hint": "gameplay.interaction.open_door",
-      "predicate": "open=false,half=upper",
+      "blockstate_predicate": "open=false,half=upper",
       "icon_type_id": "corncraft:enter_location",
       "show_in_list": false,
       "triggers": [
@@ -1024,7 +1024,7 @@
     "close_door": {
       "action": "interact",
       "hint": "gameplay.interaction.close_door",
-      "predicate": "open=true,half=lower",
+      "blockstate_predicate": "open=true,half=lower",
       "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:oak_door",
@@ -1052,7 +1052,7 @@
     "close_door_hidden": {
       "action": "interact",
       "hint": "gameplay.interaction.close_door",
-      "predicate": "open=true,half=upper",
+      "blockstate_predicate": "open=true,half=upper",
       "icon_type_id": "corncraft:dialog",
       "show_in_list": false,
       "triggers": [
@@ -1081,7 +1081,7 @@
     "open_trapdoor": {
       "action": "interact",
       "hint": "gameplay.interaction.open_trapdoor",
-      "predicate": "open=false",
+      "blockstate_predicate": "open=false",
       "icon_type_id": "corncraft:enter_location",
       "triggers": [
         "minecraft:oak_trapdoor",
@@ -1109,7 +1109,7 @@
     "close_trapdoor": {
       "action": "interact",
       "hint": "gameplay.interaction.close_trapdoor",
-      "predicate": "open=true",
+      "blockstate_predicate": "open=true",
       "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:oak_trapdoor",
@@ -1137,7 +1137,7 @@
     "pull_lever_on": {
       "action": "interact",
       "hint": "gameplay.interaction.pull_lever",
-      "predicate": "powered=false",
+      "blockstate_predicate": "powered=false",
       "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:lever"
@@ -1146,7 +1146,7 @@
     "pull_lever_off": {
       "action": "interact",
       "hint": "gameplay.interaction.pull_lever",
-      "predicate": "powered=true",
+      "blockstate_predicate": "powered=true",
       "icon_type_id": "corncraft:dialog",
       "triggers": [
         "minecraft:lever"
@@ -1155,7 +1155,7 @@
     "push_button": {
       "action": "interact",
       "hint": "gameplay.interaction.push_button",
-      "predicate": "powered=false",
+      "blockstate_predicate": "powered=false",
       "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
@@ -1223,7 +1223,7 @@
     "chest": {
       "action": "interact",
       "hint": "container.chest",
-      "predicate": "type=single",
+      "blockstate_predicate": "type=single",
       "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
@@ -1234,7 +1234,7 @@
     "chest_large": {
       "action": "interact",
       "hint": "container.chestDouble",
-      "predicate": "type=left",
+      "blockstate_predicate": "type=left",
       "icon_type_id": "corncraft:dialog",
       "reusable": true,
       "triggers": [
@@ -1245,7 +1245,7 @@
     "chest_large_hidden": {
       "action": "interact",
       "hint": "container.chestDouble",
-      "predicate": "type=right",
+      "blockstate_predicate": "type=right",
       "icon_type_id": "corncraft:dialog",
       "show_in_list": false,
       "reusable": true,
@@ -1479,6 +1479,7 @@
       "action": "interact",
       "hint": "gameplay.interaction.edit_sign_text",
       "icon_type_id": "corncraft:dialog",
+      "enabled_predicate": "protocol_version>=763",
       "triggers": [
         "minecraft:oak_sign",
         "minecraft:spruce_sign",
