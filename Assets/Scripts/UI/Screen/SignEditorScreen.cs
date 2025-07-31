@@ -102,6 +102,13 @@ namespace CraftSharp.UI
                     {
                         inputFields[i].text = lines[i];
                     }
+
+                    var color = signBlockEntity.GetColor(front);
+                    
+                    for (var i = 0; i < inputFields.Count; i++)
+                    {
+                        inputFields[i].textComponent.color = color.GetColor32();
+                    }
                 }
                 
                 // Select this text input

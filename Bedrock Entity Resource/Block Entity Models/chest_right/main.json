@@ -4,7 +4,7 @@
 		{
 			"description": {
 				"identifier": "geometry.unknown",
-				"texture_width": 128,
+				"texture_width": 64,
 				"texture_height": 64,
 				"visible_bounds_width": 3,
 				"visible_bounds_height": 2.5,
@@ -15,15 +15,15 @@
 					"name": "Bottom",
 					"pivot": [0, 0, 0],
 					"cubes": [
-						{"origin": [-7, 0, -7], "size": [30, 10, 14], "uv": [0, 19]}
+						{"origin": [-7, 10, -7], "size": [15, 10, 14], "pivot": [0, 10, 0], "rotation": [180, 0, 0], "uv": [0, 19]}
 					]
 				},
 				{
 					"name": "Top",
 					"pivot": [0, 9, 7],
 					"cubes": [
-						{"origin": [-7, 9, -7], "size": [30, 5, 14], "uv": [0, 0]},
-						{"origin": [7, 8, -8], "size": [2, 4, 1], "uv": [0, 0]}
+						{"origin": [-7, 4, 7], "size": [15, 5, 14], "pivot": [0, 9, 7], "rotation": [180, 0, 0], "uv": [0, 0]},
+						{"origin": [7, 10, -37], "size": [1, 4, 1], "pivot": [8, 11, -22], "rotation": [180, 0, 0], "uv": [0, 0]}
 					]
 				}
 			]

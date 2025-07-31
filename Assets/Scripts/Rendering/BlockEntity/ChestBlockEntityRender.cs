@@ -8,7 +8,8 @@ namespace CraftSharp.Rendering
     public class ChestBlockEntityRender : BlockEntityRender
     {
         private static readonly ResourceLocation CHEST_ID = new("chest");
-        private static readonly ResourceLocation LARGE_CHEST_ID = new("large_chest");
+        private static readonly ResourceLocation CHEST_LEFT_ID = new("chest_left");
+        private static readonly ResourceLocation CHEST_RIGHT_ID = new("chest_right");
         private static readonly ResourceLocation ENDER_CHEST_ID = new("ender_chest");
         private static readonly ResourceLocation TRAPPED_CHEST_ID = new("trapped_chest");
 
@@ -50,57 +51,79 @@ namespace CraftSharp.Rendering
         {
             if (blockState != BlockState)
             {
-                var isDouble = false;
-                var isNotDoubleLeft = true;
+                ResourceLocation blockEntityRenderId;
+                string entityName;
                 
                 if (blockState.Properties.TryGetValue("type", out var typeVal)) // Ender chest doesn't have this property
                 {
-                    isDouble = typeVal is "left" or "right";
-                    isNotDoubleLeft = typeVal != "left";
+                    switch (typeVal)
+                    {
+                        case "left":
+                            blockEntityRenderId = CHEST_LEFT_ID;
+                            entityName = "chest_left";
+                            break;
+                        case "right":
+                            blockEntityRenderId = CHEST_RIGHT_ID;
+                            entityName = "chest_right";
+                            break;
+                        default:
+                            blockEntityRenderId = CHEST_ID;
+                            entityName = "chest";
+                            break;
+                    }
+                }
+                else // Ender chest, etc.
+                {
+                    blockEntityRenderId = CHEST_ID;
+                    entityName = "chest";
                 }
 
                 lidTransform = null;
                 ClearBedrockBlockEntityRender();
 
-                // The left part of a double chest doesn't need a visual object, the right part will take care of it
-                if (isNotDoubleLeft)
+                // Update entity render
+                var render = BuildBedrockBlockEntityRender(blockEntityRenderId);
+                
+                render.transform.localScale = Vector3.one;
+                render.transform.localPosition = BEDROCK_BLOCK_ENTITY_OFFSET;
+
+                lidTransform = render.transform.GetChild(1); // Get 2nd child
+
+                if (isItemPreview)
                 {
-                    // Update entity render
-                    var render = BuildBedrockBlockEntityRender(isDouble ? LARGE_CHEST_ID : CHEST_ID);
-                    
-                    render.transform.localScale = Vector3.one;
-                    render.transform.localPosition = BEDROCK_BLOCK_ENTITY_OFFSET;
-
-                    lidTransform = render.transform.GetChild(1); // Get 2nd child
-
-                    if (isItemPreview)
-                    {
-                        render.transform.localEulerAngles = new(0F, 180F, 0F);
-                    }
-                    else if (blockState.Properties.TryGetValue("facing", out var facingVal))
-                    {
-                        int rotationDeg = facingVal switch
-                        {
-                            "north" => 0,
-                            "east"  => 90,
-                            "south" => 180,
-                            "west"  => 270,
-                            _       => 0
-                        };
-                        render.transform.localEulerAngles = new(0F, rotationDeg, 0F);
-                    }
-
-                    var textureName = blockState.BlockId == ENDER_CHEST_ID ? "ender" :
-                        blockState.BlockId == TRAPPED_CHEST_ID ? "trapped" : "normal";
-                    
-                    render.name += $" {blockState}";
-
-                    var entityName = isDouble ? "large_chest" : "chest";
-                    SetBedrockBlockEntityRenderTexture(render, $"{entityName}/{textureName}");
+                    render.transform.localEulerAngles = new(0F, 180F, 0F);
                 }
+                else if (blockState.Properties.TryGetValue("facing", out var facingVal))
+                {
+                    int rotationDeg = facingVal switch
+                    {
+                        "north" => 0,
+                        "east"  => 90,
+                        "south" => 180,
+                        "west"  => 270,
+                        _       => 0
+                    };
+                    render.transform.localEulerAngles = new(0F, rotationDeg, 0F);
+                }
+
+                var textureName = blockState.BlockId == ENDER_CHEST_ID ? "ender" :
+                    GetConnectableChestTextureVariant(blockState.BlockId);
+                
+                render.name += $" {blockState}";
+
+                SetBedrockBlockEntityRenderTexture(render, $"{entityName}/{textureName}");
             }
             
             base.UpdateBlockState(blockState, isItemPreview);
+        }
+
+        private static string GetConnectableChestTextureVariant(ResourceLocation blockId)
+        {
+            DateTime today = DateTime.Today;
+
+            if (today is { Month: 12, Day: >= 24 and <= 26 }) return "christmas";
+            
+            return blockId == TRAPPED_CHEST_ID ? "trapped" : "normal";
         }
         
         public override void ManagedUpdate(float tickMilSec)

@@ -47,6 +47,11 @@ namespace CraftSharp.Rendering
             return front ? frontLines : backLines;
         }
         
+        public CommonColors GetColor(bool front)
+        {
+            return front ? frontColor : backColor;
+        }
+        
         protected void UpdateSignText()
         {
             var client = CornApp.CurrentClient;
