@@ -34,13 +34,13 @@ namespace CraftSharp
         private const int EDITOR_FPS_LIMIT = 60;
 
         public const string CORN_CRAFT_BUILTIN_FILE_NAME = "CornCraftBuiltin";
-        public const int    CORN_CRAFT_BUILTIN_VERSION = 30;
+        public const int    CORN_CRAFT_BUILTIN_VERSION = 31;
         private const string VANILLA_FIX_FILE_NAME = "VanillaFix";
-        private const int    VANILLA_FIX_VERSION = 7;
+        private const int    VANILLA_FIX_VERSION = 8;
         public const string BEDROCK_RES_FILE_NAME = "BedrockRes";
-        public const int    BEDROCK_RES_VERSION = 1;
+        public const int    BEDROCK_RES_VERSION = 2;
         private const string BLOCK_ENTITY_MODELS_FILE_NAME = "BlockEntityModels";
-        private const int    BLOCK_ENTITY_MODELS_VERSION = 1;
+        private const int    BLOCK_ENTITY_MODELS_VERSION = 2;
         
         public const string RESOURCE_LOCATION_NAMESPACE = "corncraft";
 
