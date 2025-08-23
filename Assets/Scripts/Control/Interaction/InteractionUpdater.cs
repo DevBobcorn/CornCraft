@@ -6,11 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using Unity.Mathematics;
 
 using CraftSharp.Event;
 using CraftSharp.Inventory;
-using CraftSharp.Protocol.Handlers;
 using CraftSharp.Rendering;
 using CraftSharp.Resource;
 
@@ -422,12 +420,10 @@ namespace CraftSharp.Control
                             {
                                 var newInfo = new BlockTriggerInteractionInfo(interactionId.AllocateID(),
                                     block, blockLoc, block.BlockId, newTriggerInteractions[i]);
-                                newInfo.Active = newInfo.Interaction.CheckHeldItems(currentMainhandItemStack,
-                                    currentOffhandItemStack);
                             
                                 AddBlockTriggerInteractionAt(blockLoc, newInfo);
                         
-                                //Debug.Log($"Upd: [{blockLoc}] {newTriggerInteraction.HintKey}");
+                                //Debug.Log($"Upd: [{blockLoc}] {newInfo.HintKey}, Active: {newInfo.Active}");
                             }
                             
                             UpdateBlockTriggerInteractionsActivityAt(blockLoc);
@@ -443,7 +439,7 @@ namespace CraftSharp.Control
                             
                             AddBlockTriggerInteractionAt(blockLoc, newInfo);
                         
-                            //Debug.Log($"Add: [{blockLoc}] {newTriggerInteraction.HintKey}");
+                            //Debug.Log($"Add: [{blockLoc}] {newInfo.HintKey}, Active: {newInfo.Active}");
                         }
 
                         UpdateBlockTriggerInteractionsActivityAt(blockLoc);
