@@ -12,4 +12,6 @@
 
 - [**Unity-Chan! Model**](https://assetstore.unity.com/packages/3d/characters/unity-chan-model-18705): 作为默认的骨骼角色模型。 原本的BiRP材质被替换成了URP使用的材质。本资源在[UCL](https://unity-chan.com/contents/license_en/)协议下提供。
 
+- [**HoloDissolveFX**](https://assetstore.unity.com/packages/p/holodissolvefx-holograms-dissolve-urp-251841): 实体溶解着色器。
+
 - [**Kinematic Character Controller**](https://assetstore.unity.com/packages/tools/physics/kinematic-character-controller-99131): 用来创建自定义角色控制器的代码库。
