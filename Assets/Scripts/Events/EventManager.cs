@@ -20,7 +20,7 @@ namespace CraftSharp.Event
             }
         }
         
-        private Dictionary<Type, IEventRegistrations> eventTable = new Dictionary<Type, IEventRegistrations>();
+        private Dictionary<Type, IEventRegistrations> eventTable = new();
 
         public void Register<T>(Action<T> callback)
         {

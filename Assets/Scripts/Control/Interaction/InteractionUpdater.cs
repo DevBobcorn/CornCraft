@@ -2,17 +2,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
+using Unity.Mathematics;
 
 using CraftSharp.Event;
-using CraftSharp.Rendering;
-using System.IO;
-using System.Threading.Tasks;
 using CraftSharp.Inventory;
 using CraftSharp.Protocol.Handlers;
+using CraftSharp.Rendering;
 using CraftSharp.Resource;
-using Unity.Mathematics;
 
 namespace CraftSharp.Control
 {
