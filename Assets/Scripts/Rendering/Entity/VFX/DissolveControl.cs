@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using HSR.NPRShader;
 
 namespace CraftSharp.Rendering
 {
@@ -44,14 +43,6 @@ namespace CraftSharp.Rendering
 
         private void Start()
         {
-            // Disable HSR render control
-            StarRailCharacterRenderingController hsr;
-
-            if (hsr = GetComponent<StarRailCharacterRenderingController>())
-            {
-                hsr.enabled = false;
-            }
-
             // Gather all renderers
             GetComponentsInChildren(true, m_Renderers);
 
