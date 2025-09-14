@@ -62,7 +62,6 @@ CornCraft在CDDL-1.0协议下开源，与MCC保持一致。除非特殊说明的
 本项目使用了部分其他开源项目/代码示例，这些项目不受CDDL-1.0约束，而使用其自身指明的开源协议。列表如下：
 * [Welai Glow Sans](https://github.com/welai/glow-sans): 作为常规游戏界面中使用的字体。
 * [Cascadia Code/Mono](https://github.com/microsoft/cascadia-code): 作为命令、技术性信息中使用的字体
-* [Star Rail NPR Shader](https://github.com/stalomeow/StarRailNPRShader): 作为自定义玩家模型使用的着色器
 * [Minecraft Data](https://github.com/PrismarineJS/minecraft-data): 提供网络数据包预览界面中解析器使用的包体结构定义
 
 更多关于CDDL-1.0的信息可在MCC的[主页](https://github.com/MCCTeam/Minecraft-Console-Client)上查看，协议全文请看[这里](./LICENSE.md)。

@@ -6,12 +6,8 @@
 
 - [**Atmospheric Height Fog**](https://assetstore.unity.com/packages/vfx/shaders/fullscreen-camera-effects/atmospheric-height-fog-optimized-fog-for-consoles-mobile-and-vr-143825): 提供体积雾，可以不要。
 
-- [**Magica Cloth 2**](https://assetstore.unity.com/packages/tools/physics/magica-cloth-2-242307): 提供角色的布料/毛发物理模拟。如果不想用的话可将角色prefab里面的`Physics`删掉，或者就用方方的原版玩家模型。
+- [**HoloDissolveFX**](https://assetstore.unity.com/packages/p/holodissolvefx-holograms-dissolve-urp-251841): 实体溶解着色器。
 
 此外，本项目还用了一些免费的商店资源，为了方便起见就直接包含到仓库里了。建议在资源商店里面领取一下，一来方便更新，二来避免一下潜在的授权风险。列表如下：
-
-- [**Unity-Chan! Model**](https://assetstore.unity.com/packages/3d/characters/unity-chan-model-18705): 作为默认的骨骼角色模型。 原本的BiRP材质被替换成了URP使用的材质。本资源在[UCL](https://unity-chan.com/contents/license_en/)协议下提供。
-
-- [**HoloDissolveFX**](https://assetstore.unity.com/packages/p/holodissolvefx-holograms-dissolve-urp-251841): 实体溶解着色器。
 
 - [**Kinematic Character Controller**](https://assetstore.unity.com/packages/tools/physics/kinematic-character-controller-99131): 用来创建自定义角色控制器的代码库。
