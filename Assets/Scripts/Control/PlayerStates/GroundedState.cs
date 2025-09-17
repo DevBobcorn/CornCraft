@@ -25,19 +25,6 @@ namespace CraftSharp.Control
         private bool _sprintRequested = false;
 
         private float _timeSinceGrounded = -1F;
-
-        public static string GetEntryAnimatorStateName(PlayerStatus info)
-        {
-            if (info.Moving)
-            {
-                if (info.Sprinting)
-                {
-                    return AnimatorEntityRender.SPRINT_NAME;
-                }
-                return info.WalkMode ? AnimatorEntityRender.WALK_NAME : AnimatorEntityRender.RUN_NAME;
-            }
-            return AnimatorEntityRender.IDLE_NAME;
-        }
         
         public static float DistanceToSquareSide(Vector2 direction, float halfSideLength)
         {
@@ -59,52 +46,43 @@ namespace CraftSharp.Control
             var yawRadian = info.TargetVisualYaw * Mathf.Deg2Rad;
             var dirVector = new Vector2(Mathf.Sin(yawRadian), Mathf.Cos(yawRadian));
             var maxDist = DistanceToSquareSide(dirVector, player.AbilityConfig.ClimbOverMaxDist);
-            
-            if (info is { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } &&
-                info.BarrierDistance < maxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
-            {
-                if (info.YawDeltaAbs <= 10F) // Trying to moving forward
-                {
-                    // Workaround: Use a cooldown value to disable climbing in a short period after landing
-                    if (_timeSinceGrounded > 0.3F)
-                    {
-                        player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, info.BarrierHeight < THRESHOLD_WALK_UP, false);
-                    }
 
-                    // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
-                    _jumpRequested = false;
-                }
+            if (info is not { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } ||
+                !(info.BarrierDistance < maxDist) || !(info.WallDistance - info.BarrierDistance > 0.7F)) return; // Climb up platform
+            
+            if (!(info.YawDeltaAbs <= 10F)) return; // Trying to move forward
+            
+            // Workaround: Use a cooldown value to disable climbing in a short period after landing
+            if (_timeSinceGrounded > 0.3F)
+            {
+                player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, info.BarrierHeight < THRESHOLD_WALK_UP, false);
             }
+
+            // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
+            _jumpRequested = false;
         }
 
         public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
-            if (info.Grounded)
+            if (!info.Grounded) return;
+            CheckClimbOver(info, player);
+
+            if (_jumpRequested) // Jump
             {
-                CheckClimbOver(info, player);
+                // Set jump confirmation flag
+                _jumpConfirmed = true;
 
-                if (_jumpRequested) // Jump
-                {
-                    // Set jump confirmation flag
-                    _jumpConfirmed = true;
+                // Makes the character skip ground probing/snapping on its next update
+                motor.ForceUnground();
+                // Randomize mirror flag before jumping
+                player.RandomizeMirroredFlag();
 
-                    // Makes the character skip ground probing/snapping on its next update
-                    motor.ForceUnground();
-                    // Randomize mirror flag before jumping
-                    player.RandomizeMirroredFlag();
-
-                    string stateName = "JumpFor" + GetEntryAnimatorStateName(info);
-
-                    // Go to jump state
-                    player.StartCrossFadeState(stateName, 0.1F);
-
-                    // Also reset grounded flag
-                    info.Grounded = false;
-                }
-
-                // Reset jump flag
-                _jumpRequested = false;
+                // Also reset grounded flag
+                info.Grounded = false;
             }
+
+            // Reset jump flag
+            _jumpRequested = false;
         }
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
@@ -215,7 +193,6 @@ namespace CraftSharp.Control
                     {
                         info.Sprinting = false;
                         info.SprintBrakeTime = SPRINT_BRAKE_TIME;
-                        moveVelocity = currentVelocity;
                     }
 
                     if (info.SprintBrakeTime > 0F)
@@ -307,20 +284,7 @@ namespace CraftSharp.Control
                 _sprintRequested = true;
             };
 
-            if (prevState is not ForceMoveState)
-            {
-                var stateName = prevState == PlayerStates.AIRBORNE ?
-                    AnimatorEntityRender.LANDING_NAME :
-                    GetEntryAnimatorStateName(info);
-
-                player.StartCrossFadeState(stateName, 0.1F);
-
-                _timeSinceGrounded = 0F;
-            }
-            else
-            {
-                _timeSinceGrounded = Mathf.Max(_timeSinceGrounded, 0F);
-            }
+            _timeSinceGrounded = prevState is not ForceMoveState ? 0F : Mathf.Max(_timeSinceGrounded, 0F);
         }
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
@@ -331,13 +295,6 @@ namespace CraftSharp.Control
             player.Actions.Locomotion.Jump.performed -= jumpRequestCallback;
             player.Actions.Locomotion.WalkToggle.performed -= walkToggleRequestCallback;
             player.Actions.Locomotion.Sprint.performed -= sprintRequestCallback;
-
-            // Ungrounded, go to falling state
-            if (nextState == PlayerStates.AIRBORNE && !info.Grounded && !_jumpConfirmed)
-            {
-                // Make sure it isn't jumping
-                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME);
-            }
 
             // Reset jump confirmation flag
             _jumpConfirmed = false;

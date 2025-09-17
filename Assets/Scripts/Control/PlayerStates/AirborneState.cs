@@ -158,11 +158,6 @@ namespace CraftSharp.Control
             info.Gliding = false;
             info.AirTime = 0F;
 
-            if (info.Flying)
-            {
-                player.StartCrossFadeState(AnimatorEntityRender.GLIDING_NAME, 0F);
-            }
-
             // Reset request flags
                 //_glideToggleRequested = false;
                 _flightRequested = false;

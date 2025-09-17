@@ -18,37 +18,14 @@ namespace CraftSharp.Control
             Mount
         }
 
-        // AbilityConfig & Skill Fields
+        // Player Config Fields
         [SerializeField] private PlayerAbilityConfig m_AbilityConfig;
-        [SerializeField] private PlayerSkillItemConfig m_SkillItemConfig;
 
         public PlayerAbilityConfig AbilityConfig => m_AbilityConfig;
-        public PlayerSkillItemConfig SkillItemConfig => m_SkillItemConfig;
 
         // Status Fields
         [SerializeField] private PlayerStatusUpdater m_StatusUpdater;
         public PlayerStatus Status => m_StatusUpdater.Status;
-        private bool usingAnimator = false;
-
-        /// <summary>
-        /// Whether player root motion should be applied.
-        /// </summary>
-        public bool UseRootMotion { get; set; } = false;
-
-        /// <summary>
-        /// Whether to countervail animator scale when applying root motion displacement. Only uniform scale is supported.
-        /// </summary>
-        public bool IgnoreAnimatorScale { get; set; } = false;
-
-        /// <summary>
-        /// Root motion position delta. Reset after applied.
-        /// </summary>
-        public Vector3 RootMotionPositionDelta { get; set; } = Vector3.zero;
-
-        /// <summary>
-        /// Root motion rotation delta. Reset after applied.
-        /// </summary>
-        public Quaternion RootMotionRotationDelta { get; set; } = Quaternion.identity;
 
         // Camera & Player Render Fields
         private CameraController m_CameraController;
@@ -69,7 +46,7 @@ namespace CraftSharp.Control
 #nullable enable
         
         // Player State Fields
-        private IPlayerState? pendingState = null;
+        private IPlayerState? pendingState;
         
 #nullable disable
         
@@ -102,10 +79,7 @@ namespace CraftSharp.Control
 
         public void SwitchPlayerRenderFromPrefab(EntityData entity, GameObject renderPrefab)
         {
-            var renderObj = renderPrefab.TryGetComponent(out Animator _) ?
-                AnimatorEntityRender.CreateFromModel(renderPrefab) : // Model prefab, wrap it up
-                // Player render prefab, just instantiate
-                Instantiate(renderPrefab);
+            var renderObj = Instantiate(renderPrefab);
             renderObj.name = $"Player Entity ({renderPrefab.name})";
 
             SwitchPlayerRender(entity, renderObj);
@@ -149,39 +123,14 @@ namespace CraftSharp.Control
                     child.gameObject.layer = gameObject.layer;
                 }
 
-                var riggedRender = m_PlayerRender as PlayerEntityRiggedRender;
-                if (riggedRender) // If player render is rigged render
+                OnPlayerUpdate += (velocity, _, _) =>
                 {
-                    // Additionally, update player state machine for rigged rendersInitialize
-                    OnPlayerUpdate += (velocity, _, status) =>
-                    {
-                        // Update player render velocity
-                        m_PlayerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
-                        // Upload animator state machine parameters
-                        riggedRender.UpdateAnimator(status);
-                        // Update render
-                        m_PlayerRender.UpdateAnimation(0.05F);
-                    };
-                    // Initialize current item held by player
-                    // TODO: Remove direct reference to client
-                    var activeItem = CornApp.CurrentClient!.GetActiveItem();
-                    riggedRender.InitializeActiveItem(activeItem,
-                            PlayerActionHelper.GetItemActionType(activeItem));
-                    // Set animator flag
-                    usingAnimator = true;
-                }
-                else // Player render is vanilla/entity render
-                {
-                    OnPlayerUpdate += (velocity, _, _) =>
-                    {
-                        // Update player render velocity
-                        m_PlayerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
-                        // Update render
-                        m_PlayerRender.UpdateAnimation(0.05F);
-                    };
-                    // Reset animator flag
-                    usingAnimator = false;
-                }
+                    // Update player render velocity
+                    m_PlayerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
+                    // Update render
+                    m_PlayerRender.UpdateAnimation(0.05F);
+                };
+                
                 // Setup camera ref and use it
                 m_FollowRef = m_PlayerRender.SetupCameraRef();
                 m_AimingRef = m_PlayerRender.GetAimingRef();
@@ -194,8 +143,6 @@ namespace CraftSharp.Control
                 // Use own transform
                 m_FollowRef = transform;
                 m_AimingRef = transform;
-                // Reset animator flag
-                usingAnimator = false;
             }
 
             if (m_CameraController)
@@ -235,35 +182,15 @@ namespace CraftSharp.Control
             OnItemStateChanged?.Invoke(itemState);
         }
 
-        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType, PlayerSkillItemConfig? config);
+        public delegate void ItemStackEventHandler(ItemStack? item, ItemActionType actionType);
         public event ItemStackEventHandler? OnCurrentItemChanged;
         public void ChangeCurrentItem(ItemStack? currentItem, ItemActionType actionType)
         {
-            OnCurrentItemChanged?.Invoke(currentItem, actionType, SkillItemConfig);
-        }
-
-        public delegate void CrossFadeStateEventHandler(string stateName, float time, int layer, float timeOffset);
-        public event CrossFadeStateEventHandler? OnCrossFadeState;
-        public void StartCrossFadeState(string stateName, float time = 0.2F, int layer = 0, float timeOffset = 0F)
-        {
-            OnCrossFadeState?.Invoke(stateName, time, layer, timeOffset);
-        }
-
-        public delegate void OverrideStateEventHandler(AnimationClip dummyClip, AnimationClip animationClip);
-        public event OverrideStateEventHandler? OnOverrideState;
-        public void OverrideStateAnimation(AnimationClip dummyClip, AnimationClip animationClip)
-        {
-            OnOverrideState?.Invoke(dummyClip, animationClip);
+            OnCurrentItemChanged?.Invoke(currentItem, actionType);
         }
 
         public event Action? OnRandomizeMirroredFlag;
         public void RandomizeMirroredFlag() => OnRandomizeMirroredFlag?.Invoke();
-
-        public event Action? OnMeleeDamageStart;
-        public void MeleeDamageStart() => OnMeleeDamageStart?.Invoke();
-
-        public event Action? OnMeleeDamageEnd;
-        public void MeleeDamageEnd() => OnMeleeDamageEnd?.Invoke();
 
         // Used only by player renders, will be cleared and reassigned upon player render update
         private delegate void PlayerUpdateEventHandler(Vector3 velocity, float interval, PlayerStatus status);
@@ -386,80 +313,27 @@ namespace CraftSharp.Control
 
         public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp, bool fromLiquid)
         {
-            if (usingAnimator && !walkUp)
-            {
-                Vector2 extraOffset;
+            Vector2 extraOffset = AbilityConfig.ClimbOverExtraOffset;
 
-                if (m_PlayerRender is PlayerEntityRiggedRender riggedRender)
-                {
-                    extraOffset = riggedRender.GetClimbOverOffset();
-                }
-                else
-                {
-                    extraOffset = AbilityConfig.ClimbOverExtraOffset;
-                }
+            if (fromLiquid) extraOffset.x += 0.1F;
+            var forwardDir = GetMovementOrientation() * Vector3.forward;
+            var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
 
-                if (fromLiquid)
-                {
-                    extraOffset.x += 0.1F;
-                }
-
-                var offset = (barrierHeight * 0.5F - 0.5F + extraOffset.y) * Motor.CharacterUp + extraOffset.x * Motor.CharacterForward;
-                
-                StartForceMoveOperation("Climb over barrier (RootMotion)",
-                        new ForceMoveOperation[] {
-                                new(offset, AbilityConfig.ClimbOverMoveTime,
-                                    init: (info, _, player) =>
-                                    {
-                                        player.RandomizeMirroredFlag();
-                                        player.StartCrossFadeState(PlayerAbilityConfig.CLIMB_1M, 0.1F);
-                                        info.PlayingRootMotion = true;
-                                        player.UseRootMotion = true;
-                                        player.IgnoreAnimatorScale = true;
-                                    },
-                                    update: (_, _, _, _, _, _) => false
-                                ),
-                                new(offset, AbilityConfig.ClimbOverTotalTime - AbilityConfig.ClimbOverMoveTime - AbilityConfig.ClimbOverCheckExit,
-                                    update: (_, _, _, _, _, _) => false
-                                ),
-                                new(Vector3.zero, AbilityConfig.ClimbOverCheckExit,
-                                    exit: (info, _, player) =>
-                                    {
-                                        info.Grounded = true;
-                                        player.UseRootMotion = false;
-                                        info.PlayingRootMotion = false;
-                                        StartCrossFadeState(GroundedState.GetEntryAnimatorStateName(info));
-                                    },
-                                    update: (_, _, inputData, info, _, _) =>
-                                    {
-                                        info.Moving = inputData.Locomotion.Movement.IsPressed();
-                                        // Terminate force move action if almost finished and player is eager to move
-                                        return info.Moving;
-                                    }
-                                )
-                        } );
-            }
-            else
-            {
-                var forwardDir = GetMovementOrientation() * Vector3.forward;
-                var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
-
-                StartForceMoveOperation("Climb over barrier (TransformDisplacement)",
-                        new ForceMoveOperation[] {
-                                new(offset, barrierHeight * 0.3F,
-                                    exit: (info, _, _) =>
-                                    {
-                                        info.Grounded = true;
-                                    },
-                                    update: (_, _, inputData, info, _, _) =>
-                                    {
-                                        info.Moving = inputData.Locomotion.Movement.IsPressed();
-                                        // Don't terminate till the time ends
-                                        return false;
-                                    }
-                                )
-                        } );
-            }
+            StartForceMoveOperation("Climb over barrier (TransformDisplacement)",
+                new ForceMoveOperation[] {
+                    new(offset, barrierHeight * 0.3F,
+                        exit: (info, _, _) =>
+                        {
+                            info.Grounded = true;
+                        },
+                        update: (_, _, inputData, info, _, _) =>
+                        {
+                            info.Moving = inputData.Locomotion.Movement.IsPressed();
+                            // Don't terminate till the time ends
+                            return false;
+                        }
+                    )
+                } );
         }
 
         private void StartForceMoveOperation(string stateName, ForceMoveOperation[] ops)
@@ -595,17 +469,6 @@ namespace CraftSharp.Control
             {
                 EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig.MaxStamina));
             }
-            
-            // Handle root motion
-            if (UseRootMotion)
-            {
-                // Rotation (yaw only)
-                var rootMotionYawDelta = RootMotionRotationDelta.eulerAngles.y;
-                status.TargetVisualYaw += rootMotionYawDelta;
-                status.CurrentVisualYaw += rootMotionYawDelta;
-                // Position
-                currentVelocity += RootMotionPositionDelta / deltaTime;
-            }
 
             // Visual updates... Don't pass the velocity by ref here, just the value
             OnPlayerUpdate?.Invoke(currentVelocity, deltaTime, Status);
@@ -630,10 +493,6 @@ namespace CraftSharp.Control
             }
             
             IsGrounded2Send = Status.GroundCheck;
-
-            // Reset root motion deltas
-            RootMotionPositionDelta = Vector3.zero;
-            RootMotionRotationDelta = Quaternion.identity;
         }
 
         private Vector3Int _worldOriginOffset = Vector3Int.zero;
@@ -680,10 +539,9 @@ namespace CraftSharp.Control
         {
             if (direction.y > 0F)
                 return Mathf.Atan(direction.x / direction.y) * Mathf.Rad2Deg;
-            else if (direction.y < 0F)
+            if (direction.y < 0F)
                 return Mathf.Atan(direction.x / direction.y) * Mathf.Rad2Deg + 180F;
-            else
-                return direction.x > 0 ? 90F : 270F;
+            return direction.x > 0 ? 90F : 270F;
         }
 
         public string GetDebugInfo()

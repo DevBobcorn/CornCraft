@@ -23,7 +23,7 @@ namespace CraftSharp.Control
                 info.BarrierDistance < maxDist && info.WallDistance - info.BarrierDistance > 0.7F) // Climb up platform
             {
                 if (info is { BarrierYawAngle: < 30F, YawDeltaAbs: <= 10F }) // Check if available, for high barriers check cooldown and angle
-                    // Trying to moving forward
+                    // Trying to move forward
                 {
                     player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, false, true);
 
@@ -154,8 +154,6 @@ namespace CraftSharp.Control
         public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
-
-            player.StartCrossFadeState(AnimatorEntityRender.TREAD_NAME);
 
             // Reset request flags
             _forceUngroundRequested = false;

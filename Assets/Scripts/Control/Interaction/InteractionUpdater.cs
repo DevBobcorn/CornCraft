@@ -676,9 +676,6 @@ namespace CraftSharp.Control
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
-                            // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
-
                             // Update player state
                             playerController.ChangeToState(PlayerStates.RANGED_AIM);
                         }
@@ -712,9 +709,6 @@ namespace CraftSharp.Control
                         {
                             if (playerController.CurrentState != PlayerStates.MELEE)
                             {
-                                // Specify attack data to use
-                                status.AttackStatus.CurrentStagedAttack = playerController.AbilityConfig.MeleeSwordAttack_Staged;
-
                                 // Update player state
                                 playerController.ChangeToState(PlayerStates.MELEE);
                             }
@@ -737,9 +731,6 @@ namespace CraftSharp.Control
                     {
                         if (status.AttackStatus.AttackCooldown <= 0F)
                         {
-                            // Specify attack data to use
-                            status.AttackStatus.CurrentChargedAttack = playerController.AbilityConfig.RangedBowAttack_Charged;
-
                             // Update player state
                             playerController.ChangeToState(PlayerStates.RANGED_AIM);
                         }

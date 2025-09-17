@@ -83,8 +83,6 @@ namespace CraftSharp.Control
         public bool EntityDisabled = false;
         public bool PhysicsDisabled = true;
 
-        public bool PlayingRootMotion = false;
-
         // Reference values
         public float CenterDownDist = 0F;
         public float BarrierHeight  = 0F;

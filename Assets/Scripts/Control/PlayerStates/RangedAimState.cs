@@ -14,17 +14,9 @@ namespace CraftSharp.Control
             info.Gliding = false;
 
             var attackStatus = info.AttackStatus;
-            var rangedAttack = attackStatus.CurrentChargedAttack;
-
-            if (!rangedAttack) // Ranged attack data is not assigned, stop it
-            {
-                info.Attacking = false;
-                attackStatus.AttackStage = -1;
-                return;
-            }
 
             // Stay in this state if attack button is still pressed or the initiation phase is not yet complete
-            if (attackStatus.StageTime < rangedAttack.SetupTime || inputData.Interaction.ChargedAttack.IsPressed())
+            if (attackStatus.AttackCooldown > 0F || inputData.Interaction.ChargedAttack.IsPressed())
             {
                 // Update moving status
                 bool prevMoving = info.Moving;
@@ -53,21 +45,12 @@ namespace CraftSharp.Control
                 // Apply updated velocity
                 currentVelocity = moveVelocity;
 
-                attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
             else // Charging state ends
             {
-                // Idle timeout
-                attackStatus.AttackCooldown -= interval;
-
-                if (attackStatus.AttackCooldown < rangedAttack.IdleTimeout) // Timed out, exit state
-                {
-                    // Attack timed out, exit
-                    info.Attacking = false;
-                    attackStatus.AttackStage = -1;
-                }
+                info.Attacking = false;
             }
 
             // Restore stamina
@@ -93,20 +76,7 @@ namespace CraftSharp.Control
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-            var rangedAttack = attackStatus.CurrentChargedAttack;
-
-            if (!rangedAttack) // Ranged attack data is not assigned, stop it
-            {
-                info.Attacking = false;
-                attackStatus.AttackStage = -1;
-                return;
-            }
-
-            attackStatus.AttackStage = 0;
-            attackStatus.StageTime = 0F;
-
-            player.OverrideStateAnimation(rangedAttack.DummyAnimationClip!, rangedAttack.DrawWeapon!);
-            player.StartCrossFadeState(PlayerAbilityConfig.SKILL, 0.01F);
+            attackStatus.AttackCooldown = 0F;
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
 

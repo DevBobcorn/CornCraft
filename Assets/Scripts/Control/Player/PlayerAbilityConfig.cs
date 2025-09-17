@@ -5,16 +5,11 @@ namespace CraftSharp.Control
     [CreateAssetMenu(fileName = "Player Ability Config", menuName = "Config/Player Ability Config")]
     public class PlayerAbilityConfig : ScriptableObject
     {
-        // Force move animation state names
-        public static readonly string CLIMB_1M = "Climb1m";
         [Range(0.1F, 3F)] public float ClimbOverMaxDist    = 0.5F;
         public Vector3 ClimbOverExtraOffset = Vector2.zero;
         [Range(0.1F, 5F)] public float ClimbOverTotalTime  = 1.1F;
         [Range(0.1F, 5F)] public float ClimbOverMoveTime   = 0.3F;
         [Range(0.1F, 5F)] public float ClimbOverCheckExit  = 0.2F;
-
-        // Skill animation state name
-        public static readonly string SKILL      = "Skill";
 
         [Range(0.1F,  4F)] public float WalkSpeed   =   2F;
         [Range(0.1F, 10F)] public float RunSpeed    =   6F;
@@ -35,8 +30,5 @@ namespace CraftSharp.Control
         [Range(1F, 100F)] public float MaxFallSpeed         =   20F;
         [Range(1F, 100F)] public float MaxGlideFallSpeed    =    1F;
         [Range(0.1F, 1F)] public float LiquidMoveMultiplier = 0.85F;
-
-        public PlayerStagedSkill MeleeSwordAttack_Staged;
-        public PlayerChargedSkill RangedBowAttack_Charged;
     }
 }

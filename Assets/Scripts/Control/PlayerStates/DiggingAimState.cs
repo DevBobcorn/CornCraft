@@ -45,7 +45,6 @@ namespace CraftSharp.Control
                 // Apply updated velocity
                 currentVelocity = moveVelocity;
 
-                attackStatus.StageTime += interval;
                 // Reset cooldown
                 attackStatus.AttackCooldown = 0F;
             }
@@ -55,7 +54,6 @@ namespace CraftSharp.Control
                 attackStatus.AttackCooldown -= interval;
 
                 info.Attacking = false;
-                attackStatus.AttackStage = -1;
             }
 
             if (!motor.GroundingStatus.FoundAnyGround)
@@ -85,9 +83,6 @@ namespace CraftSharp.Control
             info.Attacking = true;
 
             var attackStatus = info.AttackStatus;
-
-            attackStatus.AttackStage = 0;
-            attackStatus.StageTime = 0F;
 
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
 

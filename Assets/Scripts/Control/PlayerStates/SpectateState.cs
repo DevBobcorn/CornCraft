@@ -53,12 +53,6 @@ namespace CraftSharp.Control
         public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
         {
             info.Sprinting = false;
-            
-            // Ungrounded, go to falling state
-            if (nextState == PlayerStates.AIRBORNE && !info.Grounded)
-            {
-                player.StartCrossFadeState(AnimatorEntityRender.FALLING_NAME);
-            }
         }
 
         public override string ToString() => "Spectate";
