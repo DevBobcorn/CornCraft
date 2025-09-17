@@ -114,7 +114,7 @@ namespace CraftSharp.Control
             else // Falling
             {
                 // Apply gravity
-                moveVelocity = currentVelocity - info.GravityScale * 12f * interval * motor.CharacterUp;
+                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 2f * interval);
                 
                 // Speed limit check
                 if (moveVelocity.magnitude > ability.MaxFallSpeed)

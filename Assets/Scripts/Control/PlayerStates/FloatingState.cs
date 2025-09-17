@@ -105,8 +105,6 @@ namespace CraftSharp.Control
                         {
                             _forceUngroundRequested = true;
                         }
-
-                        
                     }
                 }
                 else if (inputData.Locomotion.Descend.IsPressed())

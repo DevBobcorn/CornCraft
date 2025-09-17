@@ -14,9 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ClimbOverMaxDist: 0.6
   ClimbOverExtraOffset: {x: 0, y: 0, z: 0}
-  ClimbOverTotalTime: 1.2
-  ClimbOverMoveTime: 0.3
-  ClimbOverCheckExit: 0.6
   WalkSpeed: 1
   RunSpeed: 6
   AccSpeed: 25
@@ -29,16 +26,16 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 5
-      inSlope: 0
-      outSlope: 0
+      value: 6
+      inSlope: 0.20443031
+      outSlope: 0.20443031
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.14
     - serializedVersion: 3
       time: 5
-      value: 5
+      value: 6.4
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -47,12 +44,12 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 10
-      value: 4.3
-      inSlope: -0.30978677
-      outSlope: -0.30978677
+      value: 5.5
+      inSlope: -0.24563129
+      outSlope: -0.24563129
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.043536566
+      inWeight: 0.12666646
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -60,11 +57,6 @@ MonoBehaviour:
   TurnSpeed: 600
   MaxStamina: 20
   SprintStaminaCost: 3
-  SwimStaminaCost: 0.8
   GlideStaminaCost: 0.6
   StaminaRestore: 4
   MaxFallSpeed: 100
-  MaxGlideFallSpeed: 2
-  LiquidMoveMultiplier: 0.8
-  MeleeSwordAttack_Staged: {fileID: 11400000, guid: e9daf537efee7104daf40cc676392536, type: 2}
-  RangedBowAttack_Charged: {fileID: 11400000, guid: 33dfb0310f5ab1a4284d261824057ad2, type: 2}
