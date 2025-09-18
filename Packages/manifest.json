@@ -12,7 +12,7 @@
     "com.devbobcorn.craftsharp": "https://github.com/DevBobcorn/CraftSharp.git",
     "com.devbobcorn.craftsharp-resource": "https://github.com/DevBobcorn/CraftSharp-Resource.git",
     "com.unity.2d.sprite": "1.0.0",
-    "com.unity.burst": "1.8.24",
+    "com.unity.burst": "1.8.25",
     "com.unity.cinemachine": "3.1.4",
     "com.unity.collections": "2.5.7",
     "com.unity.ide.rider": "3.0.37",
