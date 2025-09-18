@@ -36,7 +36,7 @@ Key                                                       | Action
 <kbd>Space</kbd>                                          | Move Up in Air/Jump
 <kbd>Space</kbd> * 2                                      | Toggle flight (Creative Mode)
 <kbd>Left Shift</kbd>                                     | Sprint/Move Down in Air
-<kbd>Left Ctrl</kbd>                                      | Toggle Walk/Rush Mode
+<kbd>Left Ctrl</kbd>                                      | Toggle Sneaking
 <kbd>Mouse Scroll</kbd>                                   | Select Hotbar Slot
 <kbd>Alt (Hold)</kbd> + <kbd>Mouse Scroll</kbd>           | Select Interaction Option
 <kbd>E</kbd>                                              | Open Player Inventory

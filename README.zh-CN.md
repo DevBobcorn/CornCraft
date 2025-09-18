@@ -36,7 +36,7 @@ CornCraft用来解析原版资源包的代码已独立成一个package并开源�
 <kbd>空格</kbd>                                           | 空中向上移动/跳跃
 <kbd>空格</kbd> * 2                                       | 切换飞行（创造模式）
 <kbd>左Shift</kbd>                                        | 疾跑/空中向下移动
-<kbd>左Ctrl</kbd>                                         | 切换行走/奔跑模式
+<kbd>左Ctrl</kbd>                                         | 切换潜行
 <kbd>鼠标滚轮</kbd>                                        | 选择快捷栏物品
 <kbd>Alt（按下）</kbd> + <kbd>鼠标滚轮</kbd>                | 选择交互选项
 <kbd>E</kbd>                                              | 打开玩家物品栏
