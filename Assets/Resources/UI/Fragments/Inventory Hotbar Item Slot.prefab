@@ -193,7 +193,7 @@ MonoBehaviour:
   slotImage: {fileID: 2725278365976862297}
   damageBarTransform: {fileID: 6662110780589018373}
   damageBarFillImage: {fileID: 6921697492545892212}
-  fullItemScale: 72
+  fullItemScale: 64
 --- !u!95 &2181847411967179396
 Animator:
   serializedVersion: 7
@@ -277,6 +277,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -298,6 +300,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0

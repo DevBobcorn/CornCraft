@@ -171,8 +171,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   modelObject: {fileID: 2939716011902131228}
   itemText: {fileID: 2880921485298370084}
-  itemMeshFilter: {fileID: 4811868574071064193}
-  itemMeshRenderer: {fileID: 6061594878036035745}
   slotCenterRef: {fileID: 7578773966599338794}
   hoveredSprite: {fileID: 21300000, guid: 80b1666e635a0c54893225c057849245, type: 3}
   draggedSprite: {fileID: 21300000, guid: 41d0db0f11f33dd4c908cc48774f213a, type: 3}
@@ -182,7 +180,7 @@ MonoBehaviour:
   slotImage: {fileID: 2725278365976862297}
   damageBarTransform: {fileID: 1983761851241344504}
   damageBarFillImage: {fileID: 4331972609591864060}
-  fullItemScale: 72
+  fullItemScale: 64
 --- !u!114 &-447243451486840513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -321,6 +319,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -342,6 +342,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -371,7 +372,7 @@ RectTransform:
   m_GameObject: {fileID: 3565336635345514498}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: -30}
-  m_LocalScale: {x: 72, y: 72, z: 72}
+  m_LocalScale: {x: 64, y: 64, z: 64}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3908735888262692892}
