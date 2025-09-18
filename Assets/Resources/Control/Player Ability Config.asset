@@ -14,34 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ClimbOverMaxDist: 0.6
   ClimbOverExtraOffset: {x: 0, y: 0, z: 0}
-  WalkSpeed: 1
-  RunSpeed: 4.317
-  AccSpeed: 25
-  DecSpeed: 15
-  SwimSpeed: 4
+  SneakSpeed: 1.3
+  WalkSpeed: 4.317
   SprintSpeed: 5.612
+  SwimSpeed: 1.97
   GlideSpeed: 2.8
   JumpSpeedCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 6
-      inSlope: 0.20443031
-      outSlope: 0.20443031
+      value: 6.5
+      inSlope: 0.000005613399
+      outSlope: 0.000005613399
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.14
-    - serializedVersion: 3
-      time: 5
-      value: 6.4
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
+      outWeight: 0.5266667
     - serializedVersion: 3
       time: 10
       value: 5.5

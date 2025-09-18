@@ -82,8 +82,6 @@ namespace CraftSharp.Control
             // Digging also use this attacking flag
             info.Attacking = true;
 
-            var attackStatus = info.AttackStatus;
-
             player.ChangeItemState(PlayerController.CurrentItemState.HoldInOffhand);
 
             player.UseAimingCamera(true);

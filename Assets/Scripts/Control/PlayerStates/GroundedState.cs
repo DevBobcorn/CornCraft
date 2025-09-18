@@ -150,10 +150,6 @@ namespace CraftSharp.Control
                     {
                         moveSpeed *= info.Moving ? (info.Sprinting ? 0.8F : 0.35F) : 1F;
                     }
-                    else if (_timeSinceGrounded is >= 0F and < 0.5F)
-                    {
-                        moveSpeed *= _timeSinceGrounded / 0.5F;
-                    }
 
                     // Smooth rotation for player model
                     info.CurrentVisualYaw = Mathf.MoveTowardsAngle(Mathf.LerpAngle(info.CurrentVisualYaw,
