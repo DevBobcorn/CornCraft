@@ -73,7 +73,7 @@ namespace CraftSharp.Control
         public readonly AttackStatus AttackStatus = new();
 
         public bool Spectating = false;
-        public bool WalkMode   = false;
+        public bool Sneaking   = false;
 
         public bool EntityDisabled = false;
         public bool PhysicsDisabled = true;

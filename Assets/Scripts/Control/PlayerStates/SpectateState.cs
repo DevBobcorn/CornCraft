@@ -24,7 +24,7 @@ namespace CraftSharp.Control
                 // Update orientation for player model
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
-                var moveSpeed = info.WalkMode ? ability.SneakSpeed : ability.WalkSpeed;
+                var moveSpeed = info.Sneaking ? ability.SneakSpeed : ability.WalkSpeed;
 
                 // Use target orientation to calculate actual movement direction, y speed is set to 0 by this point
                 moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;

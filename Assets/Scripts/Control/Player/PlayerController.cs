@@ -305,10 +305,10 @@ namespace CraftSharp.Control
             Motor.enabled = true;
         }
         
-        public void ToggleWalkMode()
+        public void ToggleSneaking()
         {
-            Status.WalkMode = !Status.WalkMode;
-            CornApp.Notify(Translations.Get($"gameplay.control.switch_to_{(Status.WalkMode ? "walk" : "rush")}"));
+            Status.Sneaking = !Status.Sneaking;
+            CornApp.Notify(Translations.Get($"gameplay.control.sneaking_{(Status.Sneaking ? "started" : "stopped")}"));
         }
 
         public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp, bool fromLiquid)

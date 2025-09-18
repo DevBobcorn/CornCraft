@@ -4,8 +4,6 @@ using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-using CraftSharp.Rendering;
-
 namespace CraftSharp.Control
 {
     public class GroundedState : IPlayerState
@@ -20,7 +18,7 @@ namespace CraftSharp.Control
 
         private bool _jumpRequested = false;
         private bool _jumpConfirmed = false;
-        private bool _walkToggleRequested = false;
+        private bool _sneakToggleRequested = false;
         private bool _sprintRequested = false;
 
         private float _timeSinceGrounded = -1F;
@@ -94,12 +92,12 @@ namespace CraftSharp.Control
             // Update grounded timer
             _timeSinceGrounded += interval;
 
-            // Check walk toggle request
-            if (_walkToggleRequested)
+            // Check sneak toggle request
+            if (_sneakToggleRequested)
             {
-                player.ToggleWalkMode();
+                player.ToggleSneaking();
 
-                _walkToggleRequested = false;
+                _sneakToggleRequested = false;
             }
 
             // Movement velocity update
@@ -141,7 +139,7 @@ namespace CraftSharp.Control
                         }
                     }
 
-                    var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.WalkMode ? ability.SneakSpeed : ability.WalkSpeed;
+                    var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.Sneaking ? ability.SneakSpeed : ability.WalkSpeed;
                     
                     _sprintRequested = false;
                     
@@ -211,7 +209,7 @@ namespace CraftSharp.Control
             // Reset request flags
             _jumpRequested = false;
             _jumpConfirmed = false;
-            _walkToggleRequested = false;
+            _sneakToggleRequested = false;
             _sprintRequested = player.Actions.Locomotion.Sprint.IsPressed();
 
             player.Actions.Locomotion.Jump.performed += jumpRequestCallback = _ =>
@@ -223,7 +221,7 @@ namespace CraftSharp.Control
             player.Actions.Locomotion.WalkToggle.performed += walkToggleRequestCallback = _ =>
             {
                 // Set walk toggle flag
-                _walkToggleRequested = true;
+                _sneakToggleRequested = true;
             };
 
             player.Actions.Locomotion.Sprint.performed += sprintRequestCallback = _ =>
