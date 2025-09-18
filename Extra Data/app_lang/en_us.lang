@@ -85,8 +85,8 @@ filemonitor.fail=[{0}] Failed to initialize FileSystemWatcher, retrying using Po
 
 [gameplay]
 gameplay.control.update_gamemode=Gamemode updated to {0}
-gameplay.control.switch_to_rush=Switched to rush mode
-gameplay.control.switch_to_walk=Switched to walk mode
+gameplay.control.sneaking_started=Sneaking started
+gameplay.control.sneaking_stopped=Sneaking stopped
 gameplay.interaction.pick_up={0}
 gameplay.interaction.go_to_bed=Go to bed
 gameplay.interaction.open_door=Open door
