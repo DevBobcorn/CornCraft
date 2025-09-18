@@ -125,12 +125,6 @@ namespace CraftSharp.Control
                     moveVelocity += player.GetMovementOrientation() * Vector3.forward * swimSpeed;
                 }
 
-                // Smooth movement (if accelerating)
-                if (moveVelocity.sqrMagnitude > currentVelocity.sqrMagnitude)
-                {
-                    moveVelocity = Vector3.MoveTowards(currentVelocity, moveVelocity, ability.AccSpeed * interval);
-                }
-
                 // Apply gravity (nonexistent)
             }
 

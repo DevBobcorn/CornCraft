@@ -8,12 +8,10 @@ namespace CraftSharp.Control
         [Range(0.1F, 3F)] public float ClimbOverMaxDist    = 0.5F;
         public Vector3 ClimbOverExtraOffset = Vector2.zero;
 
-        [Range(0.1F,   4F)] public float WalkSpeed   =   2F;
-        [Range(0.1F,  10F)] public float RunSpeed    =   6F;
-        [Range(0.1F, 100F)] public float AccSpeed    =  10F;
-        [Range(0.1F, 100F)] public float DecSpeed    =  10F;
-        [Range(0.1F,  10F)] public float SwimSpeed   =   4F;
+        [Range(0.1F,  10F)] public float SneakSpeed  =   2F;
+        [Range(0.1F,  10F)] public float WalkSpeed   =   6F;
         [Range(0.1F,  10F)] public float SprintSpeed = 3.5F;
+        [Range(0.1F,  10F)] public float SwimSpeed   =   4F;
         [Range(0.1F,  10F)] public float GlideSpeed  = 3.6F;
         
         public AnimationCurve JumpSpeedCurve = new();

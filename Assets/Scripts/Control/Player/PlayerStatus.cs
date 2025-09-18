@@ -62,11 +62,6 @@ namespace CraftSharp.Control
         public bool Sprinting = false;
 
         /// <summary>
-        /// Time left to brake current sprinting
-        /// </summary>
-        public float SprintBrakeTime = 0F;
-
-        /// <summary>
         /// Gravity scale. Used only for controlling player entity enablement / disablement
         /// </summary>
         public float GravityScale = 0F;

@@ -24,7 +24,7 @@ namespace CraftSharp.Control
                 // Update orientation for player model
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
-                var moveSpeed = info.WalkMode ? ability.WalkSpeed : ability.RunSpeed;
+                var moveSpeed = info.WalkMode ? ability.SneakSpeed : ability.WalkSpeed;
 
                 // Use target orientation to calculate actual movement direction, y speed is set to 0 by this point
                 moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
@@ -36,9 +36,9 @@ namespace CraftSharp.Control
 
             // Check vertical movement...
             if (inputData.Locomotion.Ascend.IsPressed())
-                moveVelocity += ability.WalkSpeed * 3F * motor.CharacterUp;
+                moveVelocity += ability.SneakSpeed * 3F * motor.CharacterUp;
             else if (inputData.Locomotion.Descend.IsPressed())
-                moveVelocity -= ability.WalkSpeed * 3F * motor.CharacterUp;
+                moveVelocity -= ability.SneakSpeed * 3F * motor.CharacterUp;
 
             currentVelocity = moveVelocity;
 

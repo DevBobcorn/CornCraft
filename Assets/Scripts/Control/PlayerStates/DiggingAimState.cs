@@ -29,7 +29,7 @@ namespace CraftSharp.Control
                 }
 
                 // Player can only move slowly in this state
-                var moveSpeed = ability.WalkSpeed;
+                var moveSpeed = ability.SneakSpeed;
                 Vector3 moveVelocity;
 
                 // Use target orientation to calculate actual movement direction, taking ground shape into consideration

@@ -15,11 +15,11 @@ MonoBehaviour:
   ClimbOverMaxDist: 0.6
   ClimbOverExtraOffset: {x: 0, y: 0, z: 0}
   WalkSpeed: 1
-  RunSpeed: 6
+  RunSpeed: 4.317
   AccSpeed: 25
   DecSpeed: 15
   SwimSpeed: 4
-  SprintSpeed: 10
+  SprintSpeed: 5.612
   GlideSpeed: 2.8
   JumpSpeedCurve:
     serializedVersion: 2

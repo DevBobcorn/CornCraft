@@ -15,7 +15,6 @@ namespace CraftSharp.Control
         private const float THRESHOLD_CLIMB_UP = 0.4F;
         
         private const float THRESHOLD_LIQUID_SINK = -0.6F;
-        private const float SPRINT_BRAKE_TIME = 0.4F;
         private const float SPRINT_STAMINA_START_MIN = 5F;
         private const float SPRINT_STAMINA_STOP = 1F;
 
@@ -132,22 +131,18 @@ namespace CraftSharp.Control
                     if (info.Moving && _sprintRequested && info.StaminaLeft > SPRINT_STAMINA_START_MIN)
                     {
                         info.Sprinting = true;
-                        info.SprintBrakeTime = SPRINT_BRAKE_TIME;
                     }
 
                     if (info.Sprinting)
                     {
-                        if ((!inputData.Locomotion.Sprint.IsPressed() || info.StaminaLeft <= SPRINT_STAMINA_STOP))
+                        if (!inputData.Locomotion.Sprint.IsPressed() || info.StaminaLeft <= SPRINT_STAMINA_STOP)
                         {
                             info.Sprinting = false;
                         }
-                        info.SprintBrakeTime = SPRINT_BRAKE_TIME;
                     }
 
-                    var moveSpeed = Mathf.Lerp(info.WalkMode ? ability.WalkSpeed : ability.RunSpeed,
-                        ability.SprintSpeed, Mathf.Max(info.SprintBrakeTime, 0F) / SPRINT_BRAKE_TIME);
+                    var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.WalkMode ? ability.SneakSpeed : ability.WalkSpeed;
                     
-                    info.SprintBrakeTime -= interval;
                     _sprintRequested = false;
                     
                     // Workaround: Slow down when walking downstairs
@@ -166,50 +161,13 @@ namespace CraftSharp.Control
                     
                     // Use target orientation to calculate actual movement direction, taking ground shape into consideration
                     moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
-
-                    // Smooth movement (if accelerating)
-                    if (moveVelocity.sqrMagnitude > currentVelocity.sqrMagnitude)
-                    {
-                        float accFactor;
-                        if (currentVelocity == Vector3.zero)
-                        {
-                            // Accelerate slowly
-                            accFactor = ability.AccSpeed * interval;
-                        }
-                        else
-                        {
-                            var angleDelta = Vector3.Angle(moveVelocity, currentVelocity);
-                            // Accelerate immediately if making a sharp turn, accelerate slowly if not
-                            accFactor = Mathf.Lerp(ability.AccSpeed * interval, (moveVelocity - currentVelocity).magnitude, angleDelta / 180F);
-                        }
-                        
-                        moveVelocity = Vector3.MoveTowards(currentVelocity, moveVelocity, accFactor);
-                    }
                 }
                 else // Idle or braking
                 {
                     // Reset sprinting state
-                    if (info.Sprinting)
-                    {
-                        info.Sprinting = false;
-                        info.SprintBrakeTime = SPRINT_BRAKE_TIME;
-                    }
-
-                    if (info.SprintBrakeTime > 0F)
-                    {
-                        var moveSpeed = Mathf.Lerp(info.WalkMode ? ability.WalkSpeed : ability.RunSpeed,
-                            ability.SprintSpeed, Mathf.Max(info.SprintBrakeTime, 0F) / SPRINT_BRAKE_TIME);
+                    info.Sprinting = false;
+                    moveVelocity = Vector3.zero;
                     
-                        info.SprintBrakeTime -= interval;
-
-                        // Use target orientation to calculate actual movement direction, taking ground shape into consideration
-                        moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
-                    }
-                    else
-                    {
-                        // Smooth deceleration
-                        moveVelocity = Vector3.MoveTowards(currentVelocity, Vector3.zero, ability.DecSpeed * interval);
-                    }
                     _sprintRequested = false;
                 }
 

@@ -94,9 +94,9 @@ namespace CraftSharp.Control
 
                     // Check vertical movement...
                     if (inputData.Locomotion.Ascend.IsPressed())
-                        moveVelocity += ability.WalkSpeed * 3F * motor.CharacterUp;
+                        moveVelocity += ability.SneakSpeed * 3F * motor.CharacterUp;
                     else if (inputData.Locomotion.Descend.IsPressed())
-                        moveVelocity -= ability.WalkSpeed * 3F * motor.CharacterUp;
+                        moveVelocity -= ability.SneakSpeed * 3F * motor.CharacterUp;
 
                     // Flying doesn't have any gravity, which can prevent proper groundcheck
                     // So here we stop flying when getting close enough to the ground
