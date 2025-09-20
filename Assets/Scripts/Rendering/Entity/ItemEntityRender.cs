@@ -34,8 +34,8 @@ namespace CraftSharp.Rendering
                         if (ItemMeshBuilder.BuildItemGameObject(ItemObject, itemStack, DisplayPosition.Ground, false)) // If built object is not empty
                         {
                             var objTransform = ItemObject.transform;
-                            objTransform.localScale = Vector3.one * 2F;
-                            objTransform.localPosition = new(0F, 0.75F, 0F);
+                            objTransform.localScale = Vector3.one;
+                            objTransform.localPosition = new Vector3(0F, 0.75F, 0F);
                         }
                     }
                     else
@@ -43,6 +43,24 @@ namespace CraftSharp.Rendering
                         Debug.LogWarning("Item entity prefab object not assigned!");
                     }
                 }
+            }
+        }
+
+        private void Update()
+        {
+            var client = CornApp.CurrentClient;
+            if (!client) return;
+
+            var cameraTransform = client.CameraController.RenderCamera.transform;
+            
+            Vector3 directionToTarget = transform.position - cameraTransform.position;
+            // Ignore vertical distance
+            directionToTarget.y = 0;
+            
+            if (directionToTarget != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+                VisualTransform.localRotation = Quaternion.AngleAxis(90F, Vector3.up) * targetRotation;
             }
         }
     }
