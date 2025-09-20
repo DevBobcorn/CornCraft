@@ -903,6 +903,12 @@ namespace CraftSharp.Rendering
                 blockEntityRenders.Clear();
                 nearbyBlockEntities.Clear();
             }
+            
+            // Recheck everything
+            foreach (var coord in nearbyChunkCoords)
+            {
+                nearbyChunkCoordsToBeChecked.Add(coord);
+            }
         }
 
         private void MarkDirtyAt(BlockLoc blockLoc)
