@@ -1042,7 +1042,7 @@ namespace CraftSharp.Control
                                 lastHarvestInteractionInfo = null;
                             }
                         }
-                        else if (!block.State.NoSolidMesh) // Start regular digging process
+                        else if (!block.State.NoSolidMesh && instaBreakCooldown <= 0F) // Start regular digging process
                         {
                             StartDiggingProcess(block, TargetBlockLoc.Value, TargetDirection.Value, status);
                         }
