@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CraftSharp.Rendering
 {
@@ -42,6 +43,17 @@ namespace CraftSharp.Rendering
                 // Update old head yaw and reset update timer
                 lastHeadYaw = head!.eulerAngles.y;
                 currentElapsedHeadYawUpdateMilSec = 0.0;
+            };
+
+            // Hide player model when in first-person perspective
+            AimingModeChangeHandler = e =>
+            {
+                MeshRenderer[] renderers = _visualTransform.GetComponentsInChildren<MeshRenderer>(true);
+    
+                foreach (var r in renderers)
+                {
+                    r.shadowCastingMode = e.Aiming ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+                }
             };
         }
 

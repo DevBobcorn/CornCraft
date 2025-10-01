@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1367375308091481784}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.31661338, y: 0.6322626, z: -0.6322626, w: 0.31661338}
   m_LocalPosition: {x: 0.8, y: -0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -92,9 +92,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damping: {x: 0, y: 0, z: 0}
   ShoulderOffset: {x: 0, y: 0, z: 0}
-  VerticalArmLength: 0.4
+  VerticalArmLength: 0.2
   CameraSide: 0.5
-  CameraDistance: -0.3
+  CameraDistance: 0
   AvoidObstacles:
     Enabled: 0
     CollisionFilter:
@@ -119,7 +119,7 @@ MonoBehaviour:
   ReferenceFrame: 0
   RecenterTarget: 0
   PanAxis:
-    Value: 0
+    Value: 126.80002
     Center: 0
     Range: {x: -180, y: 180}
     Wrap: 1
@@ -129,7 +129,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   TiltAxis:
-    Value: 0
+    Value: 90
     Center: 0
     Range: {x: -90, y: 90}
     Wrap: 0
@@ -265,7 +265,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2988304240145284854}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.22015071, y: 0.75641114, z: -0.5296448, w: 0.3144078}
   m_LocalPosition: {x: -1.5256128, y: 3.05159, z: 2.0881348}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -361,7 +361,7 @@ MonoBehaviour:
   ReferenceFrame: 0
   RecenterTarget: 0
   PanAxis:
-    Value: 0
+    Value: 134.85886
     Center: 0
     Range: {x: -180, y: 180}
     Wrap: 1
@@ -371,7 +371,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   TiltAxis:
-    Value: 0
+    Value: 70
     Center: 0
     Range: {x: -70, y: 70}
     Wrap: 0

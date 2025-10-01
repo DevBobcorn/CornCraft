@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+using CraftSharp.Event;
 using CraftSharp.Protocol.Message;
 
 namespace CraftSharp.Rendering
@@ -354,7 +355,7 @@ namespace CraftSharp.Rendering
             // Update position
             transform.position = Vector3.Lerp(lastPosition, Position.Value, (float) (currentElapsedMovementUpdateMilSec / movementUpdateInterval));
 
-            // Update visual velocity
+            // Update visual velocity (for leg animations, etc.)
             var distanceToTarget = Vector3.Distance(transform.position, Position.Value);
             if (distanceToTarget <= 0.01f)
             {
@@ -382,7 +383,9 @@ namespace CraftSharp.Rendering
             return transform;
         }
 
-        protected Transform SetupCameraRef(Vector3 pos)
+        public Action<CameraAimingEvent> AimingModeChangeHandler { get; protected set; }
+
+        private Transform SetupCameraRef(Vector3 pos)
         {
             var cameraRefObj = new GameObject("Camera Ref Obj");
             var cameraRef = cameraRefObj.transform;
