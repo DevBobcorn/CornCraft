@@ -51,33 +51,35 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Entity position
         /// </summary>
-        public readonly TrackedValue<Vector3> Position = new(Vector3.zero);
-        protected Vector3 lastTickPosition = Vector3.zero;
+        public TrackedValue<Vector3> Position { get; private set; } = new(Vector3.zero);
 
-        protected double currentTickStartMilSec = 0F;
+        // 200ms between server location updates
+        protected double movementUpdateInterval = 200;
+        protected Vector3 lastPosition;
+        protected double currentElapsedMovementUpdateMilSec = 0;
+        protected double currentElapsedYawUpdateMilSec = 0;
 
         /// <summary>
         /// Entity velocity received from server
         /// </summary>
-        private Vector3? receivedVelocity = null;
+        private Vector3? receivedVelocity;
+        
+        public string GetDebugText()
+        {
+            return $"{(int) currentElapsedMovementUpdateMilSec} / {(int) movementUpdateInterval} ({(int) (currentElapsedMovementUpdateMilSec / movementUpdateInterval * 100.0)}%)";
+        }
 
         /// <summary>
         /// Entity yaw
         /// </summary>
         public readonly TrackedValue<float> Yaw = new(0F);
         protected float lastYaw = 0F;
-
+        
         /// <summary>
-        /// Entity head pitch
+        /// Entity (head) pitch
         /// </summary>
         public readonly TrackedValue<float> Pitch = new(0F);
         protected float lastPitch = 0F;
-
-        /// <summary>
-        /// Entity head yaw
-        /// </summary>
-        public readonly TrackedValue<float> HeadYaw = new(0F);
-        protected float lastHeadYaw = 0F;
         
         /// <summary>
         /// Used in Item Frame, Falling Block and Fishing Float.
@@ -240,17 +242,22 @@ namespace CraftSharp.Rendering
             Type = source.Type;
 
             Position.Value = CoordConvert.MC2Unity(originOffset, source.Location);
-            lastTickPosition = Position.Value;
+            lastPosition = Position.Value;
             lastYaw = Yaw.Value = source.Yaw;
-            lastHeadYaw = HeadYaw.Value = source.HeadYaw;
             lastPitch = Pitch.Value = source.Pitch;
 
-            Position.OnValueUpdate += (prevVal, newVal) =>
+            Position.OnValueUpdate += (_, _) =>
             {
-                lastTickPosition = prevVal;
-
-                // Reset lerp variable every time we receive a new position
-                currentTickStartMilSec = Time.realtimeSinceStartupAsDouble * 1000D;
+                // Update old position and reset update timer
+                lastPosition = transform.position;
+                currentElapsedMovementUpdateMilSec = 0.0;
+            };
+            
+            Yaw.OnValueUpdate += (_, _) =>
+            {
+                // Update old yaw and reset update timer
+                lastYaw = VisualTransform!.eulerAngles.y;
+                currentElapsedYawUpdateMilSec = 0.0;
             };
 
             ObjectData = source.ObjectData;
@@ -340,65 +347,26 @@ namespace CraftSharp.Rendering
 
         protected virtual void UpdateTransform(float tickMilSec)
         {
-            //var currentTickMilSec = Time.realtimeSinceStartupAsDouble * 1000D - currentTickStartMilSec;
+            // Update elapsed time in current tick
+            currentElapsedMovementUpdateMilSec += Time.unscaledDeltaTime * 1000;
+            currentElapsedYawUpdateMilSec += Time.unscaledDeltaTime * 1000;
 
             // Update position
-            if ((Position.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
+            transform.position = Vector3.Lerp(lastPosition, Position.Value, (float) (currentElapsedMovementUpdateMilSec / movementUpdateInterval));
+
+            // Update visual velocity
+            var distanceToTarget = Vector3.Distance(transform.position, Position.Value);
+            if (distanceToTarget <= 0.01f)
             {
-                transform.position = Position.Value;
-            }
-            else // Smoothly move to current position
-            {
-                transform.position = Vector3.SmoothDamp(transform.position, Position.Value,
-                        ref _visualMovementVelocity, tickMilSec / 1000F);
-
-                /*
-                if (currentTickMilSec >= tickMilSec)
-                {
-                    transform.position = Position.Value;
-                    //lastTickPosition = Position.Value;
-                }
-                else
-                {
-                    transform.position = Vector3.Lerp(lastTickPosition, Position.Value, (float) currentTickMilSec / tickMilSec);
-                }
-                */
-
-                //gameObject.name = $"XXX {(float) currentTickMilSec / tickMilSec:0.000} ({currentTickMilSec:0.00} / {tickMilSec:0.00})";
-            }
-
-            // Update rotation
-            var headYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastHeadYaw, HeadYaw.Value));
-            var bodyYawDelta = Mathf.Abs(Mathf.DeltaAngle(lastYaw, Yaw.Value));
-
-            if (bodyYawDelta > 0.0025F)
-            {
-                lastYaw = Mathf.MoveTowardsAngle(lastYaw, Yaw.Value, Time.deltaTime * 300F);
-                _visualTransform!.eulerAngles = new(0F, lastYaw, 0F);
-            }
-
-            if (headYawDelta > 0.0025F)
-            {
-                lastHeadYaw = Mathf.MoveTowardsAngle(lastHeadYaw, HeadYaw.Value, Time.deltaTime * 150F);
+                _visualMovementVelocity = Vector3.zero;
             }
             else
             {
-                if (_visualMovementVelocity.magnitude < 0.1F)
-                {
-                    Yaw.Value = HeadYaw.Value;
-                }
+                _visualMovementVelocity = (Position.Value - lastPosition) / (float) movementUpdateInterval * 1000;
             }
-            
-            if (Mathf.Abs(Mathf.DeltaAngle(Yaw.Value, HeadYaw.Value)) > 75F)
-            {
-                Yaw.Value = HeadYaw.Value;
-            }
-            
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (lastPitch != Pitch.Value)
-            {
-                lastPitch = Mathf.MoveTowardsAngle(lastPitch, Pitch.Value, Time.deltaTime * 300F);
-            }
+
+            var _visualYaw = Mathf.LerpAngle(_visualTransform!.eulerAngles.y, Yaw.Value, (float)(currentElapsedYawUpdateMilSec / movementUpdateInterval));
+            _visualTransform!.eulerAngles = new Vector3(0F, _visualYaw, 0F);
         }
 
         public virtual Transform SetupCameraRef()
@@ -425,7 +393,7 @@ namespace CraftSharp.Rendering
             return cameraRef;
         }
 
-        public virtual void SetVisualMovementVelocity(Vector3 velocity, Vector3 upDirection)
+        public void SetVisualMovementVelocity(Vector3 velocity)
         {
             _visualMovementVelocity = velocity;
         }

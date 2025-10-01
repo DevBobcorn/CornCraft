@@ -11,21 +11,20 @@ namespace CraftSharp.UI
         private readonly Dictionary<int, FloatingUI> entityFloatingUIs = new();
         public AnimationCurve UIScaleCurve;
 
-        public void AddForEntity(int entityId, EntityRender render)
+        private void AddForEntity(int entityId, EntityRender render)
         {
-            if (render && !entityFloatingUIs.ContainsKey(entityId))
-            {
-                var infoTagPrefab = render.FloatingInfoPrefab;
-                if (!infoTagPrefab) return;
+            if (!render || entityFloatingUIs.ContainsKey(entityId)) return;
+            
+            var infoTagPrefab = render.FloatingInfoPrefab;
+            if (!infoTagPrefab) return;
 
-                // Make a new floating UI here...
-                var fUIObj = Instantiate(infoTagPrefab, render.InfoAnchor, false);
+            // Make a new floating UI here...
+            var fUIObj = Instantiate(infoTagPrefab, render.InfoAnchor, false);
 
-                var fUI = fUIObj.GetComponent<FloatingUI>();
-                fUI.SetInfo(render);
+            var fUI = fUIObj.GetComponent<FloatingUI>();
+            fUI.SetInfo(render);
 
-                entityFloatingUIs.Add(entityId, fUI);
-            }
+            entityFloatingUIs.Add(entityId, fUI);
         }
 
         public void RemoveForEntity(int entityId)
@@ -94,7 +93,7 @@ namespace CraftSharp.UI
                 var scale = UIScaleCurve.Evaluate(dist);
                 // Countervail entity render scale (support uniform scale only)
                 scale *= 1F / target.transform.parent.lossyScale.x;
-                target.localScale = new(scale, scale, 1F);
+                target.localScale = new Vector3(scale, scale, 1F);
             }
 
             if (nullKeyList.Any())

@@ -248,6 +248,15 @@ namespace CraftSharp.Protocol
         /// <param name="dz">Z offset</param>
         /// <param name="onGround">TRUE if on ground</param>
         void OnEntityPosition(int entityId, double dx, double dy, double dz, bool onGround);
+        
+        /// <summary>
+        /// Called when an entity's velocity changed.
+        /// </summary>
+        /// <param name="entityId">Entity Id</param>
+        /// <param name="vx">New x velocity</param>
+        /// <param name="vy">New y velocity</param>
+        /// <param name="vz">New z velocity</param>
+        void OnEntityVelocity(int entityId, double vx, double vy, double vz);
 
         /// <summary>
         /// Called when an entity's yaw or pitch changed.

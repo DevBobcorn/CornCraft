@@ -26,8 +26,15 @@ namespace CraftSharp.UI
 
             if (descriptionText)
             {
-                descriptionText.text = $"<{entityRender.Type.TypeId}>";
+                // descriptionText.text = $"<{entityRender.Type.TypeId}>";
             }
+        }
+
+        private void Update()
+        {
+            if (!entityRender) return;
+
+            descriptionText.text = entityRender.GetDebugText();
         }
 
         public override void Destroy(Action callback)

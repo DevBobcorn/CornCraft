@@ -146,7 +146,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         /// <param name="entityId">Numeral id of the entity to set velocity for</param>
         /// <param name="velocity">New velocity</param>
-        public void SetEntityRenderVelocity(int entityId, float3 velocity)
+        public void SetEntityReceivedVelocity(int entityId, float3 velocity)
         {
             if (entityRenders.TryGetValue(entityId, out var render))
             {
@@ -190,9 +190,10 @@ namespace CraftSharp.Rendering
         /// <param name="headYaw">Byte angle, conversion required</param>
         public void RotateEntityRenderHead(int entityId, byte headYaw)
         {
-            if (entityRenders.TryGetValue(entityId, out var render))
+            if (entityRenders.TryGetValue(entityId, out var render)
+                && render is LivingEntityRender livingEntityRender)
             {
-                render.HeadYaw.Value = EntityData.GetHeadYawFromByte(headYaw);
+                livingEntityRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(headYaw);
             }
         }
 
@@ -311,10 +312,12 @@ namespace CraftSharp.Rendering
             if (!client) // Game is not ready, cancel update
                 return;
 
+            float tickMilSec = client.GetTickMilSec();
+
             foreach (var render in entityRenders.Values)
             {
                 // Call managed update
-                render.ManagedUpdate(client.GetTickMilSec());
+                render.ManagedUpdate(tickMilSec);
 
                 // Update entities around the player
                 float dist = (render.transform.position - client.GetPosition()).sqrMagnitude;

@@ -102,7 +102,8 @@ namespace CraftSharp.Control
             if (renderObj.TryGetComponent(out m_PlayerRender))
             {
                 // Initialize head yaw to look forward
-                m_PlayerRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(127); // i.e. -90F
+                if (m_PlayerRender is LivingEntityRender livingEntityRender)
+                    livingEntityRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(127); // i.e. -90F
                 m_PlayerRender.UUID = entity.UUID;
                 m_PlayerRender.transform.SetParent(transform, false);
 
@@ -126,7 +127,7 @@ namespace CraftSharp.Control
                 OnPlayerUpdate += (velocity, _, _) =>
                 {
                     // Update player render velocity
-                    m_PlayerRender.SetVisualMovementVelocity(velocity, Motor.CharacterUp);
+                    m_PlayerRender.SetVisualMovementVelocity(velocity);
                     // Update render
                     m_PlayerRender.UpdateAnimation(0.05F);
                 };

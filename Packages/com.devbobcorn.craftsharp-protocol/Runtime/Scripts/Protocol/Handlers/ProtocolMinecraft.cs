@@ -2085,6 +2085,22 @@ namespace CraftSharp.Protocol.Handlers
                         handler.OnEntityPosition(entityId, deltaX, deltaY, deltaZ, onGround);
                     }
                     break;
+                case PacketTypesIn.EntityVelocity:
+                    {
+                        var entityId = DataTypes.ReadNextVarInt(packetData);
+
+                        var velocityX = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        var velocityY = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+                        var velocityZ = Convert.ToDouble(DataTypes.ReadNextShort(packetData));
+
+                        // Divide by 8000 to get m/tick, then multiply with 20 tick/s to get m/s
+                        velocityX /= 400;
+                        velocityY /= 400;
+                        velocityZ /= 400;
+
+                        handler.OnEntityVelocity(entityId, velocityX, 0, velocityZ);
+                    }
+                    break;
                 case PacketTypesIn.EntityPositionAndRotation:
                     {
                         var entityId = DataTypes.ReadNextVarInt(packetData);

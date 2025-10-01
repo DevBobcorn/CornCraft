@@ -19,6 +19,7 @@ using CraftSharp.Inventory;
 using CraftSharp.Inventory.Recipe;
 using CraftSharp.Rendering;
 using CraftSharp.Protocol.Session;
+using Unity.Mathematics;
 
 namespace CraftSharp
 {
@@ -2375,17 +2376,17 @@ namespace CraftSharp
         }
 
         /// <summary>
-        /// Called when an entity's head yaw changed.
+        /// Called when an entity's velocity changed.
         /// </summary>
         /// <param name="entityId">Entity Id</param>
-        /// <param name="vX">New x velocity</param>
-        /// <param name="vY">New y velocity</param>
-        /// <param name="vZ">New z velocity</param>
-        public void OnEntityVelocity(int entityId, short vX, short vY, short vZ)
+        /// <param name="vx">New x velocity</param>
+        /// <param name="vy">New y velocity</param>
+        /// <param name="vz">New z velocity</param>
+        public void OnEntityVelocity(int entityId, double vx, double vy, double vz)
         {
             Loom.QueueOnMainThread(() =>
             {
-                EntityRenderManager.SetEntityRenderVelocity(entityId, new(vX / 8000F, vY / 8000F, vZ / 8000F));
+                EntityRenderManager.SetEntityReceivedVelocity(entityId, new float3((float) vx, (float) vy, (float) vz));
             });
         }
 
@@ -2393,7 +2394,7 @@ namespace CraftSharp
         {
             Loom.QueueOnMainThread(() =>
             {
-                EntityRenderManager.TeleportEntityRender(entityId, new(X, Y, Z));
+                EntityRenderManager.TeleportEntityRender(entityId, new Location(X, Y, Z));
             });
         }
 
