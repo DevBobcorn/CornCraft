@@ -12,10 +12,7 @@ using UnityEngine;
 using CraftSharp.Crypto;
 using CraftSharp.Proxy;
 using CraftSharp.Inventory;
-using CraftSharp.Inventory.Recipe;
 using CraftSharp.Protocol.Handlers.PacketPalettes;
-using CraftSharp.Protocol.Handlers.Forge;
-using CraftSharp.Protocol.Handlers.StructuredComponents.Core;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Message;
 using CraftSharp.Protocol.Session;
@@ -37,7 +34,7 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_17_1_Version = 756;
         public const int MC_1_18_1_Version = 757;
         public const int MC_1_18_2_Version = 758;
-        public const int MC_1_19_Version   = 759;
+        public const int MC_1_19_1_Version = 759;
         public const int MC_1_19_2_Version = 760;
         public const int MC_1_19_3_Version = 761;
         public const int MC_1_19_4_Version = 762;
@@ -73,7 +70,6 @@ namespace CraftSharp.Protocol.Handlers
         private LastSeenMessagesCollector lastSeenMessagesCollector;
         private LastSeenMessageList.AcknowledgedMessage? lastReceivedMessage = null;
 
-        private readonly ProtocolForge pForge;
         private readonly ProtocolTerrain pTerrain;
         private readonly IMinecraftComHandler handler;
         private readonly EntityMetadataPalette entityMetadataPalette;
@@ -84,15 +80,14 @@ namespace CraftSharp.Protocol.Handlers
         private Tuple<Thread, CancellationTokenSource>? netReader = null; // Net reader thread
         private readonly RandomNumberGenerator randomGen;
 
-        public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler, ForgeInfo? forgeInfo)
+        public ProtocolMinecraft(TcpClient Client, int protocolVersion, IMinecraftComHandler handler)
         {
             this.socketWrapper = new SocketWrapper(Client);
             this.dataTypes = new MinecraftDataTypes(protocolVersion);
             this.protocolVersion = protocolVersion;
             this.handler = handler;
-            this.pForge = new ProtocolForge(forgeInfo, protocolVersion, dataTypes, this, handler);
             this.pTerrain = new ProtocolTerrain(protocolVersion, dataTypes, handler);
-            this.packetPalette = new PacketTypeHandler(protocolVersion, forgeInfo != null).GetTypeHandler();
+            this.packetPalette = new PacketTypeHandler(protocolVersion).GetTypeHandler();
             this.randomGen = RandomNumberGenerator.Create();
             lastSeenMessagesCollector = protocolVersion >= MC_1_19_3_Version ? new(20) : new(5);
 
@@ -122,7 +117,7 @@ namespace CraftSharp.Protocol.Handlers
                 charTypeRegistry.Register(new ResourceLocation("team_msg_command_outgoing"), 5, ChatParser.MessageType.TEAM_MSG_COMMAND_OUTGOING);
                 charTypeRegistry.Register(new ResourceLocation("emote_command"), 7, ChatParser.MessageType.EMOTE_COMMAND);
             }
-            else if (protocolVersion >= MC_1_19_Version)
+            else if (protocolVersion >= MC_1_19_1_Version)
             {
                 var charTypeRegistry = ChatParser.MessageTypeRegistry;
                 charTypeRegistry.Clear();
@@ -315,12 +310,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             // Login Plugin Request
                             case 0x04:
-                                var messageId = DataTypes.ReadNextVarInt(packetData);
-                                var channel = DataTypes.ReadNextString(packetData);
-                                List<byte> responseData = new();
-                                var understood = pForge.HandleLoginPluginRequest(channel, packetData, ref responseData);
-                                SendLoginPluginResponse(messageId, understood, responseData.ToArray());
-                                return understood;
+                                return true;
                             
                             // Cookie Request
                             case 0x05:
@@ -617,7 +607,7 @@ namespace CraftSharp.Protocol.Handlers
                             string? dimensionTypeName = null;
                             Dictionary<string, object>? dimensionType = null;
                             
-                            if (protocolVersion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_1_Version)
                                 dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                             else
                                 dimensionType = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
@@ -635,7 +625,7 @@ namespace CraftSharp.Protocol.Handlers
                                 World.SetDimensionType(dimensionId);
                                 World.SetDimensionId(dimensionId);
                             }
-                            else if (protocolVersion >= MC_1_19_Version)
+                            else if (protocolVersion >= MC_1_19_1_Version)
                             {
                                 var dimensionTypeId = ResourceLocation.FromString(dimensionTypeName!);
 
@@ -664,7 +654,7 @@ namespace CraftSharp.Protocol.Handlers
                             DataTypes.ReadNextBool(packetData);           // Is Debug - 1.16 and above
                             DataTypes.ReadNextBool(packetData);           // Is Flat - 1.16 and above
 
-                            if (protocolVersion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_1_Version)
                             {
                                 if (DataTypes.ReadNextBool(packetData))       // Has death location
                                 {
@@ -715,7 +705,7 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.SpawnPainting: // Just skip, no need for this
                     return true;
                 case PacketTypesIn.DeclareCommands:
-                    if (protocolVersion >= MC_1_19_Version)
+                    if (protocolVersion >= MC_1_19_1_Version)
                     {
                         DeclareCommands.Read(dataTypes, packetData, protocolVersion);
                         receiveDeclareCommands = true;
@@ -760,7 +750,7 @@ namespace CraftSharp.Protocol.Handlers
 
                             handler.OnTextReceived(new(message, null, true, messageType, senderUUID));
                         }
-                        else if (protocolVersion == MC_1_19_Version) // 1.19
+                        else if (protocolVersion == MC_1_19_1_Version) // 1.19
                         {
                             var signedChat = DataTypes.ReadNextString(packetData);
 
@@ -1174,7 +1164,7 @@ namespace CraftSharp.Protocol.Handlers
                             case >= MC_1_20_6_Version:
                                 dimensionTypeNameRespawn = World.GetDimensionTypeIdByNumId(DataTypes.ReadNextVarInt(packetData)).ToString(); // Dimension Type: Num Id
                                 break;
-                            case >= MC_1_19_Version:
+                            case >= MC_1_19_1_Version:
                                 dimensionTypeNameRespawn = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                                 break;
                             default: // 1.16.2+
@@ -1195,7 +1185,7 @@ namespace CraftSharp.Protocol.Handlers
                             World.SetDimensionType(dimensionId);
                             World.SetDimensionId(dimensionId);
                         }
-                        else if (protocolVersion >= MC_1_19_Version)
+                        else if (protocolVersion >= MC_1_19_1_Version)
                         {
                             var dimensionTypeIdRespawn = ResourceLocation.FromString(dimensionTypeNameRespawn);
 
@@ -1213,7 +1203,7 @@ namespace CraftSharp.Protocol.Handlers
                         if (protocolVersion < MC_1_20_2_Version)
                             DataTypes.ReadNextBool(packetData); // Copy metadata (Data Kept) - 1.16 - 1.20.2
 
-                        if (protocolVersion >= MC_1_19_Version)
+                        if (protocolVersion >= MC_1_19_1_Version)
                         {
                             if (DataTypes.ReadNextBool(packetData))     // Has death location
                             {
@@ -1754,7 +1744,7 @@ namespace CraftSharp.Protocol.Handlers
                                     // 1.19 Additions
                                     long? keyExpiration = null;
                                     byte[]? publicKey = null, signature = null;
-                                    if (protocolVersion >= MC_1_19_Version)
+                                    if (protocolVersion >= MC_1_19_1_Version)
                                     {
                                         if (DataTypes.ReadNextBool(
                                                 packetData)) // Has Sig Data (if true, red the following fields)
@@ -1841,9 +1831,7 @@ namespace CraftSharp.Protocol.Handlers
                 case PacketTypesIn.PluginMessage:
                     {
                         var channel = DataTypes.ReadNextString(packetData);
-                        // Length is unneeded as the whole remaining packetData is the entire payload of the packet.
-                        //handler.OnPluginChannelMessage(channel, packetData.ToArray());
-                        return pForge.HandlePluginMessage(channel, packetData, ref currentDimension);
+                        return true;
                     }
                 case PacketTypesIn.Disconnect:
                     handler.OnConnectionLost(DisconnectReason.InGameKick,
@@ -2037,7 +2025,7 @@ namespace CraftSharp.Protocol.Handlers
                         var hasFactorData = false;
                         Dictionary<string, object>? factorCodec = null;
 
-                        if (protocolVersion is >= MC_1_19_Version and < MC_1_20_6_Version)
+                        if (protocolVersion is >= MC_1_19_1_Version and < MC_1_20_6_Version)
                         {
                             hasFactorData = DataTypes.ReadNextBool(packetData);
                             if (hasFactorData)
@@ -2544,7 +2532,7 @@ namespace CraftSharp.Protocol.Handlers
                     DataTypes.GetVarInt(protocolVersion),
 
                     // Server Address
-                    DataTypes.GetString(pForge.GetServerAddress(handler.GetServerHost())),
+                    DataTypes.GetString(handler.GetServerHost()),
 
                     // Server Port
                     DataTypes.GetUShort((ushort)handler.GetServerPort()),
@@ -2558,7 +2546,7 @@ namespace CraftSharp.Protocol.Handlers
             fullLoginPacket.AddRange(DataTypes.GetString(handler.GetUsername())); // Username
 
             // 1.19 - 1.19.2
-            if (protocolVersion is >= MC_1_19_Version and < MC_1_19_3_Version)
+            if (protocolVersion is >= MC_1_19_1_Version and < MC_1_19_3_Version)
             {
                 if (playerKeyPair == null)
                     fullLoginPacket.AddRange(DataTypes.GetBool(false)); // Has Sig Data
@@ -2649,12 +2637,6 @@ namespace CraftSharp.Protocol.Handlers
                             if (protocolVersion >= MC_1_20_2_Version)
                                 SendPacket(0x03, new List<byte>());
 
-                            if (!pForge.CompleteForgeHandshake())
-                            {
-                                Debug.LogError(Translations.Get("error.forge"));
-                                return false;
-                            }
-
                             StartUpdating();
                             return true; //No need to check session or start encryption
                         }
@@ -2718,7 +2700,7 @@ namespace CraftSharp.Protocol.Handlers
             encryptionResponse.AddRange(DataTypes.GetArray(RSAService.Encrypt(secretKey, false)));     // Shared Secret
             
             // 1.19 - 1.19.2
-            if (protocolVersion is >= MC_1_19_Version and < MC_1_19_3_Version)
+            if (protocolVersion is >= MC_1_19_1_Version and < MC_1_19_3_Version)
             {
                 if (playerKeyPair is null)
                 {
@@ -2769,7 +2751,7 @@ namespace CraftSharp.Protocol.Handlers
                             var uuidReceived = DataTypes.ReadNextUUID(packetData);
                             var userName = DataTypes.ReadNextString(packetData);
                             Tuple<string, string, string>[]? playerProperty = null;
-                            if (protocolVersion >= MC_1_19_Version)
+                            if (protocolVersion >= MC_1_19_1_Version)
                             {
                                 var count = DataTypes.ReadNextVarInt(packetData); // Number Of Properties
                                 playerProperty = new Tuple<string, string, string>[count];
@@ -2795,12 +2777,6 @@ namespace CraftSharp.Protocol.Handlers
                                 SendPacket(0x03, new List<byte>());
 
                             handler.OnLoginSuccess(uuidReceived, userName, playerProperty);
-
-                            if (!pForge.CompleteForgeHandshake())
-                            {
-                                Debug.Log(Translations.Get("error.forge_encrypt"));
-                                return false;
-                            }
 
                             StartUpdating();
                             return true;
@@ -2844,7 +2820,7 @@ namespace CraftSharp.Protocol.Handlers
         /// Ping a Minecraft server to get information about the server
         /// </summary>
         /// <returns>True if ping was successful</returns>
-        public static bool DoPing(string host, int port, ref string versionName, ref int protocol, ref ForgeInfo? forgeInfo)
+        public static bool DoPing(string host, int port, ref string versionName, ref int protocol)
         {
             var tcp = ProxyHandler.NewTcpClient(host, port);
             tcp.ReceiveTimeout = 30000; // 30 seconds
@@ -2889,9 +2865,6 @@ namespace CraftSharp.Protocol.Handlers
                             // Retrieve protocol version number for handling this server
                             if (versionData.Properties.TryGetValue("protocol", out var protocolProperty))
                                 protocol = int.Parse(protocolProperty.StringValue);
-
-                            // Check for forge on the server.
-                            ProtocolForge.ServerInfoCheckForge(jsonData, ref forgeInfo);
 
                             return true;
                         }
@@ -3043,7 +3016,7 @@ namespace CraftSharp.Protocol.Handlers
             try
             {
                 List<Tuple<string, string>>? needSigned = null; // List< Argument Name, Argument Value >
-                if (playerKeyPair != null && isOnlineMode && protocolVersion >= MC_1_19_Version
+                if (playerKeyPair != null && isOnlineMode && protocolVersion >= MC_1_19_1_Version
                     && ProtocolSettings.LoginWithSecureProfile && ProtocolSettings.SignMessageInCommand)
                     needSigned = DeclareCommands.CollectSignArguments(command);
 
@@ -3083,7 +3056,7 @@ namespace CraftSharp.Protocol.Handlers
                             fields.AddRange(DataTypes.GetString(argName)); // Argument name: String
 
                             byte[] sign;
-                            if (protocolVersion == MC_1_19_Version)
+                            if (protocolVersion == MC_1_19_1_Version)
                                 sign = playerKeyPair!.PrivateKey.SignMessage(message, uuid, timeNow, ref salt);
                             else if (protocolVersion == MC_1_19_2_Version)
                                 sign = playerKeyPair!.PrivateKey.SignMessage(message, uuid, timeNow, ref salt,
@@ -3148,7 +3121,7 @@ namespace CraftSharp.Protocol.Handlers
                 return true;
 
             // Process Chat Command - 1.19 and above
-            if (protocolVersion >= MC_1_19_Version && message.StartsWith('/'))
+            if (protocolVersion >= MC_1_19_1_Version && message.StartsWith('/'))
                 return SendChatCommand(message[1..], playerKeyPair);
 
             try
@@ -3158,7 +3131,7 @@ namespace CraftSharp.Protocol.Handlers
                 // 	Message: String (up to 256 chars)
                 fields.AddRange(DataTypes.GetString(message));
 
-                if (protocolVersion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_1_Version)
                 {
                     lock (MessageSigningLock)
                     {
@@ -3193,7 +3166,7 @@ namespace CraftSharp.Protocol.Handlers
                             // Signature Length & Signature: (VarInt) and Byte Array
                             var playerUUID = handler.GetUserUUID();
                             byte[] sign;
-                            if (protocolVersion == MC_1_19_Version) // 1.19.1 or lower
+                            if (protocolVersion == MC_1_19_1_Version) // 1.19.1 or lower
                                 sign = playerKeyPair.PrivateKey.SignMessage(message, playerUUID, timeNow, ref salt);
                             else if (protocolVersion == MC_1_19_2_Version) // 1.19.2
                                 sign = playerKeyPair.PrivateKey.SignMessage(message, playerUUID, timeNow, ref salt,
@@ -3506,7 +3479,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 List<byte> packet = new();
                 packet.AddRange(DataTypes.GetVarInt(hand));
-                if (protocolVersion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_1_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));
                 SendPacket(PacketTypesOut.UseItem, packet);
                 return true;
@@ -3538,7 +3511,7 @@ namespace CraftSharp.Protocol.Handlers
                 packet.AddRange(DataTypes.GetVarInt(status));
                 packet.AddRange(DataTypes.GetBlockLoc(blockLoc));
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(face)));
-                if (protocolVersion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_1_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));
                 SendPacket(PacketTypesOut.PlayerDigging, packet);
                 return true;
@@ -3557,7 +3530,7 @@ namespace CraftSharp.Protocol.Handlers
                 packet.AddRange(DataTypes.GetVarInt(status));
                 packet.AddRange(DataTypes.GetBlockLoc(BlockLoc.Zero)); // Location is always set to 0/0/0
                 packet.AddRange(DataTypes.GetVarInt(dataTypes.GetBlockFace(Direction.Down))); // Face is always set to -Y
-                if (protocolVersion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_1_Version)
                     packet.AddRange(DataTypes.GetVarInt(0)); // Sequence is always set to 0
                 SendPacket(PacketTypesOut.PlayerDigging, packet);
                 return true;
@@ -3579,7 +3552,7 @@ namespace CraftSharp.Protocol.Handlers
                 packet.AddRange(DataTypes.GetFloat(y)); // cursorY
                 packet.AddRange(DataTypes.GetFloat(z)); // cursorZ
                 packet.Add(0); // insideBlock = false;
-                if (protocolVersion >= MC_1_19_Version)
+                if (protocolVersion >= MC_1_19_1_Version)
                     packet.AddRange(DataTypes.GetVarInt(sequenceId));
                 SendPacket(PacketTypesOut.PlayerBlockPlacement, packet);
                 return true;

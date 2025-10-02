@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.Security;
 using CraftSharp.Protocol.Handlers;
-using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.Session;
 using System.Security.Authentication;
 using UnityEngine;
@@ -71,19 +70,19 @@ namespace CraftSharp.Protocol
         /// </summary>
         /// <param name="serverIP">Server IP to ping</param>
         /// <param name="serverPort">Server Port to ping</param>
-        /// <param name="protocolversion">Will contain protocol version, if ping successful</param>
+        /// <param name="versionName">Version name</param>
+        /// <param name="protocolVersion">Will contain protocol version, if ping successful</param>
         /// <returns>TRUE if ping was successful</returns>
-        public static bool GetServerInfo(string serverIP, ushort serverPort, ref string versionName, ref int protocolversion, ref ForgeInfo? forgeInfo)
+        public static bool GetServerInfo(string serverIP, ushort serverPort, ref string versionName, ref int protocolVersion)
         {
             bool success = false;
-            int protocolversionTmp = 0;
-            ForgeInfo? forgeInfoTmp = null;
+            int protocolVersionTmp = 0;
             string versionNameTmp = string.Empty;
             if (AutoTimeout.Perform(() =>
             {
                 try
                 {
-                    if (ProtocolMinecraft.DoPing(serverIP, serverPort, ref versionNameTmp, ref protocolversionTmp, ref forgeInfoTmp))
+                    if (ProtocolMinecraft.DoPing(serverIP, serverPort, ref versionNameTmp, ref protocolVersionTmp))
                     {
                         success = true;
                     }
@@ -96,13 +95,13 @@ namespace CraftSharp.Protocol
                 }
             }, TimeSpan.FromSeconds(10)))
             {
-                if (protocolversion != 0 && protocolversion != protocolversionTmp)
+                if (protocolVersion != 0 && protocolVersion != protocolVersionTmp)
                     Debug.LogError(Translations.Get("error.version_different"));
-                if (protocolversion == 0 && protocolversionTmp <= 1)
+                if (protocolVersion == 0 && protocolVersionTmp <= 1)
                     Debug.LogError(Translations.Get("error.no_version_report"));
-                if (protocolversion == 0)
-                    protocolversion = protocolversionTmp;
-                forgeInfo = forgeInfoTmp;
+                if (protocolVersion == 0)
+                    protocolVersion = protocolVersionTmp;
+                
                 versionName = versionNameTmp;
                 return success;
             }
@@ -136,10 +135,10 @@ namespace CraftSharp.Protocol
         /// <param name="protocolVersion">Protocol version to handle</param>
         /// <param name="handler">Handler with the appropriate callbacks</param>
         /// <returns></returns>
-        public static IMinecraftCom GetProtocolHandler(TcpClient client, int protocolVersion, ForgeInfo forgeInfo, IMinecraftComHandler handler)
+        public static IMinecraftCom GetProtocolHandler(TcpClient client, int protocolVersion, IMinecraftComHandler handler)
         {
             if (IsProtocolSupported(protocolVersion))
-                return new ProtocolMinecraft(client, protocolVersion, handler, forgeInfo);
+                return new ProtocolMinecraft(client, protocolVersion, handler);
             throw new NotSupportedException(Translations.Get("exception.version_unsupported", protocolVersion));
         }
 
@@ -215,26 +214,6 @@ namespace CraftSharp.Protocol
         public static string ProtocolVersion2MCVer(int protocol)
         {
             return ACCECPTED_VERSIONS.GetValueOrDefault(protocol, "unknown");
-        }
-
-        /// <summary>
-        /// Check if we can force-enable Forge support for a Minecraft version without using server Ping
-        /// </summary>
-        /// <param name="protocolVersion">Minecraft protocol version</param>
-        /// <returns>TRUE if we can force-enable Forge support without using server Ping</returns>
-        public static bool ProtocolMayForceForge(int protocol)
-        {
-            return ProtocolForge.ServerMayForceForge(protocol);
-        }
-
-        /// <summary>
-        /// Server Info: Consider Forge to be enabled regardless of server Ping
-        /// </summary>
-        /// <param name="protocolVersion">Minecraft protocol version</param>
-        /// <returns>ForgeInfo item stating that Forge is enabled</returns>
-        public static ForgeInfo ProtocolForceForge(int protocol)
-        {
-            return ProtocolForge.ServerForceForge(protocol);
         }
 
         public enum LoginResult { OtherError, ServiceUnavailable, SSLError, Success, WrongPassword, AccountMigrated, NotPremium, LoginRequired, InvalidToken, InvalidResponse, NullError, UserCancel };

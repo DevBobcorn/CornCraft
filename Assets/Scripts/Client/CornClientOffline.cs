@@ -50,7 +50,7 @@ namespace CraftSharp
 
                 // Start up by self since it's not started from login screen
                 StartClient(new(false, new(), null, "dummy", 
-                    0, DUMMY_PROTOCOL_VERSION, null, "dummy_player"));
+                    0, DUMMY_PROTOCOL_VERSION, "dummy_player"));
             }
 
             // Set up screen control

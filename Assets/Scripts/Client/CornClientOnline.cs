@@ -167,7 +167,7 @@ namespace CraftSharp
                 client.ReceiveTimeout = 30000; // 30 seconds
 
                 // Create handler
-                handler = ProtocolHandler.GetProtocolHandler(client, info.ProtocolVersion, info.ForgeInfo, this);
+                handler = ProtocolHandler.GetProtocolHandler(client, info.ProtocolVersion, this);
 
                 // Start update loop
                 timeoutDetector = Tuple.Create(new Thread(TimeoutDetector), new CancellationTokenSource());
@@ -367,7 +367,7 @@ namespace CraftSharp
                 client.ReceiveTimeout = 30000; // 30 seconds
 
                 // Reinitialize the protocol handler
-                handler = ProtocolHandler.GetProtocolHandler(client, protocolVersion, null, this);
+                handler = ProtocolHandler.GetProtocolHandler(client, protocolVersion, this);
                 Debug.Log($"Connected to {host}:{port}");
 
                 // Retry login process

@@ -10,7 +10,6 @@ using UnityEngine.UI;
 using TMPro;
 
 using CraftSharp.Protocol;
-using CraftSharp.Protocol.Handlers.Forge;
 using CraftSharp.Protocol.ProfileKey;
 using CraftSharp.Protocol.Session;
 using CraftSharp.Rendering;
@@ -128,7 +127,7 @@ namespace CraftSharp.UI
             HideLoginPanel();
             // Store current login info
             loginInfo = new StartLoginInfo(false, session, null, "<local>", 0,
-                    protocolVersion, null, accountLower);
+                    protocolVersion, accountLower);
             StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
         }
 
@@ -290,15 +289,12 @@ namespace CraftSharp.UI
                 Debug.Log(Translations.Get("mcc.retrieve")); // Retrieve server information
                 loadStateInfoText.text = Translations.Get("mcc.retrieve");
                 int protocolVersion = 0;
-                #nullable enable
-                ForgeInfo? forgeInfo = null;
-                #nullable disable
                 string receivedVersionName = string.Empty;
 
                 bool pingResult = false;
                 var pingTask = Task.Run(() => {
                     // ReSharper disable once AccessToModifiedClosure
-                    pingResult = ProtocolHandler.GetServerInfo(host, port, ref receivedVersionName, ref protocolVersion, ref forgeInfo);
+                    pingResult = ProtocolHandler.GetServerInfo(host, port, ref receivedVersionName, ref protocolVersion);
                 });
 
                 while (!pingTask.IsCompleted) yield return null;
@@ -321,7 +317,7 @@ namespace CraftSharp.UI
                         HideLoginPanel();
                         // Store current login info
                         loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
-                                protocolVersion, null, accountLower);
+                                protocolVersion, accountLower);
                         // No need to yield return this coroutine because it's the last step here
                         StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
                     }
@@ -341,7 +337,7 @@ namespace CraftSharp.UI
                             HideLoginPanel();
                             // Store current login info
                             loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
-                                    protocolVersion, null, accountLower);
+                                    protocolVersion, accountLower);
                             // Display a notification
                             var altMcVersion = ProtocolHandler.ProtocolVersion2MCVer(protocolVersion);
                             CornApp.Notify($"Using alternative version {altMcVersion} (protocol v{protocolVersion})", Notification.Type.Warning);

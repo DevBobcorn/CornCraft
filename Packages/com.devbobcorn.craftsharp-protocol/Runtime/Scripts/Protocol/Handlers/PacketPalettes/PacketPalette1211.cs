@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
-    public class PacketPalette121 : PacketTypePalette
+    public class PacketPalette1211 : PacketTypePalette
     {
         private readonly Dictionary<int, PacketTypesIn> typeIn = new()
         {

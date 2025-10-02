@@ -158,11 +158,11 @@ namespace CraftSharp.Protocol.Handlers
                 entityYaw = DataTypes.ReadNextByte(cache); // Yaw
                 entityHeadYaw = entityYaw;
 
-                if (protocolVersion >= ProtocolMinecraft.MC_1_19_Version)
+                if (protocolVersion >= ProtocolMinecraft.MC_1_19_1_Version)
                     entityYaw = DataTypes.ReadNextByte(cache); // Head Yaw
 
                 // Data
-                data = protocolVersion >= ProtocolMinecraft.MC_1_19_Version 
+                data = protocolVersion >= ProtocolMinecraft.MC_1_19_1_Version 
                     ? DataTypes.ReadNextVarInt(cache) : DataTypes.ReadNextInt(cache);
             }
 

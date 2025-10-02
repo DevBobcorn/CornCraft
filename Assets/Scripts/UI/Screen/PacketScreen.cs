@@ -145,7 +145,7 @@ namespace CraftSharp.UI
                 Debug.Log($"Protocol version: {protocolVersion}");
 
                 // Create packet palette for interpreting packets
-                packetPalette = new PacketTypeHandler(protocolVersion, false).GetTypeHandler();
+                packetPalette = new PacketTypeHandler(protocolVersion).GetTypeHandler();
             }
 
             var packetItem = packetItemPool.Get();
