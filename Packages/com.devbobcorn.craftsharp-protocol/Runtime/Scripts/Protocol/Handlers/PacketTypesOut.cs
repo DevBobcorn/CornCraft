@@ -13,11 +13,12 @@
         ChatMessage,                 //
         ChatPreview,                 // Added in 1.19
         ChunkBatchReceived,          // Added in 1.20.2
-        ClickInventory,                 //
-        ClickInventoryButton,           //
+        ClickInventory,              //
+        ClickInventoryButton,        //
+        ClientTickEnd,               // Added in 1.21.2
         ClientSettings,              //
         ClientStatus,                //
-        CloseInventory,                 //
+        CloseInventory,              //
         CraftRecipeRequest,          //
         CreativeInventoryAction,     //
         CookieResponse,              // Added in 1.20.6
@@ -51,6 +52,7 @@
         RecipeBookData,              //
         ResourcePackStatus,          //
         SelectTrade,                 //
+        SelectBundleItem,            // Added in 1.21.2
         SetBeaconEffect,             //
         SetDifficulty,               //
         SetDisplayedRecipe,          // Added in 1.16.2
@@ -69,6 +71,6 @@
         UpdateStructureBlock,        //
         UseItem,                     //
         VehicleMove,                 //
-        InventoryConfirmation,          //
+        InventoryConfirmation,       //
     }
 }

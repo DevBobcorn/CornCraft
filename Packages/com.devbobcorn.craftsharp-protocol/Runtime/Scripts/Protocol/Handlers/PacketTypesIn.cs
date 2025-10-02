@@ -51,10 +51,12 @@
         EntityMovement,             //
         EntityPosition,             //
         EntityPositionAndRotation,  //
+        MoveMinecart,               // Added in 1.21.2
         EntityProperties,           //
         EntityRotation,             //
         EntitySoundEffect,          //
         EntityStatus,               //
+        EntityPositionSync,         // Added in 1.21.2
         EntityTeleport,             //
         EntityVelocity,             //
         Explosion,                  //
@@ -84,6 +86,7 @@
         PlayerListHeaderAndFooter,  //
         PlayerRemove,               // Added in 1.19.3 (Not used)
         PlayerPositionAndLook,      //
+        PlayerRotation,             // Added in 1.21.2
         PluginMessage,              //
         ProfilelessChatMessage,     // Added in 1.19.3
         ProjectilePower,            // Added in 1.20.6
@@ -103,6 +106,7 @@
         SetExperience,              //
         SetPassengers,              //
         SetSlot,                    //
+        SetCursorItem,              // Added in 1.21.2
         SetTickingState,            // Added in 1.20.3
         StepTick,                   // Added in 1.20.3
         SetTitleSubTitle,           //
@@ -132,6 +136,9 @@
         Unknown,                    // For old version packet that have been removed and not used by mcc 
         UnloadChunk,                //
         UnlockRecipes,              //
+        RecipeBookAdd,              // Added in 1.21.2
+        RecipeBookRemove,           // Added in 1.21.2
+        RecipeBookSettings,         // Added in 1.21.2
         UpdateEntityNBT,            // For 1.8 or below
         UpdateHealth,               //
         UpdateLight,                //
