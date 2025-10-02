@@ -3,9 +3,9 @@ using System.Collections.Generic;
 namespace CraftSharp
 {
     /// <summary>
-    /// 1.20.5 - 1.21.4
+    /// 1.21.9
     /// </summary>
-    public class EntityMetadataPalette1205 : EntityMetadataPalette
+    public class EntityMetadataPalette1219 : EntityMetadataPalette
     {
         private readonly Dictionary<int, EntityMetadataType> entityMetadataMappings = new()
         {
@@ -25,21 +25,27 @@ namespace CraftSharp
             { 13, EntityMetadataType.OptionalUUID },
             { 14, EntityMetadataType.BlockState },
             { 15, EntityMetadataType.OptionalBlockState },
-            { 16, EntityMetadataType.Nbt },
-            { 17, EntityMetadataType.Particle },
-            { 18, EntityMetadataType.Particles },
-            { 19, EntityMetadataType.VillagerData },
-            { 20, EntityMetadataType.OptionalVarInt },
-            { 21, EntityMetadataType.Pose },
-            { 22, EntityMetadataType.CatVariant },
+            { 16, EntityMetadataType.Particle },
+            { 17, EntityMetadataType.Particles },
+            { 18, EntityMetadataType.VillagerData },
+            { 19, EntityMetadataType.OptionalVarInt },
+            { 20, EntityMetadataType.Pose },
+            { 21, EntityMetadataType.CatVariant },
+            { 22, EntityMetadataType.CowVariant },
             { 23, EntityMetadataType.WolfVariant },
-            { 24, EntityMetadataType.FrogVariant },
-            { 25, EntityMetadataType.OptionalGlobalPosition },
-            { 26, EntityMetadataType.PaintingVariant },
-            { 27, EntityMetadataType.SnifferState },
-            { 28, EntityMetadataType.ArmadilloState },
-            { 29, EntityMetadataType.Vector3 },
-            { 30, EntityMetadataType.Quaternion }
+            { 24, EntityMetadataType.WolfSoundVariant },
+            { 25, EntityMetadataType.FrogVariant },
+            { 26, EntityMetadataType.PigVariant },
+            { 27, EntityMetadataType.ChickenVariant },
+            { 28, EntityMetadataType.OptionalGlobalPosition },
+            { 29, EntityMetadataType.PaintingVariant },
+            { 30, EntityMetadataType.SnifferState },
+            { 31, EntityMetadataType.ArmadilloState },
+            { 32, EntityMetadataType.CopperGolemState },
+            { 33, EntityMetadataType.WeatheringCopperState },
+            { 34, EntityMetadataType.Vector3 },
+            { 35, EntityMetadataType.Quaternion },
+            { 36, EntityMetadataType.ResolvableProfile }
         };
             
         public override Dictionary<int, EntityMetadataType> GetEntityMetadataMappingsList()

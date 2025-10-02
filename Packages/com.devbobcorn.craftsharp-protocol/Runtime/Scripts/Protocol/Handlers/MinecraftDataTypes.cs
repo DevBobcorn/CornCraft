@@ -244,7 +244,7 @@ namespace CraftSharp.Protocol.Handlers
                     case EntityMetadataType.Boolean: // Boolean
                         value = DataTypes.ReadNextBool(cache);
                         break;
-                    case EntityMetadataType.Rotation: // Rotation (3x floats)
+                    case EntityMetadataType.Rotations: // Rotations (3x floats)
                         value = new Vector3
                         (
                             DataTypes.ReadNextFloat(cache),
@@ -270,10 +270,10 @@ namespace CraftSharp.Protocol.Handlers
                             value = DataTypes.ReadNextUUID(cache);
                         }
                         break;
-                    case EntityMetadataType.BlockId: // BlockID (VarInt)
+                    case EntityMetadataType.BlockState: // BlockID (VarInt)
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
-                    case EntityMetadataType.OptionalBlockId: // Optional BlockID (VarInt)
+                    case EntityMetadataType.OptionalBlockState: // Optional BlockID (VarInt)
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
                     case EntityMetadataType.Nbt: // NBT
