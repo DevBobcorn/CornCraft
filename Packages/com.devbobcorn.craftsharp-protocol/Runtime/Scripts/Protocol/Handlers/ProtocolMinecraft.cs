@@ -49,6 +49,9 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_21_3_Version = 768;
         public const int MC_1_21_4_Version = 769;
         public const int MC_1_21_5_Version = 770;
+        public const int MC_1_21_6_Version = 771;
+        public const int MC_1_21_8_Version = 772;
+        public const int MC_1_21_9_Version = 773;
 
         private int compression_threshold = -1;
         private int autocomplete_transaction_id = 0;
