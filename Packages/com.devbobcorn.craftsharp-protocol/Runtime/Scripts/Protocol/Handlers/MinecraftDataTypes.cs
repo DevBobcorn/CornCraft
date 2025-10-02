@@ -270,10 +270,10 @@ namespace CraftSharp.Protocol.Handlers
                             value = DataTypes.ReadNextUUID(cache);
                         }
                         break;
-                    case EntityMetadataType.BlockState: // BlockID (VarInt)
+                    case EntityMetadataType.BlockState: // BlockState (VarInt)
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
-                    case EntityMetadataType.OptionalBlockState: // Optional BlockID (VarInt)
+                    case EntityMetadataType.OptionalBlockState: // Optional BlockState (VarInt)
                         value = DataTypes.ReadNextVarInt(cache);
                         break;
                     case EntityMetadataType.Nbt: // NBT
@@ -348,6 +348,12 @@ namespace CraftSharp.Protocol.Handlers
                             DataTypes.ReadNextFloat(cache)
                         );
                         break;
+                    case EntityMetadataType.ResolvableProfile: // ResolvableProfile
+                        value = null;
+                        // TODO: Implement for 1.21.9+
+                        // See https://minecraft.wiki/w/Java_Edition_protocol/Entity_metadata#Resolvable_Profile
+                        break;
+
                 }
 
                 data[key] = value;
