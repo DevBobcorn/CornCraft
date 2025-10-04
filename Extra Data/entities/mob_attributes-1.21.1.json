@@ -20,49 +20,76 @@
     "minecraft:player.block_interaction_range": {
         "protocol_id": 6
     },
-    "minecraft:player.entity_interaction_range": {
+    "minecraft:generic.burning_time": {
         "protocol_id": 7
     },
-    "minecraft:generic.fall_damage_multiplier": {
+    "minecraft:generic.explosion_knockback_resistance": {
         "protocol_id": 8
     },
-    "minecraft:generic.flying_speed": {
+    "minecraft:player.entity_interaction_range": {
         "protocol_id": 9
     },
-    "minecraft:generic.follow_range": {
+    "minecraft:generic.fall_damage_multiplier": {
         "protocol_id": 10
     },
-    "minecraft:generic.gravity": {
+    "minecraft:generic.flying_speed": {
         "protocol_id": 11
     },
-    "minecraft:generic.jump_strength": {
+    "minecraft:generic.follow_range": {
         "protocol_id": 12
     },
-    "minecraft:generic.knockback_resistance": {
+    "minecraft:generic.gravity": {
         "protocol_id": 13
     },
-    "minecraft:generic.luck": {
+    "minecraft:generic.jump_strength": {
         "protocol_id": 14
     },
-    "minecraft:generic.max_absorption": {
+    "minecraft:generic.knockback_resistance": {
         "protocol_id": 15
     },
-    "minecraft:generic.max_health": {
+    "minecraft:generic.luck": {
         "protocol_id": 16
     },
-    "minecraft:generic.movement_speed": {
+    "minecraft:generic.max_absorption": {
         "protocol_id": 17
     },
-    "minecraft:generic.safe_fall_distance": {
+    "minecraft:generic.max_health": {
         "protocol_id": 18
     },
-    "minecraft:generic.scale": {
+    "minecraft:player.mining_efficiency": {
         "protocol_id": 19
     },
-    "minecraft:zombie.spawn_reinforcements": {
+    "minecraft:generic.movement_efficiency": {
         "protocol_id": 20
     },
-    "minecraft:generic.step_height": {
+    "minecraft:generic.movement_speed": {
         "protocol_id": 21
+    },
+    "minecraft:generic.oxygen_bonus": {
+        "protocol_id": 22
+    },
+    "minecraft:generic.safe_fall_distance": {
+        "protocol_id": 23
+    },
+    "minecraft:generic.scale": {
+        "protocol_id": 24
+    },
+    "minecraft:player.sneaking_speed": {
+        "protocol_id": 25
+    },
+    "minecraft:zombie.spawn_reinforcements": {
+        "protocol_id": 26
+    },
+    "minecraft:generic.step_height": {
+        "protocol_id": 27
+    },
+    "minecraft:player.submerged_mining_speed": {
+        "protocol_id": 28
+    },
+    "minecraft:player.sweeping_damage_ratio": {
+        "protocol_id": 29
+    },
+    "minecraft:generic.water_movement_efficiency": {
+        "protocol_id": 30
     }
 }

@@ -1,0 +1,98 @@
+{
+    "minecraft:armor": {
+        "protocol_id": 0
+    },
+    "minecraft:armor_toughness": {
+        "protocol_id": 1
+    },
+    "minecraft:attack_damage": {
+        "protocol_id": 2
+    },
+    "minecraft:attack_knockback": {
+        "protocol_id": 3
+    },
+    "minecraft:attack_speed": {
+        "protocol_id": 4
+    },
+    "minecraft:block_break_speed": {
+        "protocol_id": 5
+    },
+    "minecraft:block_interaction_range": {
+        "protocol_id": 6
+    },
+    "minecraft:burning_time": {
+        "protocol_id": 7
+    },
+    "minecraft:explosion_knockback_resistance": {
+        "protocol_id": 8
+    },
+    "minecraft:entity_interaction_range": {
+        "protocol_id": 9
+    },
+    "minecraft:fall_damage_multiplier": {
+        "protocol_id": 10
+    },
+    "minecraft:flying_speed": {
+        "protocol_id": 11
+    },
+    "minecraft:follow_range": {
+        "protocol_id": 12
+    },
+    "minecraft:gravity": {
+        "protocol_id": 13
+    },
+    "minecraft:jump_strength": {
+        "protocol_id": 14
+    },
+    "minecraft:knockback_resistance": {
+        "protocol_id": 15
+    },
+    "minecraft:luck": {
+        "protocol_id": 16
+    },
+    "minecraft:max_absorption": {
+        "protocol_id": 17
+    },
+    "minecraft:max_health": {
+        "protocol_id": 18
+    },
+    "minecraft:mining_efficiency": {
+        "protocol_id": 19
+    },
+    "minecraft:movement_efficiency": {
+        "protocol_id": 20
+    },
+    "minecraft:movement_speed": {
+        "protocol_id": 21
+    },
+    "minecraft:oxygen_bonus": {
+        "protocol_id": 22
+    },
+    "minecraft:safe_fall_distance": {
+        "protocol_id": 23
+    },
+    "minecraft:scale": {
+        "protocol_id": 24
+    },
+    "minecraft:sneaking_speed": {
+        "protocol_id": 25
+    },
+    "minecraft:spawn_reinforcements": {
+        "protocol_id": 26
+    },
+    "minecraft:step_height": {
+        "protocol_id": 27
+    },
+    "minecraft:submerged_mining_speed": {
+        "protocol_id": 28
+    },
+    "minecraft:sweeping_damage_ratio": {
+        "protocol_id": 29
+    },
+    "minecraft:tempt_range": {
+        "protocol_id": 30
+    },
+    "minecraft:water_movement_efficiency": {
+        "protocol_id": 31
+    }
+}
