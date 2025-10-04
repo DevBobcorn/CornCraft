@@ -10,6 +10,7 @@ namespace CraftSharp.Protocol.Handlers
         ResourcePackResponse,
         CookieResponse,
         KnownDataPacks,
+        CustomClickAction,
         
         Unknown
     }

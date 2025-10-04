@@ -19,6 +19,8 @@ namespace CraftSharp.Protocol.Handlers
         StoreCookie,
         Transfer,
         UpdateTags,
+        ClearDialog,
+        ShowDialog,
         
         Unknown
     }

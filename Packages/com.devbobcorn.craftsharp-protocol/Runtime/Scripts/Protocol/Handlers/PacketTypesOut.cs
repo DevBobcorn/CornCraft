@@ -9,6 +9,7 @@
         AdvancementTab,              //
         Animation,                   //
         ChangeInventorySlotState,    // Added in 1.20.3
+        ChangeGameMode,              // Added in 1.21.6
         ChatCommand,                 // Added in 1.19
         ChatMessage,                 //
         ChatPreview,                 // Added in 1.19
@@ -36,10 +37,13 @@
         MessageAcknowledgment,       // Added in 1.19.1 (1.19.2)
         NameItem,                    //
         PickItem,                    //
+        PickItemFromBlock,           // Added in 1.21.4
+        PickItemFromEntity,          // Added in 1.21.4
         PingRequest,                 // Added in 1.20.2
         PlayerAbilities,             //
         PlayerBlockPlacement,        //
         PlayerDigging,               //
+        PlayerLoaded,                // Added in 1.21.4
         PlayerMovement,              //
         PlayerPosition,              //
         PlayerPositionAndRotation,   //
@@ -69,8 +73,11 @@
         UpdateJigsawBlock,           //
         UpdateSign,                  //
         UpdateStructureBlock,        //
+        UpdateTestBlock,             // Added in 1.21.5
+        TestInstanceBlockAction,     // Added in 1.21.5
         UseItem,                     //
         VehicleMove,                 //
         InventoryConfirmation,       //
+        CustomClickAction,           // Added in 1.21.6
     }
 }

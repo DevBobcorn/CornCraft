@@ -105,8 +105,10 @@
         SetDisplayChatPreview,      // Added in 1.19
         SetExperience,              //
         SetPassengers,              //
+        SetPlayerInventorySlot,     // Added in 1.21.2
         SetSlot,                    //
         SetCursorItem,              // Added in 1.21.2
+        TestInstanceBlockStatus,    // Added in 1.21.5
         SetTickingState,            // Added in 1.20.3
         StepTick,                   // Added in 1.20.3
         SetTitleSubTitle,           //
@@ -158,5 +160,8 @@
         WorldBorderSize,            //
         WorldBorderWarningDelay,    //
         WorldBorderWarningReach,    //
+        Waypoint,                   // Added in 1.21.6
+        ClearDialog,                // Added in 1.21.6
+        ShowDialog,                 // Added in 1.21.6
     }
 }

@@ -232,4 +232,4 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
         protected override Dictionary<int, ConfigurationPacketTypesIn> GetConfigurationListIn() => configurationTypesIn!;
         protected override Dictionary<int, ConfigurationPacketTypesOut> GetConfigurationListOut() => configurationTypesOut!;
     }
-    }
+}

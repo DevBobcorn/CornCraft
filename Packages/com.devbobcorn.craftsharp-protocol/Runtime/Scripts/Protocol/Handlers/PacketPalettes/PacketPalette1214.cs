@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace CraftSharp.Protocol.Handlers.PacketPalettes
 {
-    public class PacketPalette1213 : PacketTypePalette
+    public class PacketPalette1214 : PacketTypePalette
     {
         private readonly Dictionary<int, PacketTypesIn> typeIn = new()
         {
@@ -172,35 +172,37 @@ namespace CraftSharp.Protocol.Handlers.PacketPalettes
             { 0x1C, PacketTypesOut.PlayerPosition },              // (Wiki name: Move Player Position)
             { 0x1D, PacketTypesOut.PlayerPositionAndRotation },   // (Wiki name: Set Player Position and Rotation)
             { 0x1E, PacketTypesOut.PlayerRotation },              // (Wiki name: Set Player Rotation)
-            { 0x1F, PacketTypesOut.PlayerMovement },              // (Wiki name: Set Player On Ground)
+            { 0x1F, PacketTypesOut.PlayerMovement },              // (Wiki name: Set Player Movement Flags)
             { 0x20, PacketTypesOut.VehicleMove },                 // (Wiki name: Move Vehicle (serverbound))
             { 0x21, PacketTypesOut.SteerBoat },                   // (Wiki name: Paddle Boat)
-            { 0x22, PacketTypesOut.PickItem },                    //
-            { 0x23, PacketTypesOut.PingRequest },                 // Added in 1.20.2 
-            { 0x24, PacketTypesOut.CraftRecipeRequest },          // (Wiki name: Place recipe)
-            { 0x25, PacketTypesOut.PlayerAbilities },             //
-            { 0x26, PacketTypesOut.PlayerDigging },               // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Player Action) 
-            { 0x27, PacketTypesOut.EntityAction },                // (Wiki name: Player Command)
-            { 0x28, PacketTypesOut.SteerVehicle },                // (Wiki name: Player Input)
-            { 0x29, PacketTypesOut.Pong },                        // (Wiki name: Pong (play))
-            { 0x2A, PacketTypesOut.SetDisplayedRecipe },          // (Wiki name: Recipe Book Change Settings)
-            { 0x2B, PacketTypesOut.SetRecipeBookState },          // (Wiki name: Recipe Book Seen Recipe)
-            { 0x2C, PacketTypesOut.NameItem },                    // (Wiki name: Rename Item)
-            { 0x2D, PacketTypesOut.ResourcePackStatus },          // (Wiki name: Resource Pack (serverbound))
-            { 0x2E, PacketTypesOut.AdvancementTab },              // (Wiki name: Seen Advancements)
-            { 0x2F, PacketTypesOut.SelectTrade },                 //
-            { 0x30, PacketTypesOut.SetBeaconEffect },             // Changed in 1.19 (No need to be implemented yet)
-            { 0x31, PacketTypesOut.HeldItemChange },              // (Wiki name: Set Carried Item (serverbound))
-            { 0x32, PacketTypesOut.UpdateCommandBlock },          // (Wiki name: Program Command Block)
-            { 0x33, PacketTypesOut.UpdateCommandBlockMinecart },  // (Wiki name: Program Command Block Minecart)
-            { 0x34, PacketTypesOut.CreativeInventoryAction },     // (Wiki name: Set Creative Mode Slot)
-            { 0x35, PacketTypesOut.UpdateJigsawBlock },           // (Wiki name: Program Jigsaw Block)
-            { 0x36, PacketTypesOut.UpdateStructureBlock },        // (Wiki name: Program Structure Block)
-            { 0x37, PacketTypesOut.UpdateSign },                  // (Wiki name: Update Sign)
-            { 0x38, PacketTypesOut.Animation },                   // (Wiki name: Swing Arm)
-            { 0x39, PacketTypesOut.Spectate },                    // (Wiki name: Teleport To Entity)
-            { 0x3A, PacketTypesOut.PlayerBlockPlacement },        // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Use Item On) 
-            { 0x3B, PacketTypesOut.UseItem },                     // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Use Item) 
+            { 0x22, PacketTypesOut.PickItemFromBlock },           // Added in 1.21.4
+            { 0x23, PacketTypesOut.PickItemFromEntity },          // Added in 1.21.4
+            { 0x24, PacketTypesOut.PingRequest },                 // Added in 1.20.2 
+            { 0x25, PacketTypesOut.CraftRecipeRequest },          // (Wiki name: Place recipe)
+            { 0x26, PacketTypesOut.PlayerAbilities },             //
+            { 0x27, PacketTypesOut.PlayerDigging },               // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Player Action) 
+            { 0x28, PacketTypesOut.EntityAction },                // (Wiki name: Player Command)
+            { 0x29, PacketTypesOut.SteerVehicle },                // (Wiki name: Player Input)
+            { 0x2A, PacketTypesOut.PlayerLoaded },                // Added in 1.21.4
+            { 0x2B, PacketTypesOut.Pong },                        // (Wiki name: Pong (play))
+            { 0x2C, PacketTypesOut.SetDisplayedRecipe },          // (Wiki name: Recipe Book Change Settings)
+            { 0x2D, PacketTypesOut.SetRecipeBookState },          // (Wiki name: Recipe Book Seen Recipe)
+            { 0x2E, PacketTypesOut.NameItem },                    // (Wiki name: Rename Item)
+            { 0x2F, PacketTypesOut.ResourcePackStatus },          // (Wiki name: Resource Pack (serverbound))
+            { 0x30, PacketTypesOut.AdvancementTab },              // (Wiki name: Seen Advancements)
+            { 0x31, PacketTypesOut.SelectTrade },                 //
+            { 0x32, PacketTypesOut.SetBeaconEffect },             // Changed in 1.19 (No need to be implemented yet)
+            { 0x33, PacketTypesOut.HeldItemChange },              // (Wiki name: Set Carried Item (serverbound))
+            { 0x34, PacketTypesOut.UpdateCommandBlock },          // (Wiki name: Program Command Block)
+            { 0x35, PacketTypesOut.UpdateCommandBlockMinecart },  // (Wiki name: Program Command Block Minecart)
+            { 0x36, PacketTypesOut.CreativeInventoryAction },     // (Wiki name: Set Creative Mode Slot)
+            { 0x37, PacketTypesOut.UpdateJigsawBlock },           // (Wiki name: Program Jigsaw Block)
+            { 0x38, PacketTypesOut.UpdateStructureBlock },        // (Wiki name: Program Structure Block)
+            { 0x39, PacketTypesOut.UpdateSign },                  // (Wiki name: Update Sign)
+            { 0x3A, PacketTypesOut.Animation },                   // (Wiki name: Swing Arm)
+            { 0x3B, PacketTypesOut.Spectate },                    // (Wiki name: Teleport To Entity)
+            { 0x3C, PacketTypesOut.PlayerBlockPlacement },        // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Use Item On) 
+            { 0x3D, PacketTypesOut.UseItem },                     // Changed in 1.19 (Added a "Sequence" field) (Wiki name: Use Item) 
         };
 
         private readonly Dictionary<int, ConfigurationPacketTypesIn> configurationTypesIn = new()
