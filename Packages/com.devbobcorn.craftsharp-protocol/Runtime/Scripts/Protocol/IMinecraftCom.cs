@@ -79,8 +79,9 @@ namespace CraftSharp.Protocol
         /// <param name="chatColors">Show chat colors</param>
         /// <param name="skinParts">Show skin layers</param>
         /// <param name="mainHand">1.9+ main hand</param>
+        /// <param name="particleStatus">1.21.2+ particle status. 0: all, 1: decreased, 2: minimal </param>
         /// <returns>True if client settings were successfully sent</returns>
-        bool SendClientSettings(string language, byte viewDistance, byte difficulty, byte chatMode, bool chatColors, byte skinParts, byte mainHand);
+        bool SendClientSettings(string language, byte viewDistance, byte difficulty, byte chatMode, bool chatColors, byte skinParts, byte mainHand, byte particleStatus);
 
         /// <summary>
         /// Send a location update telling that we moved to that location

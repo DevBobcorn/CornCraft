@@ -115,17 +115,17 @@ namespace CraftSharp.Protocol
 
         public static bool IsProtocolSupported(int protocol)
         {
-            return ACCECPTED_VERSIONS.ContainsKey(protocol);
+            return ACCEPTED_VERSIONS.ContainsKey(protocol);
         }
 
         public static int GetMinSupported()
         {
-            return ACCECPTED_VERSIONS.Min(x => x.Key);
+            return ACCEPTED_VERSIONS.Min(x => x.Key);
         }
 
         public static int GetMaxSupported()
         {
-            return ACCECPTED_VERSIONS.Max(x => x.Key);
+            return ACCEPTED_VERSIONS.Max(x => x.Key);
         }
 
         /// <summary>
@@ -142,50 +142,7 @@ namespace CraftSharp.Protocol
             throw new NotSupportedException(Translations.Get("exception.version_unsupported", protocolVersion));
         }
 
-        /// <summary>
-        /// Convert a human-readable Minecraft version number to network protocol version number
-        /// </summary>
-        /// <param name="mcVersion">The Minecraft version number</param>
-        /// <returns>The protocol version number or 0 if could not determine protocol version: error, unknown, not supported</returns>
-        public static int MCVer2ProtocolVersion(string mcVersion)
-        {
-            if (mcVersion.Contains('.'))
-            {
-                return mcVersion.Split(' ')[0].Trim() switch
-                {
-                    "1.16.2" => 751,
-                    "1.16.3" => 753,
-                    "1.16.4" or "1.16.5" => 754,
-                    "1.17" => 755,
-                    "1.17.1" => 756,
-                    "1.18" or "1.18.1" => 757,
-                    "1.18.2" => 758,
-                    "1.19" => 759,
-                    "1.19.1" or "1.19.2" => 760,
-                    "1.19.3" => 761,
-                    "1.19.4" => 762,
-                    "1.20" or "1.20.1" => 763,
-                    "1.20.2" => 764,
-                    "1.20.3" or "1.20.4" => 765,
-                    "1.20.5" or "1.20.6" => 766,
-                    "1.21" or "1.21.1" => 767,
-                    _ => 0,
-                };
-            }
-            else
-            {
-                try
-                {
-                    return int.Parse(mcVersion);
-                }
-                catch
-                {
-                    return 0;
-                }
-            }
-        }
-
-        private static readonly Dictionary<int, string> ACCECPTED_VERSIONS = new()
+        private static readonly Dictionary<int, string> ACCEPTED_VERSIONS = new()
         {
                 [751] = "1.16.2",
                 [753] = "1.16.3",
@@ -202,7 +159,8 @@ namespace CraftSharp.Protocol
                 [764] = "1.20.2",
                 [765] = "1.20.3",
                 [766] = "1.20.5",
-                [767] = "1.21"
+                [767] = "1.21",
+                [768] = "1.21.2"
         };
 
         /// <summary>
@@ -213,7 +171,7 @@ namespace CraftSharp.Protocol
         /// <returns>The 1.X.X version number, or unknown if could not determine protocol version</returns>
         public static string ProtocolVersion2MCVer(int protocol)
         {
-            return ACCECPTED_VERSIONS.GetValueOrDefault(protocol, "unknown");
+            return ACCEPTED_VERSIONS.GetValueOrDefault(protocol, "unknown");
         }
 
         public enum LoginResult { OtherError, ServiceUnavailable, SSLError, Success, WrongPassword, AccountMigrated, NotPremium, LoginRequired, InvalidToken, InvalidResponse, NullError, UserCancel };

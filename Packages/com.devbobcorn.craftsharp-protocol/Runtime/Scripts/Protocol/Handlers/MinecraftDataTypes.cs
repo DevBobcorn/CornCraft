@@ -585,6 +585,7 @@ namespace CraftSharp.Protocol.Handlers
             {
                 RecipeExtraDataType.CraftingShaped        => ReadCraftingShapedRecipe(cache, itemPalette),
                 RecipeExtraDataType.CraftingShapeless     => ReadCraftingShapelessRecipe(cache, itemPalette),
+                RecipeExtraDataType.CraftingTransmute     => ReadCraftingTransmuteRecipe(cache),
                 RecipeExtraDataType.Cooking               => ReadCookingRecipe(cache, itemPalette),
                 RecipeExtraDataType.Stonecutting          => ReadStonecuttingRecipe(cache, itemPalette),
                 RecipeExtraDataType.Smithing              => ReadLegacySmithingRecipe(cache, itemPalette),
@@ -664,6 +665,12 @@ namespace CraftSharp.Protocol.Handlers
             return new CraftingSpecialExtraData(category);
         }
 
+        private CraftingTransmuteExtraData ReadCraftingTransmuteRecipe(Queue<byte> cache)
+        {
+            // TODO: Implement 1.21.2+ recipe reading
+            return new CraftingTransmuteExtraData();
+        }
+
         private CookingExtraData ReadCookingRecipe(Queue<byte> cache, ItemPalette itemPalette)
         {
             var group = DataTypes.ReadNextString(cache);
@@ -714,7 +721,7 @@ namespace CraftSharp.Protocol.Handlers
             
             return new SmithingTrimExtraData(template, @base, addition);
         }
-        
+
         /// <summary>
         /// Read a single villager trade from a cache of bytes and remove it from the cache
         /// </summary>

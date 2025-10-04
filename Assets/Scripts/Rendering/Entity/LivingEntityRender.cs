@@ -1,3 +1,4 @@
+using CraftSharp.Event;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -19,6 +20,18 @@ namespace CraftSharp.Rendering
         public override Transform GetAimingRef()
         {
             return head;
+        }
+
+        public override void HandleAimingModeChange(CameraAimingEvent e)
+        {
+            if (!_visualTransform) return;
+            
+            MeshRenderer[] renderers = _visualTransform.GetComponentsInChildren<MeshRenderer>(true);
+    
+            foreach (var r in renderers)
+            {
+                r.shadowCastingMode = e.Aiming ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
+            }
         }
 
         public override void Initialize(EntityData source, Vector3Int originOffset)
@@ -43,17 +56,6 @@ namespace CraftSharp.Rendering
                 // Update old head yaw and reset update timer
                 lastHeadYaw = head!.eulerAngles.y;
                 currentElapsedHeadYawUpdateMilSec = 0.0;
-            };
-
-            // Hide player model when in first-person perspective
-            AimingModeChangeHandler = e =>
-            {
-                MeshRenderer[] renderers = _visualTransform.GetComponentsInChildren<MeshRenderer>(true);
-    
-                foreach (var r in renderers)
-                {
-                    r.shadowCastingMode = e.Aiming ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
-                }
             };
         }
 

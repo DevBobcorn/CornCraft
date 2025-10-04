@@ -1711,7 +1711,8 @@ namespace CraftSharp
                     ProtocolSettings.MCSettings.ChatMode,
                     ProtocolSettings.MCSettings.ChatColors,
                     ProtocolSettings.MCSettings.Skin_All,
-                    ProtocolSettings.MCSettings.MainHand);
+                    ProtocolSettings.MCSettings.MainHand,
+                    ProtocolSettings.MCSettings.ParticleStatus);
 
             if (protocolVersion >= ProtocolMinecraft.MC_1_19_3_Version
                 && playerKeyPair != null && isOnlineMode)

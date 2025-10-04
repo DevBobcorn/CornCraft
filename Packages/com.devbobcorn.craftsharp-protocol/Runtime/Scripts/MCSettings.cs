@@ -31,5 +31,7 @@ namespace CraftSharp
                 );
             }
         }
+        // 0: all, 1: decreased, 2: minimal
+        public byte ParticleStatus = 0;
     }
 }

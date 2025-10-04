@@ -383,7 +383,10 @@ namespace CraftSharp.Rendering
             return transform;
         }
 
-        public Action<CameraAimingEvent> AimingModeChangeHandler { get; protected set; }
+        public virtual void HandleAimingModeChange(CameraAimingEvent e)
+        {
+            
+        }
 
         private Transform SetupCameraRef(Vector3 pos)
         {

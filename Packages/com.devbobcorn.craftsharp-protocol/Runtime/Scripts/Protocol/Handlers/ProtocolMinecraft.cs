@@ -55,7 +55,6 @@ namespace CraftSharp.Protocol.Handlers
         private readonly Dictionary<int, short> inventoryActions = new();
         private CurrentState currentState = CurrentState.Login;
         private readonly int protocolVersion;
-        private int currentDimension;
         private bool isOnlineMode;
         private readonly BlockingCollection<Tuple<int, Queue<byte>>> packetQueue = new();
         private float LastYaw, LastPitch;
@@ -611,8 +610,6 @@ namespace CraftSharp.Protocol.Handlers
                                 dimensionTypeName = DataTypes.ReadNextString(packetData); // Dimension Type: Identifier
                             else
                                 dimensionType = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
-
-                            currentDimension = 0;
 
                             string dimensionName = DataTypes.ReadNextString(packetData); // Dimension Id (World Id) - 1.16 and above
                             var dimensionId = ResourceLocation.FromString(dimensionName);
@@ -1171,8 +1168,6 @@ namespace CraftSharp.Protocol.Handlers
                                 dimensionTypeRespawn = DataTypes.ReadNextNbt(packetData, dataTypes.UseAnonymousNBT); // Dimension Type: NBT Tag Compound
                                 break;
                         }
-                            
-                        currentDimension = 0;
 
                         var dimensionName = DataTypes.ReadNextString(packetData); // Dimension Name (World Name) - 1.16 and above
                         var dimensionId = ResourceLocation.FromString(dimensionName);
@@ -3299,8 +3294,9 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="chatColors">Show chat colors</param>
         /// <param name="skinParts">Show skin layers</param>
         /// <param name="mainHand">1.9+ main hand</param>
+        /// <param name="particleStatus">1.21.2+ particle status. 0: all, 1: decreased, 2: minimal </param>
         /// <returns>True if client settings were successfully sent</returns>
-        public bool SendClientSettings(string language, byte viewDistance, byte difficulty, byte chatMode, bool chatColors, byte skinParts, byte mainHand)
+        public bool SendClientSettings(string language, byte viewDistance, byte difficulty, byte chatMode, bool chatColors, byte skinParts, byte mainHand, byte particleStatus)
         {
             try
             {
@@ -3319,6 +3315,8 @@ namespace CraftSharp.Protocol.Handlers
                 }
                 if (protocolVersion >= MC_1_18_1_Version)
                     fields.Add(1); // 1.18 and above - Allow server listings
+                if (protocolVersion >= MC_1_21_3_Version)
+                    fields.AddRange(DataTypes.GetVarInt(particleStatus)); // 1.21.2 and above - Particle status
                 SendPacket(PacketTypesOut.ClientSettings, fields);
             }
             catch (SocketException) { }

@@ -92,7 +92,7 @@ namespace CraftSharp.Control
             if (prevRender)
             {
                 // Unregister previous aiming mode change handler
-                EventManager.Instance.Unregister(prevRender.AimingModeChangeHandler);
+                EventManager.Instance.Unregister<CameraAimingEvent>(prevRender.HandleAimingModeChange);
                 
                 // Unload and then destroy previous render object, if present
                 prevRender.Unload();
@@ -146,10 +146,10 @@ namespace CraftSharp.Control
                 {
                     // Create a dummy aiming mode change event
                     var aimingModeEvent = new CameraAimingEvent(m_CameraController.IsAimingOrLocked);
-                    m_PlayerRender.AimingModeChangeHandler.Invoke(aimingModeEvent);
+                    m_PlayerRender.HandleAimingModeChange(aimingModeEvent);
                 }
                 
-                EventManager.Instance.Register(m_PlayerRender.AimingModeChangeHandler);
+                EventManager.Instance.Register<CameraAimingEvent>(m_PlayerRender.HandleAimingModeChange);
             }
             else
             {
