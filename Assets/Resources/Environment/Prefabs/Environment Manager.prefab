@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4209606522294189099}
   m_Layer: 0
-  m_Name: Sun Transform
+  m_Name: Sun Pitch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24,13 +24,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 117662396050898258}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 335060118807926362}
-  m_Father: {fileID: 6986690481205669468}
+  m_Father: {fileID: 2950776790232733973}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1 &1360069255651483902
 GameObject:
@@ -60,7 +60,7 @@ Transform:
   m_GameObject: {fileID: 1360069255651483902}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 3.1, z: 0}
   m_LocalScale: {x: 999, y: 999, z: 999}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -139,15 +139,15 @@ MonoBehaviour:
   renderMode: 10
   categoryScene: 1
   mainCamera: {fileID: 0}
-  mainDirectional: {fileID: 0}
+  mainDirectional: {fileID: 1978168991097772859}
   categoryMode: 1
-  fogMode: 10
+  fogMode: 20
   messagePreset: 0
   messageTimeOfDay: 0
   presetMaterial: {fileID: 0}
-  presetDay: {fileID: 0}
-  presetNight: {fileID: 0}
-  timeOfDay: 0
+  presetDay: {fileID: 2100000, guid: 773ff7080a742a14b84621328e5d7bd1, type: 2}
+  presetNight: {fileID: 2100000, guid: 2c3933c25ad2a4747bfcd4d5db205aa7, type: 2}
+  timeOfDay: 1
   categoryFog: 1
   fogIntensity: 1
   fogAxisMode: 1
@@ -217,13 +217,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2174527360863371361}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.5, z: 0, w: 0.8660254}
+  m_LocalRotation: {x: 0, y: -0.258819, z: 0, w: 0.9659259}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4209606522294189099}
-  m_LocalEulerAnglesHint: {x: 0, y: 60, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -30, z: 0}
 --- !u!108 &1978168991097772859
 Light:
   m_ObjectHideFlags: 0
@@ -318,6 +318,38 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &6683888785448276510
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2950776790232733973}
+  m_Layer: 0
+  m_Name: Sun Yaw
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2950776790232733973
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6683888785448276510}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4209606522294189099}
+  m_Father: {fileID: 6986690481205669468}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7676391819571368479
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,7 +360,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6986690481205669468}
   - component: {fileID: 4680534492281049065}
-  - component: {fileID: 8248344031915582242}
   m_Layer: 0
   m_Name: Environment Manager
   m_TagString: Untagged
@@ -349,7 +380,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4209606522294189099}
+  - {fileID: 2950776790232733973}
   - {fileID: 7073678620302902644}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -392,17 +423,17 @@ MonoBehaviour:
       time: 0.35
       value: 2.5
       inSlope: 2.0686202
-      outSlope: 2.0686202
-      tangentMode: 0
+      outSlope: Infinity
+      tangentMode: 97
       weightedMode: 0
       inWeight: 0.19287598
       outWeight: 0.10469149
     - serializedVersion: 3
       time: 0.65
       value: 2.5
-      inSlope: -2.059314
+      inSlope: Infinity
       outSlope: -2.059314
-      tangentMode: 0
+      tangentMode: 7
       weightedMode: 0
       inWeight: 0.107587785
       outWeight: 0.33333334
@@ -427,62 +458,62 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  skyboxExposure:
+  fogBlendFactor:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.5
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
+      value: 1
+      inSlope: -0.13003732
+      outSlope: Infinity
+      tangentMode: 97
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.33333334
+      outWeight: 0.9768162
     - serializedVersion: 3
-      time: 0.25
-      value: 0.5
+      time: 0.2
+      value: 1
       inSlope: Infinity
-      outSlope: 2
+      outSlope: -0.72324026
       tangentMode: 7
       weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
+      inWeight: 0.39854276
+      outWeight: 0.9994686
     - serializedVersion: 3
-      time: 0.35
-      value: 4
-      inSlope: 0.012275581
-      outSlope: 0.012275581
-      tangentMode: 0
+      time: 0.25
+      value: 0
+      inSlope: 0.076203614
+      outSlope: Infinity
+      tangentMode: 97
       weightedMode: 0
-      inWeight: 0.19287598
-      outWeight: 0.044929985
-    - serializedVersion: 3
-      time: 0.65
-      value: 4
-      inSlope: 0.016610693
-      outSlope: 0.016610693
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.06679078
-      outWeight: 0.33333334
+      inWeight: 0.42807236
+      outWeight: 0.09576169
     - serializedVersion: 3
       time: 0.75
-      value: 0.5
-      inSlope: -17.499996
-      outSlope: -17.499996
-      tangentMode: 34
+      value: 0
+      inSlope: Infinity
+      outSlope: -0.052267138
+      tangentMode: 7
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0.08896281
+      outWeight: 0.30377838
+    - serializedVersion: 3
+      time: 0.8
+      value: 1
+      inSlope: 0.51111203
+      outSlope: Infinity
+      tangentMode: 97
+      weightedMode: 0
+      inWeight: 0.7591352
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 0.5
+      value: 1
       inSlope: Infinity
-      outSlope: 0
+      outSlope: 1.7141209
       tangentMode: 7
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0.6503854
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -490,16 +521,3 @@ MonoBehaviour:
   heightFog: {fileID: 62462049458115584}
   startTime: 8000
   updateEnvLighting: 0
---- !u!114 &8248344031915582242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7676391819571368479}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6a148fca9ac24a90b29a417c2757430, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mFogColor: {r: 1.2646849, g: 1.6930001, b: 1.8490566, a: 1}

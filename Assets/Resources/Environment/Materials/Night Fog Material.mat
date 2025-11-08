@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Height Fog Night
+  m_Name: Night Fog Material
   m_Shader: {fileID: 4800000, guid: a3a3bc8785681554d9558e2ea68f100e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -20,7 +20,8 @@ Material:
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - MOTIONVECTORS
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -83,6 +84,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AddPrecomputedVelocity: 0
     - _AdvancedCat: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -108,12 +110,12 @@ Material:
     - _FogCameraMode: 0
     - _FogCat: 1
     - _FogColorDuo: 0
-    - _FogDistanceEnd: 300
-    - _FogDistanceFalloff: 4
+    - _FogDistanceEnd: 100
+    - _FogDistanceFalloff: 1
     - _FogDistanceStart: 0
-    - _FogHeightEnd: 564
+    - _FogHeightEnd: 100
     - _FogHeightFalloff: 1
-    - _FogHeightStart: 54
+    - _FogHeightStart: 0
     - _FogIntensity: 1
     - _FogLayersMode: 0
     - _GlossMapScale: 0
@@ -127,7 +129,7 @@ Material:
     - _NoiseDistanceEnd: 200
     - _NoiseIntensity: 1
     - _NoiseMax: 1
-    - _NoiseMin: 1
+    - _NoiseMin: 0
     - _NoiseModeBlend: 1
     - _NoiseScale: 30
     - _OcclusionStrength: 1
@@ -135,10 +137,10 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _SkyboxCat: 1
-    - _SkyboxFogBottom: 0.5
-    - _SkyboxFogFalloff: 5
+    - _SkyboxFogBottom: 0
+    - _SkyboxFogFalloff: 1
     - _SkyboxFogFill: 0
-    - _SkyboxFogHeight: 2
+    - _SkyboxFogHeight: 1
     - _SkyboxFogIntensity: 1
     - _SkyboxFogOffset: 0
     - _Smoothness: 0.5
@@ -148,21 +150,22 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _WorkflowMode: 1
+    - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DirectionalColor: {r: 0.372686, g: 0.56111044, b: 0.6320754, a: 1}
-    - _DirectionalDir: {r: 0.46816084, g: 0.35114282, b: 0.8108786, a: 0}
+    - _DirectionalColor: {r: 0.021851175, g: 0.045633655, b: 0.11698109, a: 1}
+    - _DirectionalDir: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogAxisOption: {r: 0, g: 1, b: 0, a: 0}
-    - _FogColorEnd: {r: 0.2746084, g: 0.42463034, b: 0.4811321, a: 1}
-    - _FogColorStart: {r: 0.07529369, g: 0.12634479, b: 0.16981131, a: 1}
+    - _FogColorEnd: {r: 0.28180647, g: 0.44822308, b: 0.6146397, a: 1}
+    - _FogColorStart: {r: 0.051669594, g: 0.1371555, b: 0.22264141, a: 1}
     - _NoiseSpeed: {r: 0.5, g: 0, b: 0.5, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &6562548357033511541
+--- !u!114 &6925946009846743422
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -173,5 +176,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10

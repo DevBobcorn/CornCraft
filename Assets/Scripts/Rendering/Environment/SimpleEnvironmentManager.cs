@@ -12,10 +12,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private Transform sunTransform;
         [SerializeField] private Light sunLight;
         [SerializeField] private AnimationCurve lightIntensity;
-
-        private Material skyboxMaterial;
-        [SerializeField] private AnimationCurve skyboxExposure;
-        
+        [SerializeField] private AnimationCurve fogBlendFactor;
         [SerializeField] private AtmosphericHeightFog.HeightFogGlobal heightFog;
 
         [SerializeField] private long startTime;
@@ -113,8 +110,6 @@ namespace CraftSharp.Rendering
         {
             var normalizedTOD = (ticks + 6000) % 24000 / 24000F;
 
-            heightFog.timeOfDay = normalizedTOD;
-
             // Update directional light
             // 00:00 - 0.00 - 270
             // 06:00 - 0.25 - 180
@@ -129,16 +124,13 @@ namespace CraftSharp.Rendering
 
             if (sunLight)
             {
-                sunLight.intensity = lightIntensity!.Evaluate(normalizedTOD);
+                sunLight.intensity = lightIntensity.Evaluate(normalizedTOD);
             }
 
-            if (!skyboxMaterial)
+            if (heightFog)
             {
-                skyboxMaterial = new Material(RenderSettings.skybox);
-                RenderSettings.skybox = skyboxMaterial;
+                heightFog.timeOfDay = fogBlendFactor.Evaluate(normalizedTOD);
             }
-
-            skyboxMaterial!.SetFloat(EXPOSURE_ID, skyboxExposure!.Evaluate(normalizedTOD));
 
             if (updateEnvLighting && Mathf.Abs(Mathf.DeltaAngle(normalizedTOD * 360F, lastUpdateEnvLightingTODAngle)) > 12F) // Time for an update!
             {
