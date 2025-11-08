@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections;
 using UnityEngine;
@@ -7,14 +6,17 @@ namespace CraftSharp.Rendering
 {
     public class SimpleEnvironmentManager : BaseEnvironmentManager
     {
+        private static readonly int EXPOSURE_ID = Shader.PropertyToID("_Exposure");
         private const float TICK_SECONDS = 0.05F;
 
-        [SerializeField] private Transform? sunTransform;
-        [SerializeField] private Light? sunLight;
-        [SerializeField] AnimationCurve? lightIntensity;
+        [SerializeField] private Transform sunTransform;
+        [SerializeField] private Light sunLight;
+        [SerializeField] private AnimationCurve lightIntensity;
 
-        private Material? skyboxMaterial;
-        [SerializeField] AnimationCurve? skyboxExposure;
+        private Material skyboxMaterial;
+        [SerializeField] private AnimationCurve skyboxExposure;
+        
+        [SerializeField] private AtmosphericHeightFog.HeightFogGlobal heightFog;
 
         [SerializeField] private long startTime;
         [SerializeField] private bool updateEnvLighting = false;
@@ -65,7 +67,7 @@ namespace CraftSharp.Rendering
 
             if (updateEnvLighting)
             {
-                float normalizedTOD = (ticks + 6000) % 24000 / 24000F;
+                var normalizedTOD = (ticks + 6000) % 24000 / 24000F;
                 lastUpdateEnvLightingTODAngle = normalizedTOD * 360F;
 
                 static IEnumerator delayed(Action action)
@@ -81,20 +83,20 @@ namespace CraftSharp.Rendering
 
         private void Update()
         {
-            if (simulate) // Simulate time passing
+            if (!simulate) return;
+            
+            // Simulate time passing
+            deltaSeconds += Time.unscaledDeltaTime;
+
+            if (deltaSeconds > TICK_SECONDS)
             {
-                deltaSeconds += Time.unscaledDeltaTime;
-
-                if (deltaSeconds > TICK_SECONDS)
+                while (deltaSeconds > TICK_SECONDS)
                 {
-                    while (deltaSeconds > TICK_SECONDS)
-                    {
-                        deltaSeconds -= TICK_SECONDS;
-                        ticks++;
-                    }
-
-                    UpdateTimeRelated();
+                    deltaSeconds -= TICK_SECONDS;
+                    ticks++;
                 }
+
+                UpdateTimeRelated();
             }
         }
 
@@ -109,7 +111,9 @@ namespace CraftSharp.Rendering
 
         private void UpdateTimeRelated()
         {
-            float normalizedTOD = (ticks + 6000) % 24000 / 24000F;
+            var normalizedTOD = (ticks + 6000) % 24000 / 24000F;
+
+            heightFog.timeOfDay = normalizedTOD;
 
             // Update directional light
             // 00:00 - 0.00 - 270
@@ -118,29 +122,27 @@ namespace CraftSharp.Rendering
             // 18:00 - 0.75 -   0
             // 24:00 - 1.00 - -90
 
-            if (sunTransform != null)
+            if (sunTransform)
             {
                 sunTransform.localEulerAngles = new Vector3(270F - normalizedTOD * 360F, 0F, 0F);
             }
 
-            if (sunLight != null)
+            if (sunLight)
             {
                 sunLight.intensity = lightIntensity!.Evaluate(normalizedTOD);
             }
 
-            if (skyboxMaterial == null)
+            if (!skyboxMaterial)
             {
                 skyboxMaterial = new Material(RenderSettings.skybox);
                 RenderSettings.skybox = skyboxMaterial;
             }
 
-            skyboxMaterial!.SetFloat("_Exposure", skyboxExposure!.Evaluate(normalizedTOD));
+            skyboxMaterial!.SetFloat(EXPOSURE_ID, skyboxExposure!.Evaluate(normalizedTOD));
 
             if (updateEnvLighting && Mathf.Abs(Mathf.DeltaAngle(normalizedTOD * 360F, lastUpdateEnvLightingTODAngle)) > 12F) // Time for an update!
             {
                 lastUpdateEnvLightingTODAngle = normalizedTOD * 360F;
-
-                //Debug.Log("Updating env lighting!");
 
                 DynamicGI.UpdateEnvironment();
             }
@@ -154,10 +156,10 @@ namespace CraftSharp.Rendering
             return (hours, secsInHour / 60, secsInHour % 60);
         }
 
-        public static string GetTimeStringFromTicks(int ticks)
+        private static string GetTimeStringFromTicks(int ticks)
         {
-            int hours = (ticks / 1000 + 6) % 24;
-            int minutes = (int)(ticks % 1000 * 3.6F) / 60;
+            var hours = (ticks / 1000 + 6) % 24;
+            var minutes = (int)(ticks % 1000 * 3.6F) / 60;
 
             return $"{hours:00}:{minutes:00}";
         }
