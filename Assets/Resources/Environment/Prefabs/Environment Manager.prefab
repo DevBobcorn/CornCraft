@@ -519,5 +519,5 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   heightFog: {fileID: 62462049458115584}
-  startTime: 8000
+  startTime: 2000
   updateEnvLighting: 0
