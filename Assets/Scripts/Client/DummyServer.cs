@@ -13,8 +13,6 @@ namespace CraftSharp
     {
         public CornClientOffline client;
 
-        public GameObject placeHolderGround;
-
         private int lastPlayerChunkX;
         private int lastPlayerChunkZ;
 

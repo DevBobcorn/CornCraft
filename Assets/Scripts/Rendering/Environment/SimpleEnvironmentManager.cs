@@ -6,7 +6,6 @@ namespace CraftSharp.Rendering
 {
     public class SimpleEnvironmentManager : BaseEnvironmentManager
     {
-        private static readonly int EXPOSURE_ID = Shader.PropertyToID("_Exposure");
         private const float TICK_SECONDS = 0.05F;
 
         [SerializeField] private Transform sunTransform;
