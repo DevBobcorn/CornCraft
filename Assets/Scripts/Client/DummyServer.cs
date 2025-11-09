@@ -23,8 +23,6 @@ namespace CraftSharp
         /// </summary>
         private readonly HashSet<Vector2Int> sentChunks = new();
 
-        private bool dataLoaded = false;
-
         private void DummyHandleCommand(string text)
         {
             if (text.StartsWith("/gamemode "))
@@ -57,7 +55,7 @@ namespace CraftSharp
 
         private void DummySendInitialTerrainData()
         {
-            if (!client || !dataLoaded) return;
+            if (!client) return;
 
             var chunkHeight = World.GetDimensionType().height;
             var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
@@ -84,7 +82,7 @@ namespace CraftSharp
 
         private void DummySendTerrainDataUpdate(int clientChunkX, int clientChunkZ)
         {
-            if (!client || !dataLoaded) return;
+            if (!client) return;
 
             var chunkHeight = World.GetDimensionType().height;
             var chunkColumnSize = Mathf.CeilToInt(chunkHeight / (float) Chunk.SIZE);
@@ -110,8 +108,8 @@ namespace CraftSharp
             Array.Fill(columnB[0], (ushort) 2, 0, 256 * 15); // Fill with granite, except top layer
 
             // Sent chunk data near the client player
-            for (int chunkX = clientChunkX - 5; chunkX <= clientChunkX + 5; chunkX++)
-                for (int chunkZ = clientChunkZ - 5; chunkZ <= clientChunkZ + 5; chunkZ++)
+            for (var chunkX = clientChunkX - 5; chunkX <= clientChunkX + 5; chunkX++)
+                for (var chunkZ = clientChunkZ - 5; chunkZ <= clientChunkZ + 5; chunkZ++)
                 {
                     var coord = new Vector2Int(chunkX, chunkZ);
 
@@ -126,37 +124,24 @@ namespace CraftSharp
 
         private void Start()
         {
-            if (client)
+            if (!client) return;
+            
+            client.OnDummySendChat += text =>
             {
-                client.OnDummySendChat += text =>
+                if (text.StartsWith('/'))
                 {
-                    if (text.StartsWith('/'))
-                    {
-                        DummyHandleCommand(text);
-                    }
-                    else
-                    {
-                        client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID()));
-                    }
-                };
-
-                dataLoaded = BlockStatePalette.INSTANCE.CheckNumId(1);
-
-                if (dataLoaded)
-                {
-                    placeHolderGround.SetActive(false);
-
-                    // Send initial terrain data
-                    DummySendInitialTerrainData();
+                    DummyHandleCommand(text);
                 }
                 else
                 {
-                    // No data loaded, use placeholder instead
-                    placeHolderGround.SetActive(true);
+                    client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID()));
                 }
+            };
+            
+            // Send initial terrain data
+            DummySendInitialTerrainData();
 
-                StartCoroutine(DeferredInitialization());
-            }
+            StartCoroutine(DeferredInitialization());
         }
 
         private IEnumerator DeferredInitialization()
@@ -184,8 +169,8 @@ namespace CraftSharp
             });
 
             // Send initial location and yaw
-            var startLocation = new Location(0, dataLoaded ? 16 : 0, 0);
-            client.DummyUpdateLocation(startLocation, 0, 0, dataLoaded);
+            var startLocation = new Location(0, 16, 0);
+            client.DummyUpdateLocation(startLocation, 0, 0);
 
             lastPlayerChunkX = 0;
             lastPlayerChunkZ = 0;
@@ -197,12 +182,13 @@ namespace CraftSharp
             client.DummyOnInventoryOpen(0, new InventoryData(0, InventoryTypePalette.INSTANCE.PLAYER,
                 ChatParser.TranslateString("container.inventory")));
 
-            if (dataLoaded)
+            var diamondSwordType = ItemPalette.INSTANCE.GetById(new ResourceLocation("diamond_sword"));
+            var bowType = ItemPalette.INSTANCE.GetById(new ResourceLocation("bow"));
+
+            if (diamondSwordType != Item.UNKNOWN && bowType != Item.UNKNOWN)
             {
-                client.DummyOnInventorySlot(0, 36, new ItemStack(ItemPalette.INSTANCE.GetById(new("diamond_sword")), 1), 0);
-                client.DummyOnInventorySlot(0, 37, new ItemStack(ItemPalette.INSTANCE.GetById(new("bow")), 1), 0);
-                client.DummyOnInventorySlot(0, 38, new ItemStack(ItemPalette.INSTANCE.GetById(new("chest")), 1), 0);
-                client.DummyOnInventorySlot(0, 39, new ItemStack(ItemPalette.INSTANCE.GetById(new("ender_chest")), 1), 0);
+                client.DummyOnInventorySlot(0, 36, new ItemStack(diamondSwordType, 1), 0);
+                client.DummyOnInventorySlot(0, 37, new ItemStack(bowType, 1), 0);
             }
         }
 
@@ -216,9 +202,9 @@ namespace CraftSharp
                 if (client.GetPosition().y < -100)
                 {
                     // Reset player position
-                    client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0, dataLoaded);
+                    client.DummyUpdateLocation(new Location(0, 16, 0), 0, 0);
 
-                    // Don't reset reset last position so as to trigger terrain data update
+                    // Don't reset last position to trigger terrain data update
                 }
 
                 var currentLoc = client.GetCurrentLocation().GetBlockLoc();

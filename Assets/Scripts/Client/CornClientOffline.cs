@@ -11,6 +11,7 @@ using CraftSharp.Inventory;
 using CraftSharp.Inventory.Recipe;
 using CraftSharp.Rendering;
 using CraftSharp.Protocol.Message;
+using CraftSharp.Resource;
 
 namespace CraftSharp
 {
@@ -77,7 +78,31 @@ namespace CraftSharp
             if (!EntityTypePalette.INSTANCE.CheckId(EntityType.PLAYER_ID))
             {
                 // Entity type not present, create a dummy one for player
-                EntityTypePalette.INSTANCE.InjectEntityType(2077, EntityType.PLAYER_ID);
+                var palette = EntityTypePalette.INSTANCE;
+                
+                palette.InjectEntityType(2077, EntityType.PLAYER_ID);
+            }
+
+            if (!BlockStatePalette.INSTANCE.CheckNumId(0))
+            {
+                // Block states not present, create some dummy blocks
+                var palette = BlockStatePalette.INSTANCE;
+                
+                palette.InjectBlockState(0, Item.AIR_ID, false, true, true);
+                for (var numId = 1; numId <= 100; numId++)
+                {
+                    palette.InjectBlockState(numId, new ResourceLocation($"block_{numId}"), true, false, false);
+                }
+                
+                // Generate geometries for injected blocks
+                if (!ResourcePackManager.Instance.Loaded)
+                {
+                    ResourcePackManager.Instance.BuildAtlasAndGeometriesForInjectedBlockStates();
+                }
+                else
+                {
+                    Debug.LogWarning("Block data is not present, but block assets are loaded?");
+                }
             }
 
             // Update entity type for dummy client entity
@@ -572,7 +597,7 @@ namespace CraftSharp
             World.StoreBiomeList(biomeList);
         }
 
-        public void DummyUpdateLocation(Location location, float yaw, float pitch, bool useTerrain)
+        public void DummyUpdateLocation(Location location, float yaw, float pitch)
         {
             if (!locationReceived) // On entering world or respawning
             {
@@ -581,18 +606,11 @@ namespace CraftSharp
                 // Update player location
                 PlayerController.SetLocationFromServer(location, mcYaw: yaw);
 
-                if (useTerrain)
-                {
-                    // Force refresh environment collider
-                    ChunkRenderManager.InitializeBoxTerrainCollider(location.GetBlockLoc(), () =>
-                    {
-                        PlayerController.EnablePhysics();
-                    });
-                }
-                else
+                // Force refresh environment collider
+                ChunkRenderManager.InitializeBoxTerrainCollider(location.GetBlockLoc(), () =>
                 {
                     PlayerController.EnablePhysics();
-                }
+                });
                 // Update nearby chunk render list
                 ChunkRenderManager.UpdateNearbyChunkCoordList(0, 0);
                 // Update camera yaw (convert to Unity yaw)

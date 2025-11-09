@@ -1167,7 +1167,7 @@ namespace CraftSharp.Rendering
             // Build chunks in queue...
             Profiler.BeginSample("Start chunk render build(/light update) tasks");
 
-            int newCount = 6; // Count quota for light updates
+            var newCount = 6; // Count quota for light updates
 
             // Start light update tasks
             while (newCount > 0 && lightUpdateRequests.Count > 0)
