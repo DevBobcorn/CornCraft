@@ -16,7 +16,6 @@ namespace CraftSharp.Control
         private const float SPRINT_STAMINA_STOP = 1F;
 
         private bool _jumpRequested = false;
-        private bool _jumpConfirmed = false;
         private bool _sneakToggleRequested = false;
         private bool _sprintRequested = false;
 
@@ -79,13 +78,15 @@ namespace CraftSharp.Control
             // Movement velocity update
             Vector3 moveVelocity;
 
-            if (_jumpConfirmed) // Jump
+            if (_jumpRequested) // Jump
             {
                 // Update current yaw to target yaw, immediately
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
                 // Apply vertical velocity to reduced horizontal velocity
                 moveVelocity = currentVelocity * 0.7F + player.transform.up * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
+
+                _jumpRequested = false;
             }
             else // Stay on ground
             {
@@ -118,12 +119,6 @@ namespace CraftSharp.Control
                     var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.Sneaking ? ability.SneakSpeed : ability.WalkSpeed;
                     
                     _sprintRequested = false;
-                    
-                    // Workaround: Slow down when walking downstairs
-                    if (!info.GroundCheck)
-                    {
-                        moveSpeed *= info.Moving ? (info.Sprinting ? 0.8F : 0.35F) : 1F;
-                    }
 
                     // Smooth rotation for player model
                     info.CurrentVisualYaw = Mathf.MoveTowardsAngle(Mathf.LerpAngle(info.CurrentVisualYaw,
@@ -140,14 +135,10 @@ namespace CraftSharp.Control
                     
                     _sprintRequested = false;
                 }
-
-                // Workaround: Used when fake grounded status is active (to avoid airborne state when moving off a block)
-                if (!info.GroundCheck && (!info.InLiquid || info.LiquidDist > THRESHOLD_LIQUID_SINK))
-                {
-                    // Apply fake gravity
-                    moveVelocity -= player.transform.up * 5F;
-                }
             }
+            
+            // Apply gravity
+            moveVelocity += Physics.gravity * (info.GravityScale * 1.6F * interval);
 
             currentVelocity = moveVelocity;
 
@@ -184,7 +175,6 @@ namespace CraftSharp.Control
 
             // Reset request flags
             _jumpRequested = false;
-            _jumpConfirmed = false;
             _sneakToggleRequested = false;
             _sprintRequested = player.Actions.Locomotion.Sprint.IsPressed();
 
@@ -223,9 +213,6 @@ namespace CraftSharp.Control
             player.Actions.Locomotion.Jump.performed -= jumpRequestCallback;
             player.Actions.Locomotion.WalkToggle.performed -= walkToggleRequestCallback;
             player.Actions.Locomotion.Sprint.performed -= sprintRequestCallback;
-
-            // Reset jump confirmation flag
-            _jumpConfirmed = false;
         }
 
         public override string ToString() => "Grounded";

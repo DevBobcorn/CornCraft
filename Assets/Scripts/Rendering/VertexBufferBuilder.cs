@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 
 using CraftSharp.Resource;
 
-namespace CraftSharp.Demo
+namespace CraftSharp.Rendering
 {
     public static class VertexBufferBuilder
     {

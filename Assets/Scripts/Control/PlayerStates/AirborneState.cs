@@ -112,18 +112,12 @@ namespace CraftSharp.Control
             else // Falling
             {
                 // Apply gravity
-                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 2f * interval);
+                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 1.6F * interval);
                 
                 // Speed limit check
                 if (moveVelocity.magnitude > ability.MaxFallSpeed)
                 {
                     moveVelocity = moveVelocity.normalized * ability.MaxFallSpeed;
-                }
-
-                // Landing check, positive when ground is near and character is going downwards
-                if (info.CenterDownDist < 0.2F && Vector3.Dot(moveVelocity, player.transform.up) <= 0)
-                {
-                    info.Grounded = true;
                 }
             }
 

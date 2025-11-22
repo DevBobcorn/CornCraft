@@ -40,7 +40,7 @@ namespace CraftSharp.Control
         public void EnableInput() => Actions?.Enable();
         public void DisableInput() => Actions?.Disable();
         
-        private Vector3 baseVelocity = Vector3.zero;
+        private Vector3 currentVelocity = Vector3.zero;
 
 #nullable enable
         
@@ -225,13 +225,28 @@ namespace CraftSharp.Control
             // Set stamina to max value
             Status.StaminaLeft = m_AbilityConfig.MaxStamina;
             // And broadcast current stamina
-            EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(Status.StaminaLeft, m_AbilityConfig.MaxStamina));
+            EventManager.Instance.Broadcast(new StaminaUpdateEvent(Status.StaminaLeft, m_AbilityConfig.MaxStamina));
             // Initialize health value
-            EventManager.Instance.Broadcast<HealthUpdateEvent>(new(20F, true));
+            EventManager.Instance.Broadcast(new HealthUpdateEvent(20F, true));
 
             // Register gamemode events for updating gamemode
             gameModeCallback = e => SetGameMode(e.GameMode);
             EventManager.Instance.Register(gameModeCallback);
+        }
+
+        private void FixedUpdate()
+        {
+            var chunkRenderManager = CornApp.CurrentClient?.ChunkRenderManager;
+            if (!chunkRenderManager) return;
+            
+            var terrainAABBs = chunkRenderManager.GetTerrainAABBs();
+            
+            BeforeCharacterUpdate(terrainAABBs);
+            
+            // Update player position
+            CharacterUpdate(Time.fixedDeltaTime, terrainAABBs);
+            
+            AfterCharacterUpdate();
         }
 
         private void OnDestroy()
@@ -282,8 +297,8 @@ namespace CraftSharp.Control
                     // Update components state...
                     Status.GravityScale = 0F;
 
-                    // Reset base velocity to zero
-                    baseVelocity = Vector3.zero;
+                    // Reset current velocity to zero
+                    currentVelocity = Vector3.zero;
 
                     // Reset player status
                     Status.Grounded = false;
@@ -398,18 +413,7 @@ namespace CraftSharp.Control
             return Quaternion.LookRotation(forward, upward);
         }
 
-        /// <summary>
-        /// Update player status
-        /// </summary>
-        private void UpdatePlayerStatus()
-        {
-            if (!Status.EntityDisabled)
-            {
-                m_StatusUpdater.UpdatePlayerStatus(GetMovementOrientation());
-            }
-        }
-
-        public void BeforeCharacterUpdate(float deltaTime)
+        public void BeforeCharacterUpdate(UnityAABB[] aabbs)
         {
             var status = m_StatusUpdater.Status;
 
@@ -432,7 +436,10 @@ namespace CraftSharp.Control
             }
 
             // Update player status (in water, grounded, etc)
-            UpdatePlayerStatus();
+            if (!Status.EntityDisabled)
+            {
+                m_StatusUpdater.UpdatePlayerStatus(GetMovementOrientation(), aabbs);
+            }
 
             // Update current player state
             if (pendingState != null) // Change to pending state if present
@@ -444,7 +451,7 @@ namespace CraftSharp.Control
             {
                 // Try to exit current state and enter another one
                 foreach (var state in PlayerStates.STATES.Where(
-                    state => state != CurrentState && state.ShouldEnter(Actions!, status)))
+                             state => state != CurrentState && state.ShouldEnter(Actions!, status)))
                 {
                     ChangeToState(state);
                     break;
@@ -452,39 +459,36 @@ namespace CraftSharp.Control
             }
         }
 
-        public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
-        {
-            var upward = m_InitialUpward;
-            var forward = Quaternion.AngleAxis(Status.CurrentVisualYaw, upward) * m_InitialForward;
-
-            currentRotation = Quaternion.LookRotation(forward, upward);
-        }
-
-        public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
+        public void CharacterUpdate(float deltaTime, UnityAABB[] aabbs)
         {
             var status = m_StatusUpdater.Status;
-
-            float prevStamina = status.StaminaLeft;
+            var prevStamina = status.StaminaLeft;
             
             // Update player physics and transform using updated current state
             CurrentState.UpdateMain(ref currentVelocity, deltaTime, Actions!, status, this);
+            
+            // Update player rotation (yaw)
+            m_PlayerRender.transform.eulerAngles = new Vector3(0F, status.CurrentVisualYaw, 0F);
+            
+            // Update player position using calculated velocity
+            m_StatusUpdater.UpdatePlayerPosition(currentVelocity, deltaTime, aabbs);
 
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (prevStamina != status.StaminaLeft) // Broadcast current stamina if changed
             {
-                EventManager.Instance.Broadcast<StaminaUpdateEvent>(new(status.StaminaLeft, m_AbilityConfig.MaxStamina));
+                EventManager.Instance.Broadcast(new StaminaUpdateEvent(status.StaminaLeft, m_AbilityConfig.MaxStamina));
             }
 
             // Visual updates... Don't pass the velocity by ref here, just the value
             OnPlayerUpdate?.Invoke(currentVelocity, deltaTime, Status);
         }
 
-        public void AfterCharacterUpdate(float deltaTime)
+        public void AfterCharacterUpdate()
         {
             var newLocation = CoordConvert.Unity2MC(_worldOriginOffset, transform.position);
 
             // Update values to send to server
-            Location2Send = new(
+            Location2Send = new Location(
                 Math.Round(newLocation.X, 2),
                 Math.Round(newLocation.Y, 2),
                 Math.Round(newLocation.Z, 2)
@@ -497,7 +501,7 @@ namespace CraftSharp.Control
                 Pitch2Send = 0F;
             }
             
-            IsGrounded2Send = Status.GroundCheck;
+            IsGrounded2Send = Status.Grounded;
         }
 
         private Vector3Int _worldOriginOffset = Vector3Int.zero;
@@ -521,9 +525,9 @@ namespace CraftSharp.Control
 
         public void SetLocationFromServer(Location loc, bool reset = false, float mcYaw = 0F)
         {
-            if (reset) // Reset base velocity
+            if (reset) // Reset current velocity
             {
-                baseVelocity = Vector3.zero;
+                currentVelocity = Vector3.zero;
             }
 
             var newUnityYaw = mcYaw + 90F; // Coordinate system conversion
@@ -553,7 +557,7 @@ namespace CraftSharp.Control
         {
             var statusInfo = Status.Spectating ? string.Empty : Status.ToString();
 
-            return $"State: {CurrentState}\n{statusInfo}";
+            return $"State: {CurrentState}\n{statusInfo}\nVelocity: {currentVelocity.x:0.00}\t{currentVelocity.y:0.00}\t{currentVelocity.z:0.00}";
         }
     }
 }

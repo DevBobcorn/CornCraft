@@ -10,11 +10,6 @@ namespace CraftSharp.Control
         /// </summary>
         public void UpdateMain(ref Vector3 currentVelocity, float interval,
                 PlayerActions inputData, PlayerStatus info, PlayerController player);
-        
-        public bool IgnoreCollision()
-        {
-            return false;
-        }
 
         public bool ShouldEnter(PlayerActions inputData, PlayerStatus info);
 

@@ -55,12 +55,6 @@ namespace CraftSharp.Control
                 info.Attacking = false;
             }
 
-            if (!info.GroundCheck)
-            {
-                // Apply fake gravity
-                currentVelocity = - player.transform.up * 5F;
-            }
-
             // Restore stamina
             info.StaminaLeft = Mathf.MoveTowards(info.StaminaLeft, ability.MaxStamina, interval * ability.StaminaRestore);
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 using Unity.Mathematics;
 
 using CraftSharp.Resource;
-using CraftSharp.Demo;
+using CraftSharp.Rendering;
 
 namespace CraftSharp
 {

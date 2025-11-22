@@ -99,9 +99,14 @@ namespace CraftSharp.Rendering
         private BaseCornClient client;
         private ChunkRenderBuilder builder;
 
-        // Terrain collider for movement
-        private GameObject terrainBoxColliderGameObject, liquidBoxColliderGameObject;
-        private readonly Dictionary<BlockLoc, BoxCollider[]> colliderList = new();
+        private readonly List<UnityAABB> terrainAABBs = new();
+        private readonly List<UnityAABB> liquidAABBs = new();
+        private readonly Dictionary<BlockLoc, List<UnityAABB>> aabbList = new();
+
+        /// <summary>
+        /// Get terrain AABBs for custom physics collision detection
+        /// </summary>
+        public UnityAABB[] GetTerrainAABBs() => terrainAABBs.ToArray();
 
         public void SetClient(BaseCornClient curClient) => client = curClient;
 
@@ -123,13 +128,21 @@ namespace CraftSharp.Rendering
                 pair.Value.transform.localPosition = CoordConvert.MC2Unity(_worldOriginOffset, pair.Key.ToCenterLocation());
             }
 
-            // Update collider positions and force flush collider transform changes
-            foreach (var boxCollider in terrainBoxColliderGameObject.GetComponents<BoxCollider>())
-                boxCollider.center += posDelta;
-            foreach (var boxCollider in liquidBoxColliderGameObject.GetComponents<BoxCollider>())
-                boxCollider.center += posDelta;
-
-            Physics.SyncTransforms();
+            // Update AABB positions
+            for (int i = 0; i < terrainAABBs.Count; i++)
+            {
+                var aabb = terrainAABBs[i];
+                aabb.Min += posDelta;
+                aabb.Max += posDelta;
+                terrainAABBs[i] = aabb;
+            }
+            for (int i = 0; i < liquidAABBs.Count; i++)
+            {
+                var aabb = liquidAABBs[i];
+                aabb.Min += posDelta;
+                aabb.Max += posDelta;
+                liquidAABBs[i] = aabb;
+            }
         }
 
         private static int dataBuildTimeSum, vertexBuildTimeSum;
@@ -973,17 +986,11 @@ namespace CraftSharp.Rendering
 
                 Loom.QueueOnMainThread(() =>
                 {
-                    foreach (var boxCollider in terrainBoxColliderGameObject.GetComponents<BoxCollider>())
-                    {
-                        Destroy(boxCollider);
-                    }
-                    foreach (var boxCollider in liquidBoxColliderGameObject.GetComponents<BoxCollider>())
-                    {
-                        Destroy(boxCollider);
-                    }
-                    colliderList.Clear();
+                    terrainAABBs.Clear();
+                    liquidAABBs.Clear();
+                    aabbList.Clear();
 
-                    ChunkRenderBuilder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject!, liquidBoxColliderGameObject!, colliderList);
+                    ChunkRenderBuilder.BuildTerrainAABBs(world, playerBlockLoc, _worldOriginOffset, terrainAABBs, liquidAABBs, aabbList);
 
                     // Set last player location
                     lastPlayerBlockLoc = playerBlockLoc;
@@ -996,12 +1003,12 @@ namespace CraftSharp.Rendering
 
         public void RebuildTerrainBoxCollider(BlockLoc playerBlockLoc)
         {
-            ChunkRenderBuilder.BuildTerrainColliderBoxes(world, playerBlockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
+            ChunkRenderBuilder.BuildTerrainAABBs(world, playerBlockLoc, _worldOriginOffset, terrainAABBs, liquidAABBs, aabbList);
         }
 
         private void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
         {
-            ChunkRenderBuilder.BuildTerrainColliderBoxesAt(world, blockLoc, _worldOriginOffset, terrainBoxColliderGameObject, liquidBoxColliderGameObject, colliderList);
+            ChunkRenderBuilder.BuildTerrainAABBsAt(world, blockLoc, _worldOriginOffset, terrainAABBs, liquidAABBs, aabbList);
         }
 
         public void UpdateNearbyChunkCoordList(int playerChunkX, int playerChunkZ)
@@ -1126,15 +1133,7 @@ namespace CraftSharp.Rendering
             var modelTable = ResourcePackManager.Instance.StateModelTable;
             builder = new(modelTable);
 
-            terrainBoxColliderGameObject = new GameObject("Terrain Box Collider")
-            {
-                layer = LayerMask.NameToLayer(TERRAIN_BOX_COLLIDER_LAYER_NAME)
-            };
-
-            liquidBoxColliderGameObject = new GameObject("Liquid Box Collider")
-            {
-                layer = LayerMask.NameToLayer(LIQUID_BOX_COLLIDER_LAYER_NAME)
-            };
+            // AABB lists are initialized as empty lists, no GameObjects needed
 
             blockPredictionCallback = e =>
             {
@@ -1295,6 +1294,29 @@ namespace CraftSharp.Rendering
                 UpdateNearbyChunkCoordList(pcx, pcz);
                 // Update last chunk coordinate only if it is changed
                 lastPlayerChunkLoc = new(pcx, pcz);
+            }
+        }
+
+        private void OnDrawGizmos()
+        {
+            // Draw terrain AABBs in red wireframe
+            Gizmos.color = Color.red;
+            
+            foreach (var aabb in terrainAABBs)
+            {
+                var center = (aabb.Min + aabb.Max) * 0.5f;
+                var size = aabb.Max - aabb.Min;
+                Gizmos.DrawWireCube(center, size);
+            }
+            
+            // Draw liquid AABBs in cyan wireframe
+            Gizmos.color = Color.cyan;
+
+            foreach (var aabb in liquidAABBs)
+            {
+                var center = (aabb.Min + aabb.Max) * 0.5f;
+                var size = aabb.Max - aabb.Min;
+                Gizmos.DrawWireCube(center, size);
             }
         }
         #endregion

@@ -616,44 +616,38 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private static BoxCollider[] GetBoxCollidersAt(BlockState state, BlockLoc blockLoc,
-            Vector3Int originOffset, Vector3? blockOffset, GameObject solidGameObject, GameObject fluidGameObject)
+        private static void GetAABBsAt(BlockState state, BlockLoc blockLoc,
+            Vector3Int originOffset, Vector3? blockOffset,
+            List<UnityAABB> terrainAABBs, List<UnityAABB> liquidAABBs)
         {
             var aabbs = state.Shape.ColliderAABBs ?? state.Shape.AABBs;
-            var colliderCount = (state.NoSolidMesh ? 0 : aabbs.Count) + (state.InLiquid ? 1 : 0);
-            
-            if (colliderCount == 0)
-                return Array.Empty<BoxCollider>();
-            
-            var boxColliders = new BoxCollider[colliderCount];
-            int i = 0;
-
             var noCollision = state.NoCollision;
             var position = CoordConvert.MC2Unity(originOffset, blockLoc.ToLocation());
             
-            foreach (var aabb in aabbs) // Add block shape colliders
+            foreach (var aabb in aabbs) // Add block shape AABBs
             {
-                var collider = solidGameObject.AddComponent<BoxCollider>();
+                if (state.NoSolidMesh) continue;
                 
-                collider.size = new(aabb.SizeZ, aabb.SizeY, aabb.SizeX);
-                collider.center = position + new Vector3(aabb.CenterZ, aabb.CenterY, aabb.CenterX);
+                var center = position + new Vector3(aabb.CenterZ, aabb.CenterY, aabb.CenterX);
                 if (blockOffset.HasValue)
-                    collider.center += blockOffset.Value;
+                    center += blockOffset.Value;
                 
-                boxColliders[i++] = collider;
-                collider.isTrigger = noCollision;
+                var size = new Vector3(aabb.SizeZ, aabb.SizeY, aabb.SizeX);
+                var min = center - size * 0.5f;
+                var max = center + size * 0.5f;
+                
+                terrainAABBs.Add(new UnityAABB(min, max, false, noCollision));
             }
-            if (state.InLiquid) // Add liquid collider
+            
+            if (state.InLiquid) // Add liquid AABB
             {
-                var collider = fluidGameObject.AddComponent<BoxCollider>();
+                var center = new Vector3(0.5F, 0.5F, 0.5F) + position;
+                var size = Vector3.one;
+                var min = center - size * 0.5f;
+                var max = center + size * 0.5f;
                 
-                collider.size = new(1F, 1F, 1F);
-                collider.center = new Vector3(0.5F, 0.5F, 0.5F) + position;
-                boxColliders[i] = collider; // Don't increase since i is not used afterwards
-                collider.isTrigger = true;
+                liquidAABBs.Add(new UnityAABB(min, max, true, true));
             }
-                
-            return boxColliders;
         }
 
         public static bool OffsetTypeAffectsAABB(OffsetType offsetType)
@@ -661,17 +655,52 @@ namespace CraftSharp.Rendering
             return offsetType == OffsetType.XZ_BoundingBox;
         }
         
-        public static void BuildTerrainColliderBoxesAt(World world, BlockLoc blockLoc, Vector3Int originOffset,
-            Dictionary<BlockLoc, BoxCollider[]> colliderList)
+        public static void BuildTerrainAABBsAt(World world, BlockLoc blockLoc, Vector3Int originOffset,
+            List<UnityAABB> terrainAABBs, List<UnityAABB> liquidAABBs,
+            Dictionary<BlockLoc, List<UnityAABB>> aabbList)
         {
-            if (colliderList.ContainsKey(blockLoc))
+            if (aabbList.ContainsKey(blockLoc))
             {
-                // Remove colliders at this location
-                foreach (var collider in colliderList[blockLoc])
+                // Remove AABBs at this location from the main lists
+                // Since we need to remove by reference and struct equality might not work,
+                // we'll rebuild the lists excluding this block's AABBs
+                var existingAABBs = aabbList[blockLoc];
+                var terrainToRemove = existingAABBs.Where(a => !a.IsLiquid).ToList();
+                var liquidToRemove = existingAABBs.Where(a => a.IsLiquid).ToList();
+
+                // Remove terrain AABBs (iterate backwards to maintain indices)
+                foreach (var aabb in terrainToRemove)
                 {
-                    UnityEngine.Object.Destroy(collider); 
+                    for (int i = terrainAABBs.Count - 1; i >= 0; i--)
+                    {
+                        if (Vector3.Distance(terrainAABBs[i].Min, aabb.Min) < 0.001f &&
+                            Vector3.Distance(terrainAABBs[i].Max, aabb.Max) < 0.001f &&
+                            terrainAABBs[i].IsLiquid == aabb.IsLiquid &&
+                            terrainAABBs[i].IsTrigger == aabb.IsTrigger)
+                        {
+                            terrainAABBs.RemoveAt(i);
+                            break;
+                        }
+                    }
                 }
-                colliderList.Remove(blockLoc);
+
+                // Remove liquid AABBs (iterate backwards to maintain indices)
+                foreach (var aabb in liquidToRemove)
+                {
+                    for (int i = liquidAABBs.Count - 1; i >= 0; i--)
+                    {
+                        if (Vector3.Distance(liquidAABBs[i].Min, aabb.Min) < 0.001f &&
+                            Vector3.Distance(liquidAABBs[i].Max, aabb.Max) < 0.001f &&
+                            liquidAABBs[i].IsLiquid == aabb.IsLiquid &&
+                            liquidAABBs[i].IsTrigger == aabb.IsTrigger)
+                        {
+                            liquidAABBs.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+
+                aabbList.Remove(blockLoc);
             }
 
             var stateModelTable = ResourcePackManager.Instance.StateModelTable;
@@ -681,8 +710,74 @@ namespace CraftSharp.Rendering
                 ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
                     blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
 
-            colliderList.Add(blockLoc, GetBoxCollidersAt(block.State, blockLoc,
-                originOffset, blockOffset, solidGameObject, fluidGameObject));
+            var blockAABBs = new List<UnityAABB>();
+            var terrainCountBefore = terrainAABBs.Count;
+            var liquidCountBefore = liquidAABBs.Count;
+
+            GetAABBsAt(block.State, blockLoc, originOffset, blockOffset, terrainAABBs, liquidAABBs);
+
+            // Add the newly created AABBs to the block's list
+            for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+            {
+                blockAABBs.Add(terrainAABBs[i]);
+            }
+            for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
+            {
+                blockAABBs.Add(liquidAABBs[i]);
+            }
+
+            if (blockAABBs.Count > 0)
+            {
+                aabbList.Add(blockLoc, blockAABBs);
+            }
+        }
+
+        public static void BuildTerrainAABBs(World world, BlockLoc playerBlockLoc, Vector3Int originOffset,
+            List<UnityAABB> terrainAABBs, List<UnityAABB> liquidAABBs,
+            Dictionary<BlockLoc, List<UnityAABB>> aabbList)
+        {
+            terrainAABBs.Clear();
+            liquidAABBs.Clear();
+            aabbList.Clear();
+
+            var stateModelTable = ResourcePackManager.Instance.StateModelTable;
+
+            foreach (var offset in validOffsets)
+            {
+                var blockLoc = new BlockLoc(
+                    playerBlockLoc.X + offset.X,
+                    playerBlockLoc.Y + offset.Y,
+                    playerBlockLoc.Z + offset.Z);
+
+                var block = world.GetBlock(blockLoc);
+                if (block.StateId == 0) continue; // Skip air
+
+                Vector3? blockOffset = stateModelTable.TryGetValue(block.StateId, out var stateModel)
+                    && OffsetTypeAffectsAABB(stateModel.OffsetType)
+                    ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
+                        blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
+
+                var blockAABBs = new List<UnityAABB>();
+                var terrainCountBefore = terrainAABBs.Count;
+                var liquidCountBefore = liquidAABBs.Count;
+
+                GetAABBsAt(block.State, blockLoc, originOffset, blockOffset, terrainAABBs, liquidAABBs);
+
+                // Add the newly created AABBs to the block's list
+                for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+                {
+                    blockAABBs.Add(terrainAABBs[i]);
+                }
+                for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
+                {
+                    blockAABBs.Add(liquidAABBs[i]);
+                }
+
+                if (blockAABBs.Count > 0)
+                {
+                    aabbList.Add(blockLoc, blockAABBs);
+                }
+            }
         }
     }
 }
