@@ -1,5 +1,4 @@
 #nullable enable
-using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -34,17 +33,17 @@ namespace CraftSharp.Control
         /// <summary>
         /// Callback invoked upon operation begins
         /// </summary>
-        public delegate void OperationInitAction(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
+        public delegate void OperationInitAction(PlayerStatus info, PlayerController player);
 
         /// <summary>
         /// Callback invoked upon operation ends
         /// </summary>
-        public delegate void OperationExitAction(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
+        public delegate void OperationExitAction(PlayerStatus info, PlayerController player);
 
         /// <summary>
         /// Callback invoked upon operation updates
         /// </summary>
         /// <returns>Whether to terminate the operation</returns>
-        public delegate bool OperationUpdateAction(float interval, float curTime, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player);
+        public delegate bool OperationUpdateAction(float interval, float curTime, PlayerActions inputData, PlayerStatus info, PlayerController player);
     }
 }

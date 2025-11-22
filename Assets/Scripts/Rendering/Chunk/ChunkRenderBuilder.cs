@@ -660,42 +660,9 @@ namespace CraftSharp.Rendering
         {
             return offsetType == OffsetType.XZ_BoundingBox;
         }
-
-        public static void BuildTerrainColliderBoxes(World world, BlockLoc playerBlockLoc, Vector3Int originOffset,
-            GameObject solidGameObject, GameObject fluidGameObject, Dictionary<BlockLoc, BoxCollider[]> colliderList)
-        {
-            foreach (var blockLoc in colliderList.Keys.ToList()
-                         .Where(blockLoc => playerBlockLoc.SqrDistanceTo(blockLoc) > MOVEMENT_RADIUS_SQR_PLUS))
-            {
-                // Remove colliders at this location
-                foreach (var collider in colliderList[blockLoc])
-                {
-                    UnityEngine.Object.Destroy(collider);
-                }
-                colliderList.Remove(blockLoc);
-            }
-
-            var availableBlockLocs = validOffsets.Select(offset => offset + playerBlockLoc);
-            var stateModelTable = ResourcePackManager.Instance.StateModelTable;
-
-            foreach (var blockLoc in availableBlockLocs)
-            {
-                if (colliderList.ContainsKey(blockLoc))
-                    continue;
-
-                var block = world.GetBlock(blockLoc);
-                Vector3? blockOffset = stateModelTable.TryGetValue(block.StateId, out var stateModel)
-                    && OffsetTypeAffectsAABB(stateModel.OffsetType)
-                    ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
-                        blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
-
-                colliderList.Add(blockLoc, GetBoxCollidersAt(block.State, blockLoc,
-                    originOffset, blockOffset, solidGameObject, fluidGameObject));
-            }
-        }
         
         public static void BuildTerrainColliderBoxesAt(World world, BlockLoc blockLoc, Vector3Int originOffset,
-            GameObject solidGameObject, GameObject fluidGameObject, Dictionary<BlockLoc, BoxCollider[]> colliderList)
+            Dictionary<BlockLoc, BoxCollider[]> colliderList)
         {
             if (colliderList.ContainsKey(blockLoc))
             {

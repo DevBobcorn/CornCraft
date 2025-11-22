@@ -1,5 +1,4 @@
 #nullable enable
-using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -26,7 +25,7 @@ namespace CraftSharp.Control
             return true;
         }
 
-        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             if (currentOperation is null)
                 return;
@@ -36,25 +35,25 @@ namespace CraftSharp.Control
             if (currentTime <= 0F)
             {
                 // Finish current operation
-                FinishOperation(info, motor, player);
+                FinishOperation(info, player);
 
                 currentOperationIndex++;
 
                 if (currentOperationIndex < Operations.Length)
                 {
                     // Start next operation in sequence
-                    StartOperation(info, motor, player);
+                    StartOperation(info, player);
                 }
             }
             else
             {
                 // Call operation update
-                var terminate = currentOperation.OperationUpdate?.Invoke(interval, currentTime, inputData, info, motor, player);
+                var terminate = currentOperation.OperationUpdate?.Invoke(interval, currentTime, inputData, info, player);
 
                 if (terminate ?? false)
                 {
                     // Finish current operation
-                    FinishOperation(info, motor, player);
+                    FinishOperation(info, player);
 
                     currentOperationIndex++;
                     currentTime = 0F;
@@ -62,13 +61,13 @@ namespace CraftSharp.Control
                     if (currentOperationIndex < Operations.Length)
                     {
                         // Start next operation in sequence
-                        StartOperation(info, motor, player);
+                        StartOperation(info, player);
                     }
                 }
             }
         }
 
-        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             if (currentOperation is not null)
             {
@@ -81,7 +80,7 @@ namespace CraftSharp.Control
             }
         }
 
-        private void StartOperation(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        private void StartOperation(PlayerStatus info, PlayerController player)
         {
             // Update current operation
             currentOperation = Operations[currentOperationIndex];
@@ -89,7 +88,7 @@ namespace CraftSharp.Control
             if (currentOperation is not null)
             {
                 // Invoke operation init if present
-                currentOperation.OperationInit?.Invoke(info, motor, player);
+                currentOperation.OperationInit?.Invoke(info, player);
                 currentTime = currentOperation.Time;
             }
             else
@@ -98,9 +97,9 @@ namespace CraftSharp.Control
             }
         }
 
-        private void FinishOperation(PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        private void FinishOperation(PlayerStatus info, PlayerController player)
         {
-            currentOperation?.OperationExit?.Invoke(info, motor, player);
+            currentOperation?.OperationExit?.Invoke(info, player);
         }
 
         // This is not used, use PlayerController.StartForceMoveOperation() to enter this state
@@ -109,14 +108,14 @@ namespace CraftSharp.Control
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info) =>
                 currentOperationIndex >= Operations.Length && currentTime <= 0F;
 
-        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
             if (Operations.Length > currentOperationIndex)
-                StartOperation(info, motor, player);
+                StartOperation(info, player);
             
         }
 
-        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             
         }

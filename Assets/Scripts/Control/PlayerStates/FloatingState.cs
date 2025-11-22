@@ -1,6 +1,4 @@
 #nullable enable
-using CraftSharp.Rendering;
-using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
@@ -33,27 +31,7 @@ namespace CraftSharp.Control
             }
         }
 
-        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
-        {
-            CheckClimbOverInLiquid(info, player);
-
-            if (_forceUngroundRequested) // Force unground
-            {
-                if (info.Grounded)
-                {
-                    _forceUngroundConfirmed = true;
-
-                    // Makes the character skip ground probing/snapping on its next update
-                    motor.ForceUnground();
-                    // Also reset grounded flag
-                    info.Grounded = false;
-                }
-
-                _forceUngroundRequested = false;
-            }
-        }
-
-        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             var ability = player.AbilityConfig;
             
@@ -68,7 +46,7 @@ namespace CraftSharp.Control
             if (_forceUngroundConfirmed)
             {
                 // Apply vertical velocity to reduced horizontal velocity
-                moveVelocity = currentVelocity * 0.5F + motor.CharacterUp * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
+                moveVelocity = currentVelocity * 0.5F + player.transform.up * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
 
                 _forceUngroundConfirmed = false;
             }
@@ -93,11 +71,11 @@ namespace CraftSharp.Control
                     {
                         if(distToAfloat <= 1F) // Move up no further than top of the surface
                         {
-                            moveVelocity = distToAfloat * 2f * motor.CharacterUp;
+                            moveVelocity = distToAfloat * 2f * player.transform.up;
                         }
                         else // Just move up
                         {
-                            moveVelocity = swimSpeed * motor.CharacterUp;
+                            moveVelocity = swimSpeed * player.transform.up;
                         }
 
                         // Workaround: Special handling for force unground
@@ -111,7 +89,7 @@ namespace CraftSharp.Control
                 {
                     if (!info.Grounded)
                     {
-                        moveVelocity = -swimSpeed * motor.CharacterUp;
+                        moveVelocity = -swimSpeed * player.transform.up;
                     }
                 }
 
@@ -143,7 +121,7 @@ namespace CraftSharp.Control
             return info.Spectating || !info.Floating;
         }
 
-        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
 
@@ -152,7 +130,7 @@ namespace CraftSharp.Control
             _forceUngroundConfirmed = false;
         }
 
-        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             
         }

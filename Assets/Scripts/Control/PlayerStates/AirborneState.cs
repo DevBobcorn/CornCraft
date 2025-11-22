@@ -1,7 +1,5 @@
 #nullable enable
 using System;
-using CraftSharp.Rendering;
-using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,7 +19,7 @@ namespace CraftSharp.Control
 
         private float _stopFlightTimer = 0F;
 
-        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             var ability = player.AbilityConfig;
 
@@ -94,9 +92,9 @@ namespace CraftSharp.Control
 
                     // Check vertical movement...
                     if (inputData.Locomotion.Ascend.IsPressed())
-                        moveVelocity += ability.SneakSpeed * 3F * motor.CharacterUp;
+                        moveVelocity += ability.SneakSpeed * 3F * player.transform.up;
                     else if (inputData.Locomotion.Descend.IsPressed())
-                        moveVelocity -= ability.SneakSpeed * 3F * motor.CharacterUp;
+                        moveVelocity -= ability.SneakSpeed * 3F * player.transform.up;
 
                     // Flying doesn't have any gravity, which can prevent proper groundcheck
                     // So here we stop flying when getting close enough to the ground
@@ -123,7 +121,7 @@ namespace CraftSharp.Control
                 }
 
                 // Landing check, positive when ground is near and character is going downwards
-                if (info.CenterDownDist < 0.2F && Vector3.Dot(moveVelocity, motor.CharacterUp) <= 0)
+                if (info.CenterDownDist < 0.2F && Vector3.Dot(moveVelocity, player.transform.up) <= 0)
                 {
                     info.Grounded = true;
                 }
@@ -152,7 +150,7 @@ namespace CraftSharp.Control
 
         private Action<InputAction.CallbackContext>? glideToggleRequestCallback;
 
-        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
             info.Gliding = false;
@@ -189,7 +187,7 @@ namespace CraftSharp.Control
             };
         }
 
-        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             if (nextState is not AirborneState) // Preserve flying & gliding status when switching player renders
             {

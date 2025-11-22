@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using KinematicCharacterController;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -59,30 +58,7 @@ namespace CraftSharp.Control
             _jumpRequested = false;
         }
 
-        public void UpdateBeforeMotor(float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
-        {
-            if (!info.Grounded) return;
-            CheckClimbOver(info, player);
-
-            if (_jumpRequested) // Jump
-            {
-                // Set jump confirmation flag
-                _jumpConfirmed = true;
-
-                // Makes the character skip ground probing/snapping on its next update
-                motor.ForceUnground();
-                // Randomize mirror flag before jumping
-                player.RandomizeMirroredFlag();
-
-                // Also reset grounded flag
-                info.Grounded = false;
-            }
-
-            // Reset jump flag
-            _jumpRequested = false;
-        }
-
-        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             var ability = player.AbilityConfig;
 
@@ -109,7 +85,7 @@ namespace CraftSharp.Control
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
                 // Apply vertical velocity to reduced horizontal velocity
-                moveVelocity = currentVelocity * 0.7F + motor.CharacterUp * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
+                moveVelocity = currentVelocity * 0.7F + player.transform.up * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
             }
             else // Stay on ground
             {
@@ -144,7 +120,7 @@ namespace CraftSharp.Control
                     _sprintRequested = false;
                     
                     // Workaround: Slow down when walking downstairs
-                    if (!motor.GroundingStatus.FoundAnyGround)
+                    if (!info.GroundCheck)
                     {
                         moveSpeed *= info.Moving ? (info.Sprinting ? 0.8F : 0.35F) : 1F;
                     }
@@ -154,7 +130,7 @@ namespace CraftSharp.Control
                             info.TargetVisualYaw, 0.2F), info.TargetVisualYaw, ability.TurnSpeed * interval);
                     
                     // Use target orientation to calculate actual movement direction, taking ground shape into consideration
-                    moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
+                    moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
                 }
                 else // Idle or braking
                 {
@@ -166,10 +142,10 @@ namespace CraftSharp.Control
                 }
 
                 // Workaround: Used when fake grounded status is active (to avoid airborne state when moving off a block)
-                if (!motor.GroundingStatus.FoundAnyGround && (!info.InLiquid || info.LiquidDist > THRESHOLD_LIQUID_SINK))
+                if (!info.GroundCheck && (!info.InLiquid || info.LiquidDist > THRESHOLD_LIQUID_SINK))
                 {
                     // Apply fake gravity
-                    moveVelocity -= motor.CharacterUp * 5F;
+                    moveVelocity -= player.transform.up * 5F;
                 }
             }
 
@@ -202,7 +178,7 @@ namespace CraftSharp.Control
         private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
         private Action<InputAction.CallbackContext>? sprintRequestCallback;
 
-        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
 
@@ -239,7 +215,7 @@ namespace CraftSharp.Control
             _timeSinceGrounded = prevState is not ForceMoveState ? 0F : Mathf.Max(_timeSinceGrounded, 0F);
         }
 
-        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
 

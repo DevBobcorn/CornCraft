@@ -4,12 +4,11 @@ using UnityEngine;
 
 using CraftSharp.Event;
 using CraftSharp.Rendering;
-using KinematicCharacterController;
 
 namespace CraftSharp.Control
 {
     [RequireComponent(typeof (PlayerStatusUpdater))]
-    public class PlayerController : MonoBehaviour, ICharacterController
+    public class PlayerController : MonoBehaviour
     {
         public enum CurrentItemState
         {
@@ -34,14 +33,14 @@ namespace CraftSharp.Control
         private EntityRender m_PlayerRender;
         [SerializeField] private Vector3 m_InitialUpward = Vector3.up;
         [SerializeField] private Vector3 m_InitialForward = Vector3.forward;
-        [SerializeField] private KinematicCharacterMotor m_Motor;
-        private KinematicCharacterMotor Motor => m_Motor;
 
         // Input System Fields & Methods
         public PlayerActions Actions { get; private set; }
 
         public void EnableInput() => Actions?.Enable();
         public void DisableInput() => Actions?.Disable();
+        
+        private Vector3 baseVelocity = Vector3.zero;
 
 #nullable enable
         
@@ -223,8 +222,6 @@ namespace CraftSharp.Control
 
         private void Start()
         {
-            Motor.CharacterController = this;
-
             // Set stamina to max value
             Status.StaminaLeft = m_AbilityConfig.MaxStamina;
             // And broadcast current stamina
@@ -255,7 +252,7 @@ namespace CraftSharp.Control
                 case GameMode.Creative:
                 case GameMode.Adventure:
                     Status.Flying = gameMode == GameMode.Creative;
-                    IPlayerState initState = Status.Flying ? PlayerStates.AIRBORNE : PlayerStates.GROUNDED;
+                    var initState = Status.Flying ? PlayerStates.AIRBORNE : PlayerStates.GROUNDED;
                     Status.Spectating = false;
 
                     if (CurrentState != initState) // Update initial player state
@@ -264,7 +261,6 @@ namespace CraftSharp.Control
                     }
 
                     // Update components state...
-                    Motor.Capsule.enabled = true;
                     Status.GravityScale = 1F;
 
                     Status.EntityDisabled = false;
@@ -284,11 +280,10 @@ namespace CraftSharp.Control
                     }
 
                     // Update components state...
-                    Motor.Capsule.enabled = false;
                     Status.GravityScale = 0F;
 
-                    // Reset velocity to zero TODO: Check
-                    Motor.BaseVelocity = Vector3.zero;
+                    // Reset base velocity to zero
+                    baseVelocity = Vector3.zero;
 
                     // Reset player status
                     Status.Grounded = false;
@@ -310,13 +305,11 @@ namespace CraftSharp.Control
         public void DisablePhysics()
         {
             Status.PhysicsDisabled = true;
-            Motor.enabled = false;
         }
 
         public void EnablePhysics()
         {
             Status.PhysicsDisabled = false;
-            Motor.enabled = true;
         }
         
         public void ToggleSneaking()
@@ -331,16 +324,16 @@ namespace CraftSharp.Control
 
             if (fromLiquid) extraOffset.x += 0.1F;
             var forwardDir = GetMovementOrientation() * Vector3.forward;
-            var offset = forwardDir * barrierDist + barrierHeight * Motor.CharacterUp;
+            var offset = forwardDir * barrierDist + barrierHeight * transform.up;
 
             StartForceMoveOperation("Climb over barrier (TransformDisplacement)",
                 new ForceMoveOperation[] {
                     new(offset, barrierHeight * 0.3F,
-                        exit: (info, _, _) =>
+                        exit: (info, _) =>
                         {
                             info.Grounded = true;
                         },
-                        update: (_, _, inputData, info, _, _) =>
+                        update: (_, _, inputData, info, _) =>
                         {
                             info.Moving = inputData.Locomotion.Movement.IsPressed();
                             // Don't terminate till the time ends
@@ -361,13 +354,13 @@ namespace CraftSharp.Control
             var prevState = CurrentState;
 
             //Debug.Log($"Exit state [{CurrentState}]");
-            CurrentState.OnExit(state, m_StatusUpdater.Status, Motor, this);
+            CurrentState.OnExit(state, m_StatusUpdater.Status, this);
 
             // Exit previous state and enter this state
             CurrentState = state;
             
             //Debug.Log($"Enter state [{CurrentState}]");
-            CurrentState.OnEnter(prevState, m_StatusUpdater.Status, Motor, this);
+            CurrentState.OnEnter(prevState, m_StatusUpdater.Status, this);
         }
 
         public void UseAimingCamera(bool enable)
@@ -412,7 +405,7 @@ namespace CraftSharp.Control
         {
             if (!Status.EntityDisabled)
             {
-                m_StatusUpdater.UpdatePlayerStatus(Motor, GetMovementOrientation());
+                m_StatusUpdater.UpdatePlayerStatus(GetMovementOrientation());
             }
         }
 
@@ -457,8 +450,6 @@ namespace CraftSharp.Control
                     break;
                 }
             }
-
-            CurrentState.UpdateBeforeMotor(deltaTime, Actions!, status, Motor, this);
         }
 
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
@@ -476,7 +467,7 @@ namespace CraftSharp.Control
             float prevStamina = status.StaminaLeft;
             
             // Update player physics and transform using updated current state
-            CurrentState.UpdateMain(ref currentVelocity, deltaTime, Actions!, status, Motor, this);
+            CurrentState.UpdateMain(ref currentVelocity, deltaTime, Actions!, status, this);
 
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (prevStamina != status.StaminaLeft) // Broadcast current stamina if changed
@@ -523,26 +514,26 @@ namespace CraftSharp.Control
             var updatedPosition = CoordConvert.MC2Unity(offset, Location2Send);
             var playerPosDelta = updatedPosition - transform.position;
 
-            Motor.SetPosition(updatedPosition);
+            transform.position = updatedPosition;
 
             return playerPosDelta;
         }
 
         public void SetLocationFromServer(Location loc, bool reset = false, float mcYaw = 0F)
         {
-            if (reset) // Reset motor velocity TODO: Check
+            if (reset) // Reset base velocity
             {
-                Motor.BaseVelocity = Vector3.zero;
+                baseVelocity = Vector3.zero;
             }
 
             var newUnityYaw = mcYaw + 90F; // Coordinate system conversion
-            var newRotation = Quaternion.Euler(0F, newUnityYaw, 0F);
 
             Status.TargetVisualYaw = newUnityYaw;
             Status.CurrentVisualYaw = newUnityYaw;
 
             // Update current location and yaw
-            Motor.SetPositionAndRotation(CoordConvert.MC2Unity(_worldOriginOffset, loc), newRotation);
+            transform.position = CoordConvert.MC2Unity(_worldOriginOffset, loc);
+            m_PlayerRender.Yaw.Value = newUnityYaw;
 
             // Update local data
             Location2Send = loc;
@@ -563,42 +554,6 @@ namespace CraftSharp.Control
             var statusInfo = Status.Spectating ? string.Empty : Status.ToString();
 
             return $"State: {CurrentState}\n{statusInfo}";
-        }
-
-        // Misc methods from Kinematic Character Controller
-
-        public void PostGroundingUpdate(float deltaTime)
-        {
-            // Do nothing
-        }
-
-        public bool IsColliderValidForCollisions(Collider coll)
-        {
-            if (!m_StatusUpdater)
-            {
-                return true;
-            }
-            return !m_StatusUpdater.Status.Spectating && !CurrentState.IgnoreCollision();
-        }
-
-        public void OnGroundHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)
-        {
-            // Do nothing
-        }
-
-        public void OnMovementHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)
-        {
-            // Do nothing
-        }
-
-        public void ProcessHitStabilityReport(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, Vector3 atCharacterPosition, Quaternion atCharacterRotation, ref HitStabilityReport hitStabilityReport)
-        {
-            // Do nothing
-        }
-
-        public void OnDiscreteCollisionDetected(Collider hitCollider)
-        {
-            // Do nothing
         }
     }
 }

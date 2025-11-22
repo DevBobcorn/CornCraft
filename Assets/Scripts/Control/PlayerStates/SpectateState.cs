@@ -1,14 +1,11 @@
 #nullable enable
-using KinematicCharacterController;
 using UnityEngine;
-
-using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
 {
     public class SpectateState : IPlayerState
     {
-        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             var ability = player.AbilityConfig;
 
@@ -36,9 +33,9 @@ namespace CraftSharp.Control
 
             // Check vertical movement...
             if (inputData.Locomotion.Ascend.IsPressed())
-                moveVelocity += ability.SneakSpeed * 3F * motor.CharacterUp;
+                moveVelocity += ability.SneakSpeed * 3F * player.transform.up;
             else if (inputData.Locomotion.Descend.IsPressed())
-                moveVelocity -= ability.SneakSpeed * 3F * motor.CharacterUp;
+                moveVelocity -= ability.SneakSpeed * 3F * player.transform.up;
 
             currentVelocity = moveVelocity;
 
@@ -50,7 +47,7 @@ namespace CraftSharp.Control
 
         public bool ShouldExit(PlayerActions inputData, PlayerStatus info)  => !info.Spectating;
 
-        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
         }

@@ -52,6 +52,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -73,6 +75,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
@@ -139,6 +142,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -160,6 +165,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
@@ -228,6 +234,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -249,6 +257,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -273,9 +282,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5325304902113657644}
   - component: {fileID: 8936216958574950242}
-  - component: {fileID: 5454645792870506942}
   - component: {fileID: 2543192715876108228}
-  - component: {fileID: 6493157887190711041}
   m_Layer: 9
   m_Name: Client Player Controller
   m_TagString: Untagged
@@ -312,53 +319,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AbilityConfig: {fileID: 11400000, guid: 899e206093da6974cb697d48a642b37d, type: 2}
-  m_SkillItemConfig: {fileID: 11400000, guid: d50d776819a982b49b745438ebbebd20, type: 2}
   m_StatusUpdater: {fileID: 2543192715876108228}
   m_InitialUpward: {x: 0, y: 1, z: 0}
   m_InitialForward: {x: 0, y: 0, z: 1}
-  m_Motor: {fileID: 5454645792870506942}
---- !u!114 &5454645792870506942
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8973392254440252464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d1bc5515e3ab954e80599c538834774, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Capsule: {fileID: 6493157887190711041}
-  CapsuleRadius: 0.4
-  CapsuleHeight: 1.8
-  CapsuleYOffset: 0.91
-  CapsulePhysicsMaterial: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
-  GroundDetectionExtraDistance: 0
-  MaxStableSlopeAngle: 50
-  StableGroundLayers:
-    serializedVersion: 2
-    m_Bits: 192
-  DiscreteCollisionEvents: 0
-  StepHandling: 2
-  MaxStepHeight: 0.4
-  AllowSteppingWithoutStableGrounding: 0
-  MinRequiredStepDepth: 0
-  LedgeAndDenivelationHandling: 0
-  MaxStableDistanceFromLedge: 0
-  MaxVelocityForLedgeSnap: 0
-  MaxStableDenivelationAngle: 180
-  InteractiveRigidbodyHandling: 1
-  RigidbodyInteractionType: 0
-  SimulatedCharacterMass: 1
-  PreserveAttachedRigidbodyMomentum: 1
-  HasPlanarConstraint: 0
-  PlanarConstraintAxis: {x: 0, y: 0, z: 1}
-  MaxMovementIterations: 5
-  MaxDecollisionIterations: 1
-  CheckMovementInitialOverlaps: 1
-  KillVelocityWhenExceedMaxMovementIterations: 1
-  KillRemainingMovementWhenExceedMaxMovementIterations: 1
 --- !u!114 &2543192715876108228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,32 +334,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97f9c4390573ed643b136abb835f0e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TerrainBoxColliderLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  LiquidBoxColliderLayer:
-    serializedVersion: 2
-    m_Bits: 16384
---- !u!136 &6493157887190711041
-CapsuleCollider:
-  m_ObjectHideFlags: 8
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8973392254440252464}
-  m_Material: {fileID: 13400000, guid: 11508097031b7f04c8ab9dcba71d230e, type: 2}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.4
-  m_Height: 1.8
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.91, z: 0}

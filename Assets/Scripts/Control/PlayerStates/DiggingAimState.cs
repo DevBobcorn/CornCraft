@@ -1,12 +1,11 @@
 ﻿#nullable enable
-using KinematicCharacterController;
 using UnityEngine;
 
 namespace CraftSharp.Control
 {
     public class DiggingAimState : IPlayerState
     {
-        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             var ability = player.AbilityConfig;
 
@@ -35,7 +34,7 @@ namespace CraftSharp.Control
                 // Use target orientation to calculate actual movement direction, taking ground shape into consideration
                 if (info.Moving)
                 {
-                    moveVelocity = motor.GetDirectionTangentToSurface(player.GetMovementOrientation() * Vector3.forward, motor.GroundingStatus.GroundNormal) * moveSpeed;
+                    moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
                 }
                 else // Idle
                 {
@@ -56,10 +55,10 @@ namespace CraftSharp.Control
                 info.Attacking = false;
             }
 
-            if (!motor.GroundingStatus.FoundAnyGround)
+            if (!info.GroundCheck)
             {
                 // Apply fake gravity
-                currentVelocity = - motor.CharacterUp * 5F;
+                currentVelocity = - player.transform.up * 5F;
             }
 
             // Restore stamina
@@ -77,7 +76,7 @@ namespace CraftSharp.Control
             return !info.Attacking || info.Spectating;
         }
 
-        public void OnEnter(IPlayerState prevState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
             // Digging also use this attacking flag
             info.Attacking = true;
@@ -87,7 +86,7 @@ namespace CraftSharp.Control
             player.UseAimingCamera(true);
         }
 
-        public void OnExit(IPlayerState nextState, PlayerStatus info, KinematicCharacterMotor motor, PlayerController player)
+        public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             // Digging also use this attacking flag
             info.Attacking = false;
