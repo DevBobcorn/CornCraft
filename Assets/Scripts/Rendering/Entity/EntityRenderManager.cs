@@ -15,6 +15,7 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject witherSkeletonPrefab;
         [SerializeField] private GameObject strayPrefab;
         [SerializeField] private GameObject zombiePrefab;
+        [SerializeField] private GameObject villagerPrefab;
         [SerializeField] private GameObject huskPrefab;
         [SerializeField] private GameObject drownedPrefab;
         [SerializeField] private GameObject creeperPrefab;
@@ -273,6 +274,7 @@ namespace CraftSharp.Rendering
             entityPrefabs.Add(EntityType.WITHER_SKELETON_ID,   witherSkeletonPrefab);
             entityPrefabs.Add(EntityType.STRAY_ID,             strayPrefab);
             entityPrefabs.Add(EntityType.ZOMBIE_ID,            zombiePrefab);
+            entityPrefabs.Add(EntityType.VILLAGER_ID,          villagerPrefab);
             entityPrefabs.Add(EntityType.HUSK_ID,              huskPrefab);
             entityPrefabs.Add(EntityType.DROWNED_ID,           drownedPrefab);
             entityPrefabs.Add(EntityType.CREEPER_ID,           creeperPrefab);
