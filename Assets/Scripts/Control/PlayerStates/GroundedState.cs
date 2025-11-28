@@ -36,27 +36,6 @@ namespace CraftSharp.Control
             return halfSideLength / Mathf.Max(absX, absY);
         }
 
-        private void CheckClimbOver(PlayerStatus info, PlayerController player)
-        {
-            var yawRadian = info.TargetVisualYaw * Mathf.Deg2Rad;
-            var dirVector = new Vector2(Mathf.Sin(yawRadian), Mathf.Cos(yawRadian));
-            var maxDist = DistanceToSquareSide(dirVector, player.AbilityConfig.ClimbOverMaxDist);
-
-            if (info is not { Moving: true, BarrierHeight: > THRESHOLD_CLIMB_UP and < THRESHOLD_CLIMB_1M } ||
-                !(info.BarrierDistance < maxDist) || !(info.WallDistance - info.BarrierDistance > 0.7F)) return; // Climb up platform
-            
-            if (!(info.YawDeltaAbs <= 10F)) return; // Trying to move forward
-            
-            // Workaround: Use a cooldown value to disable climbing in a short period after landing
-            if (_timeSinceGrounded > 0.3F)
-            {
-                player.ClimbOverBarrier(info.BarrierDistance, info.BarrierHeight, info.BarrierHeight < THRESHOLD_WALK_UP, false);
-            }
-
-            // Prevent jump preparation if climbing is successfully initiated, or only timer is not ready
-            _jumpRequested = false;
-        }
-
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
             var ability = player.AbilityConfig;
@@ -138,7 +117,7 @@ namespace CraftSharp.Control
             }
             
             // Apply gravity
-            moveVelocity += Physics.gravity * (info.GravityScale * 1.6F * interval);
+            moveVelocity += Physics.gravity * (info.GravityScale * 1.8F * interval);
 
             currentVelocity = moveVelocity;
 
@@ -202,7 +181,7 @@ namespace CraftSharp.Control
                 _sprintRequested = true;
             };
 
-            _timeSinceGrounded = prevState is not ForceMoveState ? 0F : Mathf.Max(_timeSinceGrounded, 0F);
+            _timeSinceGrounded = Mathf.Max(_timeSinceGrounded, 0F);
         }
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)

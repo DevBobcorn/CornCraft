@@ -333,37 +333,6 @@ namespace CraftSharp.Control
             CornApp.Notify(Translations.Get($"gameplay.control.sneaking_{(Status.Sneaking ? "started" : "stopped")}"));
         }
 
-        public void ClimbOverBarrier(float barrierDist, float barrierHeight, bool walkUp, bool fromLiquid)
-        {
-            Vector2 extraOffset = AbilityConfig.ClimbOverExtraOffset;
-
-            if (fromLiquid) extraOffset.x += 0.1F;
-            var forwardDir = GetMovementOrientation() * Vector3.forward;
-            var offset = forwardDir * barrierDist + barrierHeight * transform.up;
-
-            StartForceMoveOperation("Climb over barrier (TransformDisplacement)",
-                new ForceMoveOperation[] {
-                    new(offset, barrierHeight * 0.3F,
-                        exit: (info, _) =>
-                        {
-                            info.Grounded = true;
-                        },
-                        update: (_, _, inputData, info, _) =>
-                        {
-                            info.Moving = inputData.Locomotion.Movement.IsPressed();
-                            // Don't terminate till the time ends
-                            return false;
-                        }
-                    )
-                } );
-        }
-
-        private void StartForceMoveOperation(string stateName, ForceMoveOperation[] ops)
-        {
-            // Set it as pending state, this will be set as active state upon next logical update
-            pendingState = new ForceMoveState(stateName, ops);
-        }
-
         public void ChangeToState(IPlayerState state)
         {
             var prevState = CurrentState;
@@ -468,10 +437,20 @@ namespace CraftSharp.Control
             CurrentState.UpdateMain(ref currentVelocity, deltaTime, Actions!, status, this);
             
             // Update player rotation (yaw)
-            m_PlayerRender.transform.eulerAngles = new Vector3(0F, status.CurrentVisualYaw, 0F);
-            
-            // Update player position using calculated velocity
-            m_StatusUpdater.UpdatePlayerPosition(currentVelocity, deltaTime, aabbs);
+            if (m_PlayerRender)
+            {
+                m_PlayerRender.transform.eulerAngles = new Vector3(0F, status.CurrentVisualYaw, 0F);
+            }
+
+            if (status.PhysicsDisabled)
+            {
+                currentVelocity = Vector3.zero;
+            }
+            else
+            {
+                // Update player position using calculated velocity
+                m_StatusUpdater.UpdatePlayerPosition(ref currentVelocity, deltaTime, aabbs);
+            }
 
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (prevStamina != status.StaminaLeft) // Broadcast current stamina if changed

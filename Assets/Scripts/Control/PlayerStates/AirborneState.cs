@@ -44,17 +44,12 @@ namespace CraftSharp.Control
                 _glideToggleRequested = false;
             }
             */
-            
-            if (info.GameMode == GameMode.Creative)
+
+            if (_flightRequested)
             {
-                if (_flightRequested)
-                    info.Flying = true;
+                info.Flying = info.GameMode == GameMode.Creative;
+                _flightRequested = false;
             }
-            else
-            {
-                info.Flying = false;
-            }
-            _flightRequested = false;
             
             info.AirTime += interval;
 
@@ -98,7 +93,7 @@ namespace CraftSharp.Control
 
                     // Flying doesn't have any gravity, which can prevent proper groundcheck
                     // So here we stop flying when getting close enough to the ground
-                    if (info.CenterDownDist < STOP_FLYING_MAXIMUM_DIST)
+                    if (info.GroundDist < STOP_FLYING_MAXIMUM_DIST)
                     {
                         info.Flying = false;
                     }
@@ -106,13 +101,13 @@ namespace CraftSharp.Control
                 else
                 {
                     // Apply gravity when gliding and not flying (Not additive when gliding)
-                    moveVelocity += info.GravityScale * 1.4f * interval * Physics.gravity;
+                    moveVelocity += info.GravityScale * 1.8F * interval * Physics.gravity;
                 }
             }
             else // Falling
             {
                 // Apply gravity
-                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 1.6F * interval);
+                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 1.8F * interval);
                 
                 // Speed limit check
                 if (moveVelocity.magnitude > ability.MaxFallSpeed)
@@ -151,8 +146,8 @@ namespace CraftSharp.Control
             info.AirTime = 0F;
 
             // Reset request flags
-                //_glideToggleRequested = false;
-                _flightRequested = false;
+            //_glideToggleRequested = false;
+            _flightRequested = false;
 
             // Register input action events
             player.Actions.Locomotion.Jump.performed += glideToggleRequestCallback = _ =>

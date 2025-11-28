@@ -10,11 +10,9 @@ namespace CraftSharp.Control
     public class PlayerStatusUpdater : MonoBehaviour
     {
         // Ground distance check
-        private const float GROUND_RAYCAST_START   = 2.5F;
         private const float GROUND_RAYCAST_DIST    = 5.0F;
 
         // Liquid status and distance check
-        private const float LIQUID_RAYCAST_START   =  2.0F; // Liquid raycast goes downward from top of player
         private const float LIQUID_RAYCAST_DIST    =  5.0F;
         public const float FLOATING_DIST_THRESHOLD = -0.5F;
 
@@ -28,6 +26,11 @@ namespace CraftSharp.Control
         const float PLAYER_CENTER_Y = PLAYER_HEIGHT * 0.5F; // 0.9
         const float GROUND_CHECK_TOLERANCE = 1E-2F; // Allow slight penetration/float
         const float MOVEMENT_EPSILON = 1E-4F; // Threshold to consider movement negligible
+        const float MAX_STEP_HEIGHT = 0.125F;
+        const float HIGH_STEP_MAX_HEIGHT = 1.125F;
+        const float HIGH_STEP_LIFT_AMOUNT = 0.125F;
+        const float FORWARD_STEP_DOT_THRESHOLD = 0.5F;
+        const float STEP_FORWARD_CHECK_OFFSET = 0.05F;
 
         public readonly PlayerStatus Status = new();
         
@@ -48,7 +51,7 @@ namespace CraftSharp.Control
             
         }
 
-        public void UpdatePlayerPosition(Vector3 velocity, float deltaTime, UnityAABB[] aabbs)
+        public void UpdatePlayerPosition(ref Vector3 velocity, float deltaTime, UnityAABB[] aabbs)
         {
             // Update player position
             var offset = velocity * deltaTime;
@@ -57,14 +60,30 @@ namespace CraftSharp.Control
             // Reset blocking AABB
             hasBlockingAABB = false;
             
-            var newPosition = CalculateNewPlayerPosition(transform.position, offset, aabbs, 
-                out bool blocked, out Vector3 blockingMin, out Vector3 blockingMax);
+            Vector3 planarVelocity = new Vector3(offset.x, 0F, offset.z);
+            Vector3 movementForward = transform.forward;
+
+            if (planarVelocity.sqrMagnitude > MOVEMENT_EPSILON * MOVEMENT_EPSILON)
+            {
+                movementForward = planarVelocity.normalized;
+            }
+            
+            bool shouldUseStepping = Status.GroundDist < 1F;
+
+            var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, shouldUseStepping,
+                aabbs, out bool blocked, out Vector3 blockingMin, out Vector3 blockingMax);
             
             if (blocked)
             {
                 hasBlockingAABB = true;
                 blockingAABBMin = blockingMin;
                 blockingAABBMax = blockingMax;
+                
+                if (!shouldUseStepping)
+                {
+                    velocity.x = 0F;
+                    velocity.z = 0F;
+                }
             }
             
             transform.position = newPosition;
@@ -74,8 +93,8 @@ namespace CraftSharp.Control
         /// Calculates new player position given current position, movement offset, and a list of AABBs.
         /// If any AABB is in the way, the player moves to the point touching the AABB.
         /// </summary>
-        private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, UnityAABB[] aabbs,
-            out bool wasBlocked, out Vector3 blockingMin, out Vector3 blockingMax)
+        private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, Vector3 forward, bool shouldUseStepping,
+            UnityAABB[] aabbs, out bool wasBlocked, out Vector3 blockingMin, out Vector3 blockingMax)
         {
             var newPos = currentPosition;
             bool blocked = false;
@@ -113,15 +132,171 @@ namespace CraftSharp.Control
                 return finalPos;
             }
 
+            if (shouldUseStepping)
+            {
+                // Check for forward step-ups before resolving axes
+                TryHandleForwardStep();
+            }
+
             // Apply movement axis by axis (Y first for gravity/ground resolution)
             ResolveVertical(effectiveOffset.y);
             ResolveHorizontalX(effectiveOffset.x);
             ResolveHorizontalZ(effectiveOffset.z);
-
+            
             wasBlocked = blocked;
             blockingMin = blockMin;
             blockingMax = blockMax;
+            
             return newPos;
+
+            void TryHandleForwardStep()
+            {
+                Vector3 horizontalOffset = new Vector3(effectiveOffset.x, 0F, effectiveOffset.z);
+                if (horizontalOffset.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
+                    return;
+
+                Vector3 planarForward = new Vector3(forward.x, 0F, forward.z);
+                if (planarForward.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
+                    return;
+
+                planarForward.Normalize();
+
+                Vector3 moveDir = horizontalOffset.normalized;
+                if (Vector3.Dot(moveDir, planarForward) < FORWARD_STEP_DOT_THRESHOLD)
+                    return;
+
+                if (!TryFindStepSurface(horizontalOffset, moveDir, out float targetSurfaceY, out float desiredLift))
+                    return;
+                Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
+
+                if (desiredLift <= GROUND_CHECK_TOLERANCE)
+                {
+                    return;
+                }
+
+                // Short steps are climbed in one frame, taller steps inch upward until reached
+                if (desiredLift <= MAX_STEP_HEIGHT + GROUND_CHECK_TOLERANCE)
+                {
+                    effectiveOffset.y = desiredLift; // snap directly onto the surface
+                    return;
+                }
+
+                if (desiredLift > HIGH_STEP_MAX_HEIGHT + GROUND_CHECK_TOLERANCE)
+                    return;
+
+                float incrementalLift = Mathf.Min(HIGH_STEP_LIFT_AMOUNT, desiredLift);
+                if (incrementalLift <= GROUND_CHECK_TOLERANCE)
+                    return;
+
+                effectiveOffset.y = incrementalLift; // climb part-way this frame
+                Debug.Log($"Incremental lift: {incrementalLift}");
+            }
+
+            bool TryFindStepSurface(Vector3 horizontalOffset, Vector3 moveDir, out float stepTargetY, out float stepLift)
+            {
+                Vector3 currentFeet = newPos;
+                Vector3 targetFeet = currentFeet + horizontalOffset;
+                stepLift = 0F;
+
+                float startMinX = currentFeet.x - PLAYER_RADIUS;
+                float startMaxX = currentFeet.x + PLAYER_RADIUS;
+                float startMinZ = currentFeet.z - PLAYER_RADIUS;
+                float startMaxZ = currentFeet.z + PLAYER_RADIUS;
+
+                float endMinX = targetFeet.x - PLAYER_RADIUS;
+                float endMaxX = targetFeet.x + PLAYER_RADIUS;
+                float endMinZ = targetFeet.z - PLAYER_RADIUS;
+                float endMaxZ = targetFeet.z + PLAYER_RADIUS;
+
+                float sweepMinX = Mathf.Min(startMinX, endMinX);
+                float sweepMaxX = Mathf.Max(startMaxX, endMaxX);
+                float sweepMinZ = Mathf.Min(startMinZ, endMinZ);
+                float sweepMaxZ = Mathf.Max(startMaxZ, endMaxZ);
+
+                bool found = false;
+                float bestSurface = float.MaxValue;
+
+                foreach (var aabb in aabbs)
+                {
+                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+
+                    float surfaceY = aabb.Max.y;
+                    if (surfaceY <= currentFeet.y + GROUND_CHECK_TOLERANCE ||
+                        surfaceY > currentFeet.y + HIGH_STEP_MAX_HEIGHT + GROUND_CHECK_TOLERANCE)
+                        continue;
+                    float liftAmount = surfaceY - currentFeet.y;
+
+                    if (!AxisOverlap(sweepMinX, sweepMaxX, aabb.Min.x, aabb.Max.x, false) ||
+                        !AxisOverlap(sweepMinZ, sweepMaxZ, aabb.Min.z, aabb.Max.z, false))
+                        continue;
+
+                    Vector3 aabbCenter = (aabb.Min + aabb.Max) * 0.5F;
+                    Vector3 toAabb = new Vector3(aabbCenter.x - currentFeet.x, 0F, aabbCenter.z - currentFeet.z);
+
+                    if (toAabb.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
+                        continue;
+
+                    toAabb.Normalize();
+
+                    if (Vector3.Dot(toAabb, moveDir) <= 0F)
+                        continue;
+
+                    if (WouldOverlapAfterLift(liftAmount, moveDir))
+                        continue;
+
+                    if (!found || surfaceY < bestSurface)
+                    {
+                        bestSurface = surfaceY;
+                        stepLift = liftAmount;
+                        found = true;
+                    }
+                }
+
+                stepTargetY = bestSurface;
+                return found;
+            }
+
+            bool WouldOverlapAfterLift(float lift, Vector3 checkDirection)
+            {
+                float testMinY = newPos.y + lift;
+                float testMaxY = testMinY + PLAYER_HEIGHT;
+
+                Vector3 forwardShift = Vector3.zero;
+                Vector3 planarDirection = new Vector3(checkDirection.x, 0F, checkDirection.z);
+                if (planarDirection.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
+                {
+                    planarDirection = new Vector3(forward.x, 0F, forward.z);
+                }
+
+                if (planarDirection.sqrMagnitude > MOVEMENT_EPSILON * MOVEMENT_EPSILON)
+                {
+                    forwardShift = planarDirection.normalized * STEP_FORWARD_CHECK_OFFSET;
+                }
+
+                float shiftedX = newPos.x + forwardShift.x;
+                float shiftedZ = newPos.z + forwardShift.z;
+
+                float playerMinX = shiftedX - PLAYER_RADIUS;
+                float playerMaxX = shiftedX + PLAYER_RADIUS;
+                float playerMinZ = shiftedZ - PLAYER_RADIUS;
+                float playerMaxZ = shiftedZ + PLAYER_RADIUS;
+
+                foreach (var aabb in aabbs)
+                {
+                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+
+                    if (!AxisOverlap(playerMinX, playerMaxX, aabb.Min.x, aabb.Max.x, false) ||
+                        !AxisOverlap(playerMinZ, playerMaxZ, aabb.Min.z, aabb.Max.z, false))
+                        continue;
+
+                    if (!AxisOverlap(testMinY, testMaxY, aabb.Min.y, aabb.Max.y, false))
+                        continue;
+
+                    return true;
+                }
+
+                return false;
+            }
 
             bool AxisOverlap(float minA, float maxA, float minB, float maxB, bool inclusive)
             {
@@ -333,6 +508,7 @@ namespace CraftSharp.Control
         {
             // Player feet position
             var playerPos = transform.position;
+            float playerFeetY = playerPos.y;
             
             // Check player's feet area (XZ plane) against terrain AABBs
             var playerMinX = playerPos.x - PLAYER_RADIUS;
@@ -341,6 +517,8 @@ namespace CraftSharp.Control
             var playerMaxZ = playerPos.z + PLAYER_RADIUS;
 
             bool isGrounded = false;
+            float closestGroundDist = GROUND_RAYCAST_DIST;
+            float raycastMinY = playerFeetY - GROUND_RAYCAST_DIST;
 
             // Check terrain AABBs (not liquid, not triggers)
             foreach (var aabb in aabbs)
@@ -352,22 +530,38 @@ namespace CraftSharp.Control
                 bool xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
                 bool zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
                 
-                if (xOverlap && zOverlap)
+                if (!xOverlap || !zOverlap)
+                    continue;
+
+                float aabbTopY = aabb.Max.y;
+                float aabbBottomY = aabb.Min.y;
+
+                if (playerFeetY >= aabbBottomY && playerFeetY <= aabbTopY)
                 {
-                    // Check if player's bottom is standing on top of this AABB
-                    // Player bottom should be within tolerance above the AABB's top surface
-                    var aabbTopY = aabb.Max.y;
-                    if (playerPos.y >= aabbTopY - GROUND_CHECK_TOLERANCE && 
-                        playerPos.y <= aabbTopY + GROUND_CHECK_TOLERANCE)
+                    closestGroundDist = 0F;
+                }
+                else if (aabbTopY <= playerFeetY && aabbTopY >= raycastMinY)
+                {
+                    float distance = playerFeetY - aabbTopY;
+                    if (distance < closestGroundDist)
                     {
-                        isGrounded = true;
-                        break;
+                        closestGroundDist = distance;
                     }
                 }
+
+                if (!isGrounded &&
+                    playerFeetY >= aabbTopY - GROUND_CHECK_TOLERANCE &&
+                    playerFeetY <= aabbTopY + GROUND_CHECK_TOLERANCE)
+                {
+                    isGrounded = true;
+                }
+
+                if (isGrounded && closestGroundDist <= 0F)
+                    break;
             }
 
+            Status.GroundDist = Mathf.Clamp(closestGroundDist, 0F, GROUND_RAYCAST_DIST);
             Status.Grounded = isGrounded;
-            Debug.Log($"Grounded: {isGrounded}");
         }
 
         private void OnDrawGizmos()

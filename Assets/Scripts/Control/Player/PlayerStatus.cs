@@ -74,12 +74,8 @@ namespace CraftSharp.Control
         public bool PhysicsDisabled = true;
 
         // Reference values
-        public float CenterDownDist = 0F;
-        public float BarrierHeight  = 0F;
-        public float LiquidDist     = 0F;
-        public float BarrierYawAngle  = 0F;
-        public float BarrierDistance  = 0F;
-        public float WallDistance     = 0F;
+        public float GroundDist = 0F;
+        public float LiquidDist = 0F;
         public float TargetVisualYaw  = 0F;
         public float MovementInputYaw = 0F;
         public float CurrentVisualYaw = 0F;
@@ -103,8 +99,8 @@ namespace CraftSharp.Control
         
         public override string ToString()
         {
-            var moveInfo = $"Moving: {Moving} CenterDownDist: {CenterDownDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
-            var envInfo = $"\nBarrier Yaw Angle: {BarrierYawAngle:0.00} Dist:\t{BarrierDistance:0.00} ({WallDistance:0.00}) Hgt:{BarrierHeight:0.00}\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}";
+            var moveInfo = $"Moving: {Moving} CenterDownDist: {GroundDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
+            var envInfo = $"\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
             return $"Flying: {Flying}\nGliding: {Gliding}\nInLiquid: {InLiquid}\nFloating: {Floating}\nGrounded: {Grounded}\nClinging: {Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";
