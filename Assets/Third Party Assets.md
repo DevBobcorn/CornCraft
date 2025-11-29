@@ -7,7 +7,3 @@ Here's a list of the assets:
 - [**Atmospheric Height Fog**](https://assetstore.unity.com/packages/vfx/shaders/fullscreen-camera-effects/atmospheric-height-fog-optimized-fog-for-consoles-mobile-and-vr-143825): Provides fog for environment, can be removed.
 
 - [**HoloDissolveFX**](https://assetstore.unity.com/packages/p/holodissolvefx-holograms-dissolve-urp-251841): Entity dissolve shaders.
-
-Also, there are some free assets included in the repo just for convenience. It is recommended that you claim these assets from Asset Store so as to get updates and avoid potential licensing issues. Below is a list of them:
-
-- [**Kinematic Character Controller**](https://assetstore.unity.com/packages/tools/physics/kinematic-character-controller-99131): Code base for creating custom player controllers used in the project.
