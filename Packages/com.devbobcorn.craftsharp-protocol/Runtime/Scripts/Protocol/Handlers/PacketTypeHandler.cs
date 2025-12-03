@@ -33,7 +33,7 @@ namespace CraftSharp.Protocol.Handlers
         {
             PacketTypePalette p = protocolVersion switch
             {
-                > ProtocolMinecraft.MC_1_21_3_Version => throw new NotImplementedException(Translations.Get("exception.palette.packet")),
+                > ProtocolMinecraft.MC_1_21_1_Version => throw new NotImplementedException(Translations.Get("exception.palette.packet")),
 
                 <= ProtocolMinecraft.MC_1_16_5_Version => new PacketPalette1165(),
                 <= ProtocolMinecraft.MC_1_17_1_Version => new PacketPalette1171(),
@@ -46,9 +46,8 @@ namespace CraftSharp.Protocol.Handlers
                 <= ProtocolMinecraft.MC_1_20_2_Version => new PacketPalette1202(),
                 <= ProtocolMinecraft.MC_1_20_4_Version => new PacketPalette1204(),
                 <= ProtocolMinecraft.MC_1_20_6_Version => new PacketPalette1206(),
-                <= ProtocolMinecraft.MC_1_21_1_Version => new PacketPalette1211(),
                 
-                _                                      => new PacketPalette1213()
+                _                                      => new PacketPalette1211()
             };
 
             return p;

@@ -43,12 +43,6 @@ namespace CraftSharp.Protocol.Handlers
         public const int MC_1_20_4_Version = 765;
         public const int MC_1_20_6_Version = 766;
         public const int MC_1_21_1_Version = 767;
-        public const int MC_1_21_3_Version = 768;
-        public const int MC_1_21_4_Version = 769;
-        public const int MC_1_21_5_Version = 770;
-        public const int MC_1_21_6_Version = 771;
-        public const int MC_1_21_8_Version = 772;
-        public const int MC_1_21_9_Version = 773;
 
         private int compression_threshold = -1;
         private int autocomplete_transaction_id = 0;
@@ -95,8 +89,6 @@ namespace CraftSharp.Protocol.Handlers
                 <= MC_1_19_2_Version => new EntityMetadataPalette1191(), // 1.13 - 1.19.2
                 <= MC_1_19_3_Version => new EntityMetadataPalette1193(), // 1.19.3
                 <= MC_1_20_4_Version => new EntityMetadataPalette1194(), // 1.19.4 - 1.20.4
-                <= MC_1_21_4_Version => new EntityMetadataPalette1205(), // 1.20.5 - 1.21.4
-                <= MC_1_21_5_Version => new EntityMetadataPalette1215(), // 1.21.5
 
                 _ => throw new NotImplementedException()
             };
@@ -711,11 +703,7 @@ namespace CraftSharp.Protocol.Handlers
                     }
                     break;
                 case PacketTypesIn.DeclareRecipes:
-                    if (protocolVersion >= MC_1_21_3_Version)
-                    {
-                        Debug.LogWarning("Recipe parsing not implemented for 1.21.2+ yet");
-                    }
-                    else // Up to 1.21.1
+                    // Up to 1.21.1
                     {
                         int recipeCount = DataTypes.ReadNextVarInt(packetData);
                         Debug.Log($"Received {recipeCount} recipes from server");
@@ -2248,7 +2236,7 @@ namespace CraftSharp.Protocol.Handlers
                         float explosionStrength;
                         int explosionBlockCount;
 
-                        if (protocolVersion < MC_1_21_3_Version)
+                        // Up to 1.21.2
                         {
                             explosionStrength = DataTypes.ReadNextFloat(packetData);
                             explosionBlockCount = protocolVersion >= MC_1_17_Version
@@ -2281,27 +2269,6 @@ namespace CraftSharp.Protocol.Handlers
                                     DataTypes.ReadNextFloat(packetData); // Range
                                 */
                             }
-                        }
-                        else // 1.21.2+
-                        {
-                            explosionStrength = 1F;
-                            explosionBlockCount = 0;
-
-                            var hasPlayerDeltaVelocity = DataTypes.ReadNextBool(packetData);
-
-                            if (hasPlayerDeltaVelocity)
-                            {
-                                DataTypes.ReadNextDouble(packetData); // Player Delta Velocity X
-                                DataTypes.ReadNextDouble(packetData); // Player Delta Velocity Y
-                                DataTypes.ReadNextDouble(packetData); // Player Delta Velocity Z
-                            }
-
-                            var itemPalette = ItemPalette.INSTANCE;
-
-                            dataTypes.ReadParticleData(packetData, itemPalette); // Explosion Particles
-
-                            // Explosion Sound TODO: Fix reading
-                            //DataTypes.ReadNextString(packetData); // Sound Id
                         }
 
                         handler.OnExplosion(explosionLocation, explosionStrength, explosionBlockCount);
@@ -3315,8 +3282,8 @@ namespace CraftSharp.Protocol.Handlers
                 }
                 if (protocolVersion >= MC_1_18_1_Version)
                     fields.Add(1); // 1.18 and above - Allow server listings
-                if (protocolVersion >= MC_1_21_3_Version)
-                    fields.AddRange(DataTypes.GetVarInt(particleStatus)); // 1.21.2 and above - Particle status
+                
+                // fields.AddRange(DataTypes.GetVarInt(particleStatus)); // 1.21.2 and above - Particle status
                 SendPacket(PacketTypesOut.ClientSettings, fields);
             }
             catch (SocketException) { }

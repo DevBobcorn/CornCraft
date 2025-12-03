@@ -390,10 +390,8 @@ namespace CraftSharp.Protocol.Handlers
             {
                 ParticleExtraDataType.None                => ParticleExtraData.Empty,
                 ParticleExtraDataType.Block               => ReadBlockParticle(cache),
-                ParticleExtraDataType.Dust                => ReadDustParticle(cache,
-                        useFloats:    protocolVersion < ProtocolMinecraft.MC_1_21_4_Version),
-                ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache,
-                        useFloats:    protocolVersion < ProtocolMinecraft.MC_1_21_4_Version),
+                ParticleExtraDataType.Dust                => ReadDustParticle(cache, useFloats: true),
+                ParticleExtraDataType.DustColorTransition => ReadDustColorTransitionParticle(cache, useFloats: true),
                 ParticleExtraDataType.EntityEffect        => ReadEntityEffectParticle(cache),
                 ParticleExtraDataType.SculkCharge         => ReadSculkChargeParticle(cache),
                 ParticleExtraDataType.Item                => ReadItemParticle(cache, itemPalette),
