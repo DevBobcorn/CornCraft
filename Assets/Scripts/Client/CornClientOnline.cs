@@ -1846,10 +1846,12 @@ namespace CraftSharp
                     Loom.QueueOnMainThread(() =>
                     {
                         var delta = PlayerController.transform.position - CoordConvert.MC2Unity(WorldOriginOffset, location);
+                        /*
                         if (delta.magnitude < 8F)
                         {
                             return; // I don't like this packet.
                         }
+                        */
                         var playerBlockLoc = location.GetBlockLoc();
                         // Force refresh environment collider
                         ChunkRenderManager.RebuildTerrainBoxCollider(playerBlockLoc);

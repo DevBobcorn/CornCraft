@@ -20,7 +20,7 @@ namespace CraftSharp.Control
         private const float BARRIER_RAYCAST_LENGTH =  2.0F;
 
         // Player dimensions
-        const float PLAYER_WIDTH = 0.6F;
+        const float PLAYER_WIDTH = 0.60001F; // Make it slightly wider than 0.6 to account for floating point error
         const float PLAYER_HEIGHT = 1.8F;
         const float PLAYER_RADIUS = PLAYER_WIDTH * 0.5F; // 0.3
         const float PLAYER_CENTER_Y = PLAYER_HEIGHT * 0.5F; // 0.9
@@ -68,7 +68,7 @@ namespace CraftSharp.Control
                 movementForward = planarVelocity.normalized;
             }
             
-            bool shouldUseStepping = Status.GroundDist < 1F;
+            bool shouldUseStepping = Status.GroundDist < HIGH_STEP_MAX_HEIGHT;
 
             var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, shouldUseStepping,
                 aabbs, out bool blocked, out Vector3 blockingMin, out Vector3 blockingMax);
