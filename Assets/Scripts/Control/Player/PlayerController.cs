@@ -467,11 +467,7 @@ namespace CraftSharp.Control
             var newLocation = CoordConvert.Unity2MC(_worldOriginOffset, transform.position);
 
             // Update values to send to server
-            Location2Send = new Location(
-                Math.Round(newLocation.X, 2),
-                Math.Round(newLocation.Y, 2),
-                Math.Round(newLocation.Z, 2)
-            );
+            Location2Send = newLocation;
 
             if (m_PlayerRender)
             {
