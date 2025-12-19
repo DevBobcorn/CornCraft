@@ -1,6 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 using CraftSharp.Rendering;
@@ -20,17 +18,17 @@ namespace CraftSharp.Control
         private const float BARRIER_RAYCAST_LENGTH =  2.0F;
 
         // Player dimensions
-        const float PLAYER_WIDTH = 0.60001F; // Make it slightly wider than 0.6 to account for floating point error
-        const float PLAYER_HEIGHT = 1.8F;
-        const float PLAYER_RADIUS = PLAYER_WIDTH * 0.5F; // 0.3
-        const float PLAYER_CENTER_Y = PLAYER_HEIGHT * 0.5F; // 0.9
-        const float GROUND_CHECK_TOLERANCE = 1E-2F; // Allow slight penetration/float
-        const float MOVEMENT_EPSILON = 1E-4F; // Threshold to consider movement negligible
-        const float MAX_STEP_HEIGHT = 0.125F;
-        const float HIGH_STEP_MAX_HEIGHT = 1.125F;
-        const float HIGH_STEP_LIFT_AMOUNT = 0.125F;
-        const float FORWARD_STEP_DOT_THRESHOLD = 0.5F;
-        const float STEP_FORWARD_CHECK_OFFSET = 0.05F;
+        private const float PLAYER_WIDTH = 0.60001F; // Make it slightly wider than 0.6 to account for floating point error
+        private const float PLAYER_HEIGHT = 1.8F;
+        private const float PLAYER_RADIUS = PLAYER_WIDTH * 0.5F; // 0.3
+        private const float PLAYER_CENTER_Y = PLAYER_HEIGHT * 0.5F; // 0.9
+        private const float GROUND_CHECK_TOLERANCE = 1E-2F; // Allow slight penetration/float
+        private const float MOVEMENT_EPSILON = 1E-4F; // Threshold to consider movement negligible
+        private const float MAX_STEP_HEIGHT = 0.125F;
+        private const float HIGH_STEP_MAX_HEIGHT = 1.125F;
+        private const float HIGH_STEP_LIFT_AMOUNT = 0.125F;
+        private const float FORWARD_STEP_DOT_THRESHOLD = 0.5F;
+        private const float STEP_FORWARD_CHECK_OFFSET = 0.125F;
 
         public readonly PlayerStatus Status = new();
         
@@ -71,7 +69,7 @@ namespace CraftSharp.Control
             var shouldUseStepping = Status.GroundDist < HIGH_STEP_MAX_HEIGHT;
 
             var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, shouldUseStepping,
-                aabbs, out bool blocked, out Vector3 blockingMin, out Vector3 blockingMax);
+                aabbs, out var blocked, out var blockingMin, out Vector3 blockingMax);
             
             if (blocked)
             {
@@ -112,7 +110,7 @@ namespace CraftSharp.Control
             {
                 if (effectiveOffset.y < 0F)
                 {
-                    float targetY = supportingSurface.Max.y;
+                    var targetY = supportingSurface.Max.y;
 
                     if (newPos.y + effectiveOffset.y < targetY)
                     {
@@ -133,18 +131,19 @@ namespace CraftSharp.Control
                 return finalPos;
             }
 
-            bool steppingApplied = false;
+            // Whether a stepping operation was performed during this tick and has not yet finished
+            var duringStepping = false;
 
             if (shouldUseStepping)
             {
                 // Check for forward step-ups before resolving axes
-                steppingApplied = TryHandleForwardStep();
+                duringStepping = TryHandleForwardStep();
             }
 
             // Apply movement axis by axis (Y first for gravity/ground resolution)
             ResolveVertical(effectiveOffset.y);
             // Don't use horizontal movement if lifting is applied
-            if (!steppingApplied)
+            if (!duringStepping)
             {
                 ResolveHorizontalX(effectiveOffset.x);
                 ResolveHorizontalZ(effectiveOffset.z);
@@ -158,17 +157,17 @@ namespace CraftSharp.Control
 
             bool TryHandleForwardStep()
             {
-                Vector3 horizontalOffset = new Vector3(effectiveOffset.x, 0F, effectiveOffset.z);
+                var horizontalOffset = new Vector3(effectiveOffset.x, 0F, effectiveOffset.z);
                 if (horizontalOffset.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
                     return false;
 
-                Vector3 planarForward = new Vector3(forward.x, 0F, forward.z);
+                var planarForward = new Vector3(forward.x, 0F, forward.z);
                 if (planarForward.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
                     return false;
 
                 planarForward.Normalize();
 
-                Vector3 moveDir = horizontalOffset.normalized;
+                var moveDir = horizontalOffset.normalized;
                 if (Vector3.Dot(moveDir, planarForward) < FORWARD_STEP_DOT_THRESHOLD)
                     return false;
 
@@ -176,22 +175,19 @@ namespace CraftSharp.Control
                     return false;
                 Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
 
-                if (desiredLift <= GROUND_CHECK_TOLERANCE)
+                switch (desiredLift)
                 {
-                    return false;
+                    case <= GROUND_CHECK_TOLERANCE:
+                        return false;
+                    // Short steps are climbed in one frame, taller steps inch upward until reached
+                    case <= MAX_STEP_HEIGHT + GROUND_CHECK_TOLERANCE:
+                        effectiveOffset.y = desiredLift; // snap directly onto the surface
+                        return false;
+                    case > HIGH_STEP_MAX_HEIGHT + GROUND_CHECK_TOLERANCE:
+                        return false;
                 }
 
-                // Short steps are climbed in one frame, taller steps inch upward until reached
-                if (desiredLift <= MAX_STEP_HEIGHT + GROUND_CHECK_TOLERANCE)
-                {
-                    effectiveOffset.y = desiredLift; // snap directly onto the surface
-                    return false;
-                }
-
-                if (desiredLift > HIGH_STEP_MAX_HEIGHT + GROUND_CHECK_TOLERANCE)
-                    return false;
-
-                float incrementalLift = Mathf.Min(HIGH_STEP_LIFT_AMOUNT, desiredLift);
+                var incrementalLift = Mathf.Min(HIGH_STEP_LIFT_AMOUNT, desiredLift);
                 if (incrementalLift <= GROUND_CHECK_TOLERANCE)
                     return false;
 
@@ -203,44 +199,44 @@ namespace CraftSharp.Control
 
             bool TryFindStepSurface(Vector3 horizontalOffset, Vector3 moveDir, out float stepTargetY, out float stepLift)
             {
-                Vector3 currentFeet = newPos;
-                Vector3 targetFeet = currentFeet + horizontalOffset;
+                var currentFeet = newPos;
+                var targetFeet = currentFeet + horizontalOffset;
                 stepLift = 0F;
 
-                float startMinX = currentFeet.x - PLAYER_RADIUS;
-                float startMaxX = currentFeet.x + PLAYER_RADIUS;
-                float startMinZ = currentFeet.z - PLAYER_RADIUS;
-                float startMaxZ = currentFeet.z + PLAYER_RADIUS;
+                var startMinX = currentFeet.x - PLAYER_RADIUS;
+                var startMaxX = currentFeet.x + PLAYER_RADIUS;
+                var startMinZ = currentFeet.z - PLAYER_RADIUS;
+                var startMaxZ = currentFeet.z + PLAYER_RADIUS;
 
-                float endMinX = targetFeet.x - PLAYER_RADIUS;
-                float endMaxX = targetFeet.x + PLAYER_RADIUS;
-                float endMinZ = targetFeet.z - PLAYER_RADIUS;
-                float endMaxZ = targetFeet.z + PLAYER_RADIUS;
+                var endMinX = targetFeet.x - PLAYER_RADIUS;
+                var endMaxX = targetFeet.x + PLAYER_RADIUS;
+                var endMinZ = targetFeet.z - PLAYER_RADIUS;
+                var endMaxZ = targetFeet.z + PLAYER_RADIUS;
 
-                float sweepMinX = Mathf.Min(startMinX, endMinX);
-                float sweepMaxX = Mathf.Max(startMaxX, endMaxX);
-                float sweepMinZ = Mathf.Min(startMinZ, endMinZ);
-                float sweepMaxZ = Mathf.Max(startMaxZ, endMaxZ);
+                var sweepMinX = Mathf.Min(startMinX, endMinX);
+                var sweepMaxX = Mathf.Max(startMaxX, endMaxX);
+                var sweepMinZ = Mathf.Min(startMinZ, endMinZ);
+                var sweepMaxZ = Mathf.Max(startMaxZ, endMaxZ);
 
-                bool found = false;
-                float bestSurface = float.MaxValue;
+                var found = false;
+                var bestSurface = float.MaxValue;
 
                 foreach (var aabb in aabbs)
                 {
                     if (aabb.IsTrigger || aabb.IsLiquid) continue;
 
-                    float surfaceY = aabb.Max.y;
+                    var surfaceY = aabb.Max.y;
                     if (surfaceY <= currentFeet.y + GROUND_CHECK_TOLERANCE ||
                         surfaceY > currentFeet.y + HIGH_STEP_MAX_HEIGHT + GROUND_CHECK_TOLERANCE)
                         continue;
-                    float liftAmount = surfaceY - currentFeet.y;
+                    var liftAmount = surfaceY - currentFeet.y;
 
                     if (!AxisOverlap(sweepMinX, sweepMaxX, aabb.Min.x, aabb.Max.x, false) ||
                         !AxisOverlap(sweepMinZ, sweepMaxZ, aabb.Min.z, aabb.Max.z, false))
                         continue;
 
-                    Vector3 aabbCenter = (aabb.Min + aabb.Max) * 0.5F;
-                    Vector3 toAabb = new Vector3(aabbCenter.x - currentFeet.x, 0F, aabbCenter.z - currentFeet.z);
+                    var aabbCenter = (aabb.Min + aabb.Max) * 0.5F;
+                    var toAabb = new Vector3(aabbCenter.x - currentFeet.x, 0F, aabbCenter.z - currentFeet.z);
 
                     if (toAabb.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
                         continue;
@@ -267,11 +263,11 @@ namespace CraftSharp.Control
 
             bool WouldOverlapAfterLift(float lift, Vector3 checkDirection)
             {
-                float testMinY = newPos.y + lift;
-                float testMaxY = testMinY + PLAYER_HEIGHT;
+                var testMinY = newPos.y + lift;
+                var testMaxY = testMinY + PLAYER_HEIGHT;
 
-                Vector3 forwardShift = Vector3.zero;
-                Vector3 planarDirection = new Vector3(checkDirection.x, 0F, checkDirection.z);
+                var forwardShift = Vector3.zero;
+                var planarDirection = new Vector3(checkDirection.x, 0F, checkDirection.z);
                 if (planarDirection.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
                 {
                     planarDirection = new Vector3(forward.x, 0F, forward.z);
@@ -282,13 +278,13 @@ namespace CraftSharp.Control
                     forwardShift = planarDirection.normalized * STEP_FORWARD_CHECK_OFFSET;
                 }
 
-                float shiftedX = newPos.x + forwardShift.x;
-                float shiftedZ = newPos.z + forwardShift.z;
+                var shiftedX = newPos.x + forwardShift.x;
+                var shiftedZ = newPos.z + forwardShift.z;
 
-                float playerMinX = shiftedX - PLAYER_RADIUS;
-                float playerMaxX = shiftedX + PLAYER_RADIUS;
-                float playerMinZ = shiftedZ - PLAYER_RADIUS;
-                float playerMaxZ = shiftedZ + PLAYER_RADIUS;
+                var playerMinX = shiftedX - PLAYER_RADIUS;
+                var playerMaxX = shiftedX + PLAYER_RADIUS;
+                var playerMinZ = shiftedZ - PLAYER_RADIUS;
+                var playerMaxZ = shiftedZ + PLAYER_RADIUS;
 
                 foreach (var aabb in aabbs)
                 {
@@ -316,22 +312,22 @@ namespace CraftSharp.Control
 
             bool TryGetSupportingSurface(Vector3 feetPosition, UnityAABB[] environment, out UnityAABB surface)
             {
-                float playerMinX = feetPosition.x - PLAYER_RADIUS;
-                float playerMaxX = feetPosition.x + PLAYER_RADIUS;
-                float playerMinZ = feetPosition.z - PLAYER_RADIUS;
-                float playerMaxZ = feetPosition.z + PLAYER_RADIUS;
+                var playerMinX = feetPosition.x - PLAYER_RADIUS;
+                var playerMaxX = feetPosition.x + PLAYER_RADIUS;
+                var playerMinZ = feetPosition.z - PLAYER_RADIUS;
+                var playerMaxZ = feetPosition.z + PLAYER_RADIUS;
 
                 foreach (var aabb in environment)
                 {
                     if (aabb.IsTrigger || aabb.IsLiquid) continue;
 
-                    bool xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
-                    bool zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
+                    var xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
+                    var zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
 
                     if (!xOverlap || !zOverlap)
                         continue;
 
-                    float surfaceY = aabb.Max.y;
+                    var surfaceY = aabb.Max.y;
                     if (feetPosition.y >= surfaceY - GROUND_CHECK_TOLERANCE &&
                         feetPosition.y <= surfaceY + GROUND_CHECK_TOLERANCE)
                     {
@@ -348,14 +344,14 @@ namespace CraftSharp.Control
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
-                float playerMinY = newPos.y;
-                float playerMaxY = newPos.y + PLAYER_HEIGHT;
-                float playerMinZ = newPos.z - PLAYER_RADIUS;
-                float playerMaxZ = newPos.z + PLAYER_RADIUS;
-                float playerMinX = newPos.x - PLAYER_RADIUS;
-                float playerMaxX = newPos.x + PLAYER_RADIUS;
+                var playerMinY = newPos.y;
+                var playerMaxY = newPos.y + PLAYER_HEIGHT;
+                var playerMinZ = newPos.z - PLAYER_RADIUS;
+                var playerMaxZ = newPos.z + PLAYER_RADIUS;
+                var playerMinX = newPos.x - PLAYER_RADIUS;
+                var playerMaxX = newPos.x + PLAYER_RADIUS;
 
-                float clamped = movement;
+                var clamped = movement;
 
                 foreach (var aabb in aabbs)
                 {
@@ -365,14 +361,14 @@ namespace CraftSharp.Control
                         !AxisOverlap(playerMinZ, playerMaxZ, aabb.Min.z, aabb.Max.z, false))
                         continue;
 
-                    float prev = clamped;
+                    var prev = clamped;
 
                     if (clamped > 0F)
                     {
                         if (playerMaxX <= aabb.Min.x &&
                             playerMaxX + clamped > aabb.Min.x)
                         {
-                            float allowed = aabb.Min.x - playerMaxX;
+                            var allowed = aabb.Min.x - playerMaxX;
                             clamped = Mathf.Min(clamped, Mathf.Max(0F, allowed));
                         }
                     }
@@ -381,7 +377,7 @@ namespace CraftSharp.Control
                         if (playerMinX >= aabb.Max.x &&
                             playerMinX + clamped < aabb.Max.x)
                         {
-                            float allowed = aabb.Max.x - playerMinX;
+                            var allowed = aabb.Max.x - playerMinX;
                             clamped = Mathf.Max(clamped, Mathf.Min(0F, allowed));
                         }
                     }
@@ -404,14 +400,14 @@ namespace CraftSharp.Control
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
-                float playerMinY = newPos.y;
-                float playerMaxY = newPos.y + PLAYER_HEIGHT;
-                float playerMinX = newPos.x - PLAYER_RADIUS;
-                float playerMaxX = newPos.x + PLAYER_RADIUS;
-                float playerMinZ = newPos.z - PLAYER_RADIUS;
-                float playerMaxZ = newPos.z + PLAYER_RADIUS;
+                var playerMinY = newPos.y;
+                var playerMaxY = newPos.y + PLAYER_HEIGHT;
+                var playerMinX = newPos.x - PLAYER_RADIUS;
+                var playerMaxX = newPos.x + PLAYER_RADIUS;
+                var playerMinZ = newPos.z - PLAYER_RADIUS;
+                var playerMaxZ = newPos.z + PLAYER_RADIUS;
 
-                float clamped = movement;
+                var clamped = movement;
 
                 foreach (var aabb in aabbs)
                 {
@@ -421,14 +417,14 @@ namespace CraftSharp.Control
                         !AxisOverlap(playerMinX, playerMaxX, aabb.Min.x, aabb.Max.x, false))
                         continue;
 
-                    float prev = clamped;
+                    var prev = clamped;
 
                     if (clamped > 0F)
                     {
                         if (playerMaxZ <= aabb.Min.z &&
                             playerMaxZ + clamped > aabb.Min.z)
                         {
-                            float allowed = aabb.Min.z - playerMaxZ;
+                            var allowed = aabb.Min.z - playerMaxZ;
                             clamped = Mathf.Min(clamped, Mathf.Max(0F, allowed));
                         }
                     }
@@ -437,7 +433,7 @@ namespace CraftSharp.Control
                         if (playerMinZ >= aabb.Max.z &&
                             playerMinZ + clamped < aabb.Max.z)
                         {
-                            float allowed = aabb.Max.z - playerMinZ;
+                            var allowed = aabb.Max.z - playerMinZ;
                             clamped = Mathf.Max(clamped, Mathf.Min(0F, allowed));
                         }
                     }
@@ -460,14 +456,14 @@ namespace CraftSharp.Control
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
-                float playerMinX = newPos.x - PLAYER_RADIUS;
-                float playerMaxX = newPos.x + PLAYER_RADIUS;
-                float playerMinZ = newPos.z - PLAYER_RADIUS;
-                float playerMaxZ = newPos.z + PLAYER_RADIUS;
-                float playerMinY = newPos.y;
-                float playerMaxY = newPos.y + PLAYER_HEIGHT;
+                var playerMinX = newPos.x - PLAYER_RADIUS;
+                var playerMaxX = newPos.x + PLAYER_RADIUS;
+                var playerMinZ = newPos.z - PLAYER_RADIUS;
+                var playerMaxZ = newPos.z + PLAYER_RADIUS;
+                var playerMinY = newPos.y;
+                var playerMaxY = newPos.y + PLAYER_HEIGHT;
 
-                float clamped = movement;
+                var clamped = movement;
 
                 foreach (var aabb in aabbs)
                 {
@@ -477,14 +473,14 @@ namespace CraftSharp.Control
                         !AxisOverlap(playerMinZ, playerMaxZ, aabb.Min.z, aabb.Max.z, false))
                         continue;
 
-                    float prev = clamped;
+                    var prev = clamped;
 
                     if (clamped > 0F)
                     {
                         if (playerMaxY <= aabb.Min.y &&
                             playerMaxY + clamped > aabb.Min.y)
                         {
-                            float allowed = aabb.Min.y - playerMaxY;
+                            var allowed = aabb.Min.y - playerMaxY;
                             clamped = Mathf.Min(clamped, Mathf.Max(0F, allowed));
                         }
                     }
@@ -493,7 +489,7 @@ namespace CraftSharp.Control
                         if (playerMinY >= aabb.Max.y &&
                             playerMinY + clamped < aabb.Max.y)
                         {
-                            float allowed = aabb.Max.y - playerMinY;
+                            var allowed = aabb.Max.y - playerMinY;
                             clamped = Mathf.Max(clamped, Mathf.Min(0F, allowed));
                         }
                     }
