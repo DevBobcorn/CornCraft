@@ -213,11 +213,10 @@ namespace CraftSharp.Control
 
         private void Awake()
         {
-            if (Actions == null)
-            {
-                Actions = new PlayerActions();
-                Actions.Enable();
-            }
+            if (Actions != null) return;
+            
+            Actions = new PlayerActions();
+            Actions.Enable();
         }
 
         private void Start()

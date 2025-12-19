@@ -101,13 +101,13 @@ namespace CraftSharp.Control
                 else
                 {
                     // Apply gravity when gliding and not flying (Not additive when gliding)
-                    moveVelocity += info.GravityScale * 1.8F * interval * Physics.gravity;
+                    moveVelocity += info.GravityScale * 3F * interval * Physics.gravity;
                 }
             }
             else // Falling
             {
                 // Apply gravity
-                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 1.8F * interval);
+                moveVelocity = currentVelocity + Physics.gravity * (info.GravityScale * 3F * interval);
                 
                 // Speed limit check
                 if (moveVelocity.magnitude > ability.MaxFallSpeed)

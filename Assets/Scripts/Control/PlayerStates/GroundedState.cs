@@ -20,21 +20,6 @@ namespace CraftSharp.Control
         private bool _sprintRequested = false;
 
         private float _timeSinceGrounded = -1F;
-        
-        public static float DistanceToSquareSide(Vector2 direction, float halfSideLength)
-        {
-            // Handle edge cases where direction aligns exactly with axes
-            if (direction.x == 0) return halfSideLength / Math.Abs(direction.y);
-            if (direction.y == 0) return halfSideLength / Math.Abs(direction.x);
-
-            // Calculate the angle in the first quadrant (0 to π/2)
-            var absX = Mathf.Abs(direction.x);
-            var absY = Mathf.Abs(direction.y);
-        
-            // The distance is halfSideLength divided by the maximum of the absolute components
-            // or equivalently, halfSideLength divided by the appropriate component
-            return halfSideLength / Mathf.Max(absX, absY);
-        }
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
@@ -62,8 +47,8 @@ namespace CraftSharp.Control
                 // Update current yaw to target yaw, immediately
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
-                // Apply vertical velocity to reduced horizontal velocity
-                moveVelocity = currentVelocity * 0.7F + player.transform.up * ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude);
+                // Apply vertical velocity to horizontal velocity
+                moveVelocity = currentVelocity + player.transform.up * 9F /* ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude) */;
 
                 _jumpRequested = false;
             }
@@ -117,7 +102,7 @@ namespace CraftSharp.Control
             }
             
             // Apply gravity
-            moveVelocity += Physics.gravity * (info.GravityScale * 1.8F * interval);
+            moveVelocity += Physics.gravity * (info.GravityScale * 3F * interval);
 
             currentVelocity = moveVelocity;
 

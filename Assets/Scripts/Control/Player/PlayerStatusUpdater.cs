@@ -66,21 +66,36 @@ namespace CraftSharp.Control
                 movementForward = planarVelocity.normalized;
             }
             
-            var shouldUseStepping = Status.GroundDist < HIGH_STEP_MAX_HEIGHT;
+            var steppingLimit = HIGH_STEP_MAX_HEIGHT - Status.GroundDist;
 
-            var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, shouldUseStepping,
-                aabbs, out var blocked, out var blockingMin, out Vector3 blockingMax);
-            
-            if (blocked)
+            var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, steppingLimit,
+                aabbs, out var wasBlockedVertically, out var wasBlockedHorizontally,
+                out var duringStepping, out var finishedStepping,
+                out var blockingMin, out var blockingMax);
+
+            if (wasBlockedHorizontally || wasBlockedVertically)
             {
                 hasBlockingAABB = true;
                 blockingAABBMin = blockingMin;
                 blockingAABBMax = blockingMax;
-                
-                if (!shouldUseStepping)
+            }
+            
+            if (wasBlockedHorizontally)
+            {
+                // Kill horizontal movement if no stepping was performed or stepping is not finished
+                if (!finishedStepping)
                 {
                     velocity.x = 0F;
                     velocity.z = 0F;
+                }
+            }
+
+            if (wasBlockedVertically)
+            {
+                // Kill vertical movement if moving upwards
+                if (velocity.y > 0F)
+                {
+                    velocity.y = 0F;
                 }
             }
             
@@ -91,11 +106,10 @@ namespace CraftSharp.Control
         /// Calculates new player position given current position, movement offset, and a list of AABBs.
         /// If any AABB is in the way, the player moves to the point touching the AABB.
         /// </summary>
-        private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, Vector3 forward, bool shouldUseStepping,
-            UnityAABB[] aabbs, out bool wasBlocked, out Vector3 blockingMin, out Vector3 blockingMax)
+        private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, Vector3 forward, float steppingLimit,
+            UnityAABB[] aabbs, out bool wasBlockedVertically, out bool wasBlockedHorizontally, out bool duringStepping, out bool finishedStepping, out Vector3 blockingMin, out Vector3 blockingMax)
         {
             var newPos = currentPosition;
-            var blocked = false;
             var blockMin = Vector3.zero;
             var blockMax = Vector3.zero;
 
@@ -103,6 +117,11 @@ namespace CraftSharp.Control
             var adjustedToSurface = false;
             UnityAABB supportingSurface = default;
             var hasMovement = effectiveOffset.sqrMagnitude > MOVEMENT_EPSILON * MOVEMENT_EPSILON;
+            
+            // Whether a stepping operation was performed during this tick and has not yet finished
+            duringStepping = false;
+            // Whether a stepping operation was finished during this tick
+            finishedStepping = false;
 
             if (aabbs.Length > 0 &&
                 !hasMovement &&
@@ -125,76 +144,94 @@ namespace CraftSharp.Control
             if (effectiveOffset.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON || aabbs.Length == 0)
             {
                 var finalPos = newPos + effectiveOffset;
-                wasBlocked = adjustedToSurface;
+                wasBlockedVertically = adjustedToSurface;
+                wasBlockedHorizontally = false;
                 blockingMin = adjustedToSurface ? supportingSurface.Min : Vector3.zero;
                 blockingMax = adjustedToSurface ? supportingSurface.Max : Vector3.zero;
                 return finalPos;
             }
 
-            // Whether a stepping operation was performed during this tick and has not yet finished
-            var duringStepping = false;
-
-            if (shouldUseStepping)
+            if (steppingLimit > 0F)
             {
                 // Check for forward step-ups before resolving axes
-                duringStepping = TryHandleForwardStep();
+                TryHandleForwardStep(out duringStepping, out finishedStepping);
             }
 
+            var xBlocked = false;
+            var zBlocked = false;
+            var yBlocked = false;
+
             // Apply movement axis by axis (Y first for gravity/ground resolution)
-            ResolveVertical(effectiveOffset.y);
+            ResolveVertical(effectiveOffset.y, ref yBlocked);
             // Don't use horizontal movement if lifting is applied
             if (!duringStepping)
             {
-                ResolveHorizontalX(effectiveOffset.x);
-                ResolveHorizontalZ(effectiveOffset.z);
+                ResolveHorizontalX(effectiveOffset.x, ref xBlocked);
+                ResolveHorizontalZ(effectiveOffset.z, ref zBlocked);
             }
             
-            wasBlocked = blocked;
+            wasBlockedHorizontally = xBlocked || zBlocked;
+            wasBlockedVertically = yBlocked;
             blockingMin = blockMin;
             blockingMax = blockMax;
             
             return newPos;
 
-            bool TryHandleForwardStep()
+            void TryHandleForwardStep(out bool duringStepping, out bool finishedStepping)
             {
+                duringStepping = false;
+                finishedStepping = false;
+
                 var horizontalOffset = new Vector3(effectiveOffset.x, 0F, effectiveOffset.z);
                 if (horizontalOffset.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
-                    return false;
+                    return;
 
                 var planarForward = new Vector3(forward.x, 0F, forward.z);
                 if (planarForward.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON)
-                    return false;
+                    return;
 
                 planarForward.Normalize();
 
                 var moveDir = horizontalOffset.normalized;
                 if (Vector3.Dot(moveDir, planarForward) < FORWARD_STEP_DOT_THRESHOLD)
-                    return false;
+                    return;
 
-                if (!TryFindStepSurface(horizontalOffset, moveDir, out float targetSurfaceY, out float desiredLift))
-                    return false;
+                if (!TryFindStepSurface(horizontalOffset, moveDir, out var targetSurfaceY, out var desiredLift))
+                    return;
+                
                 Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
+
+                if (desiredLift > steppingLimit)
+                {
+                    Debug.Log("Cancelled stepping due to height limit");
+                    return;
+                }
 
                 switch (desiredLift)
                 {
                     case <= GROUND_CHECK_TOLERANCE:
-                        return false;
+                        return;
                     // Short steps are climbed in one frame, taller steps inch upward until reached
                     case <= MAX_STEP_HEIGHT + GROUND_CHECK_TOLERANCE:
                         effectiveOffset.y = desiredLift; // snap directly onto the surface
-                        return false;
+                        finishedStepping = true;
+                        return;
                     case > HIGH_STEP_MAX_HEIGHT + GROUND_CHECK_TOLERANCE:
-                        return false;
+                        return;
                 }
 
                 var incrementalLift = Mathf.Min(HIGH_STEP_LIFT_AMOUNT, desiredLift);
                 if (incrementalLift <= GROUND_CHECK_TOLERANCE)
-                    return false;
+                    return;
+                
+                // If the incremental lift is greater than or equal to the desired lift, the stepping is finished
+                if (incrementalLift >= desiredLift)
+                    finishedStepping = true;
+                else
+                    duringStepping = true;
 
                 effectiveOffset.y = incrementalLift; // climb part-way this frame
                 Debug.Log($"Incremental lift: {incrementalLift}");
-                
-                return true;
             }
 
             bool TryFindStepSurface(Vector3 horizontalOffset, Vector3 moveDir, out float stepTargetY, out float stepLift)
@@ -340,7 +377,7 @@ namespace CraftSharp.Control
                 return false;
             }
 
-            void ResolveHorizontalX(float movement)
+            void ResolveHorizontalX(float movement, ref bool blocked)
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
@@ -396,7 +433,7 @@ namespace CraftSharp.Control
                 newPos.x += clamped;
             }
 
-            void ResolveHorizontalZ(float movement)
+            void ResolveHorizontalZ(float movement, ref bool blocked)
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
@@ -452,7 +489,7 @@ namespace CraftSharp.Control
                 newPos.z += clamped;
             }
 
-            void ResolveVertical(float movement)
+            void ResolveVertical(float movement, ref bool blocked)
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
