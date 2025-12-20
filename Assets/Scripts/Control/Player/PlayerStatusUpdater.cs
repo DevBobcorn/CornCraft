@@ -80,6 +80,7 @@ namespace CraftSharp.Control
                 blockingAABBMax = blockingMax;
             }
             
+            /*
             if (wasBlockedHorizontally)
             {
                 // Kill horizontal movement if no stepping was performed or stepping is not finished
@@ -89,6 +90,7 @@ namespace CraftSharp.Control
                     velocity.z = 0F;
                 }
             }
+            */
 
             if (wasBlockedVertically)
             {
@@ -318,10 +320,11 @@ namespace CraftSharp.Control
                 var shiftedX = newPos.x + forwardShift.x;
                 var shiftedZ = newPos.z + forwardShift.z;
 
-                var playerMinX = shiftedX - PLAYER_RADIUS;
-                var playerMaxX = shiftedX + PLAYER_RADIUS;
-                var playerMinZ = shiftedZ - PLAYER_RADIUS;
-                var playerMaxZ = shiftedZ + PLAYER_RADIUS;
+                // Add extra player radius to prevent false-negative
+                var playerMinX = shiftedX - PLAYER_RADIUS - 0.125F;
+                var playerMaxX = shiftedX + PLAYER_RADIUS + 0.125F;
+                var playerMinZ = shiftedZ - PLAYER_RADIUS - 0.125F;
+                var playerMaxZ = shiftedZ + PLAYER_RADIUS + 0.125F;
 
                 foreach (var aabb in aabbs)
                 {
