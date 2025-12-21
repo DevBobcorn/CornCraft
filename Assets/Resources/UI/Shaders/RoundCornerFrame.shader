@@ -110,16 +110,24 @@
                 float4 cornerRadii = input.cornerRadii;
                 
                 float borderDist = sdRoundBox(input.uv * size, size, cornerRadii);
-                float borderMask = borderDist + borderThickness * 2.0;
+                float borderAA = max(fwidth(borderDist), 0.001);
+                float outerEdge = 1.0 - smoothstep(0.0, borderAA, borderDist);
+                float innerFalloff = 1.0 - smoothstep(-borderThickness - borderAA, -borderThickness, borderDist);
+                float borderAlpha = saturate(outerEdge * (1.0 - innerFalloff));
 
-                // Draw border
-                half4 color = -borderThickness < borderDist && borderDist < 0 ? _BorderColor : _BorderColor * 0;
+                half4 color = borderAlpha > 0.0 ? _BorderColor * borderAlpha : half4(0, 0, 0, 0);
+
+                float maskDist = borderDist + borderThickness * 2.0;
+                float maskAA = max(fwidth(maskDist), 0.001);
+                float maskAlpha = 1.0 - smoothstep(0.0, maskAA, maskDist);
 
                 // Draw value
                 float2 fillSize = float2(size.x, size.y);
                 float fillDist = sdRoundBox(input.uv * size, fillSize, cornerRadii);
+                float fillAA = max(fwidth(fillDist), 0.001);
+                float fillAlpha = (1.0 - smoothstep(0.0, fillAA, fillDist)) * maskAlpha;
 
-                color = borderMask < 0 && fillDist < 0 ? _FillColor : color;
+                color = fillAlpha > color.a ? _FillColor * fillAlpha : color;
                 color *= input.color;
 
                 return color;

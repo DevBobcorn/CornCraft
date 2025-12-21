@@ -117,24 +117,49 @@
                 float4 cornerRadii = input.cornerRadii;
                 
                 float borderDist = sdRoundBox(input.uv * size, size, cornerRadii);
-                float borderMask = borderDist + borderThickness * 2.0;
+                float borderAA = max(fwidth(borderDist), 0.001);
+                float outerEdge = 1.0 - smoothstep(0.0, borderAA, borderDist);
+                float innerFalloff = 1.0 - smoothstep(-borderThickness - borderAA, -borderThickness, borderDist);
+                float borderAlpha = saturate(outerEdge * (1.0 - innerFalloff));
 
-                // Draw border
-                half4 color = -borderThickness < borderDist && borderDist < 0 ? _BorderColor : _BorderColor * 0;
+                half4 color = borderAlpha > 0.0 ? _BorderColor * borderAlpha : half4(0, 0, 0, 0);
+
+                float maskDist = borderDist + borderThickness * 2.0;
+                float maskAA = max(fwidth(maskDist), 0.001);
+                float maskAlpha = 1.0 - smoothstep(0.0, maskAA, maskDist);
+
+                // Ensure delta/value ordering always uses the smaller amount as the "value"
+                half fillAmount = _FillAmount;
+                half deltaAmount = _DeltaAmount;
+                if (fillAmount > deltaAmount)
+                {
+                    half temp = fillAmount;
+                    fillAmount = deltaAmount;
+                    deltaAmount = temp;
+                }
+
+                // Inner drawable area after padding created by the border mask
+                float2 innerSize = max(size - borderThickness * 2.0, 0.0);
+                float4 fillCornerRadii = cornerRadii * 0.35; // Smaller roundness for inner fills
 
                 // Draw delta
-                float2 deltaSize = float2(size.x * _DeltaAmount, size.y);
-                float2 deltaBias = float2(size.x * (1 - _DeltaAmount) , 0);
-                float deltaDist = sdRoundBox(input.uv * size + deltaBias, deltaSize, cornerRadii);
+                float2 deltaSize = float2(innerSize.x * deltaAmount, innerSize.y);
+                float2 deltaBias = float2(innerSize.x * (1.0 - deltaAmount), 0.0);
+                float deltaDist = sdRoundBox(input.uv * size + deltaBias, deltaSize, fillCornerRadii);
+                float deltaAA = max(fwidth(deltaDist), 0.001);
+                float deltaAlpha = (1.0 - smoothstep(0.0, deltaAA, deltaDist)) * maskAlpha;
 
-                color = borderMask < 0 && deltaDist < 0 ? _DeltaColor : color;
+                color = deltaAlpha > color.a ? _DeltaColor * deltaAlpha : color;
 
                 // Draw value
-                deltaSize = float2(size.x * _FillAmount, size.y);
-                deltaBias = float2(size.x * (1 - _FillAmount) , 0);
-                deltaDist = sdRoundBox(input.uv * size + deltaBias, deltaSize, cornerRadii);
+                deltaSize = float2(innerSize.x * fillAmount, innerSize.y);
+                deltaBias = float2(innerSize.x * (1.0 - fillAmount), 0.0);
+                deltaDist = sdRoundBox(input.uv * size + deltaBias, deltaSize, fillCornerRadii);
+                deltaAA = max(fwidth(deltaDist), 0.001);
+                float valueAlpha = (1.0 - smoothstep(0.0, deltaAA, deltaDist)) * maskAlpha;
 
-                color = borderMask < 0 && deltaDist < 0 ? _ValueColor : color;
+                // Use >= to ensure value color is applied over delta color
+                color = valueAlpha >= color.a ? _ValueColor * valueAlpha : color;
                 color *= input.color;
 
                 return color;
