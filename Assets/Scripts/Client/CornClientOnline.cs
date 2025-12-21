@@ -138,6 +138,14 @@ namespace CraftSharp
 
             // Freeze player controller until terrain is ready
             PlayerController.DisablePhysics();
+            
+            // Add handlers for player controller
+            PlayerController.OnPlayerAction += actionType =>
+            {
+                //Debug.Log(Translations.Get($"Player action: {actionType}"));
+                
+                SendEntityAction(actionType);
+            };
         }
 
         public override bool StartClient(StartLoginInfo info)

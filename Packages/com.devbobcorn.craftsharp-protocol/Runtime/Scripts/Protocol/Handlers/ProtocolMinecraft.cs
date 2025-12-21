@@ -3205,13 +3205,13 @@ namespace CraftSharp.Protocol.Handlers
             catch (ObjectDisposedException) { return false; }
         }
 
-        public bool SendEntityAction(int PlayerEntityId, int ActionId)
+        public bool SendEntityAction(int playerEntityId, int actionId)
         {
             try
             {
                 List<byte> fields = new();
-                fields.AddRange(DataTypes.GetVarInt(PlayerEntityId));
-                fields.AddRange(DataTypes.GetVarInt(ActionId));
+                fields.AddRange(DataTypes.GetVarInt(playerEntityId));
+                fields.AddRange(DataTypes.GetVarInt(actionId));
                 fields.AddRange(DataTypes.GetVarInt(0));
                 SendPacket(PacketTypesOut.EntityAction, fields);
                 return true;

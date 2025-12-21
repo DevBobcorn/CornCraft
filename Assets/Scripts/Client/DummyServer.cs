@@ -41,14 +41,14 @@ namespace CraftSharp
                         break;
                     
                     default:
-                        client.DummyOnTextReceived(new ChatMessage($"§cInvalid gamemode: {text[10..]}", "DUMMY SERVER", false, 0, Guid.Empty, true));
+                        CornClientOffline.DummyOnTextReceived(new ChatMessage($"§cInvalid gamemode: {text[10..]}", "DUMMY SERVER", false, 0, Guid.Empty, true));
                         break;
                 }
 
                 return;
             }
 
-            client.DummyOnTextReceived(new ChatMessage($"§cInvalid command: {text}", "DUMMY SERVER", false, 0, Guid.Empty, true));
+            CornClientOffline.DummyOnTextReceived(new ChatMessage($"§cInvalid command: {text}", "DUMMY SERVER", false, 0, Guid.Empty, true));
         }
 
         private void DummySendInitialTerrainData()
@@ -132,7 +132,7 @@ namespace CraftSharp
                 }
                 else
                 {
-                    client.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID()));
+                    CornClientOffline.DummyOnTextReceived(new ChatMessage($"{client.GetUsername()}: {text}", client.GetUsername(), false, 0, client.GetUserUUID()));
                 }
             };
             

@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 using CraftSharp.Event;
+using CraftSharp.Protocol;
 using CraftSharp.Rendering;
 
 namespace CraftSharp.Control
@@ -208,6 +209,10 @@ namespace CraftSharp.Control
         // Used only by player renders, will be cleared and reassigned upon player render update
         private delegate void PlayerUpdateEventHandler(Vector3 velocity, float interval, PlayerStatus status);
         private event PlayerUpdateEventHandler? OnPlayerUpdate;
+        
+        // Used by client to send EntityAction packets
+        public delegate void PlayerActionEventHandler(EntityActionType actionType);
+        public event PlayerActionEventHandler? OnPlayerAction;
 
 #nullable disable
 
@@ -239,6 +244,9 @@ namespace CraftSharp.Control
             if (!chunkRenderManager) return;
             
             var terrainAABBs = chunkRenderManager.GetTerrainAABBs();
+
+            var wasSprinting = Status.Sprinting;
+            var wasSneaking  = Status.Sneaking;
             
             BeforeCharacterUpdate(terrainAABBs);
             
@@ -246,6 +254,18 @@ namespace CraftSharp.Control
             CharacterUpdate(Time.fixedDeltaTime, terrainAABBs);
             
             AfterCharacterUpdate();
+
+            // Check if sprinting status has changed
+            if (wasSprinting != Status.Sprinting)
+            {
+                OnPlayerAction?.Invoke(wasSprinting ? EntityActionType.StopSprinting : EntityActionType.StartSprinting);
+            }
+            
+            // Check if sneaking status has changed
+            if (wasSneaking != Status.Sneaking)
+            {
+                OnPlayerAction?.Invoke(wasSneaking ? EntityActionType.StopSneaking : EntityActionType.StartSneaking);
+            }
         }
 
         private void OnDestroy()

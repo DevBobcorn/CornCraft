@@ -201,11 +201,11 @@ namespace CraftSharp.Control
                 if (!TryFindStepSurface(horizontalOffset, moveDir, out var targetSurfaceY, out var desiredLift))
                     return;
                 
-                Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
+                //Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
 
                 if (desiredLift > steppingLimit)
                 {
-                    Debug.Log("Cancelled stepping due to height limit");
+                    //Debug.Log("Cancelled stepping due to height limit");
                     return;
                 }
 
@@ -233,7 +233,7 @@ namespace CraftSharp.Control
                     duringStepping = true;
 
                 effectiveOffset.y = incrementalLift; // climb part-way this frame
-                Debug.Log($"Incremental lift: {incrementalLift}");
+                //Debug.Log($"Incremental lift: {incrementalLift}");
             }
 
             bool TryFindStepSurface(Vector3 horizontalOffset, Vector3 moveDir, out float stepTargetY, out float stepLift)

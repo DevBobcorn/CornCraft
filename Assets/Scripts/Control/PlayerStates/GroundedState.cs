@@ -67,7 +67,7 @@ namespace CraftSharp.Control
                 if (info.Moving) // Moving
                 {
                     // Initiate sprinting check
-                    if (info.Moving && _sprintRequested && info.StaminaLeft > SPRINT_STAMINA_START_MIN)
+                    if (info.Moving && !info.Sneaking && _sprintRequested && info.StaminaLeft > SPRINT_STAMINA_START_MIN)
                     {
                         info.Sprinting = true;
                     }

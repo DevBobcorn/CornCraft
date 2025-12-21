@@ -55,6 +55,11 @@ namespace CraftSharp.Control
         /// Whether player is sprinting
         /// </summary>
         public bool Sprinting = false;
+        
+        /// <summary>
+        /// Whether player is sneaking
+        /// </summary>
+        public bool Sneaking   = false;
 
         /// <summary>
         /// Gravity scale. Used only for controlling player entity enablement / disablement
@@ -67,8 +72,10 @@ namespace CraftSharp.Control
         public bool Attacking = false;
         public readonly AttackStatus AttackStatus = new();
 
+        /// <summary>
+        /// Whether player is playing as a spectator
+        /// </summary>
         public bool Spectating = false;
-        public bool Sneaking   = false;
 
         public bool EntityDisabled = false;
         public bool PhysicsDisabled = true;
@@ -99,7 +106,7 @@ namespace CraftSharp.Control
         
         public override string ToString()
         {
-            var moveInfo = $"Moving: {Moving} GroundDist: {GroundDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
+            var moveInfo = $"Moving: {Moving} GroundDist: {GroundDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nSneaking: {Sneaking}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
             var envInfo = $"\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             

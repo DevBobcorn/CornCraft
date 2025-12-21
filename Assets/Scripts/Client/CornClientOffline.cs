@@ -11,6 +11,7 @@ using CraftSharp.Inventory;
 using CraftSharp.Inventory.Recipe;
 using CraftSharp.Rendering;
 using CraftSharp.Protocol.Message;
+using CraftSharp.Protocol.Session;
 using CraftSharp.Resource;
 
 namespace CraftSharp
@@ -50,7 +51,7 @@ namespace CraftSharp
                 CornApp.SetCurrentClient(this);
 
                 // Start up by self since it's not started from login screen
-                StartClient(new(false, new(), null, "dummy", 
+                StartClient(new StartLoginInfo(false, new SessionToken(), null, "dummy", 
                     0, DUMMY_PROTOCOL_VERSION, "dummy_player"));
             }
 
@@ -630,7 +631,7 @@ namespace CraftSharp
         /// Received chat/system message from the server
         /// </summary>
         /// <param name="message">Message received</param>
-        public void DummyOnTextReceived(ChatMessage message)
+        public static void DummyOnTextReceived(ChatMessage message)
         {
             List<(string, string, string, string)> actions = new();
             
