@@ -1,5 +1,4 @@
 using System.IO;
-using UnityEngine;
 
 namespace CraftSharp.Control
 {
@@ -81,8 +80,8 @@ namespace CraftSharp.Control
         public bool PhysicsDisabled = true;
 
         // Reference values
-        public float GroundDist = 0F;
-        public float LiquidDist = 0F;
+        public float GroundDistFromFeet = 0F;
+        public float LiquidDistFromHead = 0F;
         public float TargetVisualYaw  = 0F;
         public float MovementInputYaw = 0F;
         public float CurrentVisualYaw = 0F;
@@ -104,7 +103,7 @@ namespace CraftSharp.Control
         
         public override string ToString()
         {
-            var moveInfo = $"Moving: {Moving} GroundDist: {GroundDist:0.000} LiquidDist: {LiquidDist:0.000}\nSprinting: {Sprinting}\nSneaking: {Sneaking}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
+            var moveInfo = $"Moving: {Moving}\nGroundDistFromFeet: {GroundDistFromFeet:0.000}\nLiquidDistFromHead: {LiquidDistFromHead:0.000}\nSprinting: {Sprinting}\nSneaking: {Sneaking}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
             var envInfo = $"\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             

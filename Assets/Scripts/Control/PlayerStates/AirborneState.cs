@@ -93,7 +93,7 @@ namespace CraftSharp.Control
 
                     // Flying doesn't have any gravity, which can prevent proper groundcheck
                     // So here we stop flying when getting close enough to the ground
-                    if (info.GroundDist < STOP_FLYING_MAXIMUM_DIST)
+                    if (info.GroundDistFromFeet < STOP_FLYING_MAXIMUM_DIST)
                     {
                         info.Flying = false;
                     }

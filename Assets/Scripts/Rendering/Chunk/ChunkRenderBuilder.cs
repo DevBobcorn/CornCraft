@@ -636,7 +636,7 @@ namespace CraftSharp.Rendering
                 var min = center - size * 0.5f;
                 var max = center + size * 0.5f;
                 
-                terrainAABBs.Add(new UnityAABB(min, max, false, noCollision));
+                terrainAABBs.Add(new UnityAABB(min, max, noCollision));
             }
             
             if (state.InLiquid) // Add liquid AABB
@@ -646,7 +646,7 @@ namespace CraftSharp.Rendering
                 var min = center - size * 0.5f;
                 var max = center + size * 0.5f;
                 
-                liquidAABBs.Add(new UnityAABB(min, max, true, true));
+                liquidAABBs.Add(new UnityAABB(min, max, true));
             }
         }
 
@@ -657,25 +657,17 @@ namespace CraftSharp.Rendering
         
         public static void BuildTerrainAABBsAt(World world, BlockLoc blockLoc, Vector3Int originOffset,
             List<UnityAABB> terrainAABBs, List<UnityAABB> liquidAABBs,
-            Dictionary<BlockLoc, List<UnityAABB>> aabbList)
+            Dictionary<BlockLoc, List<UnityAABB>> terrainAABBMap,
+            Dictionary<BlockLoc, List<UnityAABB>> liquidAABBMap)
         {
-            if (aabbList.ContainsKey(blockLoc))
+            if (terrainAABBMap.TryGetValue(blockLoc, out var existingTerrain))
             {
-                // Remove AABBs at this location from the main lists
-                // Since we need to remove by reference and struct equality might not work,
-                // we'll rebuild the lists excluding this block's AABBs
-                var existingAABBs = aabbList[blockLoc];
-                var terrainToRemove = existingAABBs.Where(a => !a.IsLiquid).ToList();
-                var liquidToRemove = existingAABBs.Where(a => a.IsLiquid).ToList();
-
-                // Remove terrain AABBs (iterate backwards to maintain indices)
-                foreach (var aabb in terrainToRemove)
+                foreach (var aabb in existingTerrain)
                 {
                     for (int i = terrainAABBs.Count - 1; i >= 0; i--)
                     {
                         if (Vector3.Distance(terrainAABBs[i].Min, aabb.Min) < 0.001f &&
                             Vector3.Distance(terrainAABBs[i].Max, aabb.Max) < 0.001f &&
-                            terrainAABBs[i].IsLiquid == aabb.IsLiquid &&
                             terrainAABBs[i].IsTrigger == aabb.IsTrigger)
                         {
                             terrainAABBs.RemoveAt(i);
@@ -684,14 +676,17 @@ namespace CraftSharp.Rendering
                     }
                 }
 
-                // Remove liquid AABBs (iterate backwards to maintain indices)
-                foreach (var aabb in liquidToRemove)
+                terrainAABBMap.Remove(blockLoc);
+            }
+
+            if (liquidAABBMap.TryGetValue(blockLoc, out var existingLiquid))
+            {
+                foreach (var aabb in existingLiquid)
                 {
                     for (int i = liquidAABBs.Count - 1; i >= 0; i--)
                     {
                         if (Vector3.Distance(liquidAABBs[i].Min, aabb.Min) < 0.001f &&
                             Vector3.Distance(liquidAABBs[i].Max, aabb.Max) < 0.001f &&
-                            liquidAABBs[i].IsLiquid == aabb.IsLiquid &&
                             liquidAABBs[i].IsTrigger == aabb.IsTrigger)
                         {
                             liquidAABBs.RemoveAt(i);
@@ -700,7 +695,7 @@ namespace CraftSharp.Rendering
                     }
                 }
 
-                aabbList.Remove(blockLoc);
+                liquidAABBMap.Remove(blockLoc);
             }
 
             var stateModelTable = ResourcePackManager.Instance.StateModelTable;
@@ -710,35 +705,41 @@ namespace CraftSharp.Rendering
                 ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
                     blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
 
-            var blockAABBs = new List<UnityAABB>();
             var terrainCountBefore = terrainAABBs.Count;
             var liquidCountBefore = liquidAABBs.Count;
 
             GetAABBsAt(block.State, blockLoc, originOffset, blockOffset, terrainAABBs, liquidAABBs);
 
-            // Add the newly created AABBs to the block's list
-            for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+            if (terrainAABBs.Count > terrainCountBefore)
             {
-                blockAABBs.Add(terrainAABBs[i]);
-            }
-            for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
-            {
-                blockAABBs.Add(liquidAABBs[i]);
+                var addedTerrain = new List<UnityAABB>();
+                for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+                {
+                    addedTerrain.Add(terrainAABBs[i]);
+                }
+                terrainAABBMap[blockLoc] = addedTerrain;
             }
 
-            if (blockAABBs.Count > 0)
+            if (liquidAABBs.Count > liquidCountBefore)
             {
-                aabbList.Add(blockLoc, blockAABBs);
+                var addedLiquid = new List<UnityAABB>();
+                for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
+                {
+                    addedLiquid.Add(liquidAABBs[i]);
+                }
+                liquidAABBMap[blockLoc] = addedLiquid;
             }
         }
 
         public static void BuildTerrainAABBs(World world, BlockLoc playerBlockLoc, Vector3Int originOffset,
             List<UnityAABB> terrainAABBs, List<UnityAABB> liquidAABBs,
-            Dictionary<BlockLoc, List<UnityAABB>> aabbList)
+            Dictionary<BlockLoc, List<UnityAABB>> terrainAABBMap,
+            Dictionary<BlockLoc, List<UnityAABB>> liquidAABBMap)
         {
             terrainAABBs.Clear();
             liquidAABBs.Clear();
-            aabbList.Clear();
+            terrainAABBMap.Clear();
+            liquidAABBMap.Clear();
 
             var stateModelTable = ResourcePackManager.Instance.StateModelTable;
 
@@ -757,25 +758,29 @@ namespace CraftSharp.Rendering
                     ? (Vector3) GetBlockOffsetInBlock(stateModel.OffsetType, blockLoc.X >> 4,
                         blockLoc.Z >> 4, blockLoc.X & 0xF, blockLoc.Z & 0xF) : null;
 
-                var blockAABBs = new List<UnityAABB>();
                 var terrainCountBefore = terrainAABBs.Count;
                 var liquidCountBefore = liquidAABBs.Count;
 
                 GetAABBsAt(block.State, blockLoc, originOffset, blockOffset, terrainAABBs, liquidAABBs);
 
-                // Add the newly created AABBs to the block's list
-                for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+                if (terrainAABBs.Count > terrainCountBefore)
                 {
-                    blockAABBs.Add(terrainAABBs[i]);
-                }
-                for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
-                {
-                    blockAABBs.Add(liquidAABBs[i]);
+                    var addedTerrain = new List<UnityAABB>();
+                    for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+                    {
+                        addedTerrain.Add(terrainAABBs[i]);
+                    }
+                    terrainAABBMap[blockLoc] = addedTerrain;
                 }
 
-                if (blockAABBs.Count > 0)
+                if (liquidAABBs.Count > liquidCountBefore)
                 {
-                    aabbList.Add(blockLoc, blockAABBs);
+                    var addedLiquid = new List<UnityAABB>();
+                    for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
+                    {
+                        addedLiquid.Add(liquidAABBs[i]);
+                    }
+                    liquidAABBMap[blockLoc] = addedLiquid;
                 }
             }
         }

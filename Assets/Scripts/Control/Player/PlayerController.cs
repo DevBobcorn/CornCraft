@@ -244,11 +244,12 @@ namespace CraftSharp.Control
             if (!chunkRenderManager) return;
             
             var terrainAABBs = chunkRenderManager.GetTerrainAABBs();
+            var liquidAABBs = chunkRenderManager.GetLiquidAABBs();
 
             var wasSprinting = Status.Sprinting;
             var wasSneaking  = Status.Sneaking;
             
-            BeforeCharacterUpdate(terrainAABBs);
+            BeforeCharacterUpdate(terrainAABBs, liquidAABBs);
             
             // Update player position
             CharacterUpdate(Time.fixedDeltaTime, terrainAABBs);
@@ -349,7 +350,6 @@ namespace CraftSharp.Control
         public void ToggleSneaking()
         {
             Status.Sneaking = !Status.Sneaking;
-            CornApp.Notify(Translations.Get($"gameplay.control.sneaking_{(Status.Sneaking ? "started" : "stopped")}"));
         }
 
         public void ChangeToState(IPlayerState state)
@@ -401,7 +401,7 @@ namespace CraftSharp.Control
             return Quaternion.LookRotation(forward, upward);
         }
 
-        public void BeforeCharacterUpdate(UnityAABB[] aabbs)
+        public void BeforeCharacterUpdate(UnityAABB[] terrainAABBs, UnityAABB[] liquidAABBs)
         {
             var status = m_StatusUpdater.Status;
 
@@ -423,10 +423,10 @@ namespace CraftSharp.Control
                 status.CurrentVisualYaw = status.TargetVisualYaw;
             }
 
-            // Update player status (in water, grounded, etc)
+            // Update player status (in water, grounded, etc.)
             if (!Status.EntityDisabled)
             {
-                m_StatusUpdater.UpdatePlayerStatus(GetMovementOrientation(), aabbs);
+                m_StatusUpdater.UpdatePlayerStatus(terrainAABBs, liquidAABBs);
             }
 
             // Update current player state

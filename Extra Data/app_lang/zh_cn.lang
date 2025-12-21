@@ -85,8 +85,6 @@ filemonitor.fail=[{0}] 无法初始化FileSystemWatcher，正在使用轮询重�
 
 [gameplay]
 gameplay.control.update_gamemode=游戏模式已更新为{0}
-gameplay.control.sneaking_started=已开始潜行
-gameplay.control.sneaking_stopped=已结束潜行
 gameplay.interaction.pick_up={0}
 gameplay.interaction.go_to_bed=睡觉
 gameplay.interaction.open_door=开门

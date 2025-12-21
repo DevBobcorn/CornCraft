@@ -8,14 +8,11 @@ namespace CraftSharp.Control
     public class PlayerStatusUpdater : MonoBehaviour
     {
         // Ground distance check
-        private const float GROUND_RAYCAST_DIST    = 5.0F;
+        private const float GROUND_RAYCAST_DIST   = PLAYER_HEIGHT;
 
         // Liquid status and distance check
-        private const float LIQUID_RAYCAST_DIST    =  5.0F;
-        public const float FLOATING_DIST_THRESHOLD = -0.5F;
-
-        // Barrier/wall distance check
-        private const float BARRIER_RAYCAST_LENGTH =  2.0F;
+        private const float LIQUID_RAYCAST_DIST   = PLAYER_HEIGHT;
+        public const float ABOVE_LIQUID_HEIGHT_WHEN_FLOATING = 0.75F;
 
         // Player dimensions
         private const float PLAYER_WIDTH = 0.60001F; // Make it slightly wider than 0.6 to account for floating point error
@@ -40,16 +37,16 @@ namespace CraftSharp.Control
         private Vector3 blockingAABBMin = Vector3.zero;
         private Vector3 blockingAABBMax = Vector3.zero;
 
-        public void UpdatePlayerStatus(Quaternion targetOrientation, UnityAABB[] aabbs)
+        public void UpdatePlayerStatus(UnityAABB[] terrainAABBs, UnityAABB[] liquidAABBs)
         {
             // Grounded state update
-            CheckGrounded(aabbs);
-
-            // Perform barrier check and wall check
+            CheckGrounded(terrainAABBs);
             
+            // Liquid status update
+            CheckInLiquid(liquidAABBs);
         }
 
-        public void UpdatePlayerPosition(ref Vector3 velocity, float deltaTime, UnityAABB[] aabbs)
+        public void UpdatePlayerPosition(ref Vector3 velocity, float deltaTime, UnityAABB[] terrainAABBs)
         {
             // Update player position
             var offset = velocity * deltaTime;
@@ -66,10 +63,17 @@ namespace CraftSharp.Control
                 movementForward = planarVelocity.normalized;
             }
             
-            var steppingLimit = HIGH_STEP_MAX_HEIGHT - Status.GroundDist;
+            var steppingLimit = HIGH_STEP_MAX_HEIGHT - Status.GroundDistFromFeet;
+
+            // Special handling: If player is currently in/above liquid, don't
+            // use GroundDistFromFeet (because the liquid can support them)
+            if (Status.LiquidDistFromHead < LIQUID_RAYCAST_DIST)
+            {
+                steppingLimit = HIGH_STEP_MAX_HEIGHT;
+            }
 
             var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, steppingLimit,
-                aabbs, out var wasBlockedVertically, out var wasBlockedHorizontally,
+                terrainAABBs, out var wasBlockedVertically, out var wasBlockedHorizontally,
                 out var duringStepping, out var finishedStepping,
                 out var blockingMin, out var blockingMax);
 
@@ -109,7 +113,7 @@ namespace CraftSharp.Control
         /// If any AABB is in the way, the player moves to the point touching the AABB.
         /// </summary>
         private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, Vector3 forward, float steppingLimit,
-            UnityAABB[] aabbs, out bool wasBlockedVertically, out bool wasBlockedHorizontally, out bool duringStepping, out bool finishedStepping, out Vector3 blockingMin, out Vector3 blockingMax)
+            UnityAABB[] terrainAABBs, out bool wasBlockedVertically, out bool wasBlockedHorizontally, out bool duringStepping, out bool finishedStepping, out Vector3 blockingMin, out Vector3 blockingMax)
         {
             var newPos = currentPosition;
             var blockMin = Vector3.zero;
@@ -125,9 +129,9 @@ namespace CraftSharp.Control
             // Whether a stepping operation was finished during this tick
             finishedStepping = false;
 
-            if (aabbs.Length > 0 &&
+            if (terrainAABBs.Length > 0 &&
                 !hasMovement &&
-                TryGetSupportingSurface(currentPosition, aabbs, out supportingSurface))
+                TryGetSupportingSurface(currentPosition, terrainAABBs, out supportingSurface))
             {
                 if (effectiveOffset.y < 0F)
                 {
@@ -143,7 +147,7 @@ namespace CraftSharp.Control
             }
 
             // If there is no meaningful movement or nothing to collide with, apply the offset directly
-            if (effectiveOffset.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON || aabbs.Length == 0)
+            if (effectiveOffset.sqrMagnitude <= MOVEMENT_EPSILON * MOVEMENT_EPSILON || terrainAABBs.Length == 0)
             {
                 var finalPos = newPos + effectiveOffset;
                 wasBlockedVertically = adjustedToSurface;
@@ -201,11 +205,11 @@ namespace CraftSharp.Control
                 if (!TryFindStepSurface(horizontalOffset, moveDir, out var targetSurfaceY, out var desiredLift))
                     return;
                 
-                //Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
+                Debug.Log($"Desired lift: {desiredLift} (Target height: {targetSurfaceY})");
 
                 if (desiredLift > steppingLimit)
                 {
-                    //Debug.Log("Cancelled stepping due to height limit");
+                    Debug.Log("Cancelled stepping due to height limit");
                     return;
                 }
 
@@ -233,7 +237,7 @@ namespace CraftSharp.Control
                     duringStepping = true;
 
                 effectiveOffset.y = incrementalLift; // climb part-way this frame
-                //Debug.Log($"Incremental lift: {incrementalLift}");
+                Debug.Log($"Incremental lift: {incrementalLift}");
             }
 
             bool TryFindStepSurface(Vector3 horizontalOffset, Vector3 moveDir, out float stepTargetY, out float stepLift)
@@ -260,9 +264,9 @@ namespace CraftSharp.Control
                 var found = false;
                 var bestSurface = float.MaxValue;
 
-                foreach (var aabb in aabbs)
+                foreach (var aabb in terrainAABBs)
                 {
-                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+                    if (aabb.IsTrigger) continue;
 
                     var surfaceY = aabb.Max.y;
                     if (surfaceY <= currentFeet.y + GROUND_CHECK_TOLERANCE ||
@@ -326,9 +330,9 @@ namespace CraftSharp.Control
                 var playerMinZ = shiftedZ - PLAYER_RADIUS - 0.125F;
                 var playerMaxZ = shiftedZ + PLAYER_RADIUS + 0.125F;
 
-                foreach (var aabb in aabbs)
+                foreach (var aabb in terrainAABBs)
                 {
-                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+                    if (aabb.IsTrigger) continue;
 
                     if (!AxisOverlap(playerMinX, playerMaxX, aabb.Min.x, aabb.Max.x, false) ||
                         !AxisOverlap(playerMinZ, playerMaxZ, aabb.Min.z, aabb.Max.z, false))
@@ -359,7 +363,7 @@ namespace CraftSharp.Control
 
                 foreach (var aabb in environment)
                 {
-                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+                    if (aabb.IsTrigger) continue;
 
                     var xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
                     var zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
@@ -393,9 +397,9 @@ namespace CraftSharp.Control
 
                 var clamped = movement;
 
-                foreach (var aabb in aabbs)
+                foreach (var aabb in terrainAABBs)
                 {
-                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+                    if (aabb.IsTrigger) continue;
 
                     if (!AxisOverlap(playerMinY, playerMaxY, aabb.Min.y, aabb.Max.y, false) ||
                         !AxisOverlap(playerMinZ, playerMaxZ, aabb.Min.z, aabb.Max.z, false))
@@ -449,9 +453,9 @@ namespace CraftSharp.Control
 
                 var clamped = movement;
 
-                foreach (var aabb in aabbs)
+                foreach (var aabb in terrainAABBs)
                 {
-                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+                    if (aabb.IsTrigger) continue;
 
                     if (!AxisOverlap(playerMinY, playerMaxY, aabb.Min.y, aabb.Max.y, false) ||
                         !AxisOverlap(playerMinX, playerMaxX, aabb.Min.x, aabb.Max.x, false))
@@ -505,9 +509,9 @@ namespace CraftSharp.Control
 
                 var clamped = movement;
 
-                foreach (var aabb in aabbs)
+                foreach (var aabb in terrainAABBs)
                 {
-                    if (aabb.IsTrigger || aabb.IsLiquid) continue;
+                    if (aabb.IsTrigger) continue;
 
                     if (!AxisOverlap(playerMinX, playerMaxX, aabb.Min.x, aabb.Max.x, false) ||
                         !AxisOverlap(playerMinZ, playerMaxZ, aabb.Min.z, aabb.Max.z, false))
@@ -549,11 +553,11 @@ namespace CraftSharp.Control
             }
         }
 
-        private void CheckGrounded(UnityAABB[] aabbs)
+        private void CheckGrounded(UnityAABB[] terrainAABBs)
         {
             // Player feet position
             var playerPos = transform.position;
-            float playerFeetY = playerPos.y;
+            var playerFeetY = playerPos.y;
             
             // Check player's feet area (XZ plane) against terrain AABBs
             var playerMinX = playerPos.x - PLAYER_RADIUS;
@@ -561,25 +565,25 @@ namespace CraftSharp.Control
             var playerMinZ = playerPos.z - PLAYER_RADIUS;
             var playerMaxZ = playerPos.z + PLAYER_RADIUS;
 
-            bool isGrounded = false;
-            float closestGroundDist = GROUND_RAYCAST_DIST;
-            float raycastMinY = playerFeetY - GROUND_RAYCAST_DIST;
+            var isGrounded = false;
+            var closestGroundDist = GROUND_RAYCAST_DIST;
+            var raycastMinY = playerFeetY - GROUND_RAYCAST_DIST;
 
-            // Check terrain AABBs (not liquid, not triggers)
-            foreach (var aabb in aabbs)
+            // Check terrain AABBs (not triggers)
+            foreach (var aabb in terrainAABBs)
             {
                 // Skip trigger AABBs (NoCollision blocks)
                 if (aabb.IsTrigger) continue;
                 
                 // Check if player's feet area overlaps with this AABB in XZ plane
-                bool xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
-                bool zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
+                var xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
+                var zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
                 
                 if (!xOverlap || !zOverlap)
                     continue;
 
-                float aabbTopY = aabb.Max.y;
-                float aabbBottomY = aabb.Min.y;
+                var aabbTopY = aabb.Max.y;
+                var aabbBottomY = aabb.Min.y;
 
                 if (playerFeetY >= aabbBottomY && playerFeetY <= aabbTopY)
                 {
@@ -587,7 +591,7 @@ namespace CraftSharp.Control
                 }
                 else if (aabbTopY <= playerFeetY && aabbTopY >= raycastMinY)
                 {
-                    float distance = playerFeetY - aabbTopY;
+                    var distance = playerFeetY - aabbTopY;
                     if (distance < closestGroundDist)
                     {
                         closestGroundDist = distance;
@@ -605,8 +609,51 @@ namespace CraftSharp.Control
                     break;
             }
 
-            Status.GroundDist = Mathf.Clamp(closestGroundDist, 0F, GROUND_RAYCAST_DIST);
+            Status.GroundDistFromFeet = Mathf.Clamp(closestGroundDist, 0F, GROUND_RAYCAST_DIST);
             Status.Grounded = isGrounded;
+        }
+
+        private void CheckInLiquid(UnityAABB[] liquidAABBs)
+        {
+            var playerPos = transform.position;
+
+            var playerMinX = playerPos.x - PLAYER_RADIUS;
+            var playerMaxX = playerPos.x + PLAYER_RADIUS;
+            var playerMinY = playerPos.y;
+            var playerMaxY = playerPos.y + PLAYER_HEIGHT;
+            var playerMinZ = playerPos.z - PLAYER_RADIUS;
+            var playerMaxZ = playerPos.z + PLAYER_RADIUS;
+
+            var inLiquid = false;
+            var highestLiquidTop = float.MinValue;
+
+            foreach (var aabb in liquidAABBs)
+            {
+                var xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
+                var yOverlap = playerMaxY > aabb.Min.y && playerMinY < aabb.Max.y;
+                var zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
+
+                if (!xOverlap || !yOverlap || !zOverlap)
+                    continue;
+
+                inLiquid = true;
+                highestLiquidTop = Mathf.Max(highestLiquidTop, aabb.Max.y);
+            }
+
+            Status.InLiquid = inLiquid;
+            if (inLiquid)
+            {
+                // Distance from player head to the top of the overlapped liquid (negative when submerged)
+                Status.LiquidDistFromHead = playerMaxY - highestLiquidTop;
+                
+                // LiquidDist <= 0 means player is submerged
+                Status.Floating = ABOVE_LIQUID_HEIGHT_WHEN_FLOATING > Status.LiquidDistFromHead;
+            }
+            else
+            {
+                Status.LiquidDistFromHead = LIQUID_RAYCAST_DIST;
+                Status.Floating = false;
+            }
         }
 
         private void OnDrawGizmos()
@@ -615,14 +662,14 @@ namespace CraftSharp.Control
             var playerPos = transform.position;
             
             // Player AABB center (position is at feet, so center is at half height)
-            Vector3 center = new Vector3(
+            var center = new Vector3(
                 playerPos.x,
                 playerPos.y + PLAYER_CENTER_Y,
                 playerPos.z
             );
             
             // Player AABB size
-            Vector3 size = new Vector3(
+            var size = new Vector3(
                 PLAYER_WIDTH,
                 PLAYER_HEIGHT,
                 PLAYER_WIDTH
@@ -638,8 +685,8 @@ namespace CraftSharp.Control
             if (lastMovementOffset.sqrMagnitude > 1E-6F)
             {
                 // Draw line from current position to intended destination
-                Vector3 startPos = playerPos;
-                Vector3 endPos = playerPos + lastMovementOffset;
+                var startPos = playerPos;
+                var endPos = playerPos + lastMovementOffset;
                 
                 // Use yellow for movement line
                 Gizmos.color = Color.yellow;
@@ -653,8 +700,8 @@ namespace CraftSharp.Control
             if (hasBlockingAABB)
             {
                 // Calculate center and size of blocking AABB
-                Vector3 blockingCenter = (blockingAABBMin + blockingAABBMax) * 0.5F;
-                Vector3 blockingSize = blockingAABBMax - blockingAABBMin;
+                var blockingCenter = (blockingAABBMin + blockingAABBMax) * 0.5F;
+                var blockingSize = blockingAABBMax - blockingAABBMin;
                 
                 // Use red for blocking AABB
                 Gizmos.color = new Color(1F, 0F, 0F, 0.5F); // Red with transparency

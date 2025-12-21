@@ -6,14 +6,12 @@ namespace CraftSharp.Rendering
     {
         public Vector3 Min;
         public Vector3 Max;
-        public bool IsLiquid;
-        public bool IsTrigger; // For NoCollision blocks
+        public readonly bool IsTrigger; // For NoCollision blocks
 
-        public UnityAABB(Vector3 min, Vector3 max, bool isLiquid, bool isTrigger)
+        public UnityAABB(Vector3 min, Vector3 max, bool isTrigger)
         {
             Min = min;
             Max = max;
-            IsLiquid = isLiquid;
             IsTrigger = isTrigger;
         }
     }

@@ -101,12 +101,18 @@ namespace CraftSharp.Rendering
 
         private readonly List<UnityAABB> terrainAABBs = new();
         private readonly List<UnityAABB> liquidAABBs = new();
-        private readonly Dictionary<BlockLoc, List<UnityAABB>> aabbList = new();
+        private readonly Dictionary<BlockLoc, List<UnityAABB>> terrainAABBMap = new();
+        private readonly Dictionary<BlockLoc, List<UnityAABB>> liquidAABBMap = new();
 
         /// <summary>
         /// Get terrain AABBs for custom physics collision detection
         /// </summary>
         public UnityAABB[] GetTerrainAABBs() => terrainAABBs.ToArray();
+        
+        /// <summary>
+        /// Get liquid AABBs for liquid physics calculation
+        /// </summary>
+        public UnityAABB[] GetLiquidAABBs() => liquidAABBs.ToArray();
 
         public void SetClient(BaseCornClient curClient) => client = curClient;
 
@@ -988,9 +994,11 @@ namespace CraftSharp.Rendering
                 {
                     terrainAABBs.Clear();
                     liquidAABBs.Clear();
-                    aabbList.Clear();
+                    terrainAABBMap.Clear();
+                    liquidAABBMap.Clear();
 
-                    ChunkRenderBuilder.BuildTerrainAABBs(world, playerBlockLoc, _worldOriginOffset, terrainAABBs, liquidAABBs, aabbList);
+                    ChunkRenderBuilder.BuildTerrainAABBs(world, playerBlockLoc, _worldOriginOffset,
+                        terrainAABBs, liquidAABBs, terrainAABBMap, liquidAABBMap);
 
                     // Set last player location
                     lastPlayerBlockLoc = playerBlockLoc;
@@ -1003,12 +1011,14 @@ namespace CraftSharp.Rendering
 
         public void RebuildTerrainBoxCollider(BlockLoc playerBlockLoc)
         {
-            ChunkRenderBuilder.BuildTerrainAABBs(world, playerBlockLoc, _worldOriginOffset, terrainAABBs, liquidAABBs, aabbList);
+            ChunkRenderBuilder.BuildTerrainAABBs(world, playerBlockLoc, _worldOriginOffset,
+                terrainAABBs, liquidAABBs, terrainAABBMap, liquidAABBMap);
         }
 
         private void RebuildTerrainBoxColliderAt(BlockLoc blockLoc)
         {
-            ChunkRenderBuilder.BuildTerrainAABBsAt(world, blockLoc, _worldOriginOffset, terrainAABBs, liquidAABBs, aabbList);
+            ChunkRenderBuilder.BuildTerrainAABBsAt(world, blockLoc, _worldOriginOffset,
+                terrainAABBs, liquidAABBs, terrainAABBMap, liquidAABBMap);
         }
 
         public void UpdateNearbyChunkCoordList(int playerChunkX, int playerChunkZ)

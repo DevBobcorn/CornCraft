@@ -39,6 +39,13 @@ namespace CraftSharp.Control
                 _sneakToggleRequested = false;
             }
 
+            // If in liquid, disable sprinting/sneaking
+            if (info.InLiquid)
+            {
+                info.Sprinting = false;
+                info.Sneaking = false;
+            }
+
             // Movement velocity update
             Vector3 moveVelocity;
 
@@ -48,7 +55,7 @@ namespace CraftSharp.Control
                 info.CurrentVisualYaw = info.TargetVisualYaw;
 
                 // Apply vertical velocity to horizontal velocity
-                moveVelocity = currentVelocity + player.transform.up * 9F /* ability.JumpSpeedCurve.Evaluate(currentVelocity.magnitude) */;
+                moveVelocity = currentVelocity + player.transform.up * 9F;
 
                 _jumpRequested = false;
             }
@@ -81,6 +88,11 @@ namespace CraftSharp.Control
                     }
 
                     var moveSpeed = info.Sprinting ? ability.SprintSpeed : info.Sneaking ? ability.SneakSpeed : ability.WalkSpeed;
+                    
+                    if (info.InLiquid)
+                    {
+                        moveSpeed = ability.SwimSpeed;
+                    }
                     
                     _sprintRequested = false;
 

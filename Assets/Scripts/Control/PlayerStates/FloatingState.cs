@@ -18,7 +18,7 @@ namespace CraftSharp.Control
             Vector3 moveVelocity = Vector3.zero;
 
             // Update moving status
-            bool prevMoving = info.Moving;
+            var prevMoving = info.Moving;
             info.Moving = inputData.Locomotion.Movement.IsPressed();
 
             // Animation mirror randomization
@@ -28,20 +28,13 @@ namespace CraftSharp.Control
             }
 
             // Check vertical movement...
-            float distToAfloat = PlayerStatusUpdater.FLOATING_DIST_THRESHOLD - 0.2F - info.LiquidDist;
+            var distToAfloat = PlayerStatusUpdater.ABOVE_LIQUID_HEIGHT_WHEN_FLOATING - info.LiquidDistFromHead;
 
             if (inputData.Locomotion.Ascend.IsPressed())
             {
-                if (distToAfloat > 0F) // Underwater
+                if (distToAfloat > 0F) // Can go up
                 {
-                    if(distToAfloat <= 1F) // Move up no further than top of the surface
-                    {
-                        moveVelocity = distToAfloat * 2f * player.transform.up;
-                    }
-                    else // Just move up
-                    {
-                        moveVelocity = swimSpeed * player.transform.up;
-                    }
+                    moveVelocity = swimSpeed * player.transform.up;
                 }
             }
             else if (inputData.Locomotion.Descend.IsPressed())
