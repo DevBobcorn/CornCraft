@@ -1727,6 +1727,14 @@ namespace CraftSharp
                 handler.SendPlayerSession(playerKeyPair);
 
             ClearInventories();
+
+            Loom.QueueOnMainThread(() =>
+            {
+                if (!string.IsNullOrWhiteSpace(host))
+                    WindowTitleManager.SetServerTitle($"{host}:{port}");
+                else
+                    WindowTitleManager.SetDefaultTitle();
+            });
         }
 
         /// <summary>

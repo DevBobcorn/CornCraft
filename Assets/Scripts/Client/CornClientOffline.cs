@@ -70,6 +70,9 @@ namespace CraftSharp
 
             // Freeze player controller until terrain is ready
             PlayerController.DisablePhysics();
+            
+            // Update window title TODO: Localize
+            WindowTitleManager.SetServerTitle("Local Test");
         }
 
         public override bool StartClient(StartLoginInfo info)

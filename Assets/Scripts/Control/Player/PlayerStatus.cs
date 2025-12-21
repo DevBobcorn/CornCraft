@@ -87,8 +87,6 @@ namespace CraftSharp.Control
         public float MovementInputYaw = 0F;
         public float CurrentVisualYaw = 0F;
 
-        public float YawDeltaAbs => Mathf.Abs(Mathf.DeltaAngle(TargetVisualYaw, CurrentVisualYaw));
-
         public static Direction GetYawDirection(float yawAngle)
         {
             while (yawAngle >= 360F) yawAngle -= 360F;

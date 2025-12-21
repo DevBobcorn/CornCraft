@@ -392,7 +392,11 @@ namespace CraftSharp
         /// <summary>
         /// Should only be externally called by CornClientOnline
         /// </summary>
-        public static void BackToLogin() => SceneManager.LoadScene("Login");
+        public static void BackToLogin()
+        {
+            WindowTitleManager.SetDefaultTitle();
+            SceneManager.LoadScene("Login");
+        }
 
         // Should be called from the Unity thread only, not net read thread
         public static void Notify(string notification) => EventManager.Instance.Broadcast<NotificationEvent>(new(notification));
