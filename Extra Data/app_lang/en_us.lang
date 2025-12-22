@@ -115,6 +115,7 @@ keybinding.keyboard.ralt=R Alt
 keybinding.keyboard.enter=Enter
 
 [login]
+login.dummy_server=Dummy Server
 login.server_name_invalid=Failed to parse server name or address!
 login.link_copied=Link copied to clipboard
 login.auth_code_empty=Authentication code is empty!

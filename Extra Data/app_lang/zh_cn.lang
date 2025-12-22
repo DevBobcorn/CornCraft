@@ -115,6 +115,7 @@ keybinding.keyboard.ralt=右Alt
 keybinding.keyboard.enter=回车
 
 [login]
+login.dummy_server=虚拟服务器
 login.server_name_invalid=服务器名称或地址无效！
 login.link_copied=链接已复制到剪切板
 login.auth_code_empty=验证码为空！
