@@ -13,9 +13,10 @@ namespace CraftSharp
         public ushort ServerPort;
         public int ProtocolVersion;
         public string AccountLower;
+        public string? ReceivedVersionName;
 
         public StartLoginInfo(bool online, SessionToken session, PlayerKeyPair? player, string serverIp, ushort serverPort,
-                int protocolVersion, string accountLower)
+                int protocolVersion, string accountLower, string? receivedVersionName)
         {
             Online = online;
             Session = session;
@@ -24,6 +25,7 @@ namespace CraftSharp
             ServerPort = serverPort;
             ProtocolVersion = protocolVersion;
             AccountLower = accountLower;
+            ReceivedVersionName = receivedVersionName;
         }
     }
 }

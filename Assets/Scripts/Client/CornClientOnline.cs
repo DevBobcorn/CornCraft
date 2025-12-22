@@ -32,6 +32,7 @@ namespace CraftSharp
         private string? host;
         private int port;
         private int protocolVersion;
+        private string? receivedVersionName;
         private string? username;
         private Guid uuid;
         private string? sessionId;
@@ -163,6 +164,7 @@ namespace CraftSharp
             protocolVersion = info.ProtocolVersion;
             playerKeyPair = info.Player;
             accountLower = info.AccountLower;
+            receivedVersionName = info.ReceivedVersionName;
 
             _sessionToken = session;
 
@@ -1731,7 +1733,7 @@ namespace CraftSharp
             Loom.QueueOnMainThread(() =>
             {
                 if (!string.IsNullOrWhiteSpace(host))
-                    WindowTitleManager.SetServerTitle($"{host}:{port}");
+                    WindowTitleManager.SetServerTitle($"{receivedVersionName ?? ProtocolHandler.ProtocolVersion2MCVer(protocolVersion)} (v{protocolVersion}) - {host}:{port}");
                 else
                     WindowTitleManager.SetDefaultTitle();
             });

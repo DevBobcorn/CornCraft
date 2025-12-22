@@ -127,7 +127,7 @@ namespace CraftSharp.UI
             HideLoginPanel();
             // Store current login info
             loginInfo = new StartLoginInfo(false, session, null, "<local>", 0,
-                    protocolVersion, accountLower);
+                    protocolVersion, accountLower, string.Empty);
             StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
         }
 
@@ -317,7 +317,7 @@ namespace CraftSharp.UI
                         HideLoginPanel();
                         // Store current login info
                         loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
-                                protocolVersion, accountLower);
+                                protocolVersion, accountLower, receivedVersionName);
                         // No need to yield return this coroutine because it's the last step here
                         StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
                     }
@@ -335,12 +335,14 @@ namespace CraftSharp.UI
 
                             // Authentication completed, hide the panel...
                             HideLoginPanel();
+                            
+                            var altVersionName = ProtocolHandler.ProtocolVersion2MCVer(protocolVersion);
+                            
                             // Store current login info
                             loginInfo = new StartLoginInfo(true, session, playerKeyPair, host, port,
-                                    protocolVersion, accountLower);
+                                    protocolVersion, accountLower, receivedVersionName + $" {altVersionName} (using v{protocolVersion})");
                             // Display a notification
-                            var altMcVersion = ProtocolHandler.ProtocolVersion2MCVer(protocolVersion);
-                            CornApp.Notify($"Using alternative version {altMcVersion} (protocol v{protocolVersion})", Notification.Type.Warning);
+                            CornApp.Notify($"Using alternative version {altVersionName} (protocol v{protocolVersion})", Notification.Type.Warning);
                             // No need to yield return this coroutine because it's the last step here
                             StartCoroutine(StoreLoginInfoAndLoadResource(loginInfo));
                         }

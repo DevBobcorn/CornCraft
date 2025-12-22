@@ -52,7 +52,7 @@ namespace CraftSharp
 
                 // Start up by self since it's not started from login screen
                 StartClient(new StartLoginInfo(false, new SessionToken(), null, "dummy", 
-                    0, DUMMY_PROTOCOL_VERSION, "dummy_player"));
+                    0, DUMMY_PROTOCOL_VERSION, "dummy_player", string.Empty));
             }
 
             // Set up screen control
@@ -71,8 +71,8 @@ namespace CraftSharp
             // Freeze player controller until terrain is ready
             PlayerController.DisablePhysics();
             
-            // Update window title TODO: Localize
-            WindowTitleManager.SetServerTitle("Local Test");
+            // Update window title
+            WindowTitleManager.SetServerTitle($"{ProtocolHandler.ProtocolVersion2MCVer(DUMMY_PROTOCOL_VERSION)} (v{DUMMY_PROTOCOL_VERSION}) - {Translations.Get("login.dummy_server")}");
         }
 
         public override bool StartClient(StartLoginInfo info)

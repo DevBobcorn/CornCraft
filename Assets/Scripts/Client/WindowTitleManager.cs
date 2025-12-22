@@ -20,7 +20,7 @@ namespace CraftSharp
 
         public static void SetServerTitle(string description)
         {
-            var title = $"{Application.productName} - {description}";
+            var title = $"{Application.productName} {description}";
             SetTitle(title);
         }
 
