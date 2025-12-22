@@ -89,8 +89,10 @@ namespace CraftSharp.Protocol.Handlers
                 <= MC_1_19_2_Version => new EntityMetadataPalette1191(), // 1.13 - 1.19.2
                 <= MC_1_19_3_Version => new EntityMetadataPalette1193(), // 1.19.3
                 <= MC_1_20_4_Version => new EntityMetadataPalette1194(), // 1.19.4 - 1.20.4
+                // <= MC_1_21_4_Version => new EntityMetadataPalette1205(), // 1.20.5 - 1.21.4
 
-                _ => throw new NotImplementedException()
+                // _ => throw new NotImplementedException()
+                _ => new EntityMetadataPalette1205(), // 1.20.5 - 1.21.4
             };
 
             // MessageType 
