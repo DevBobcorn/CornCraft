@@ -84,8 +84,11 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(healthCallback);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            // Make sure base actions are disabled
+            base.OnDestroy();
+            
             if (healthCallback is not null)
             {
                 EventManager.Instance.Unregister(healthCallback);

@@ -237,8 +237,11 @@ namespace CraftSharp.UI
 
         #nullable disable
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            // Make sure base actions are disabled
+            base.OnDestroy();
+            
             if (cameraAimCallback is not null)
                 EventManager.Instance.Unregister(cameraAimCallback);
             if (gameModeCallback is not null)
@@ -259,6 +262,9 @@ namespace CraftSharp.UI
                 EventManager.Instance.Unregister(staminaCallback);
             if (chatMessageCallback is not null)
                 EventManager.Instance.Unregister(chatMessageCallback);
+            
+            // Make sure actions are disabled
+            Actions?.Disable();
         }
 
         public override void UpdateScreen()

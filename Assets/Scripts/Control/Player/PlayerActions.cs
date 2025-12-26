@@ -207,6 +207,17 @@ namespace CraftSharp.Control
                 },
                 {
                     ""name"": """",
+                    ""id"": ""68b3dcc9-d447-4616-b2c1-0754bdebaeb2"",
+                    ""path"": ""<Joystick>/stick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""fb253dbb-4dd5-4426-9612-244abac76a65"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": ""Press"",

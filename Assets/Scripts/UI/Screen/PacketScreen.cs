@@ -119,8 +119,11 @@ namespace CraftSharp.UI
             ClearPacketPreview();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            // Make sure base actions are disabled
+            base.OnDestroy();
+            
             if (packetCallback is not null)
             {
                 EventManager.Instance.Unregister(packetCallback);

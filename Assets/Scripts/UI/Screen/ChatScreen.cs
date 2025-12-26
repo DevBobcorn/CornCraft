@@ -337,14 +337,16 @@ namespace CraftSharp.UI
             EventManager.Instance.Register(autoCompleteCallback);
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            // Make sure base actions are disabled
+            base.OnDestroy();
+            
             if (chatMessageCallback is not null)
                 EventManager.Instance.Unregister(chatMessageCallback);
             
             if (autoCompleteCallback is not null)
                 EventManager.Instance.Unregister(autoCompleteCallback);
-
         }
 
         public override void UpdateScreen()

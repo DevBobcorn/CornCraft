@@ -1241,9 +1241,12 @@ namespace CraftSharp.UI
 
             get => isActive;
         }
-        
-        private void OnDestroy()
+
+        protected override void OnDestroy()
         {
+            // Make sure base actions are disabled
+            base.OnDestroy();
+            
             if (mobEffectUpdateCallback is not null)
                 EventManager.Instance.Unregister(mobEffectUpdateCallback);
             if (mobEffectRemovalCallback is not null)

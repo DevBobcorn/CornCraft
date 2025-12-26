@@ -34,6 +34,12 @@ namespace CraftSharp.UI
             EnsureInitialized();
         }
 
+        protected virtual void OnDestroy()
+        {
+            // Make sure base actions are disabled
+            BaseActions?.Disable();
+        }
+
         public abstract void UpdateScreen();
     }
 }

@@ -19,6 +19,7 @@ namespace CraftSharp.UI
 
         [SerializeField] [Range(0.1F, 1F)] private float warningThreshold = 0.3F;
         [SerializeField] [Range(0.1F, 1F)] private float dangerThreshold  = 0.1F;
+        [SerializeField] [Range(0.1F, 1F)] private float updateMultiplier = 0.2F;
 
         [SerializeField] private Image barImage;
         private Material barMaterial;
@@ -36,12 +37,12 @@ namespace CraftSharp.UI
         {
             if (displayValue > curValue) // Reducing fill
             {
-                displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime, curValue);
+                displayValue = Mathf.Max(displayValue - maxValue * Time.deltaTime * updateMultiplier, curValue);
                 barMaterial.SetColor(DELTA_COLOR, reduceColor);
             }
             else // Increasing fill
             {
-                displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime, curValue);
+                displayValue = Mathf.Min(displayValue + maxValue * Time.deltaTime * updateMultiplier, curValue);
                 barMaterial.SetColor(DELTA_COLOR, increaseColor);
             }
 
