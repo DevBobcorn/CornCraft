@@ -113,6 +113,17 @@ namespace CraftSharp.UI
                 
                 // Select this text input
                 text1Input.Select();
+                
+                if (isActive)
+                {
+                    // Enable actions
+                    BaseActions?.Enable();
+                }
+                else
+                {
+                    // Disable actions
+                    BaseActions.Disable();
+                }
             }
 
             get => isActive;
@@ -181,14 +192,14 @@ namespace CraftSharp.UI
 
         public override void UpdateScreen()
         {
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (BaseActions.Interaction.CloseScreen.WasPressedThisFrame())
             {
                 Submit();
             }
             
             // Check if any TMP_InputField is currently focused
             GameObject currentSelected = EventSystem.current.currentSelectedGameObject;
-            if (currentSelected)
+            if (currentSelected && Keyboard.current != null)
             {
                 TMP_InputField currentInputField = currentSelected.GetComponent<TMP_InputField>();
                 if (currentInputField && currentInputField.lineType == TMP_InputField.LineType.SingleLine)

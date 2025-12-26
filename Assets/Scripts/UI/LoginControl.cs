@@ -398,7 +398,12 @@ namespace CraftSharp.UI
             if (resLoadFlag.Failed)
             {
                 resourceLoaded = false;
+                preparingGame = false;
+
                 Debug.LogWarning("Resource load failed");
+
+                // Show login panel again
+                ShowLoginPanel();
             }
             else
             {
@@ -587,7 +592,11 @@ namespace CraftSharp.UI
             var extraDataDir = PathHelper.GetExtraDataDirectory();
             var builtinResLoad = BuiltinResourceHelper.ReadyBuiltinResource(
                     CornApp.CORN_CRAFT_BUILTIN_FILE_NAME, CornApp.CORN_CRAFT_BUILTIN_VERSION, extraDataDir,
-                    _ => { }, () => { }, _ => { });
+                    _ => { }, () => { }, succeeded =>
+                    {
+                        // Reload translations after generating builtin asset files
+                        if (succeeded) Translations.LoadTranslationsFile(ProtocolSettings.Language);
+                    });
             
             while (builtinResLoad.MoveNext()) { /* Do nothing */ }
             
@@ -656,7 +665,7 @@ namespace CraftSharp.UI
 
         private void Update()
         {
-            if (namesShown)
+            if (namesShown && Keyboard.current != null)
             {
                 if (Keyboard.current.upArrowKey.wasPressedThisFrame)
                 {

@@ -126,44 +126,47 @@ namespace CraftSharp
 
         private void Update()
         {
-            if (Keyboard.current.f5Key.isPressed)
+            if (Keyboard.current != null)
             {
-                if (Keyboard.current.lKey.wasPressedThisFrame) // Debug function, update environment lighting
+                if (Keyboard.current.f5Key.isPressed)
                 {
-                    CornApp.Notify(Translations.Get("rendering.debug.update_env_lighting"));
-                    // Recalculate dynamic GI
-                    DynamicGI.UpdateEnvironment();
+                    if (Keyboard.current.lKey.wasPressedThisFrame) // Debug function, update environment lighting
+                    {
+                        CornApp.Notify(Translations.Get("rendering.debug.update_env_lighting"));
+                        // Recalculate dynamic GI
+                        DynamicGI.UpdateEnvironment();
+                    }
+                    
+                    if (Keyboard.current.cKey.wasPressedThisFrame) // Debug function, rebuild chunk renders
+                    {
+                        CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
+                        // Don't destroy block entity renders
+                        ChunkRenderManager.ReloadChunksRender(false);
+                    }
                 }
-                
-                if (Keyboard.current.cKey.wasPressedThisFrame) // Debug function, rebuild chunk renders
-                {
-                    CornApp.Notify(Translations.Get("rendering.debug.reload_chunk_render"));
-                    // Don't destroy block entity renders
-                    ChunkRenderManager.ReloadChunksRender(false);
-                }
-            }
 
-            if (PlayerController)
-            {
-                if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
+                if (PlayerController)
                 {
-                    SwitchPlayerRenderBy(clientEntity, -1);
+                    if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
+                    {
+                        SwitchPlayerRenderBy(clientEntity, -1);
+                    }
+                    else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
+                    {
+                        SwitchPlayerRenderBy(clientEntity,  0);
+                    }
+                    else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
+                    {
+                        SwitchPlayerRenderBy(clientEntity,  1);
+                    }
                 }
-                else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
-                {
-                    SwitchPlayerRenderBy(clientEntity,  0);
-                }
-                else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
-                {
-                    SwitchPlayerRenderBy(clientEntity,  1);
-                }
-            }
 
-            if (Keyboard.current.shiftKey.isPressed)
-            {
-                if (Keyboard.current.tabKey.wasPressedThisFrame) // Select next camera controller
+                if (Keyboard.current.shiftKey.isPressed)
                 {
-                    SwitchCameraControllerBy(1);
+                    if (Keyboard.current.tabKey.wasPressedThisFrame) // Select next camera controller
+                    {
+                        SwitchCameraControllerBy(1);
+                    }
                 }
             }
         }

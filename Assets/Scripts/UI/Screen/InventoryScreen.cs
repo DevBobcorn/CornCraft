@@ -1226,6 +1226,17 @@ namespace CraftSharp.UI
             set {
                 isActive = value;
                 screenAnimator.SetBool(SHOW_HASH, isActive);
+                
+                if (isActive)
+                {
+                    // Enable actions
+                    BaseActions?.Enable();
+                }
+                else
+                {
+                    // Disable actions
+                    BaseActions.Disable();
+                }
             }
 
             get => isActive;
@@ -1585,7 +1596,7 @@ namespace CraftSharp.UI
 
         public override void UpdateScreen()
         {
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (BaseActions.Interaction.CloseScreen.WasPressedThisFrame())
             {
                 CloseInventory();
             }

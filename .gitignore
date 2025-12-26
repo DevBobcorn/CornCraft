@@ -11,6 +11,9 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
+# IL2CPP files
+/.utmp
+
 # Minor config files & session cache
 /*.ini
 

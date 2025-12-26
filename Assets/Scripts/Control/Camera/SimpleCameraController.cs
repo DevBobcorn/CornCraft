@@ -68,11 +68,14 @@ namespace CraftSharp.Control
                 SetYaw(_setYawRequest.Value);
             }
 
-            var mouseScroll = Mouse.current.scroll.value.y;
-            if (mouseScroll != 0F && Keyboard.current.shiftKey.IsPressed())
+            if (Mouse.current != null && Keyboard.current != null)
             {
-                // Update target camera status according to user input
-                cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - mouseScroll * zoomSensitivity);
+                var mouseScroll = Mouse.current.scroll.value.y;
+                if (mouseScroll != 0F && Keyboard.current.shiftKey.isPressed)
+                {
+                    // Update target camera status according to user input
+                    cameraInfo.TargetScale = Mathf.Clamp01(cameraInfo.TargetScale - mouseScroll * zoomSensitivity);
+                }
             }
             
             if (!Mathf.Approximately(cameraInfo.TargetScale, cameraInfo.CurrentScale))

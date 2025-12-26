@@ -23,11 +23,20 @@ namespace CraftSharp.UI
                 screenGroup.alpha = value ? 1F : 0F;
                 screenGroup.blocksRaycasts = value;
                 screenGroup.interactable   = value;
+                
                 // Focus chat input on enter chat screen
-                if (value)
+                if (isActive)
                 {
                     chatInput.text = string.Empty;
                     chatInput.ActivateInputField();
+                    
+                    // Enable actions
+                    BaseActions?.Enable();
+                }
+                else
+                {
+                    // Disable actions
+                    BaseActions.Disable();
                 }
             }
 
@@ -340,7 +349,7 @@ namespace CraftSharp.UI
 
         public override void UpdateScreen()
         {
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (BaseActions.Interaction.CloseScreen.WasPressedThisFrame())
             {
                 var client = CornApp.CurrentClient;
                 if (client)
@@ -354,21 +363,24 @@ namespace CraftSharp.UI
             if (!game) return;
 
             // Update cursor text position
-            var mousePos = Mouse.current.position.value;
-            
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                screenRect, mousePos, game.UICamera, out Vector2 newPos);
-            
-            var tipPos = new Vector2(
-                Mathf.Min(screenRect.rect.width / 2 - cursorTextPanel.rect.width, newPos.x),
-                Mathf.Max(cursorTextPanel.rect.height - screenRect.rect.height / 2, newPos.y) );
-            
-            tipPos = transform.TransformPoint(tipPos);
+            if (Mouse.current != null || Pointer.current != null)
+            {
+                var mousePos = Mouse.current != null ? Mouse.current.position.value : Pointer.current.position.ReadValue();
 
-            // Don't modify z coordinate
-            cursorTextPanel.position = new Vector3(tipPos.x, tipPos.y, cursorTextPanel.position.z);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    screenRect, mousePos, game.UICamera, out Vector2 newPos);
+                
+                var tipPos = new Vector2(
+                    Mathf.Min(screenRect.rect.width / 2 - cursorTextPanel.rect.width, newPos.x),
+                    Mathf.Max(cursorTextPanel.rect.height - screenRect.rect.height / 2, newPos.y) );
+                
+                tipPos = transform.TransformPoint(tipPos);
 
-            if (chatInput.IsActive())
+                // Don't modify z coordinate
+                cursorTextPanel.position = new Vector3(tipPos.x, tipPos.y, cursorTextPanel.position.z);
+            }
+
+            if (Keyboard.current != null && chatInput.IsActive())
             {
                 if (Keyboard.current.enterKey.wasPressedThisFrame ||
                     Keyboard.current.numpadEnterKey.wasPressedThisFrame)

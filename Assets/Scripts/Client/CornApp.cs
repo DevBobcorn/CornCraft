@@ -235,7 +235,8 @@ namespace CraftSharp
                 Debug.Log($"Resources for {resourceVersion} not present. Downloading...");
                 var downloadSucceeded = false;
                 yield return StartCoroutine(ResourceDownloader.DownloadResource(resourceVersion,
-                        updateStatus, () => { },
+                        updateStatus, () => { 
+                            updateStatus("resource.info.download_started", string.Empty); },
                         succeeded => downloadSucceeded = succeeded));
                 
                 if (!downloadSucceeded)
@@ -407,7 +408,7 @@ namespace CraftSharp
 
         private void Update()
         {
-            if (Keyboard.current.f11Key.wasPressedThisFrame) // Toggle full screen
+            if (Keyboard.current != null && Keyboard.current.f11Key.wasPressedThisFrame) // Toggle full screen
             {
                 if (Screen.fullScreen)
                 {

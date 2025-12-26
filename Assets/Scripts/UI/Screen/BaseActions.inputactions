@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "BaseActions",
+    "maps": [
+        {
+            "name": "Interaction",
+            "id": "1515cce2-d9c7-42de-8faf-7a1b93b72c74",
+            "actions": [
+                {
+                    "name": "Close Screen",
+                    "type": "Button",
+                    "id": "67fafbab-636e-4faa-b55c-c886cea68300",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "07042c35-452b-4005-8369-ee384fd5a2b6",
+                    "path": "*/{Back}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Close Screen",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

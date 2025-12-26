@@ -203,7 +203,7 @@ namespace CraftSharp.UI
         {
             base.LateUpdate();
 
-            if (isActiveAndEnabled)
+            if (isActiveAndEnabled && Keyboard.current != null)
             {
                 if (Keyboard.current.leftArrowKey.wasPressedThisFrame ||
                         Keyboard.current.rightArrowKey.wasPressedThisFrame)

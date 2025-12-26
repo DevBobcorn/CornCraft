@@ -13,11 +13,17 @@ namespace CraftSharp.UI
 
         protected bool initialized;
         protected abstract void Initialize();
+        
+        // Input System Fields & Methods
+        public BaseActions BaseActions { get; private set; }
 
         public void EnsureInitialized()
         {
             if (!initialized)
             {
+                // Initialize base actions...
+                BaseActions = new BaseActions();
+                
                 Initialize();
                 initialized = true;
             }

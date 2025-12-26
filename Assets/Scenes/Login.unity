@@ -1256,7 +1256,7 @@ GameObject:
   - component: {fileID: 577806895}
   - component: {fileID: 577806894}
   m_Layer: 5
-  m_Name: Dummy Server Button
+  m_Name: Test Game Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2914,8 +2914,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 577806893}
   - {fileID: 584747998}
+  - {fileID: 577806893}
   - {fileID: 1270496597}
   m_Father: {fileID: 844491131}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3551,7 +3551,7 @@ GameObject:
   - component: {fileID: 1270496599}
   - component: {fileID: 1270496598}
   m_Layer: 5
-  m_Name: Quit Button
+  m_Name: Quit Game Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6450,7 +6450,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Dummy Server
+  m_text: Test Game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
   m_sharedMaterial: {fileID: -1950688326045491076, guid: 1ca8d82fa0abe124fa88df17095227d4, type: 2}
