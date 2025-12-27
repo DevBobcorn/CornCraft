@@ -54,11 +54,14 @@ namespace CraftSharp.Rendering
         /// </summary>
         public TrackedValue<Vector3> Position { get; private set; } = new(Vector3.zero);
 
-        // 200ms between server location updates
+        /// <summary>
+        /// 200ms between server location updates
+        /// </summary>
         protected double movementUpdateInterval = 200;
-        protected Vector3 lastPosition;
-        protected double currentElapsedMovementUpdateMilSec = 0;
-        protected double currentElapsedYawUpdateMilSec = 0;
+        
+        private Vector3 lastPosition;
+        private double currentElapsedMovementUpdateMilSec = 0;
+        private double currentElapsedYawUpdateMilSec = 0;
 
         /// <summary>
         /// Entity velocity received from server
@@ -192,9 +195,9 @@ namespace CraftSharp.Rendering
         #nullable disable
 
         /// <summary>
-        /// Whether the current entity has turned into ragdoll form
+        /// Whether the current entity has started death animation
         /// </summary>
-        protected bool _turnedIntoRagdoll = false;
+        private bool _deathAnimationStarted = false;
 
         [SerializeField] protected Transform _infoAnchor;
         [SerializeField] protected Transform _visualTransform;
@@ -217,7 +220,6 @@ namespace CraftSharp.Rendering
             protected set => _visualTransform = value;
         }
 
-        [SerializeField] protected GameObject ragdollPrefab;
         public GameObject FloatingInfoPrefab;
 
         /// <summary>
@@ -411,61 +413,11 @@ namespace CraftSharp.Rendering
 
         }
 
-        protected virtual void HandleRagdollMaterialUpdate(EntityMaterialAssigner ragdollMaterialControl, EntityMaterialManager matManager, ResourceLocation textureId, Material updatedMaterial)
-        {
-
-        }
-
-        protected virtual void TurnIntoRagdoll()
-        {
-            _turnedIntoRagdoll = true;
-
-            // Create ragdoll in place
-            if (ragdollPrefab)
-            {
-                var ragdollObj = GameObject.Instantiate(ragdollPrefab)!;
-
-                ragdollObj.transform.position = transform.position;
-
-                // Assign own rotation and localScale to ragdoll object
-                var ragdoll = ragdollObj.GetComponentInChildren<EntityRagdoll>();
-                if (ragdoll && _visualTransform)
-                {
-                    ragdollObj.transform.rotation = _visualTransform.rotation;
-                    ragdoll.Visual.localScale = _visualTransform.localScale;
-
-                    // Make it fly!
-                    if (ragdoll.mainRigidbody)
-                    {
-                        if (_visualMovementVelocity.sqrMagnitude > 0F)
-                            ragdoll.mainRigidbody.AddForce(_visualMovementVelocity.normalized * 15F, ForceMode.VelocityChange);
-                        else
-                            ragdoll.mainRigidbody.AddForce(Vector3.up * 10F, ForceMode.VelocityChange);
-                    }
-
-                    // Initialize ragdoll materials using own metadata
-                    if (ragdoll.gameObject.TryGetComponent(out EntityMaterialAssigner materialControl))
-                    {
-                        materialControl.InitializeMaterials(Type, GetControlVariables(), Metadata, (matManager, texId, mat) =>
-                        {
-                            HandleRagdollMaterialUpdate(materialControl, matManager, texId, mat);
-                        });
-                    }
-                }
-
-                // Hide own visual
-                if (_visualTransform)
-                {
-                    _visualTransform.gameObject.SetActive(false);
-                }
-            }
-        }
-
         public virtual void ManagedUpdate(float tickMilSec)
         {
-            if (!_turnedIntoRagdoll && Health.Value <= 0F)
+            if (!_deathAnimationStarted && Health.Value <= 0F)
             {
-                TurnIntoRagdoll();
+                _deathAnimationStarted = true;
             }
 
             UpdateTransform(tickMilSec);

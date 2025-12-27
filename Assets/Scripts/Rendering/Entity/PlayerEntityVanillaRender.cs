@@ -31,12 +31,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        protected override void HandleRagdollMaterialUpdate(EntityMaterialAssigner ragdollMaterialControl, EntityMaterialManager matManager, ResourceLocation textureId, Material updatedMaterial)
-        {
-            // TODO: Make player ragdoll and update accordingly
-        }
-
-        public void SetSlimModel(bool slimModel)
+        private void SetSlimModel(bool slimModel)
         {
             foreach (var model in slimModelObjects)
             {

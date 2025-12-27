@@ -62,8 +62,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8248813924472142757}
   - {fileID: 3677966705359002839}
+  - {fileID: 8248813924472142757}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2254008045796747884
@@ -87,7 +87,6 @@ MonoBehaviour:
   Pose: 0
   _infoAnchor: {fileID: 8248813924472142757}
   _visualTransform: {fileID: 3677966705359002839}
-  ragdollPrefab: {fileID: 0}
   FloatingInfoPrefab: {fileID: 5300854894600073256, guid: c0d5430989fe0e44bb3d36023e36d951, type: 3}
   head: {fileID: 9039543395478082801}
   cycleTime: 1
@@ -177,7 +176,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: fe72ea1eaf604d74ca738868996f2dfa, type: 2}
     - target: {fileID: 919132149155446097, guid: f9d8a51cf47b58c49aa91b65a3e5bffa, type: 3}
       propertyPath: m_Name
-      value: Villager
+      value: Visual
       objectReference: {fileID: 0}
     - target: {fileID: 4344928398308093090, guid: f9d8a51cf47b58c49aa91b65a3e5bffa, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
