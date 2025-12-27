@@ -117,7 +117,7 @@ namespace CraftSharp.UI
             }
             preparingGame = true;
 
-            const string serverVersionName = "<dummy>";
+            var serverVersionName = ProtocolHandler.ProtocolVersion2MCVer(CornClientOffline.DUMMY_PROTOCOL_VERSION);
             var protocolVersion = CornClientOffline.DUMMY_PROTOCOL_VERSION;
             CornApp.Notify(Translations.Get("mcc.server_protocol", serverVersionName, protocolVersion));
 
