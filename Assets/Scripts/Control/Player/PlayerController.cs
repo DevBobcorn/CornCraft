@@ -458,7 +458,7 @@ namespace CraftSharp.Control
             // Update player rotation (yaw)
             if (m_PlayerRender)
             {
-                m_PlayerRender.transform.eulerAngles = new Vector3(0F, status.CurrentVisualYaw, 0F);
+                m_PlayerRender.VisualTransform.eulerAngles = new Vector3(0F, status.CurrentVisualYaw, 0F);
             }
 
             if (status.PhysicsDisabled)
