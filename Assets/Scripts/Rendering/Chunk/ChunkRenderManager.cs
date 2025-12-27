@@ -1100,7 +1100,47 @@ namespace CraftSharp.Rendering
                     aabbInfo.point += cellPos;
                     var exactLoc = CoordConvert.Unity2MC(_worldOriginOffset, aabbInfo.point);
                     
-                    blockInfo = new(cellPos, blockLoc, exactLoc, blockState, block.StateId);
+                    blockInfo = new BlockRaycastInfo(cellPos, blockLoc, exactLoc, blockState, block.StateId);
+                    return true;
+                }
+            }
+            
+            aabbInfo = new Raycaster.AABBRaycastHit
+            {
+                hit = false,
+                point = Vector3.zero,
+                direction = Direction.Up
+            };
+            blockInfo = null;
+            return false;
+        }
+        
+        public bool RaycastLiquid(List<Vector3Int> cellPosList, Ray ray,
+            out Raycaster.AABBRaycastHit aabbInfo,
+            out BlockRaycastInfo blockInfo)
+        {
+            // TODO: Use more accurate liquid AABB
+            var fullShape = new BlockShapeAABB(0, 0, 0, 1, 1, 1);
+            
+            foreach (var cellPos in cellPosList) // Go through the list
+            {
+                var cellSpaceRay = new Ray(ray.origin - cellPos, ray.direction);
+                
+                var blockLoc = CoordConvert.Unity2MC(_worldOriginOffset, cellPos);
+                var block = GetBlock(blockLoc);
+                
+                var blockState = block.State;
+                if (!blockState.InLiquid) continue; // Not in liquid, skip
+
+                aabbInfo = Raycaster.RaycastAABB(cellSpaceRay, fullShape);
+                
+                if (aabbInfo.hit)
+                {
+                    // Convert from cell space back to world space
+                    aabbInfo.point += cellPos;
+                    var exactLoc = CoordConvert.Unity2MC(_worldOriginOffset, aabbInfo.point);
+                    
+                    blockInfo = new BlockRaycastInfo(cellPos, blockLoc, exactLoc, blockState, block.StateId);
                     return true;
                 }
             }
@@ -1309,13 +1349,12 @@ namespace CraftSharp.Rendering
 
         private void OnDrawGizmos()
         {
-            // Draw terrain AABBs in red wireframe
-            Gizmos.color = Color.red;
-            
+            // Draw terrain AABBs in red/blue wireframe
             foreach (var aabb in terrainAABBs)
             {
                 var center = (aabb.Min + aabb.Max) * 0.5f;
                 var size = aabb.Max - aabb.Min;
+                Gizmos.color = aabb.IsTrigger ? Color.cornflowerBlue : Color.red;
                 Gizmos.DrawWireCube(center, size);
             }
             

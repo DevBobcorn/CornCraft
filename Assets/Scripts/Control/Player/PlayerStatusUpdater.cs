@@ -676,21 +676,20 @@ namespace CraftSharp.Control
             );
             
             // Set gizmo color (cyan / magenta)
-            Gizmos.color = Status.Grounded ? Color.cyan : Color.magenta;
+            Gizmos.color = Status.Grounded ? new Color(0F, 1F, 1F, 0.25F) : new Color(1F, 0F, 1F, 0.25F);
             
-            // Draw wireframe cube for the AABB
-            Gizmos.DrawWireCube(center, size);
+            // Draw cube for the AABB
+            Gizmos.DrawCube(center, size);
             
             // Draw movement line if there's any movement
             if (lastMovementOffset.sqrMagnitude > 1E-6F)
             {
                 // Draw line from current position to intended destination
-                var startPos = playerPos;
                 var endPos = playerPos + lastMovementOffset;
                 
                 // Use yellow for movement line
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawLine(startPos, endPos);
+                Gizmos.DrawLine(playerPos, endPos);
                 
                 // Draw a small sphere at the destination
                 Gizmos.DrawSphere(endPos, 0.1F);
@@ -708,7 +707,7 @@ namespace CraftSharp.Control
                 Gizmos.DrawWireCube(blockingCenter, blockingSize);
                 
                 // Also draw filled cube with lower opacity
-                Gizmos.color = new Color(1F, 0F, 0F, 0.2F);
+                Gizmos.color = new Color(1F, 0F, 0F, 0.25F);
                 Gizmos.DrawCube(blockingCenter, blockingSize);
             }
         }

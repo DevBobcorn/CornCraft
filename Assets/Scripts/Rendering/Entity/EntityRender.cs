@@ -55,9 +55,9 @@ namespace CraftSharp.Rendering
         public TrackedValue<Vector3> Position { get; private set; } = new(Vector3.zero);
 
         /// <summary>
-        /// 200ms between server location updates
+        /// Interval between server location updates (ticks)
         /// </summary>
-        protected double movementUpdateInterval = 200;
+        protected double movementUpdateInterval = int.MaxValue;
         
         private Vector3 lastPosition;
         private double currentElapsedMovementUpdateMilSec = 0;
@@ -249,6 +249,11 @@ namespace CraftSharp.Rendering
             lastYaw = Yaw.Value = source.Yaw;
             lastPitch = Pitch.Value = source.Pitch;
 
+            // TODO: Check this
+            var intervalTicks = Type.UpdateInterval;
+            if (intervalTicks < 0) intervalTicks = 0;
+            movementUpdateInterval = intervalTicks == int.MaxValue ? double.MaxValue : (intervalTicks + 1) * 50D;
+
             Position.OnValueUpdate += (_, _) =>
             {
                 // Update old position and reset update timer
@@ -422,6 +427,27 @@ namespace CraftSharp.Rendering
 
             UpdateTransform(tickMilSec);
             UpdateAnimation(tickMilSec);
+        }
+        
+        private void OnDrawGizmos()
+        {
+            // Draw player AABB
+            var entityPos = transform.position;
+            
+            var width = Type.Width;
+            var height = Type.Height;
+            
+            // Player AABB center (position is at feet, so center is at half height)
+            var center = new Vector3(entityPos.x, entityPos.y + height / 2F, entityPos.z);
+            
+            // Player AABB size
+            var size = new Vector3(width, height, width);
+            
+            // Set gizmo color (cyan / magenta)
+            Gizmos.color = Color.orange;
+            
+            // Draw wireframe cube for the AABB
+            Gizmos.DrawWireCube(center, size);
         }
     }
 }

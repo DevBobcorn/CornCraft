@@ -6,6 +6,7 @@ Shader "Unlit/Dashed Line Billboard"
     Properties
     {
         _MainTex ("Texture Image", 2D) = "white" {}
+        _Line_Color ("Line Color", Color) = (1, 1, 1, 1)
         _Line_Width ("Line Width", Float) = 0.03
         _Line_Length ("Line Length", Float) = 1.00
 
@@ -30,8 +31,9 @@ Shader "Unlit/Dashed Line Billboard"
             #pragma vertex vert
             #pragma fragment frag
  
-            // User-specified uniforms          
-            uniform sampler2D _MainTex;      
+            // User-specified uniforms
+            uniform sampler2D _MainTex;
+            uniform float4 _Line_Color;
             uniform float _Line_Width;
             uniform float _Line_Length;
            
@@ -50,6 +52,7 @@ Shader "Unlit/Dashed Line Billboard"
                 float4 pos : SV_POSITION;
                 float2 tex : TEXCOORD0;
             };
+            
             vertexOutput vert(vertexInput input)
             {
                 // See https://discussions.unity.com/t/strange-unity_objecttoworld-behaviour/769706
@@ -139,13 +142,10 @@ Shader "Unlit/Dashed Line Billboard"
 
             float4 frag(vertexOutput input) : COLOR
             {
-                //return tex2D(_MainTex, input.tex.xy);  
-
-                fixed4 col = tex2D(_MainTex, input.tex.xy);  
+                float4 col = tex2D(_MainTex, input.tex.xy) * _Line_Color;
 
                 // Clip segments
                 col.a *= sin((input.tex.y + input.tex.x * _DashCapTilt + _DashOffset) * _DashFrequency * _Line_Length);
-
 
                 clip(col.a);
 

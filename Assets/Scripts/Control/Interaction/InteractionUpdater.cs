@@ -70,8 +70,12 @@ namespace CraftSharp.Control
 
         [SerializeField] private LayerMask blockSelectionLayer;
         [SerializeField] private GameObject? blockSelectionFramePrefab;
+        [SerializeField] private GameObject? liquidSelectionFramePrefab;
+        [SerializeField] private GameObject? entitySelectionFramePrefab;
 
         private BlockSelectionBox? blockSelectionBox;
+        private AABBSelectionBox? liquidSelectionBox;
+        private AABBSelectionBox? entitySelectionBox;
 
         private BaseCornClient? client;
         private CameraController? cameraController;
@@ -97,17 +101,20 @@ namespace CraftSharp.Control
         
         public Direction? TargetDirection { get; private set; }
         public BlockLoc? TargetBlockLoc { get; private set; }
+        public BlockLoc? TargetLiquidLoc { get; private set; }
         public Location? TargetExactLoc { get; private set; }
         
         private float instaBreakCooldown;
         private float placeBlockCooldown;
 
-        private void UpdateBlockSelection(Ray? viewRay, float maxDistance)
+        private void UpdateBlockAndLiquidSelection(Ray? viewRay, float maxDistance)
         {
             if (viewRay is null || !client) return;
             
             ray = viewRay.Value;
             Raycaster.RaycastGridCells(viewRay.Value.origin, viewRay.Value.direction, maxDistance, rayCells);
+
+            var blockDistance = maxDistance;
 
             if (placeBlockCooldown >= 0F) // Ongoing block placement cooldown
             {
@@ -125,6 +132,8 @@ namespace CraftSharp.Control
                     blockSelectionBox = Instantiate(blockSelectionFramePrefab)!.GetComponent<BlockSelectionBox>();
                     blockSelectionBox!.transform.SetParent(transform, false);
                 }
+
+                blockDistance = Vector3.Distance(aabbInfo.point, ray.origin);
 
                 // Update target location if changed
                 if (TargetBlockLoc != blockInfo.BlockLoc)
@@ -164,6 +173,49 @@ namespace CraftSharp.Control
                 if (blockSelectionBox)
                 {
                     blockSelectionBox.ClearShape();
+                }
+            }
+            
+            // Raycast liquid, only update if liquid distance is smaller than block distance (i.e. Not blocked)
+            if (client.ChunkRenderManager.RaycastLiquid(rayCells, ray, out var aabbInfo2, out var liquidInfo)
+                && blockDistance > Vector3.Distance(aabbInfo2.point, ray.origin))
+            {
+                // Create selection box if not present
+                if (!liquidSelectionBox)
+                {
+                    liquidSelectionBox = Instantiate(liquidSelectionFramePrefab)!.GetComponent<AABBSelectionBox>();
+                    liquidSelectionBox!.transform.SetParent(transform, false);
+                }
+
+                // Update target location if changed
+                if (TargetLiquidLoc != liquidInfo.BlockLoc)
+                {
+                    TargetLiquidLoc = liquidInfo.BlockLoc;
+                    liquidSelectionBox.transform.position = liquidInfo.CellPos;
+                    
+                    EventManager.Instance.Broadcast(new TargetLiquidLocUpdateEvent(liquidInfo.BlockLoc));
+                }
+                
+                // TODO: Use more accurate liquid AABB
+                var fullShape = new BlockShapeAABB(0, 0, 0, 1, 1, 1);
+                
+                // Update shape even if target location is not changed (the block itself may change)
+                liquidSelectionBox.UpdateAABB(fullShape);
+            }
+            else
+            {
+                // Update target location if changed
+                if (TargetLiquidLoc is not null)
+                {
+                    TargetLiquidLoc = null;
+
+                    EventManager.Instance.Broadcast(new TargetLiquidLocUpdateEvent(null));
+                }
+
+                // Clear AABB if selection box is created
+                if (liquidSelectionBox)
+                {
+                    liquidSelectionBox.ClearAABB();
                 }
             }
         }
@@ -1018,7 +1070,7 @@ namespace CraftSharp.Control
 
             if (cameraController && cameraController.IsAimingOrLocked)
             {
-                UpdateBlockSelection(cameraController.GetPointerRay(), MAX_INTERACTION_DISTANCE);
+                UpdateBlockAndLiquidSelection(cameraController.GetPointerRay(), MAX_INTERACTION_DISTANCE);
 
                 if (client.GameMode == GameMode.Spectator)
                 {
