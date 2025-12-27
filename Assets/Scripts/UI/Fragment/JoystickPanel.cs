@@ -43,7 +43,7 @@ namespace CraftSharp.UI
 
             ResetStick();
 
-            if (Keyboard.current != null)
+            if (Touchscreen.current == null)
             {
                 gameObject.SetActive(false);
             }
