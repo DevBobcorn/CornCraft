@@ -465,6 +465,11 @@ namespace CraftSharp.Control
             {
                 currentVelocity = Vector3.zero;
             }
+            else if (Status.GameMode == GameMode.Spectator)
+            {
+                // Update player position using calculated velocity, no collision, no gravity
+                transform.position += currentVelocity * deltaTime;
+            }
             else
             {
                 // Update player position using calculated velocity
