@@ -2,15 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using CraftSharp.Event;
 using CraftSharp.Protocol.Message;
+using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
 {
     public class EntityRender : MonoBehaviour
     {
         protected const float MOVE_THRESHOLD = 5F * 5F; // Treat as teleport if move more than 5 meters at once
+        protected static readonly ResourceLocation FIRE_0_ID = new("block/fire_0");
+        protected static readonly ResourceLocation FIRE_1_ID = new("block/fire_1");
 
         /// <summary>
         /// ID of the entity on the Minecraft server
@@ -84,7 +88,15 @@ namespace CraftSharp.Rendering
         /// </summary>
         public readonly TrackedValue<float> Pitch = new(0F);
         protected float lastPitch = 0F;
-        
+
+
+        /// <summary>
+        /// Entity shared flags
+        /// <br/>
+        /// See https://minecraft.wiki/w/Java_Edition_protocol/Entity_metadata#Entity
+        /// </summary>
+        public readonly TrackedValue<byte> SharedFlags = new(0);
+
         /// <summary>
         /// Used in Item Frame, Falling Block and Fishing Float.
         /// See https://wiki.vg/Object_Data for details.
@@ -124,7 +136,7 @@ namespace CraftSharp.Rendering
         public virtual void UpdateMetadata(Dictionary<int, object?> updatedMeta)
         {
             // Create if not present
-            Metadata ??= new();
+            Metadata ??= new Dictionary<int, object?>();
 
             foreach (var entry in updatedMeta)
             {
@@ -172,6 +184,16 @@ namespace CraftSharp.Rendering
                     Pose = (EntityPose) pose;
                 }
             }
+            
+            // Update entity shared flags
+            if (Type.MetaSlotByName.TryGetValue("data_shared_flags_id", out var metaSlot5)
+                && Type.MetaEntries[metaSlot5].DataType == EntityMetadataType.Byte)
+            {
+                if (Metadata.TryGetValue(metaSlot5, out var value) && value is byte sharedFlags)
+                {
+                    SharedFlags.Value = sharedFlags;
+                }
+            }
 
             // TODO: Update control variables
 
@@ -201,6 +223,9 @@ namespace CraftSharp.Rendering
 
         [SerializeField] protected Transform _infoAnchor;
         [SerializeField] protected Transform _visualTransform;
+
+        private Transform _fireBillboardTransform;
+        private static Mesh FIRE_BILLBOARD_MESH;
 
         /// <summary>
         /// Anchor transform for locating floating labels, health bars, etc.
@@ -353,7 +378,7 @@ namespace CraftSharp.Rendering
             receivedVelocity = velocity;
         }
 
-        protected virtual void UpdateTransform(float tickMilSec)
+        protected virtual void UpdateTransform(float tickMilSec, Transform cameraTransform)
         {
             // Update elapsed time in current tick
             currentElapsedMovementUpdateMilSec += Time.unscaledDeltaTime * 1000;
@@ -431,15 +456,135 @@ namespace CraftSharp.Rendering
 
         }
 
-        public virtual void ManagedUpdate(float tickMilSec)
+        public virtual void ManagedUpdate(float tickMilSec, Transform cameraTransform)
         {
             if (!_deathAnimationStarted && Health.Value <= 0F)
             {
                 _deathAnimationStarted = true;
             }
+            
+            UpdateTransform(tickMilSec, cameraTransform);
+            
+            // Check on fire flag and update billboard
+            var onFire = (SharedFlags.Value & 0x01) != 0;
+            UpdateFireBillboard(onFire, cameraTransform);
 
-            UpdateTransform(tickMilSec);
             UpdateAnimation(tickMilSec);
+        }
+        
+        public void UpdateFireBillboard(bool enable, Transform cameraTransform)
+        {
+            if (enable)
+            {
+                if (!_fireBillboardTransform)
+                {
+                    CreateFireBillboard();
+                }
+
+                UpdateFireBillboardFacing(cameraTransform);
+            }
+            else
+            {
+                if (_fireBillboardTransform)
+                {
+                    Destroy(_fireBillboardTransform.gameObject);
+                    _fireBillboardTransform = null;
+                }
+            }
+        }
+
+        private void CreateFireBillboard()
+        {
+            var client = CornApp.CurrentClient;
+            if (!client) return;
+
+            var chunkMaterial = client.ChunkMaterialManager.GetAtlasMaterial(RenderType.UNLIT);
+            var billboardObj = new GameObject("Fire Billboard");
+
+            billboardObj.transform.SetParent(transform, false);
+            billboardObj.transform.localPosition = Vector3.zero;
+
+            var meshFilter = billboardObj.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = GetFireBillboardMesh();
+
+            var meshRenderer = billboardObj.AddComponent<MeshRenderer>();
+            meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            meshRenderer.receiveShadows = false;
+            meshRenderer.sharedMaterial = chunkMaterial;
+
+            // Scale roughly to entity dimensions
+            billboardObj.transform.localScale = new Vector3(
+                Mathf.Max(0.6F, Type.Width), Mathf.Max(0.6F, Type.Height), 1F);
+
+            _fireBillboardTransform = billboardObj.transform;
+        }
+
+        private static Mesh GetFireBillboardMesh()
+        {
+            if (FIRE_BILLBOARD_MESH)
+            {
+                return FIRE_BILLBOARD_MESH;
+            }
+
+            var mesh = new Mesh
+            {
+                name = "Fire Billboard Quad Stack"
+            };
+
+            var (uvs, anim) = ResourcePackManager.Instance.GetUVs(FIRE_0_ID, new Vector4(0, 0, 1, 1), 0);
+            var baseUv0 = uvs.Select(x => (Vector3) x).ToArray();
+            var baseUv1 = Enumerable.Repeat((Vector4) anim, 4).ToArray();
+
+            // Multiple quads with decreasing height; lower quads sit slightly closer (negative Z)
+            var heights = new[] { 1.5F, 1.0F, 0.5F };
+
+            var vertices = new List<Vector3>(heights.Length * 4);
+            var uv0 = new List<Vector3>(heights.Length * 4);
+            var uv1 = new List<Vector4>(heights.Length * 4);
+            var triangles = new List<int>(heights.Length * 6);
+
+            for (int i = 0; i < heights.Length; i++)
+            {
+                var h = heights[i];
+                var zOffset = -0.0625F * i;
+                int vStart = vertices.Count;
+
+                vertices.Add(new Vector3(-0.5F, h, zOffset));
+                vertices.Add(new Vector3( 0.5F, h, zOffset));
+                vertices.Add(new Vector3(-0.5F, 0F, zOffset));
+                vertices.Add(new Vector3( 0.5F, 0F, zOffset));
+
+                uv0.AddRange(baseUv0);
+                uv1.AddRange(baseUv1);
+
+                triangles.AddRange(new[] { vStart + 0, vStart + 1, vStart + 2, vStart + 2, vStart + 1, vStart + 3 });
+            }
+
+            mesh.SetVertices(vertices);
+            mesh.SetUVs(0, uv0);
+            mesh.SetUVs(1, uv1);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateNormals();
+
+            FIRE_BILLBOARD_MESH = mesh;
+            return mesh;
+        }
+
+        private void UpdateFireBillboardFacing(Transform cameraTransform)
+        {
+            if (!_fireBillboardTransform)
+            {
+                return;
+            }
+
+            var directionToTarget = _fireBillboardTransform.position - cameraTransform.position;
+            // Ignore vertical distance
+            directionToTarget.y = 0;
+            
+            if (directionToTarget != Vector3.zero)
+            {
+                _fireBillboardTransform.localRotation = Quaternion.LookRotation(directionToTarget);
+            }
         }
         
         private void OnDrawGizmos()

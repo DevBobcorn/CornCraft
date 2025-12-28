@@ -12,6 +12,7 @@ namespace CraftSharp.Rendering
         public Material AtlasCutoutMipped;
         public Material AtlasTranslucent;
         public Material StylizedWater;
+        public Material AtlasUnlit;
         public Material Foliage;
         public Material Plants;
 
@@ -64,6 +65,11 @@ namespace CraftSharp.Rendering
             var translucent = new Material(AtlasTranslucent);
             translucent.SetTexture("_BaseMap", packManager.GetAtlasArray(true));
             atlasMaterials.Add(RenderType.TRANSLUCENT, translucent);
+            
+            // Unlit
+            var unlit = new Material(AtlasUnlit);
+            unlit.SetTexture("_BaseMap", packManager.GetAtlasArray(true));
+            atlasMaterials.Add(RenderType.UNLIT, unlit);
 
             // Water
             var water = new Material(StylizedWater);
@@ -102,6 +108,12 @@ namespace CraftSharp.Rendering
             inventoryTranslucent.name += " (Inventory)";
             inventoryTranslucent.EnableKeyword("_DISABLE_FOG_AND_GI");
             inventoryMaterials.Add(RenderType.TRANSLUCENT, inventoryTranslucent);
+            
+            // Inventory Unlit
+            var inventoryUnlit = new Material(unlit);
+            inventoryUnlit.name += " (Inventory)";
+            inventoryUnlit.EnableKeyword("_DISABLE_FOG_AND_GI");
+            inventoryMaterials.Add(RenderType.UNLIT, inventoryUnlit);
 
             // Inventory Water - Shouldn't be used
             inventoryMaterials.Add(RenderType.WATER, water);

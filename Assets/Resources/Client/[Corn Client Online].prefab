@@ -189,6 +189,7 @@ MonoBehaviour:
   AtlasCutoutMipped: {fileID: 2100000, guid: 356fe3b2c3144ef4f82484e1a7bebe4e, type: 2}
   AtlasTranslucent: {fileID: 2100000, guid: 6721cc8fabad23b45b323d5ddcccad2b, type: 2}
   StylizedWater: {fileID: 2100000, guid: 002453dd655f38e42968cf609e04ee33, type: 2}
+  AtlasUnlit: {fileID: 2100000, guid: 260d37673b405164d8482f4da4ec2809, type: 2}
   Foliage: {fileID: 2100000, guid: adf0649238070f449b01459c6e16a664, type: 2}
   Plants: {fileID: 2100000, guid: 4962df059f7094841bc40cc6d1ab4d5d, type: 2}
 --- !u!114 &5810336599918708874

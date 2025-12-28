@@ -277,7 +277,7 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            return entityRender != null;
+            return entityRender;
         }
 
         private Vector3Int _worldOriginOffset = Vector3Int.zero;
@@ -346,12 +346,18 @@ namespace CraftSharp.Rendering
             if (!client) // Game is not ready, cancel update
                 return;
 
-            float tickMilSec = client.GetTickMilSec();
+            var tickMilSec = client.GetTickMilSec();
+            var cameraController = client.CameraController;
+            
+            if (!cameraController) // Camera is not ready, cancel update
+                return;
+            
+            var cameraTransform = cameraController.RenderCamera.transform;
 
             foreach (var render in entityRenders.Values)
             {
                 // Call managed update
-                render.ManagedUpdate(tickMilSec);
+                render.ManagedUpdate(tickMilSec, cameraTransform);
 
                 // Update entities around the player
                 float dist = (render.transform.position - client.GetPosition()).sqrMagnitude;

@@ -2630,6 +2630,11 @@ namespace CraftSharp
                 {
                     entity.UpdateMetadata(metadata);
                 }
+
+                if (entityId == clientEntity.Id)
+                {
+                    PlayerController.UpdateMetadataForPlayerRender(clientEntity, metadata);
+                }
             });
         }
 

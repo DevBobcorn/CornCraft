@@ -59,9 +59,9 @@ namespace CraftSharp.Rendering
             };
         }
 
-        protected override void UpdateTransform(float tickMilSec)
+        protected override void UpdateTransform(float tickMilSec, Transform cameraTransform)
         {
-            base.UpdateTransform(tickMilSec);
+            base.UpdateTransform(tickMilSec, cameraTransform);
             
             // Update elapsed time in current tick
             currentElapsedPitchUpdateMilSec += Time.unscaledDeltaTime * 1000;

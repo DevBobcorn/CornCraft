@@ -46,20 +46,17 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private void Update()
+        protected override void UpdateTransform(float tickMilSec, Transform cameraTransform)
         {
-            var client = CornApp.CurrentClient;
-            if (!client) return;
-
-            var cameraTransform = client.CameraController.RenderCamera.transform;
+            base.UpdateTransform(tickMilSec, cameraTransform);
             
-            Vector3 directionToTarget = transform.position - cameraTransform.position;
+            var directionToTarget = transform.position - cameraTransform.position;
             // Ignore vertical distance
             directionToTarget.y = 0;
             
             if (directionToTarget != Vector3.zero)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
+                var targetRotation = Quaternion.LookRotation(directionToTarget);
                 VisualTransform.localRotation = Quaternion.AngleAxis(90F, Vector3.up) * targetRotation;
             }
         }

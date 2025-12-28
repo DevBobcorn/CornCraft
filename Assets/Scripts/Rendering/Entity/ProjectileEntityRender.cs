@@ -4,8 +4,10 @@ namespace CraftSharp.Rendering
 {
     public class ProjectileEntityRender : EntityRender
     {
-        protected override void UpdateTransform(float tickMilSec)
+        protected override void UpdateTransform(float tickMilSec, Transform cameraTransform)
         {
+            base.UpdateTransform(tickMilSec, cameraTransform);
+            
             // Update position
             if ((Position.Value - transform.position).sqrMagnitude > MOVE_THRESHOLD) // Treat as teleport
                 transform.position = Position.Value;

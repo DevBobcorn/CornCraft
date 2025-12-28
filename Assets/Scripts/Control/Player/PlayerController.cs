@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -82,8 +83,29 @@ namespace CraftSharp.Control
             var renderObj = Instantiate(renderPrefab);
             renderObj.name = $"Player Entity ({renderPrefab.name})";
 
+            // Switch to player render created with given prefab
             SwitchPlayerRender(entity, renderObj);
+
+            // Initialize metadata
+            if (entity.Metadata is not null)
+            {
+                m_PlayerRender.UpdateMetadata(entity.Metadata);
+            }
         }
+
+#nullable enable
+        public void UpdateMetadataForPlayerRender(EntityData entity, Dictionary<int, object?> metadata)
+        {
+            Debug.Log($"Updating metadata for player entity {entity.Id}");
+            
+            foreach (var entry in metadata)
+            {
+                Debug.Log($"[{entry.Key}] {m_PlayerRender.Type.MetaEntries[entry.Key].Name} -> {entry.Value}");
+            }
+            
+            m_PlayerRender.UpdateMetadata(metadata);
+        }
+#nullable disable
 
         private void SwitchPlayerRender(EntityData entity, GameObject renderObj)
         {
@@ -131,6 +153,14 @@ namespace CraftSharp.Control
                 {
                     // Update player render velocity
                     m_PlayerRender.SetVisualMovementVelocity(velocity);
+                    
+                    // Check on fire flag and update billboard
+                    if (m_CameraController && m_CameraController.RenderCamera)
+                    {
+                        var onFire = (m_PlayerRender.SharedFlags.Value & 0x01) != 0;
+                        m_PlayerRender.UpdateFireBillboard(onFire, m_CameraController.RenderCamera.transform);
+                    }
+                    
                     // Update render
                     m_PlayerRender.UpdateAnimation(0.05F);
                 };
@@ -267,6 +297,8 @@ namespace CraftSharp.Control
             {
                 OnPlayerAction?.Invoke(wasSneaking ? EntityActionType.StopSneaking : EntityActionType.StartSneaking);
             }
+            
+            
         }
 
         private void OnDestroy()
