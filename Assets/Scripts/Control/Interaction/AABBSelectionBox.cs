@@ -9,7 +9,6 @@ namespace CraftSharp.Control
         private static readonly int BILLBOARD_AXIS = Shader.PropertyToID("_BillboardAxis");
 
         [SerializeField] private MeshRenderer[] lineMeshRenderers;
-        [SerializeField] private Color lineColor = Color.cyan;
 
         private static MaterialPropertyBlock GetLengthPropertyBlock(int axis, float length, Color color)
         {
@@ -21,7 +20,7 @@ namespace CraftSharp.Control
             return propBlock;
         }
         
-        public void UpdateAABB(BlockShapeAABB aabb)
+        public void UpdateAABB(ShapeAABB aabb, Color lineColor)
         {
             // Swap X and Z
             float minX = aabb.MinZ, minY = aabb.MinY, minZ = aabb.MinX;

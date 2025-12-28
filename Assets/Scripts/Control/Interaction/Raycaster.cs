@@ -118,7 +118,7 @@ namespace CraftSharp.Control
             return nearestHit;
         }
         
-        public static AABBRaycastHit RaycastAABB(Ray ray, BlockShapeAABB aabb)
+        public static AABBRaycastHit RaycastAABB(Ray ray, ShapeAABB aabb)
         {
             AABBRaycastHit result = new AABBRaycastHit
             {

@@ -285,7 +285,7 @@ namespace CraftSharp.Rendering
             UnityEngine.Random.InitState(NumeralId);
             _pseudoRandomOffset = UnityEngine.Random.Range(0F, 1F);
 
-            _visualTransform.eulerAngles = new(0F, lastYaw, 0F);
+            _visualTransform.eulerAngles = new Vector3(0F, lastYaw, 0F);
 
             // Initialize materials (This requires metadata to be present)
             if (TryGetComponent(out EntityMaterialAssigner materialControl))
@@ -390,6 +390,19 @@ namespace CraftSharp.Rendering
             return transform;
         }
 
+        public ShapeAABB GetAABB()
+        {
+            // AABBs should use Minecraft coordinate system
+            var minX = transform.position.z - Type.Width / 2F;
+            var maxX = transform.position.z + Type.Width / 2F;
+            var minZ = transform.position.x - Type.Width / 2F;
+            var maxZ = transform.position.x + Type.Width / 2F;
+            var minY = transform.position.y;
+            var maxY = transform.position.y + Type.Height;
+
+            return new ShapeAABB(minX, minY, minZ, maxX, maxY, maxZ);
+        }
+        
         public virtual void HandleAimingModeChange(CameraAimingEvent e)
         {
             
@@ -443,7 +456,7 @@ namespace CraftSharp.Rendering
             // Player AABB size
             var size = new Vector3(width, height, width);
             
-            // Set gizmo color (cyan / magenta)
+            // Set gizmo color (orange)
             Gizmos.color = Color.orange;
             
             // Draw wireframe cube for the AABB

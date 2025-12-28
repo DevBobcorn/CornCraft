@@ -1120,7 +1120,7 @@ namespace CraftSharp.Rendering
             out BlockRaycastInfo blockInfo)
         {
             // TODO: Use more accurate liquid AABB
-            var fullShape = new BlockShapeAABB(0, 0, 0, 1, 1, 1);
+            var fullShape = new ShapeAABB(0, 0, 0, 1, 1, 1);
             
             foreach (var cellPos in cellPosList) // Go through the list
             {

@@ -282,7 +282,7 @@ MonoBehaviour:
   textFormat: '{0:0}/{1:0}'
   normalColor: {r: 0, g: 0.5913043, b: 1, a: 1}
   reduceColor: {r: 1, g: 0.19607843, b: 0.31764707, a: 1}
-  increaseColor: {r: 0.23529412, g: 0.89411765, b: 0, a: 1}
+  increaseColor: {r: 0.54901963, g: 0.7882353, b: 0.14117648, a: 1}
   warningColor: {r: 1, g: 0.8227729, b: 0.015686274, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
   warningThreshold: 0.3

@@ -42,9 +42,9 @@ Material:
     - _BarSize: {r: 300, g: 100, b: 0, a: 0}
     - _BorderColor: {r: 1, g: 1, b: 1, a: 1}
     - _CornerRadii: {r: 0, g: 40, b: 0, a: 0}
-    - _DeltaColor: {r: 0.23529412, g: 0.89411765, b: 0, a: 1}
+    - _DeltaColor: {r: 0.54901963, g: 0.7882353, b: 0.14117648, a: 1}
     - _Size: {r: 450, g: 36, b: 0, a: 0}
-    - _ValueColor: {r: 0.23529412, g: 0.89411765, b: 0, a: 1}
+    - _ValueColor: {r: 0.54901963, g: 0.7882353, b: 0.14117648, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &353353256494423236

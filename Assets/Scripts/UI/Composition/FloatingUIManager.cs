@@ -50,7 +50,7 @@ namespace CraftSharp.UI
             if (!client) return;
             
             var entityManager = client.EntityRenderManager;
-            var validTagOwners = entityManager.GetNearbyEntities().Keys.ToList();
+            var validTagOwners = entityManager.GetNearbyEntityIds().Keys.ToList();
 
             if (validTagOwners.Any())
             {

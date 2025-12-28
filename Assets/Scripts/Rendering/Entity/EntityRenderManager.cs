@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
+using CraftSharp.Control;
 
 namespace CraftSharp.Rendering
 {
@@ -41,7 +42,7 @@ namespace CraftSharp.Rendering
         /// </summary>
         private readonly Dictionary<int, EntityRender> entityRenders = new();
         
-        // Squared distance range of a entity to be considered as "near" the player
+        // Squared distance range of an entity to be considered as "near" the player
         private const float NEARBY_THRESHOLD_INNER =  81F; //  9 *  9
         private const float NEARBY_THRESHOLD_OUTER = 100F; // 10 * 10
 
@@ -213,39 +214,70 @@ namespace CraftSharp.Rendering
         }
 
         /// <summary>
-        /// Get a list of entities near the player
+        /// Get a list of ids of entities near the player
         /// </summary>
         /// <returns>A dictionary mapping nearby entity ids to the distance between the entity and client player</returns>
-        public Dictionary<int, float> GetNearbyEntities()
+        public Dictionary<int, float> GetNearbyEntityIds()
         {
             return nearbyEntities;
         }
-
-        public Vector3? GetAttackTarget(Vector3 playerPos)
+        
+        /// <summary>
+        /// Get a list entities near the player
+        /// </summary>
+        /// <returns>A dictionary mapping nearby entity ids to the distance between the entity and client player</returns>
+        public Dictionary<EntityRender, float> GetNearbyEntities()
         {
-            if (nearbyEntities.Count == 0) // Nothing to attack
-                return null;
-            
-            Vector3? targetPos = null;
-            float minDist = float.MaxValue;
+            return nearbyEntities.ToDictionary(x => GetEntityRender(x.Key),
+                x => x.Value);
+        }
 
-            foreach (var pair in nearbyEntities)
+        private static Raycaster.AABBRaycastHit GetEmptyAabbHit() => new()
+        {
+            hit = false,
+            point = Vector3.zero,
+            direction = Direction.Up
+        };
+
+        /// <summary>
+        /// Raycast against nearby entities using their AABBs and return the nearest hit, if any.
+        /// </summary>
+        /// <param name="ray">Ray in Unity world space.</param>
+        /// <param name="aabbInfo">Hit info on the entity AABB.</param>
+        /// <param name="entityRender">Entity render that was hit.</param>
+        /// <returns>True if any nearby entity is hit by the ray.</returns>
+        public bool RaycastNearbyEntities(Ray ray, out Raycaster.AABBRaycastHit aabbInfo, out EntityRender entityRender)
+        {
+            aabbInfo = GetEmptyAabbHit();
+            entityRender = null;
+
+            // Avoid invalid rays to prevent division by zero in the raycast utility
+            if (ray.direction.sqrMagnitude < Mathf.Epsilon)
             {
-                if (pair.Value < minDist)
+                return false;
+            }
+
+            float nearestDistance = float.PositiveInfinity;
+
+            foreach (var entityId in nearbyEntities.Keys)
+            {
+                if (!entityRenders.TryGetValue(entityId, out var render) || !render)
+                    continue;
+
+                var hit = Raycaster.RaycastAABB(ray, render.GetAABB());
+                if (!hit.hit)
+                    continue;
+
+                var distance = Vector3.Distance(ray.origin, hit.point);
+                if (distance < nearestDistance)
                 {
-                    var render = GetEntityRender(pair.Key);
-
-                    if (render!.Type.ContainsItem) // Not a valid target
-                        continue;
-
-                    var pos = render.transform.position;
-                    
-                    if (pair.Value <= 16F && pos.y - playerPos.y < 2F)
-                        targetPos = pos;
+                    nearestDistance = distance;
+                    aabbInfo = hit;
+                    entityRender = render;
                 }
             }
 
-            return targetPos;
+            return entityRender != null;
         }
 
         private Vector3Int _worldOriginOffset = Vector3Int.zero;

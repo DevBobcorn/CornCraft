@@ -71,7 +71,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 1
-  m_AdditionalShaderChannelsFlag: 7
+  m_AdditionalShaderChannelsFlag: 31
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -90,15 +90,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2460094622834980133, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: normalColor.b
-      value: 0
+      value: 0.14117648
       objectReference: {fileID: 0}
     - target: {fileID: 2460094622834980133, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: normalColor.g
-      value: 0.89411765
+      value: 0.7882353
       objectReference: {fileID: 0}
     - target: {fileID: 2460094622834980133, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: normalColor.r
-      value: 0.23529412
+      value: 0.54901963
+      objectReference: {fileID: 0}
+    - target: {fileID: 2460094622834980133, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
+      propertyPath: increaseColor.b
+      value: 0.14117648
+      objectReference: {fileID: 0}
+    - target: {fileID: 2460094622834980133, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
+      propertyPath: increaseColor.g
+      value: 0.7882353
+      objectReference: {fileID: 0}
+    - target: {fileID: 2460094622834980133, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
+      propertyPath: increaseColor.r
+      value: 0.54901963
       objectReference: {fileID: 0}
     - target: {fileID: 2639785828856538326, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: m_Layer
@@ -211,6 +223,10 @@ PrefabInstance:
     - target: {fileID: 8771523588992301714, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
       propertyPath: m_SizeDelta.x
       value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771523588992301714, guid: c533c19538933f541a84ff6ae96f111c, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 45
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

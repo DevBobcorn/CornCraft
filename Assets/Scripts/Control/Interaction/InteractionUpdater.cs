@@ -197,10 +197,10 @@ namespace CraftSharp.Control
                 }
                 
                 // TODO: Use more accurate liquid AABB
-                var fullShape = new BlockShapeAABB(0, 0, 0, 1, 1, 1);
+                var fullShape = new ShapeAABB(0, 0, 0, 1, 1, 1);
                 
                 // Update shape even if target location is not changed (the block itself may change)
-                liquidSelectionBox.UpdateAABB(fullShape);
+                liquidSelectionBox.UpdateAABB(fullShape, Color.dodgerBlue);
             }
             else
             {
@@ -216,6 +216,31 @@ namespace CraftSharp.Control
                 if (liquidSelectionBox)
                 {
                     liquidSelectionBox.ClearAABB();
+                }
+            }
+            
+            // Raycast entities, only update if entity distance is smaller than block distance (i.e. Not blocked)
+            if (client.EntityRenderManager.RaycastNearbyEntities(ray, out var aabbInfo3, out var entityRender)
+                && blockDistance > Vector3.Distance(aabbInfo3.point, ray.origin))
+            {
+                // Create selection box if not present
+                if (!entitySelectionBox)
+                {
+                    entitySelectionBox = Instantiate(entitySelectionFramePrefab)!.GetComponent<AABBSelectionBox>();
+                    entitySelectionBox!.transform.SetParent(transform, false);
+                }
+
+                // TODO: Record target entity
+
+                // Update shape even if target entity is not changed (the entity itself may change)
+                entitySelectionBox.UpdateAABB(entityRender.GetAABB(), Color.orange);
+            }
+            else
+            {
+                // Clear AABB if selection box is created
+                if (entitySelectionBox)
+                {
+                    entitySelectionBox.ClearAABB();
                 }
             }
         }
