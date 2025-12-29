@@ -81,18 +81,11 @@ namespace CraftSharp.Rendering
                 cullingRules[stateId] = bubbleColumnNeighborCheck;
         }
 
-        private static long GetSeedForCoords(int i, int j, int k)
-        {
-            long l = (i * 3129871) ^ k * 116129781L ^ j;
-            l = l * l * 42317861L + l * 11L;
-            return l >> 16;
-        }
-
         public static float3 GetBlockOffsetInChunk(OffsetType offsetType, int chunkX, int chunkZ, int blocX, int blocY, int blocZ)
         {
             if (offsetType is OffsetType.XZ or OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
             {
-                var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
+                var oSeed = LocationSeedHelper.GetSeed((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 var oz = ((oSeed >> 8 & 15L) / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 
@@ -100,7 +93,7 @@ namespace CraftSharp.Rendering
             }
             if (offsetType == OffsetType.XYZ) // Apply random offset on all directions
             {
-                var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
+                var oSeed = LocationSeedHelper.GetSeed((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 var oz = ((oSeed >> 8 & 15L) / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 var oy = ((oSeed >> 4 & 15L) / 15.0F - 1.0F) * 0.2F; //  -0.2F to    0F
@@ -115,7 +108,7 @@ namespace CraftSharp.Rendering
         {
             if (offsetType is OffsetType.XZ or OffsetType.XZ_BoundingBox) // Apply random offset on horizontal directions
             {
-                var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
+                var oSeed = LocationSeedHelper.GetSeed((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 var oz = ((oSeed >> 8 & 15L) / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 
@@ -123,7 +116,7 @@ namespace CraftSharp.Rendering
             }
             if (offsetType == OffsetType.XYZ) // Apply random offset on all directions
             {
-                var oSeed = GetSeedForCoords((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
+                var oSeed = LocationSeedHelper.GetSeed((chunkX << 4) + blocX, 0, (chunkZ << 4) + blocZ);
                 var ox = ((oSeed & 15L)      / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 var oz = ((oSeed >> 8 & 15L) / 15.0F - 0.5F) * 0.5F; // -0.25F to 0.25F
                 var oy = ((oSeed >> 4 & 15L) / 15.0F - 1.0F) * 0.2F; //  -0.2F to    0F

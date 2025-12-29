@@ -2541,7 +2541,7 @@ namespace CraftSharp
                 if (onlinePlayers.TryGetValue(playerUUID, out var player))
                 {
                     player.Ping = latency;
-                }   
+                }
             }
         }
 
