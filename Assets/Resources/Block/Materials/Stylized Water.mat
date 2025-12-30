@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Stylized Water
-  m_Shader: {fileID: -6465566751694194690, guid: 823f6b206953b674a9a64f9e3ec57752, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 736ec786f5b19444fa49d07e41df79ca, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -23,6 +23,7 @@ Material:
   - ADVANCED_LIGHTING
   - _DEPTHEXP_ON
   - _DEPTH_TEX
+  - _ENABLEDIRECTIONALCAUSTICS_ON
   - _FOAM
   - _INTERSECTIONSHARP_ON
   - _RECEIVEDYNAMICEFFECTSFOAM_ON
@@ -153,29 +154,29 @@ Material:
     - _Blend: 0
     - _BumpScale: 1
     - _CROSSPAN_INTERSECTIONOn: 1
-    - _CausticsBrightness: 2
+    - _CausticsBrightness: 1
     - _CausticsChromance: 1
     - _CausticsDistortion: 0.047
     - _CausticsOn: 1
     - _CausticsSpeed: 0.1
     - _CausticsTiling: 0.125
-    - _ColorAbsorption: 0
+    - _ColorAbsorption: 0.125
     - _CrossPan_IntersectionOn: 0
     - _Cull: 0
     - _Cutoff: 0.5
     - _Depth: 0.94
     - _DepthExp: 1
-    - _DepthHorizontal: 1
+    - _DepthHorizontal: 0.1
     - _DepthMode: 0
     - _DepthTexture: 1
-    - _DepthVertical: 8
+    - _DepthVertical: 2.69
     - _DisableDepthTexture: 0
     - _DistanceFoamTiling: 0.2
     - _DistanceNormalsOn: 1
-    - _DistanceNormalsTiling: 0.25
+    - _DistanceNormalsTiling: 0.01
     - _DstBlend: 0
     - _EdgeFade: 18.7
-    - _EnableDirectionalCaustics: 0
+    - _EnableDirectionalCaustics: 1
     - _EnvironmentReflections: 1
     - _EnvironmentReflectionsOn: 1
     - _FlatShadingOn: 0
@@ -184,6 +185,7 @@ Material:
     - _FoamBubblesSpread: 1
     - _FoamBubblesStrength: 0
     - _FoamClipping: 0
+    - _FoamClippingDynamic: 0
     - _FoamDistanceOn: 0
     - _FoamDistortion: 0
     - _FoamOn: 0
@@ -238,6 +240,7 @@ Material:
     - _PlanarReflectionsParams: 0
     - _PointSpotLightReflectionDistortion: 0.5
     - _PointSpotLightReflectionExp: 64
+    - _PointSpotLightReflectionSharp: 0
     - _PointSpotLightReflectionSize: 0
     - _PointSpotLightReflectionStrength: 10
     - _QueueOffset: 0
@@ -282,6 +285,7 @@ Material:
     - _SrcBlend: 1
     - _SunReflectionDistortion: 0.7
     - _SunReflectionPerturbance: 0.386
+    - _SunReflectionSharp: 0
     - _SunReflectionSize: 0.1
     - _SunReflectionStrength: 10
     - _Surface: 0
@@ -295,6 +299,7 @@ Material:
     - _TranslucencyReflectionMask: 0
     - _TranslucencyStrength: 0.05
     - _TranslucencyStrengthDirect: 0.05
+    - _UnderwaterReflectionStrength: 0.5
     - _UnderwaterRefractionOffset: 0.2
     - _UnderwaterSurfaceSmoothness: 0.8
     - _VertexColorFoam: 0
@@ -327,7 +332,7 @@ Material:
     - _FoamTiling: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _HorizonColor: {r: 0.68, g: 1, b: 0.99, a: 0.15}
     - _IntersectionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _NormalTiling: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _NormalTiling: {r: 0.2, g: 0.2, b: 0, a: 0}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShallowColor: {r: 0, g: 0.8, b: 1, a: 0.19607843}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

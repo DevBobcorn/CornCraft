@@ -27,9 +27,9 @@ namespace CraftSharp.Rendering
         private static List<BlockLoc> ComputeOffsets()
         {
             var offsets = new List<BlockLoc>();
-            for (int x = -MOVEMENT_RADIUS; x <= MOVEMENT_RADIUS; x++)
-                for (int y = -MOVEMENT_RADIUS; y <= MOVEMENT_RADIUS; y++)
-                    for (int z = -MOVEMENT_RADIUS; z <= MOVEMENT_RADIUS; z++)
+            for (var x = -MOVEMENT_RADIUS; x <= MOVEMENT_RADIUS; x++)
+                for (var y = -MOVEMENT_RADIUS; y <= MOVEMENT_RADIUS; y++)
+                    for (var z = -MOVEMENT_RADIUS; z <= MOVEMENT_RADIUS; z++)
                         if (x * x + y * y + z * z <= MOVEMENT_RADIUS_SQR_MINI)
                             offsets.Add(new BlockLoc(x, y, z));
             return offsets;
@@ -75,7 +75,7 @@ namespace CraftSharp.Rendering
                 cullingRules[stateId] = iceNeighborCheck;
             
             // Bubble column block
-            BlockNeighborCheck bubbleColumnNeighborCheck = BlockNeighborChecks.WATER_SURFACE;
+            var bubbleColumnNeighborCheck = BlockNeighborChecks.WATER_SURFACE;
             
             foreach (var stateId in palette.GetAllNumIds(BUBBLE_COLUMN_ID))
                 cullingRules[stateId] = bubbleColumnNeighborCheck;
@@ -137,25 +137,26 @@ namespace CraftSharp.Rendering
                 
                 // Set up vertex counter
                 var vertexCount = new int[count];
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
                     vertexCount[i] = 0;
                 }
-                int colliderVertexCount = 0;
+                var colliderVertexCount = 0;
 
                 var blocs = data.BlockStates;
                 var stids = data.BlockStateIds;
                 var light = data.Light;
                 var allColors = data.Color;
+                var allWaters = data.Water;
 
                 var stateTable = BlockStatePalette.INSTANCE;
 
                 // Collect vertex count and layer mask before collecting actual vertex data
-                for (int x = 1; x <= Chunk.SIZE; x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
+                for (var x = 1; x <= Chunk.SIZE; x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
                 {
-                    for (int y = 1; y <= Chunk.SIZE; y++)
+                    for (var y = 1; y <= Chunk.SIZE; y++)
                     {
-                        for (int z = 1; z <= Chunk.SIZE; z++)
+                        for (var z = 1; z <= Chunk.SIZE; z++)
                         {
                             var state = data.BlockStates[x, y, z];
                             var stateId = data.BlockStateIds[x, y, z];
@@ -163,7 +164,7 @@ namespace CraftSharp.Rendering
                             if (state.InLiquid) // Build liquid here
                             {
                                 var liquidNeighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = getCullFlags(x, y, z, state, liquidNeighborCheck);
+                                var liquidCullFlags = getCullFlags(x, y, z, state, liquidNeighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
@@ -178,11 +179,11 @@ namespace CraftSharp.Rendering
                             if (state.NoSolidMesh) continue;
                             
                             var neighborCheck = cullingRules.GetValueOrDefault(stateId, BlockNeighborChecks.NON_FULL_SOLID);
-                            int cullFlags = getCullFlags(x, y, z, state, neighborCheck);
+                            var cullFlags = getCullFlags(x, y, z, state, neighborCheck);
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
-                                int layerIndex = ChunkRender.TypeIndex(modelTable[stateId].RenderType);
+                                var layerIndex = ChunkRender.TypeIndex(modelTable[stateId].RenderType);
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
@@ -193,7 +194,7 @@ namespace CraftSharp.Rendering
                                 }
                                 else
                                 {
-                                    int vertCount = models[chosen].GetVertexCount(cullFlags);
+                                    var vertCount = models[chosen].GetVertexCount(cullFlags);
                                     vertexCount[layerIndex] += vertCount;
                                     colliderVertexCount += vertCount;
                                 }
@@ -206,40 +207,40 @@ namespace CraftSharp.Rendering
 
                 // Create vertex buffers for containing vertex data
                 var visualBuffer = new VertexBuffer[count];
-                for (int layer = 0; layer < count; layer++)
+                for (var layer = 0; layer < count; layer++)
                 {
                     if ((layerMask & (1 << layer)) != 0)
                     {
                         visualBuffer[layer] = new(vertexCount[layer]);
                     }
                 }
-                float3[] colliderVerts = new float3[colliderVertexCount];
+                var colliderVerts = new float3[colliderVertexCount];
 
                 // Setup vertex offset
                 var vertOffset = new uint[count];
-                for (int layer = 0; layer < count; layer++)
+                for (var layer = 0; layer < count; layer++)
                 {
                     vertOffset[layer] = 0;
                 }
                 uint colliderVertOffset = 0;
 
                 // Build mesh vertices block by block
-                for (int x = 1; x <= Chunk.SIZE; x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
+                for (var x = 1; x <= Chunk.SIZE; x++) // From 1 to 16, because we have a padding for blocks in adjacent chunks
                 {
-                    int blocX = x - 1;
-                    for (int y = 1; y <= Chunk.SIZE; y++)
+                    var blocX = x - 1;
+                    for (var y = 1; y <= Chunk.SIZE; y++)
                     {
-                        int blocY = y - 1;
-                        for (int z = 1; z <= Chunk.SIZE; z++)
+                        var blocY = y - 1;
+                        for (var z = 1; z <= Chunk.SIZE; z++)
                         {
-                            int blocZ = z - 1;
+                            var blocZ = z - 1;
                             var state = data.BlockStates[x, y, z];
                             var stateId = data.BlockStateIds[x, y, z];
 
                             if (state.InLiquid) // Build liquid here
                             {
                                 var liquidNeighborCheck = state.InWater ? BlockNeighborChecks.WATER_SURFACE : BlockNeighborChecks.LAVA_SURFACE;
-                                int liquidCullFlags = getCullFlags(x, y, z, state, liquidNeighborCheck);
+                                var liquidCullFlags = getCullFlags(x, y, z, state, liquidNeighborCheck);
 
                                 if (liquidCullFlags != 0)
                                 {
@@ -248,8 +249,10 @@ namespace CraftSharp.Rendering
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
                                     var lights = getCornerLights(x, y, z);
 
+                                    var color = state.InWater ? allWaters[blocX, blocY, blocZ] : new float3(1F);
+
                                     FluidGeometry.Build(visualBuffer[liquidLayerIndex], ref vertOffset[liquidLayerIndex], new float3(blocZ, blocY, blocX),
-                                            liquidTexture, liquidHeights, liquidCullFlags, lights, new float3(1F));
+                                            liquidTexture, liquidHeights, liquidCullFlags, lights, color);
                                 }
                             }
 
@@ -257,15 +260,16 @@ namespace CraftSharp.Rendering
                             if (state.NoSolidMesh) continue;
 
                             var neighborCheck = cullingRules.GetValueOrDefault(stateId, BlockNeighborChecks.NON_FULL_SOLID);
-                            int cullFlags = getCullFlags(x, y, z, state, neighborCheck);
+                            var cullFlags = getCullFlags(x, y, z, state, neighborCheck);
                             
                             if (cullFlags != 0 && modelTable.ContainsKey(stateId)) // This chunk has at least one visible block of this render type
                             {
                                 var renderType = modelTable[stateId].RenderType;
-                                int layerIndex = ChunkRender.TypeIndex(renderType);
+                                var layerIndex = ChunkRender.TypeIndex(renderType);
                                 var aoIntensity = 0.2F;
 
                                 var datFormat = BlockGeometry.VertexDataFormat.Color_Light;
+                                /*
                                 if (renderType == RenderType.FOLIAGE)
                                 {
                                     datFormat = BlockGeometry.VertexDataFormat.Color_Light_BlockNormal;
@@ -276,6 +280,7 @@ namespace CraftSharp.Rendering
 
                                     aoIntensity = 0.15F;
                                 }
+                                */
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
@@ -283,7 +288,7 @@ namespace CraftSharp.Rendering
                                 var lights = getCornerLights(x, y, z);
                                 var aoMask = getNeighborCastAOMask(x, y, z);
 
-                                float3 posOffset = GetBlockOffsetInChunk(modelTable[stateId].OffsetType, chunkRender.ChunkX, chunkRender.ChunkZ, blocX, blocY, blocZ);
+                                var posOffset = GetBlockOffsetInChunk(modelTable[stateId].OffsetType, chunkRender.ChunkX, chunkRender.ChunkZ, blocX, blocY, blocZ);
 
                                 if (state.NoCollision)
                                 {
@@ -340,7 +345,7 @@ namespace CraftSharp.Rendering
                         // Visual Mesh
                         // Count layers, vertices and face indices
                         int layerCount = 0, totalVertCount = 0;
-                        for (int layer = 0; layer < count; layer++)
+                        for (var layer = 0; layer < count; layer++)
                         {
                             if ((layerMask & (1 << layer)) != 0)
                             {
@@ -372,8 +377,8 @@ namespace CraftSharp.Rendering
                         var allAnims = new float4[totalVertCount];
                         var allTints = new float4[totalVertCount];
 
-                        int curVertOffset = 0;
-                        for (int layer = 0; layer < count; layer++)
+                        var curVertOffset = 0;
+                        for (var layer = 0; layer < count; layer++)
                         {
                             if ((layerMask & (1 << layer)) != 0)
                             {
@@ -398,7 +403,7 @@ namespace CraftSharp.Rendering
 
                         // Generate triangle arrays
                         var triIndices = meshData.GetIndexData<uint>();
-                        uint vi = 0; int ti = 0;
+                        uint vi = 0; var ti = 0;
                         for (; vi < totalVertCount; vi += 4U, ti += 6)
                         {
                             triIndices[ti]     = vi;
@@ -409,14 +414,14 @@ namespace CraftSharp.Rendering
                             triIndices[ti + 5] = vi + 3U;
                         }
 
-                        int subMeshIndex = 0;
+                        var subMeshIndex = 0;
                         curVertOffset = 0;
-                        for (int layer = 0; layer < count; layer++)
+                        for (var layer = 0; layer < count; layer++)
                         {
                             if ((layerMask & (1 << layer)) != 0)
                             {
                                 materialArr[subMeshIndex] = CornApp.CurrentClient!.ChunkMaterialManager.GetAtlasMaterial(ChunkRender.TYPES[layer]);
-                                int vertCount = visualBuffer[layer].vert.Length;
+                                var vertCount = visualBuffer[layer].vert.Length;
                                 meshData.SetSubMesh(subMeshIndex, new(curVertOffset / 2 * 3, vertCount / 2 * 3){ vertexCount = vertCount });
                                 curVertOffset += vertCount;
                                 subMeshIndex++;
@@ -447,7 +452,7 @@ namespace CraftSharp.Rendering
                         chunkRender.GetComponent<MeshRenderer>().sharedMaterials = materialArr;
 
                         // Collider Mesh
-                        int colVertCount = colliderVerts.Length;
+                        var colVertCount = colliderVerts.Length;
 
                         if (colVertCount > 0)
                         {
@@ -520,9 +525,9 @@ namespace CraftSharp.Rendering
                 {
                     var result = new float[8];
 
-                    for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
+                    for (var y_ = 0; y_ < 3; y_++) for (var z_ = 0; z_ < 3; z_++) for (var x_ = 0; x_ < 3; x_++)
                     {
-                        byte sample = light[x + x_ - 1, y + y_ - 1, z + z_ - 1];
+                        var sample = light[x + x_ - 1, y + y_ - 1, z + z_ - 1];
 
                         if (y_ != 2 && z_ != 2 && x_ != 2) // [0] x0z0 y0
                         {
@@ -563,7 +568,7 @@ namespace CraftSharp.Rendering
 
                 int getCullFlags(int x, int y, int z, BlockState self, BlockNeighborCheck check)
                 {
-                    int cullFlags = 0;
+                    var cullFlags = 0;
 
                     if (check(self, blocs[x, y + 1, z])) // Up
                         cullFlags |= 1 << 0;
@@ -588,9 +593,9 @@ namespace CraftSharp.Rendering
 
                 int getNeighborCastAOMask(int x, int y, int z)
                 {
-                    int result = 0;
+                    var result = 0;
 
-                    for (int y_ = 0; y_ < 3; y_++) for (int z_ = 0; z_ < 3; z_++) for (int x_ = 0; x_ < 3; x_++)
+                    for (var y_ = 0; y_ < 3; y_++) for (var z_ = 0; z_ < 3; z_++) for (var x_ = 0; x_ < 3; x_++)
                     {
                         if (stateTable.GetByNumId(stids[x + x_ - 1, y + y_ - 1, z + z_ - 1]).AmbientOcclusionSolid)
                         {
@@ -657,7 +662,7 @@ namespace CraftSharp.Rendering
             {
                 foreach (var aabb in existingTerrain)
                 {
-                    for (int i = terrainAABBs.Count - 1; i >= 0; i--)
+                    for (var i = terrainAABBs.Count - 1; i >= 0; i--)
                     {
                         if (Vector3.Distance(terrainAABBs[i].Min, aabb.Min) < 0.001f &&
                             Vector3.Distance(terrainAABBs[i].Max, aabb.Max) < 0.001f &&
@@ -676,7 +681,7 @@ namespace CraftSharp.Rendering
             {
                 foreach (var aabb in existingLiquid)
                 {
-                    for (int i = liquidAABBs.Count - 1; i >= 0; i--)
+                    for (var i = liquidAABBs.Count - 1; i >= 0; i--)
                     {
                         if (Vector3.Distance(liquidAABBs[i].Min, aabb.Min) < 0.001f &&
                             Vector3.Distance(liquidAABBs[i].Max, aabb.Max) < 0.001f &&
@@ -706,7 +711,7 @@ namespace CraftSharp.Rendering
             if (terrainAABBs.Count > terrainCountBefore)
             {
                 var addedTerrain = new List<UnityAABB>();
-                for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+                for (var i = terrainCountBefore; i < terrainAABBs.Count; i++)
                 {
                     addedTerrain.Add(terrainAABBs[i]);
                 }
@@ -716,7 +721,7 @@ namespace CraftSharp.Rendering
             if (liquidAABBs.Count > liquidCountBefore)
             {
                 var addedLiquid = new List<UnityAABB>();
-                for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
+                for (var i = liquidCountBefore; i < liquidAABBs.Count; i++)
                 {
                     addedLiquid.Add(liquidAABBs[i]);
                 }
@@ -759,7 +764,7 @@ namespace CraftSharp.Rendering
                 if (terrainAABBs.Count > terrainCountBefore)
                 {
                     var addedTerrain = new List<UnityAABB>();
-                    for (int i = terrainCountBefore; i < terrainAABBs.Count; i++)
+                    for (var i = terrainCountBefore; i < terrainAABBs.Count; i++)
                     {
                         addedTerrain.Add(terrainAABBs[i]);
                     }
@@ -769,7 +774,7 @@ namespace CraftSharp.Rendering
                 if (liquidAABBs.Count > liquidCountBefore)
                 {
                     var addedLiquid = new List<UnityAABB>();
-                    for (int i = liquidCountBefore; i < liquidAABBs.Count; i++)
+                    for (var i = liquidCountBefore; i < liquidAABBs.Count; i++)
                     {
                         addedLiquid.Add(liquidAABBs[i]);
                     }
