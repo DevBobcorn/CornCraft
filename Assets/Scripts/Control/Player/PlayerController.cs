@@ -96,13 +96,6 @@ namespace CraftSharp.Control
 #nullable enable
         public void UpdateMetadataForPlayerRender(EntityData entity, Dictionary<int, object?> metadata)
         {
-            Debug.Log($"Updating metadata for player entity {entity.Id}");
-            
-            foreach (var entry in metadata)
-            {
-                Debug.Log($"[{entry.Key}] {m_PlayerRender.Type.MetaEntries[entry.Key].Name} -> {entry.Value}");
-            }
-            
             m_PlayerRender.UpdateMetadata(metadata);
         }
 #nullable disable
