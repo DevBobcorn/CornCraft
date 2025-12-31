@@ -19,8 +19,15 @@ Shader "Unlit/Dashed Line Billboard"
     }
  
     SubShader
-    {  
+    {
+        Tags {
+		    "Queue"="Overlay"
+		    "IgnoreProjector"="True"
+		    "RenderType"="TransparentCutout"
+	    }
+        
         Cull Off
+        ZWrite On
  
         Pass
         {
