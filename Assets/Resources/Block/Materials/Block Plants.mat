@@ -89,8 +89,10 @@ Material:
     - _Alpha_Clipping_Threshold: 0.5
     - _BackLightMultiplier: 4
     - _Back_Scatter_Multiplier: 5
+    - _Back_Scatter_Power: 1
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
+    - _Block_Light_Power: 0.1
     - _BumpScale: 1
     - _CastShadows: 1
     - _ClearCoatMask: 0
@@ -121,6 +123,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
+    - _Vert_Light_Multiplier: 1
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 1

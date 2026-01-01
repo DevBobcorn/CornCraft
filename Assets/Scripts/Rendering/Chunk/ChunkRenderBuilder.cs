@@ -270,7 +270,6 @@ namespace CraftSharp.Rendering
                                 var aoIntensity = 0.2F;
 
                                 var datFormat = BlockGeometry.VertexDataFormat.Color_Light;
-                                /*
                                 if (renderType == RenderType.FOLIAGE)
                                 {
                                     datFormat = BlockGeometry.VertexDataFormat.Color_Light_BlockNormal;
@@ -281,7 +280,6 @@ namespace CraftSharp.Rendering
 
                                     aoIntensity = 0.15F;
                                 }
-                                */
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
