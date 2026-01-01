@@ -8,6 +8,7 @@ using UnityEngine.Rendering;
 using Unity.Collections;
 using Unity.Mathematics;
 
+using CraftSharp;
 using CraftSharp.Resource;
 using Object = UnityEngine.Object;
 
@@ -249,7 +250,7 @@ namespace CraftSharp.Rendering
                                     var liquidTexture = FluidGeometry.LiquidTextures[state.InWater ? 0 : 1];
                                     var lights = getCornerLights(x, y, z);
 
-                                    var color = state.InWater ? allWaters[blocX, blocY, blocZ] : new float3(1F);
+                                    var color = state.InWater ? ColorConvert.GetFloat3(allWaters[blocX, blocY, blocZ]) : new float3(1F);
 
                                     FluidGeometry.Build(visualBuffer[liquidLayerIndex], ref vertOffset[liquidLayerIndex], new float3(blocZ, blocY, blocX),
                                             liquidTexture, liquidHeights, liquidCullFlags, lights, color);
@@ -284,7 +285,7 @@ namespace CraftSharp.Rendering
 
                                 var models = modelTable[stateId].Geometries;
                                 var chosen = (x + y + z) % models.Length;
-                                var color  = allColors[blocX, blocY, blocZ];
+                                var color  = ColorConvert.GetFloat3(allColors[blocX, blocY, blocZ]);
                                 var lights = getCornerLights(x, y, z);
                                 var aoMask = getNeighborCastAOMask(x, y, z);
 

@@ -5,9 +5,9 @@ namespace CraftSharp.Rendering
     public record BlockParticleExtraDataWithColor : ParticleExtraData
     {
         public int BlockStateId;
-        public float3 BlockColor;
+        public int BlockColor;
 
-        public BlockParticleExtraDataWithColor(int blockStateId, float3 blockColor)
+        public BlockParticleExtraDataWithColor(int blockStateId, int blockColor)
         {
             BlockStateId = blockStateId;
             BlockColor = blockColor;

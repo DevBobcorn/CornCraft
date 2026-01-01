@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+using CraftSharp;
 using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
@@ -87,7 +88,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        private static Mesh BuildBlockMesh(BlockState state, BlockGeometry geometry, int cullFlags, float3 color, float3 waterColor)
+        private static Mesh BuildBlockMesh(BlockState state, BlockGeometry geometry, int cullFlags, int colorInt, int waterColorInt)
         {
             int vertexCount = geometry.GetVertexCount(cullFlags);
             int fluidVertexCount = 0;
@@ -104,13 +105,17 @@ namespace CraftSharp.Rendering
             uint vertexOffset = 0;
 
             if (state.InWater)
+            {
+                var waterColor = ColorConvert.GetFloat3(waterColorInt);
                 FluidGeometry.Build(visualBuffer, ref vertexOffset, float3.zero, FluidGeometry.LiquidTextures[0], FLUID_HEIGHTS,
                         cullFlags, DUMMY_BLOCK_VERT_LIGHT, waterColor);
+            }
             else if (state.InLava)
                 FluidGeometry.Build(visualBuffer, ref vertexOffset, float3.zero, FluidGeometry.LiquidTextures[1], FLUID_HEIGHTS,
                         cullFlags, DUMMY_BLOCK_VERT_LIGHT, BlockGeometry.DEFAULT_COLOR);
 
-            geometry.Build(visualBuffer, ref vertexOffset, float3.zero, cullFlags, 0, 0F, DUMMY_BLOCK_VERT_LIGHT, color);
+            var blockColor = ColorConvert.GetFloat3(colorInt);
+            geometry.Build(visualBuffer, ref vertexOffset, float3.zero, cullFlags, 0, 0F, DUMMY_BLOCK_VERT_LIGHT, blockColor);
 
             int triIdxCount = vertexCount / 2 * 3;
 

@@ -473,7 +473,7 @@ namespace CraftSharp.Rendering
         /// <param name="stateId">Target block state id</param>
         /// <param name="blockLoc">Location to retrieve block color from</param>
         /// <returns>Block at specified location or Air if the location is not loaded</returns>
-        public float3 GetBlockColor(int stateId, BlockLoc blockLoc)
+        public int GetBlockColor(int stateId, BlockLoc blockLoc)
         {
             return BlockStatePalette.INSTANCE.GetBlockColor(stateId, world, blockLoc);
         }

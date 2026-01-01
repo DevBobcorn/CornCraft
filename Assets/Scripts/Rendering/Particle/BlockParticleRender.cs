@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using CraftSharp;
 using CraftSharp.Resource;
 
 namespace CraftSharp.Rendering
@@ -22,7 +23,7 @@ namespace CraftSharp.Rendering
             particleTransform.Scale = random.Next(80, 120) / 100F;
 
             // Assign particle color
-            var blockColor = particleState.ExtraData.BlockColor;
+            var blockColor = ColorConvert.GetFloat3(particleState.ExtraData.BlockColor);
             particleTransformCol[idx] = new Vector4(blockColor.x, blockColor.y, blockColor.z, 1F);
 
             float xOfs = random.Next(0, 14) / 16F;
