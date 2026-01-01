@@ -133,7 +133,7 @@ namespace CraftSharp.Control
             return info.Spectating || info.Grounded || info.Clinging || info.Floating;
         }
 
-        private Action<InputAction.CallbackContext>? glideToggleRequestCallback;
+        private Action<InputAction.CallbackContext>? flightToggleRequestCallback;
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
@@ -148,7 +148,7 @@ namespace CraftSharp.Control
             _flightRequested = false;
 
             // Register input action events
-            player.Actions.Locomotion.Jump.performed += glideToggleRequestCallback = _ =>
+            player.Actions.Locomotion.Jump.performed += flightToggleRequestCallback = _ =>
             {
                 if (info.GameMode == GameMode.Creative)
                 {
@@ -165,8 +165,8 @@ namespace CraftSharp.Control
                         {
                             info.Flying = false; // Stop flight
                         }
-                        info.JumpTime = 0F;
                     }
+                    info.JumpTime = 0F;
                 }
                 
                 //_glideToggleRequested = true;
@@ -178,17 +178,22 @@ namespace CraftSharp.Control
             if (nextState is not AirborneState) // Preserve flying & gliding status when switching player renders
             {
                 info.Gliding = false;
-                info.Flying = false;
+
+                // Preserve flying status when switching to floating state
+                if (nextState is not FloatingState)
+                {
+                    info.Flying = false;
+
+                    // Set jump time to infinity
+                    info.JumpTime = float.PositiveInfinity;
+
+                    // And reset air time
+                    info.AirTime = 0F;
+                }
             }
-            
-            // Set jump time to infinity
-            info.JumpTime = float.PositiveInfinity;
-            
-            // And reset air time
-            info.AirTime = 0;
 
             // Unregister input action events
-            player.Actions.Locomotion.Jump.performed -= glideToggleRequestCallback;
+            player.Actions.Locomotion.Jump.performed -= flightToggleRequestCallback;
         }
 
         public override string ToString() => "Airborne";
