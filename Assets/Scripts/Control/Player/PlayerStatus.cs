@@ -26,9 +26,14 @@ namespace CraftSharp.Control
         public bool Grounded  = false;
         
         /// <summary>
-        /// Time since last grounded, 0 when player is not in air
+        /// Time since last grounded, not increasing when player is not in air
         /// </summary>
         public float AirTime  = 0F;
+        
+        /// <summary>
+        /// Time since last jump started, not increasing when player is not jumping
+        /// </summary>
+        public float JumpTime = 0F;
 
         /// <summary>
         /// Unused for now
@@ -104,7 +109,7 @@ namespace CraftSharp.Control
         public override string ToString()
         {
             var moveInfo = $"Moving: {Moving}\nGroundDistFromFeet: {GroundDistFromFeet:0.000}\nLiquidDistFromHead: {LiquidDistFromHead:0.000}\nSprinting: {Sprinting}\nSneaking: {Sneaking}\nYaw: {TargetVisualYaw:0.00} ({GetYawDirection(TargetVisualYaw)})";
-            var envInfo = $"\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}";
+            var envInfo = $"\nGravity Scale: {GravityScale:0.00}\nAir Time: {AirTime:0.00}\nJump Time: {JumpTime:0.00}";
             var atkInfo = Attacking ? AttackStatus.ToString() : string.Empty;
             
             return $"Flying: {Flying}\nGliding: {Gliding}\nInLiquid: {InLiquid}\nFloating: {Floating}\nGrounded: {Grounded}\nClinging: {Clinging}\n{envInfo}\n{moveInfo}\n{atkInfo}";

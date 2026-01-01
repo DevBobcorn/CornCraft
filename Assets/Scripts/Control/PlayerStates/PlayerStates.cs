@@ -18,9 +18,6 @@ namespace CraftSharp.Control
         // Block interaction states
         public static readonly IPlayerState DIGGING_AIM = new DiggingAimState();
 
-        // Clinging states
-        public static readonly IPlayerState CLINGING    = new ClingingState();
-
         // Airborne states
         public static readonly IPlayerState AIRBORNE    = new AirborneState();
         // Floating states
@@ -47,9 +44,6 @@ namespace CraftSharp.Control
 
                 // Block interaction states (no state machine entry)
                 // DIGGING_AIM,
-
-                // Clinging States (no state machine entry)
-                // CLIMB,
 
                 // Airborne State
                 AIRBORNE,

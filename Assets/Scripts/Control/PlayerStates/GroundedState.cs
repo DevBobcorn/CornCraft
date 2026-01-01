@@ -56,6 +56,9 @@ namespace CraftSharp.Control
 
                 // Apply vertical velocity to horizontal velocity
                 moveVelocity = currentVelocity + player.transform.up * 9F;
+                
+                // Reset jump time
+                info.JumpTime = 0;
 
                 _jumpRequested = false;
             }

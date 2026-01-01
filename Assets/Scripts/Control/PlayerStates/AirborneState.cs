@@ -7,7 +7,7 @@ namespace CraftSharp.Control
 {
     public class AirborneState : IPlayerState
     {
-        public const float FLIGHT_START_AIRTIME_MAX = 0.3F;
+        public const float FLIGHT_START_JUMPTIME_MAX = 0.3F;
         public const float FLIGHT_STOP_TIMEOUT_MAX  = 0.3F;
 
         public const float STOP_FLYING_MAXIMUM_DIST = 0.1F;
@@ -16,8 +16,6 @@ namespace CraftSharp.Control
 
         //private bool _glideToggleRequested = false;
         private bool _flightRequested = false;
-
-        private float _stopFlightTimer = 0F;
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
@@ -50,8 +48,9 @@ namespace CraftSharp.Control
                 info.Flying = info.GameMode == GameMode.Creative;
                 _flightRequested = false;
             }
-            
+
             info.AirTime += interval;
+            info.JumpTime += interval;
 
             // Check stamina for gliding
             if (info.StaminaLeft == 0)
@@ -82,9 +81,6 @@ namespace CraftSharp.Control
 
                 if (info.Flying)
                 {
-                    // Accumulate stop flight timer value
-                    _stopFlightTimer += interval;
-
                     // Check vertical movement...
                     if (inputData.Locomotion.Ascend.IsPressed())
                         moveVelocity += ability.SneakSpeed * 3F * player.transform.up;
@@ -143,6 +139,8 @@ namespace CraftSharp.Control
         {
             info.Sprinting = false;
             info.Gliding = false;
+            
+            // Reset air time but not jump time
             info.AirTime = 0F;
 
             // Reset request flags
@@ -156,19 +154,18 @@ namespace CraftSharp.Control
                 {
                     if (!info.Flying)
                     {
-                        if (info.AirTime <= FLIGHT_START_AIRTIME_MAX)
+                        if (info.JumpTime <= FLIGHT_START_JUMPTIME_MAX)
                         {
                             _flightRequested = true;
                         }
-                        info.AirTime = 0F; // Reset air time for next flight request check
                     }
                     else
                     {
-                        if (_stopFlightTimer <= FLIGHT_STOP_TIMEOUT_MAX)
+                        if (info.JumpTime <= FLIGHT_STOP_TIMEOUT_MAX)
                         {
                             info.Flying = false; // Stop flight
                         }
-                        _stopFlightTimer = 0F;
+                        info.JumpTime = 0F;
                     }
                 }
                 
@@ -183,6 +180,12 @@ namespace CraftSharp.Control
                 info.Gliding = false;
                 info.Flying = false;
             }
+            
+            // Set jump time to infinity
+            info.JumpTime = float.PositiveInfinity;
+            
+            // And reset air time
+            info.AirTime = 0;
 
             // Unregister input action events
             player.Actions.Locomotion.Jump.performed -= glideToggleRequestCallback;
