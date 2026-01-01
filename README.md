@@ -33,10 +33,10 @@ Most basic controls in CornCraft are similar to vanilla Java Edition. These are 
 Key                                                       | Action
 ---                                                       | :---:
 <kbd>W</kbd> / <kbd>A</kbd> / <kbd>S</kbd> / <kbd>D</kbd> | Move Horizontally
-<kbd>Space</kbd>                                          | Move Up in Air/Jump
-<kbd>Space</kbd> * 2                                      | Toggle flight (Creative Mode)
-<kbd>Left Shift</kbd>                                     | Sprint/Move Down in Air
-<kbd>Left Ctrl</kbd>                                      | Toggle Sneaking
+<kbd>Space</kbd>                                          | Move Up/Jump
+<kbd>Space</kbd> * 2                                      | Toggle Flight (Creative Mode)
+<kbd>Left Shift</kbd>                                     | Sneak/Move Down
+<kbd>Left Ctrl</kbd>                                      | Sprint
 <kbd>Mouse Scroll</kbd>                                   | Select Hotbar Slot
 <kbd>Alt (Hold)</kbd> + <kbd>Mouse Scroll</kbd>           | Select Interaction Option
 <kbd>E</kbd>                                              | Open Player Inventory
