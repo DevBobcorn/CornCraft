@@ -7,19 +7,11 @@ namespace CraftSharp.Control
 {
     public class GroundedState : IPlayerState
     {
-        private const float THRESHOLD_CLIMB_1M = 1.1F;
-        private const float THRESHOLD_WALK_UP  = 0.6F;
-        private const float THRESHOLD_CLIMB_UP = 0.4F;
-        
-        private const float THRESHOLD_LIQUID_SINK = -0.6F;
         private const float SPRINT_STAMINA_START_MIN = 5F;
         private const float SPRINT_STAMINA_STOP = 1F;
 
         private bool _jumpRequested = false;
-        private bool _sneakToggleRequested = false;
         private bool _sprintRequested = false;
-
-        private float _timeSinceGrounded = -1F;
 
         public void UpdateMain(ref Vector3 currentVelocity, float interval, PlayerActions inputData, PlayerStatus info, PlayerController player)
         {
@@ -28,22 +20,15 @@ namespace CraftSharp.Control
             // Reset gliding state
             info.Gliding = false;
 
-            // Update grounded timer
-            _timeSinceGrounded += interval;
-
-            // Check sneak toggle request
-            if (_sneakToggleRequested)
-            {
-                player.ToggleSneaking();
-
-                _sneakToggleRequested = false;
-            }
-
             // If in liquid, disable sprinting/sneaking
             if (info.InLiquid)
             {
                 info.Sprinting = false;
                 info.Sneaking = false;
+            }
+            else
+            {
+                info.Sneaking = inputData.Locomotion.Descend.IsPressed();
             }
 
             // Movement velocity update
@@ -104,13 +89,22 @@ namespace CraftSharp.Control
                             info.TargetVisualYaw, 0.2F), info.TargetVisualYaw, ability.TurnSpeed * interval);
                     
                     // Use target orientation to calculate actual movement direction, taking ground shape into consideration
-                    moveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
+                    // Use current horizontal velocity to smoothly reach target direction/speed
+                    var targetMoveVelocity = player.GetMovementOrientation() * Vector3.forward * moveSpeed;
+                    var currentHorizontalVelocity = currentVelocity;
+                    currentHorizontalVelocity.y = 0F;
+
+                    moveVelocity = Vector3.Lerp(currentHorizontalVelocity, targetMoveVelocity, 0.25F);
                 }
                 else // Idle or braking
                 {
                     // Reset sprinting state
                     info.Sprinting = false;
-                    moveVelocity = Vector3.zero;
+                    
+                    var currentHorizontalVelocity = currentVelocity;
+                    currentHorizontalVelocity.y = 0F;
+                    moveVelocity = Vector3.Lerp(currentHorizontalVelocity, Vector3.zero, 0.25F);
+                    moveVelocity.y = 0F;
                     
                     _sprintRequested = false;
                 }
@@ -145,28 +139,22 @@ namespace CraftSharp.Control
         }
 
         private Action<InputAction.CallbackContext>? jumpRequestCallback;
-        private Action<InputAction.CallbackContext>? walkToggleRequestCallback;
+        private Action<InputAction.CallbackContext>? sneakRequestCallback;
         private Action<InputAction.CallbackContext>? sprintRequestCallback;
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
+            info.Sneaking = false;
 
             // Reset request flags
             _jumpRequested = false;
-            _sneakToggleRequested = false;
             _sprintRequested = player.Actions.Locomotion.Sprint.IsPressed();
 
             player.Actions.Locomotion.Jump.performed += jumpRequestCallback = _ =>
             {
                 // Set jump flag
                 _jumpRequested = true;
-            };
-
-            player.Actions.Locomotion.WalkToggle.performed += walkToggleRequestCallback = _ =>
-            {
-                // Set walk toggle flag
-                _sneakToggleRequested = true;
             };
 
             player.Actions.Locomotion.Sprint.performed += sprintRequestCallback = _ =>
@@ -180,17 +168,15 @@ namespace CraftSharp.Control
                 // Set sprint flag
                 _sprintRequested = true;
             };
-
-            _timeSinceGrounded = Mathf.Max(_timeSinceGrounded, 0F);
         }
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
             info.Sprinting = false;
+            info.Sneaking = false;
 
             // Unregister input action events
             player.Actions.Locomotion.Jump.performed -= jumpRequestCallback;
-            player.Actions.Locomotion.WalkToggle.performed -= walkToggleRequestCallback;
             player.Actions.Locomotion.Sprint.performed -= sprintRequestCallback;
         }
 

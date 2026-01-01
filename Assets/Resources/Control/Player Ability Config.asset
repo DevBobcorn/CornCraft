@@ -12,37 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 626338d7e82f32b4893ae4cf50bbdfc2, type: 3}
   m_Name: Player Ability Config
   m_EditorClassIdentifier: 
-  ClimbOverMaxDist: 0.6
-  ClimbOverExtraOffset: {x: 0, y: 0, z: 0}
   SneakSpeed: 1.3
   WalkSpeed: 4.317
   SprintSpeed: 5.612
   SwimSpeed: 1.97
-  GlideSpeed: 2.8
-  JumpSpeedCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 6.5
-      inSlope: 0.000005613399
-      outSlope: 0.000005613399
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.5266667
-    - serializedVersion: 3
-      time: 10
-      value: 5.5
-      inSlope: -0.24563129
-      outSlope: -0.24563129
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.12666646
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  GlideSpeed: 5
   TurnSpeed: 600
   MaxStamina: 20
   SprintStaminaCost: 3

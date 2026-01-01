@@ -7,12 +7,10 @@ namespace CraftSharp.Control
 {
     public class AirborneState : IPlayerState
     {
-        public const float FLIGHT_START_JUMPTIME_MAX = 0.3F;
+        public const float FLIGHT_START_TIMEOUT_MAX = 0.3F;
         public const float FLIGHT_STOP_TIMEOUT_MAX  = 0.3F;
 
         public const float STOP_FLYING_MAXIMUM_DIST = 0.1F;
-
-        public const float THRESHOLD_ANGLE_FORWARD = 40F;
 
         //private bool _glideToggleRequested = false;
         private bool _flightRequested = false;
@@ -71,23 +69,32 @@ namespace CraftSharp.Control
                 {
                     // Smooth rotation for player model
                     info.CurrentVisualYaw = Mathf.MoveTowardsAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.TurnSpeed * interval * 0.5F);
-                    // Horizontal speed
-                    moveVelocity = player.GetMovementOrientation() * Vector3.forward * ability.GlideSpeed;
+                    
+                    // Smoothly reach target horizontal direction/speed
+                    var targetMoveVelocity = player.GetMovementOrientation() * Vector3.forward * ability.GlideSpeed;
+                    var currentHorizontalVelocity = currentVelocity;
+                    currentHorizontalVelocity.y = 0F;
+                    moveVelocity = Vector3.Lerp(currentHorizontalVelocity, targetMoveVelocity, 0.25F);
                 }
-                else // No horizontal movement
+                else // No horizontal movement, smoothly brake
                 {
-                    moveVelocity = Vector3.zero;
+                    var currentHorizontalVelocity = currentVelocity;
+                    currentHorizontalVelocity.y = 0F;
+                    moveVelocity = Vector3.Lerp(currentHorizontalVelocity, Vector3.zero, 0.15F);
                 }
 
                 if (info.Flying)
                 {
-                    // Check vertical movement...
+                    // Smooth vertical movement while flying
+                    var targetVerticalVelocity = 0F;
                     if (inputData.Locomotion.Ascend.IsPressed())
-                        moveVelocity += ability.SneakSpeed * 3F * player.transform.up;
+                        targetVerticalVelocity = ability.SneakSpeed * 3F;
                     else if (inputData.Locomotion.Descend.IsPressed())
-                        moveVelocity -= ability.SneakSpeed * 3F * player.transform.up;
+                        targetVerticalVelocity = -ability.SneakSpeed * 3F;
 
-                    // Flying doesn't have any gravity, which can prevent proper groundcheck
+                    moveVelocity.y = Mathf.Lerp(currentVelocity.y, targetVerticalVelocity, 0.25F);
+
+                    // Flying doesn't have any gravity, which can prevent proper ground-check
                     // So here we stop flying when getting close enough to the ground
                     if (info.GroundDistFromFeet < STOP_FLYING_MAXIMUM_DIST)
                     {
@@ -154,7 +161,7 @@ namespace CraftSharp.Control
                 {
                     if (!info.Flying)
                     {
-                        if (info.JumpTime <= FLIGHT_START_JUMPTIME_MAX)
+                        if (info.JumpTime <= FLIGHT_START_TIMEOUT_MAX)
                         {
                             _flightRequested = true;
                         }

@@ -138,15 +138,6 @@ namespace CraftSharp.Control
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""WalkToggle"",
-                    ""type"": ""Button"",
-                    ""id"": ""dcc660b9-db49-4350-a3aa-27dbb29a5426"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -252,22 +243,11 @@ namespace CraftSharp.Control
                 {
                     ""name"": """",
                     ""id"": ""638786f9-ab53-4fbf-a30b-c559942f8e5b"",
-                    ""path"": ""<Keyboard>/leftShift"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
                     ""interactions"": ""Press"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Sprint"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""82a91f93-d0dc-4e6d-8f0d-551d9023a23e"",
-                    ""path"": ""<Keyboard>/leftCtrl"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""WalkToggle"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -411,7 +391,6 @@ namespace CraftSharp.Control
             m_Locomotion_Descend = m_Locomotion.FindAction("Descend", throwIfNotFound: true);
             m_Locomotion_Ascend = m_Locomotion.FindAction("Ascend", throwIfNotFound: true);
             m_Locomotion_Sprint = m_Locomotion.FindAction("Sprint", throwIfNotFound: true);
-            m_Locomotion_WalkToggle = m_Locomotion.FindAction("WalkToggle", throwIfNotFound: true);
             // Interaction
             m_Interaction = asset.FindActionMap("Interaction", throwIfNotFound: true);
             m_Interaction_ChargedAttack = m_Interaction.FindAction("Charged Attack", throwIfNotFound: true);
@@ -506,7 +485,6 @@ namespace CraftSharp.Control
         private readonly InputAction m_Locomotion_Descend;
         private readonly InputAction m_Locomotion_Ascend;
         private readonly InputAction m_Locomotion_Sprint;
-        private readonly InputAction m_Locomotion_WalkToggle;
         /// <summary>
         /// Provides access to input actions defined in input action map "Locomotion".
         /// </summary>
@@ -538,10 +516,6 @@ namespace CraftSharp.Control
             /// Provides access to the underlying input action "Locomotion/Sprint".
             /// </summary>
             public InputAction @Sprint => m_Wrapper.m_Locomotion_Sprint;
-            /// <summary>
-            /// Provides access to the underlying input action "Locomotion/WalkToggle".
-            /// </summary>
-            public InputAction @WalkToggle => m_Wrapper.m_Locomotion_WalkToggle;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -583,9 +557,6 @@ namespace CraftSharp.Control
                 @Sprint.started += instance.OnSprint;
                 @Sprint.performed += instance.OnSprint;
                 @Sprint.canceled += instance.OnSprint;
-                @WalkToggle.started += instance.OnWalkToggle;
-                @WalkToggle.performed += instance.OnWalkToggle;
-                @WalkToggle.canceled += instance.OnWalkToggle;
             }
 
             /// <summary>
@@ -612,9 +583,6 @@ namespace CraftSharp.Control
                 @Sprint.started -= instance.OnSprint;
                 @Sprint.performed -= instance.OnSprint;
                 @Sprint.canceled -= instance.OnSprint;
-                @WalkToggle.started -= instance.OnWalkToggle;
-                @WalkToggle.performed -= instance.OnWalkToggle;
-                @WalkToggle.canceled -= instance.OnWalkToggle;
             }
 
             /// <summary>
@@ -841,13 +809,6 @@ namespace CraftSharp.Control
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnSprint(InputAction.CallbackContext context);
-            /// <summary>
-            /// Method invoked when associated input action "WalkToggle" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-            /// </summary>
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-            void OnWalkToggle(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Interaction" which allows adding and removing callbacks.

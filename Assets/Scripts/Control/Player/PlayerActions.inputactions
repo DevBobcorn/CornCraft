@@ -50,15 +50,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "WalkToggle",
-                    "type": "Button",
-                    "id": "dcc660b9-db49-4350-a3aa-27dbb29a5426",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -164,22 +155,11 @@
                 {
                     "name": "",
                     "id": "638786f9-ab53-4fbf-a30b-c559942f8e5b",
-                    "path": "<Keyboard>/leftShift",
+                    "path": "<Keyboard>/leftCtrl",
                     "interactions": "Press",
                     "processors": "",
                     "groups": "",
                     "action": "Sprint",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "82a91f93-d0dc-4e6d-8f0d-551d9023a23e",
-                    "path": "<Keyboard>/leftCtrl",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "WalkToggle",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

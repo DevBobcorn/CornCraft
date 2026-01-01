@@ -41,19 +41,20 @@ namespace CraftSharp.Control
 
             // Check vertical movement...
             var distToAfloat = PlayerStatusUpdater.ABOVE_LIQUID_HEIGHT_WHEN_FLOATING - info.LiquidDistFromHead;
+            var targetVerticalVelocity = 0F;
 
             if (inputData.Locomotion.Ascend.IsPressed())
             {
                 if (distToAfloat > 0F) // Can go up
                 {
-                    moveVelocity = (info.Flying ? flightSpeed : swimSpeed) * player.transform.up;
+                    targetVerticalVelocity = (info.Flying ? flightSpeed : swimSpeed);
                 }
             }
             else if (inputData.Locomotion.Descend.IsPressed())
             {
                 if (!info.Grounded)
                 {
-                    moveVelocity = -(info.Flying ? flightSpeed : swimSpeed) * player.transform.up;
+                    targetVerticalVelocity = -(info.Flying ? flightSpeed : swimSpeed);
                 }
             }
 
@@ -63,9 +64,21 @@ namespace CraftSharp.Control
                 // Smooth rotation for player model
                 info.CurrentVisualYaw = Mathf.MoveTowardsAngle(info.CurrentVisualYaw, info.TargetVisualYaw, ability.TurnSpeed * interval * 0.5F);
                 
-                // Use target orientation to calculate actual movement direction
-                moveVelocity += player.GetMovementOrientation() * Vector3.forward * (info.Flying ? flightSpeed : swimSpeed);
+                // Smoothly reach target horizontal direction/speed
+                var targetMoveVelocity = player.GetMovementOrientation() * Vector3.forward * (info.Flying ? flightSpeed : swimSpeed);
+                var currentHorizontalVelocity = currentVelocity;
+                currentHorizontalVelocity.y = 0F;
+                moveVelocity += Vector3.Lerp(currentHorizontalVelocity, targetMoveVelocity, 0.2F);
             }
+            else // No horizontal input, smoothly brake
+            {
+                var currentHorizontalVelocity = currentVelocity;
+                currentHorizontalVelocity.y = 0F;
+                moveVelocity += Vector3.Lerp(currentHorizontalVelocity, Vector3.zero, 0.2F);
+            }
+
+            // Smooth vertical movement while floating/flying
+            moveVelocity.y = Mathf.Lerp(currentVelocity.y, targetVerticalVelocity, 0.2F);
 
             // Apply gravity (nonexistent)
 
@@ -97,7 +110,7 @@ namespace CraftSharp.Control
                 {
                     if (!info.Flying)
                     {
-                        if (info.JumpTime <= AirborneState.FLIGHT_START_JUMPTIME_MAX)
+                        if (info.JumpTime <= AirborneState.FLIGHT_START_TIMEOUT_MAX)
                         {
                             _flightRequested = true;
                         }
