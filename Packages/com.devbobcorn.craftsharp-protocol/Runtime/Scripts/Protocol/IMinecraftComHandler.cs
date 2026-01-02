@@ -212,8 +212,8 @@ namespace CraftSharp.Protocol
         /// <summary>
         /// Called when an entity has spawned
         /// </summary>
-        /// <param name="entity">Spawned entity</param>
-        void OnSpawnEntity(EntityData entity);
+        /// <param name="entitySpawn">Spawned entity</param>
+        void OnSpawnEntity(EntitySpawnData entitySpawn);
 
         /// <summary>
         /// Called when an entity has spawned

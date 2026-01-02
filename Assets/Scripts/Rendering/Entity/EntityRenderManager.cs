@@ -80,36 +80,36 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Create a new entity render from given entity data
         /// </summary>
-        /// <param name="entity">Entity data</param>
-        public void AddEntityRender(EntityData entity)
+        /// <param name="entitySpawn">Entity data</param>
+        public void AddEntityRender(EntitySpawnData entitySpawn)
         {
             // If the numeral id is occupied by an entity already,
             // destroy this entity first
-            if (entityRenders.ContainsKey(entity.Id))
+            if (entityRenders.ContainsKey(entitySpawn.Id))
             {
-                if (entityRenders[entity.Id])
+                if (entityRenders[entitySpawn.Id])
                 {
-                    entityRenders[entity.Id].Unload();
+                    entityRenders[entitySpawn.Id].Unload();
                 }
                 
-                entityRenders.Remove(entity.Id);
-                nearbyEntities.Remove(entity.Id);
+                entityRenders.Remove(entitySpawn.Id);
+                nearbyEntities.Remove(entitySpawn.Id);
             }
 
-            var entityPrefab = entity.Type.TypeId == EntityType.PLAYER_ID ?
-                serverPlayerPrefab : GetPrefabForType(entity.Type.TypeId);
+            var entityPrefab = entitySpawn.Type.TypeId == EntityType.PLAYER_ID ?
+                serverPlayerPrefab : GetPrefabForType(entitySpawn.Type.TypeId);
 
             if (entityPrefab)
             {
                 var entityObj = Instantiate(entityPrefab, transform, true);
                 var entityRender = entityObj!.GetComponent<EntityRender>();
 
-                entityRenders.Add(entity.Id, entityRender);
+                entityRenders.Add(entitySpawn.Id, entityRender);
 
-                entityObj.name = $"{entity.Id} {entity.Type}";
+                entityObj.name = $"{entitySpawn.Id} {entitySpawn.Type}";
 
                 // Initialize the entity
-                entityRender.Initialize(entity, _worldOriginOffset);
+                entityRender.Initialize(entitySpawn, _worldOriginOffset);
             }
         }
 
@@ -180,8 +180,8 @@ namespace CraftSharp.Rendering
         {
             if (entityRenders.ContainsKey(entityId))
             {
-                entityRenders[entityId].Yaw.Value = EntityData.GetYawFromByte(yaw);
-                entityRenders[entityId].Pitch.Value = EntityData.GetPitchFromByte(pitch);
+                entityRenders[entityId].Yaw.Value = EntitySpawnData.GetYawFromByte(yaw);
+                entityRenders[entityId].Pitch.Value = EntitySpawnData.GetPitchFromByte(pitch);
             }
         }
 
@@ -195,7 +195,7 @@ namespace CraftSharp.Rendering
             if (entityRenders.TryGetValue(entityId, out var render)
                 && render is LivingEntityRender livingEntityRender)
             {
-                livingEntityRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(headYaw);
+                livingEntityRender.HeadYaw.Value = EntitySpawnData.GetHeadYawFromByte(headYaw);
             }
         }
 

@@ -78,29 +78,23 @@ namespace CraftSharp.Control
         /// </summary>
         public bool IsGrounded2Send { get; private set; }
 
-        public void SwitchPlayerRenderFromPrefab(EntityData entity, GameObject renderPrefab)
+        public void SwitchPlayerRenderFromPrefab(EntitySpawnData entitySpawn, GameObject renderPrefab)
         {
             var renderObj = Instantiate(renderPrefab);
             renderObj.name = $"Player Entity ({renderPrefab.name})";
 
             // Switch to player render created with given prefab
-            SwitchPlayerRender(entity, renderObj);
-
-            // Initialize metadata
-            if (entity.Metadata is not null)
-            {
-                m_PlayerRender.UpdateMetadata(entity.Metadata);
-            }
+            SwitchPlayerRender(entitySpawn, renderObj);
         }
 
 #nullable enable
-        public void UpdateMetadataForPlayerRender(EntityData entity, Dictionary<int, object?> metadata)
+        public void UpdateMetadataForPlayerRender(EntitySpawnData entitySpawn, Dictionary<int, object?> metadata)
         {
             m_PlayerRender.UpdateMetadata(metadata);
         }
 #nullable disable
 
-        private void SwitchPlayerRender(EntityData entity, GameObject renderObj)
+        private void SwitchPlayerRender(EntitySpawnData entitySpawn, GameObject renderObj)
         {
             var prevRender = m_PlayerRender;
 
@@ -108,9 +102,6 @@ namespace CraftSharp.Control
             {
                 // Unregister previous aiming mode change handler
                 EventManager.Instance.Unregister<CameraAimingEvent>(prevRender.HandleAimingModeChange);
-                
-                // Unload and then destroy previous render object, if present
-                prevRender.Unload();
             }
 
             // Clear existing event subscriptions
@@ -121,20 +112,18 @@ namespace CraftSharp.Control
             {
                 // Initialize head yaw to look forward
                 if (m_PlayerRender is LivingEntityRender livingEntityRender)
-                    livingEntityRender.HeadYaw.Value = EntityData.GetHeadYawFromByte(127); // i.e. -90F
-                m_PlayerRender.UUID = entity.UUID;
+                    livingEntityRender.HeadYaw.Value = EntitySpawnData.GetHeadYawFromByte(127); // i.e. -90F
+                m_PlayerRender.UUID = entitySpawn.UUID;
                 m_PlayerRender.transform.SetParent(transform, false);
 
-                // Destroy these colliders, so that they won't affect our movement
-                foreach (var playerCollider in m_PlayerRender.GetComponentsInChildren<Collider>())
-                {
-                    Destroy(playerCollider);
-                }
-
                 // Initialize player entity render (originOffset not used here)
-                m_PlayerRender.Initialize(entity, Vector3Int.zero);
-                // Workaround: This value should not be applied to entity render for client player
-                m_PlayerRender.VisualTransform.localRotation = Quaternion.identity;
+                m_PlayerRender.Initialize(entitySpawn, Vector3Int.zero);
+                
+                // Update entity data from previous player render
+                if (prevRender && prevRender.Metadata is not null)
+                {
+                    m_PlayerRender.UpdateMetadata(prevRender.Metadata);
+                }
 
                 // Update render gameobject layer (do this last to ensure all children are present)
                 foreach (var child in renderObj.GetComponentsInChildren<Transform>())
@@ -180,6 +169,12 @@ namespace CraftSharp.Control
                 // Use own transform
                 m_FollowRef = transform;
                 m_AimingRef = transform;
+            }
+
+            if (prevRender)
+            {
+                // Unload and then destroy previous render object, if present
+                prevRender.Unload();
             }
 
             if (m_CameraController)

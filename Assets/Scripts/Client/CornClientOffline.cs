@@ -31,7 +31,7 @@ namespace CraftSharp
 
         #region Players and Entities
         private bool locationReceived = false;
-        private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
+        private readonly EntitySpawnData _clientEntitySpawn = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private readonly Dictionary<int, InventoryData> inventories = new();
         private readonly Dictionary<Guid, PlayerInfo> onlinePlayers = new();
         
@@ -110,14 +110,13 @@ namespace CraftSharp
             }
 
             // Update entity type for dummy client entity
-            clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
+            _clientEntitySpawn.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
             // Update client entity name
-            clientEntity.Name = session.PlayerName;
-            clientEntity.UUID = LOCAL_UUID;
-            clientEntity.MaxHealth = 20F;
+            _clientEntitySpawn.Name = session.PlayerName;
+            _clientEntitySpawn.UUID = LOCAL_UUID;
 
             // Create player render
-            SwitchToFirstPlayerRender(clientEntity);
+            SwitchToFirstPlayerRender(_clientEntitySpawn);
             // Create camera controller
             SwitchToFirstCameraController();
 
@@ -149,15 +148,15 @@ namespace CraftSharp
                 {
                     if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                     {
-                        SwitchPlayerRenderBy(clientEntity, -1);
+                        SwitchPlayerRenderBy(_clientEntitySpawn, -1);
                     }
                     else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
                     {
-                        SwitchPlayerRenderBy(clientEntity,  0);
+                        SwitchPlayerRenderBy(_clientEntitySpawn,  0);
                     }
                     else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
                     {
-                        SwitchPlayerRenderBy(clientEntity,  1);
+                        SwitchPlayerRenderBy(_clientEntitySpawn,  1);
                     }
                 }
 
@@ -208,7 +207,7 @@ namespace CraftSharp
         public override double GetLatestServerTps() => 20;
         public override double GetServerAverageTps() => 20;
         public override int GetPacketCount() => 0;
-        public override int GetClientEntityId() => clientEntity.Id;
+        public override int GetClientEntityId() => _clientEntitySpawn.Id;
         public override double GetClientFoodSaturation() => 10;
         public override double GetClientExperienceLevel() => 42;
         public override double GetClientTotalExperience() => 10;

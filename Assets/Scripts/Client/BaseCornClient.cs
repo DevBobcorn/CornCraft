@@ -132,15 +132,15 @@ namespace CraftSharp
             interactionUpdater.SetControllers(this, CameraController, PlayerController);
         }
 
-        protected void SwitchToFirstPlayerRender(EntityData clientEntity)
+        protected void SwitchToFirstPlayerRender(EntitySpawnData clientEntitySpawn)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 
             selectedRenderPrefab = 0;
-            PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[0]);
+            PlayerController.SwitchPlayerRenderFromPrefab(clientEntitySpawn, m_PlayerRenderPrefabs[0]);
         }
 
-        protected void SwitchPlayerRenderBy(EntityData clientEntity, int indexOffset)
+        protected void SwitchPlayerRenderBy(EntitySpawnData clientEntitySpawn, int indexOffset)
         {
             if (m_PlayerRenderPrefabs.Length == 0) return;
 
@@ -148,7 +148,7 @@ namespace CraftSharp
             while (index < 0) index += m_PlayerRenderPrefabs.Length;
 
             selectedRenderPrefab = index % m_PlayerRenderPrefabs.Length;
-            PlayerController.SwitchPlayerRenderFromPrefab(clientEntity, m_PlayerRenderPrefabs[selectedRenderPrefab]);
+            PlayerController.SwitchPlayerRenderFromPrefab(clientEntitySpawn, m_PlayerRenderPrefabs[selectedRenderPrefab]);
         }
 
         public GameMode GameMode { get; protected set; } = GameMode.Survival;

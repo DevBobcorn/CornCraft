@@ -9,9 +9,9 @@ namespace CraftSharp.Rendering
         [SerializeField] private GameObject[] slimModelObjects = { };
         [SerializeField] private GameObject[] regularModelObjects = { };
 
-        public override void Initialize(EntityData entity, Vector3Int originOffset)
+        public override void Initialize(EntitySpawnData entitySpawn, Vector3Int originOffset)
         {
-            base.Initialize(entity, originOffset);
+            base.Initialize(entitySpawn, originOffset);
         }
 
         public override void UpdateAnimation(float tickMilSec)

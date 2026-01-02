@@ -88,8 +88,12 @@ namespace CraftSharp.Rendering
         /// </summary>
         public readonly TrackedValue<float> Pitch = new(0F);
         protected float lastPitch = 0F;
-
-
+        
+        /// <summary>
+        /// Entity metadata
+        /// </summary>
+        public Dictionary<int, object?>? Metadata { get; private set; }
+        
         /// <summary>
         /// Entity shared flags
         /// <br/>
@@ -118,16 +122,11 @@ namespace CraftSharp.Rendering
         /// Item of the entity if ItemFrame or Item
         /// </summary>
         public readonly TrackedValue<ItemStack?> Item = new(null);
-        
+
         /// <summary>
         /// Entity pose in the Minecraft world
         /// </summary>
-        public EntityPose Pose;
-        
-        /// <summary>
-        /// Entity metadata
-        /// </summary>
-        protected Dictionary<int, object?>? Metadata { get; private set; }
+        public readonly TrackedValue<EntityPose> Pose = new(EntityPose.Standing);
 
         /// <summary>
         /// Update entity metadata, validate control variables,
@@ -181,7 +180,7 @@ namespace CraftSharp.Rendering
             {
                 if (Metadata.TryGetValue(metaSlot4, out var value) && value is int pose)
                 {
-                    Pose = (EntityPose) pose;
+                    Pose.Value = (EntityPose) pose;
                 }
             }
             
@@ -256,7 +255,7 @@ namespace CraftSharp.Rendering
         /// <summary>
         /// Initialize this entity render
         /// </summary>
-        public virtual void Initialize(EntityData source, Vector3Int originOffset)
+        public virtual void Initialize(EntitySpawnData source, Vector3Int originOffset)
         {
             if (!_visualTransform)
             {
@@ -294,8 +293,8 @@ namespace CraftSharp.Rendering
             };
 
             ObjectData = source.ObjectData;
-            Health.Value = source.Health;
-            MaxHealth.Value = source.MaxHealth;
+            Health.Value = 1F;
+            MaxHealth.Value = 1F;
 
             // Initialize other fields with default values
             // These fields will be later assigned by metadata packets
@@ -303,7 +302,7 @@ namespace CraftSharp.Rendering
             CustomNameJson = null;
             IsCustomNameVisible = true;
             Item.Value = null;
-            Pose = EntityPose.Standing;
+            Pose.Value = EntityPose.Standing;
             Metadata = null;
             Equipment = null;
 
@@ -315,7 +314,7 @@ namespace CraftSharp.Rendering
             // Initialize materials (This requires metadata to be present)
             if (TryGetComponent(out EntityMaterialAssigner materialControl))
             {
-                materialControl.InitializeMaterials(source.Type, GetControlVariables(), source.Metadata, HandleMaterialUpdate);
+                materialControl.InitializeMaterials(source.Type, GetControlVariables(), HandleMaterialUpdate);
             }
         }
         

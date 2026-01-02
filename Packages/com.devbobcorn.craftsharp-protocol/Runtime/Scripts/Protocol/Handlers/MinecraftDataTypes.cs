@@ -130,14 +130,13 @@ namespace CraftSharp.Protocol.Handlers
         /// <param name="entityPalette">Mappings for converting entity type Ids to EntityType</param>
         /// <param name="living">TRUE for living entities (layout differs)</param>
         /// <returns>Entity information</returns>
-        public EntityData ReadNextEntity(Queue<byte> cache, EntityTypePalette entityPalette, bool living)
+        public EntitySpawnData ReadNextEntity(Queue<byte> cache, EntityTypePalette entityPalette, bool living)
         {
             var entityId = DataTypes.ReadNextVarInt(cache);
             var entityUUID = DataTypes.ReadNextUUID(cache); // MC 1.8+
 
-            EntityType entityType;
             // Entity type data type change from byte to varint after 1.14
-            entityType = entityPalette.GetByNumId(DataTypes.ReadNextVarInt(cache));
+            var entityType = entityPalette.GetByNumId(DataTypes.ReadNextVarInt(cache));
 
             var entityX = DataTypes.ReadNextDouble(cache);
             var entityY = DataTypes.ReadNextDouble(cache);
@@ -166,7 +165,7 @@ namespace CraftSharp.Protocol.Handlers
                     ? DataTypes.ReadNextVarInt(cache) : DataTypes.ReadNextInt(cache);
             }
 
-            return new EntityData(entityId, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, entityHeadYaw, data);
+            return new EntitySpawnData(entityId, entityType, new Location(entityX, entityY, entityZ), entityYaw, entityPitch, entityHeadYaw, data);
         }
 
         /// <summary>

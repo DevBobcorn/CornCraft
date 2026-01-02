@@ -78,7 +78,9 @@ namespace CraftSharp
 
         #region Players and Entities
         private bool locationReceived = false;
-        private readonly EntityData clientEntity = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
+        private readonly EntitySpawnData _clientEntitySpawn = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
+        private float maximumHealth = -0F;
+        private float currentHealth = -0F;
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int currentHunger;
         private float currentSaturation;
@@ -187,15 +189,15 @@ namespace CraftSharp
                 if (handler!.Login(playerKeyPair, session, accountLower)) // Login
                 {
                     // Update entity type for dummy client entity
-                    clientEntity.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
+                    _clientEntitySpawn.Type = EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID);
                     // Update client entity name
-                    clientEntity.Name = session.PlayerName;
-                    clientEntity.UUID = uuid;
+                    _clientEntitySpawn.Name = session.PlayerName;
+                    _clientEntitySpawn.UUID = uuid;
                     Debug.Log($"Client uuid: {uuid}");
-                    clientEntity.MaxHealth = 20F;
+                    maximumHealth = 20F;
 
                     // Create player render
-                    SwitchToFirstPlayerRender(clientEntity);
+                    SwitchToFirstPlayerRender(_clientEntitySpawn);
                     // Create camera controller
                     SwitchToFirstCameraController();
 
@@ -277,15 +279,15 @@ namespace CraftSharp
                 {
                     if (Keyboard.current.f6Key.wasPressedThisFrame) // Select previous
                     {
-                        SwitchPlayerRenderBy(clientEntity, -1);
+                        SwitchPlayerRenderBy(_clientEntitySpawn, -1);
                     }
                     else if (Keyboard.current.f7Key.wasPressedThisFrame) // Regenerate current prefab
                     {
-                        SwitchPlayerRenderBy(clientEntity,  0);
+                        SwitchPlayerRenderBy(_clientEntitySpawn,  0);
                     }
                     else if (Keyboard.current.f8Key.wasPressedThisFrame) // Select next
                     {
-                        SwitchPlayerRenderBy(clientEntity,  1);
+                        SwitchPlayerRenderBy(_clientEntitySpawn,  1);
                     }
                 }
 
@@ -313,7 +315,7 @@ namespace CraftSharp
 
             while (chatQueue.Count > 0 && nextMessageSendTime < DateTime.Now)
             {
-                string text = chatQueue.Dequeue();
+                var text = chatQueue.Dequeue();
                 handler!.SendChatMessage(text, playerKeyPair);
                 nextMessageSendTime = DateTime.Now + TimeSpan.FromSeconds(ProtocolSettings.MessageCooldown);
             }
@@ -349,7 +351,7 @@ namespace CraftSharp
             {
                 while (threadTasks.Count > 0)
                 {
-                    Action taskToRun = threadTasks.Dequeue();
+                    var taskToRun = threadTasks.Dequeue();
                     taskToRun();
                 }
             }
@@ -422,7 +424,7 @@ namespace CraftSharp
 
             do
             {
-                for (int i = 0; i < 30; i++) // 15 seconds in total
+                for (var i = 0; i < 30; i++) // 15 seconds in total
                 {
                     Thread.Sleep(TimeSpan.FromSeconds(0.5));
 
@@ -572,7 +574,7 @@ namespace CraftSharp
         {
             get
             {
-                int callingThreadId = Thread.CurrentThread.ManagedThreadId;
+                var callingThreadId = Thread.CurrentThread.ManagedThreadId;
                 if (handler != null)
                 {
                     return handler.GetNetMainThreadId() != callingThreadId;
@@ -599,7 +601,7 @@ namespace CraftSharp
         public override double GetServerAverageTps() => averageTPS;
         public override double GetLatestServerTps() => serverTPS;
         public override int GetPacketCount() => packetCount;
-        public override int GetClientEntityId() => clientEntity.Id;
+        public override int GetClientEntityId() => _clientEntitySpawn.Id;
         public override double GetClientFoodSaturation() => currentHunger;
         public override double GetClientExperienceLevel() => experienceLevel;
         public override double GetClientTotalExperience() => totalExperience;
@@ -661,7 +663,7 @@ namespace CraftSharp
         /// <returns>Status info string</returns>
         public override string GetInfoString(bool withDebugInfo)
         {
-            string baseString = $"FPS: {Mathf.Round(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager.GetTimeString()}";
+            var baseString = $"FPS: {Mathf.Round(1F / Time.deltaTime), 4}\n{GameMode}\nTime: {EnvironmentManager.GetTimeString()}";
 
             if (withDebugInfo)
             {
@@ -734,8 +736,8 @@ namespace CraftSharp
         {
             lock (onlinePlayers)
             {
-                string[] playerNames = new string[onlinePlayers.Count];
-                int idx = 0;
+                var playerNames = new string[onlinePlayers.Count];
+                var idx = 0;
                 foreach (var player in onlinePlayers)
                     playerNames[idx++] = player.Value.Name;
                 return playerNames;
@@ -751,7 +753,7 @@ namespace CraftSharp
             var uuid2Player = new Dictionary<string, string>();
             lock (onlinePlayers)
             {
-                foreach (Guid key in onlinePlayers.Keys)
+                foreach (var key in onlinePlayers.Keys)
                 {
                     uuid2Player.Add(key.ToString(), onlinePlayers[key].Name);
                 }
@@ -794,7 +796,7 @@ namespace CraftSharp
             if (string.IsNullOrEmpty(text))
                 return;
 
-            int maxLength = handler!.GetMaxChatMessageLength();
+            var maxLength = handler!.GetMaxChatMessageLength();
 
             lock (chatQueue)
             {
@@ -837,7 +839,7 @@ namespace CraftSharp
         public override bool SendEntityAction(EntityActionType entityAction)
         {
             return InvokeRequired ? InvokeOnNetMainThread(() => SendEntityAction(entityAction)) :
-                handler!.SendEntityAction(clientEntity.Id, (int) entityAction);
+                handler!.SendEntityAction(_clientEntitySpawn.Id, (int) entityAction);
         }
 
         /// <summary>
@@ -927,8 +929,8 @@ namespace CraftSharp
             List<Tuple<short, ItemStack?>> changedSlots = new(); // List<Slot Id, Changed Items>
 
             // Update our inventory base on action type
-            InventoryData? inventory = GetInventory(inventoryId);
-            InventoryData playerInventory = GetInventory(0)!;
+            var inventory = GetInventory(inventoryId);
+            var playerInventory = GetInventory(0)!;
             
             if (inventory != null)
             {
@@ -955,7 +957,7 @@ namespace CraftSharp
                                 // Check if items are stackable?
                                 if (InventoryData.CheckStackable(target1, cursor1))
                                 {
-                                    int maxCount = Mathf.Min(target1.MaxStackSize, slotType.MaxCount);
+                                    var maxCount = Mathf.Min(target1.MaxStackSize, slotType.MaxCount);
                                     
                                     // Check item stacking
                                     if (target1.Count + cursor1.Count <= maxCount)
@@ -1017,7 +1019,7 @@ namespace CraftSharp
                                     
                                     return false; // Interaction not valid
                                 }
-                                int maxCount = slotType.MaxCount;
+                                var maxCount = slotType.MaxCount;
 
                                 if (cursor1.Count <= maxCount)
                                 {
@@ -1069,7 +1071,7 @@ namespace CraftSharp
                             // Check target slot also have item
                             if (inventory.Items.TryGetValue(slot, out var target2))
                             {
-                                int maxCount = Mathf.Min(target2.MaxStackSize, slotType.MaxCount);
+                                var maxCount = Mathf.Min(target2.MaxStackSize, slotType.MaxCount);
 
                                 // Check if these 2 items are stackable
                                 if (InventoryData.CheckStackable(target2, cursor2))
@@ -1126,7 +1128,7 @@ namespace CraftSharp
                                     
                                     return false; // Interaction not valid
                                 }
-                                int maxCount = slotType.MaxCount;
+                                var maxCount = slotType.MaxCount;
 
                                 if (1 <= maxCount)
                                 {
@@ -1263,20 +1265,20 @@ namespace CraftSharp
                         var stackMax = dragStartCursorItemClone.MaxStackSize;
                         var initCursorCount = dragStartCursorItemClone.Count;
                         
-                        int maxAllocForEachSlot = actionType switch
+                        var maxAllocForEachSlot = actionType switch
                         {
                             InventoryActionType.AddDragLeft => initCursorCount / draggedSlots.Count,
                             InventoryActionType.AddDragRight => 1,
                             _ => throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null)
                         };
-                        int actualAllocationTotal = 0;
+                        var actualAllocationTotal = 0;
                         
                         // Increase item count in each of the dragged slots
                         foreach (var (draggedSlot, initCount) in draggedSlots)
                         {
                             if (stackMax <= initCount) continue; // Full stack already
                             
-                            int actualAllocation = Mathf.Min(stackMax - initCount, maxAllocForEachSlot);
+                            var actualAllocation = Mathf.Min(stackMax - initCount, maxAllocForEachSlot);
                             actualAllocationTotal += actualAllocation;
                             if (ProtocolSettings.DebugMode)
                                 Debug.Log($"Dragged slot [{draggedSlot}] {initCount} +{actualAllocation} => {initCount + actualAllocation}");
@@ -1425,7 +1427,7 @@ namespace CraftSharp
         /// <returns>TRUE if animation successfully done</returns>
         public override bool DoAnimation(int playerAnimation)
         {
-            return InvokeRequired ? InvokeOnNetMainThread(() => DoAnimation(playerAnimation)) : handler!.SendAnimation(playerAnimation, clientEntity.Id);
+            return InvokeRequired ? InvokeOnNetMainThread(() => DoAnimation(playerAnimation)) : handler!.SendAnimation(playerAnimation, _clientEntitySpawn.Id);
         }
         
         /// <summary>
@@ -1573,7 +1575,7 @@ namespace CraftSharp
                 return false;
             }
 
-            bool sent = handler!.SendPlayerAction(dropEntireStack ? 3 : 4);
+            var sent = handler!.SendPlayerAction(dropEntireStack ? 3 : 4);
             if (sent) // Do update on client side
             {
                 ItemStack? updatedItem;
@@ -1591,7 +1593,7 @@ namespace CraftSharp
                         Debug.Log($"Dropped a single {curItem.ItemType.ItemId} in hotbar slot {CurrentHotbarSlot}, {updatedItem.Count} left.");
                 }
 
-                int invSlot = inventories[0].GetFirstHotbarSlot() + CurrentHotbarSlot;
+                var invSlot = inventories[0].GetFirstHotbarSlot() + CurrentHotbarSlot;
                 if (updatedItem is null)
                 {
                     inventories[0].Items.Remove(invSlot);
@@ -1661,11 +1663,11 @@ namespace CraftSharp
         /// <summary>
         /// Teleport to player in spectator mode
         /// </summary>
-        /// <param name="entity">Player to teleport to</param>
+        /// <param name="entitySpawn">Player to teleport to</param>
         /// Teleporting to other entities is NOT implemented yet
-        public bool Spectate(EntityData entity)
+        public bool Spectate(EntitySpawnData entitySpawn)
         {
-            return entity.Type.TypeId == EntityType.PLAYER_ID && SpectateByUUID(entity.UUID);
+            return entitySpawn.Type.TypeId == EntityType.PLAYER_ID && SpectateByUUID(entitySpawn.UUID);
         }
 
         /// <summary>
@@ -1817,14 +1819,14 @@ namespace CraftSharp
         /// <param name="lookAtLocation">Block coordinates to look at</param>
         public void UpdateLocation(Location location, Location lookAtLocation)
         {
-            double dx = lookAtLocation.X - (location.X - 0.5);
-            double dy = lookAtLocation.Y - (location.Y + 1);
-            double dz = lookAtLocation.Z - (location.Z - 0.5);
+            var dx = lookAtLocation.X - (location.X - 0.5);
+            var dy = lookAtLocation.Y - (location.Y + 1);
+            var dz = lookAtLocation.Z - (location.Z - 0.5);
 
-            double r = Math.Sqrt(dx * dx + dy * dy + dz * dz);
+            var r = Math.Sqrt(dx * dx + dy * dy + dz * dz);
 
-            float yaw = Convert.ToSingle(-Math.Atan2(dx, dz) / Math.PI * 180);
-            float pitch = Convert.ToSingle(-Math.Asin(dy / r) / Math.PI * 180);
+            var yaw = Convert.ToSingle(-Math.Atan2(dx, dz) / Math.PI * 180);
+            var pitch = Convert.ToSingle(-Math.Asin(dy / r) / Math.PI * 180);
             if (yaw < 0) yaw += 360;
 
             UpdateLocation(location, yaw, pitch);
@@ -1898,7 +1900,7 @@ namespace CraftSharp
             string messageText;
 
             // Used for 1.19+ to mark: system message, legal / illegal signature
-            string signaturePrefix = string.Empty;
+            var signaturePrefix = string.Empty;
 
             if (message.isSignedChat)
             {
@@ -2066,7 +2068,7 @@ namespace CraftSharp
 
                     foreach (var (slot, itemStack) in itemList)
                     {
-                        if (inventory.IsHotbar(slot, out int hotbarSlot))
+                        if (inventory.IsHotbar(slot, out var hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, itemStack));
                             if (hotbarSlot == CurrentHotbarSlot) // Updating held item
@@ -2136,7 +2138,7 @@ namespace CraftSharp
                     {
                         EventManager.Instance.Broadcast(new InventorySlotUpdateEvent(inventoryId, slot, item, fromClient));
 
-                        if (inventory2.IsHotbar(slot, out int hotbarSlot))
+                        if (inventory2.IsHotbar(slot, out var hotbarSlot))
                         {
                             EventManager.Instance.Broadcast(new HotbarSlotUpdateEvent(hotbarSlot, item));
                             if (hotbarSlot == CurrentHotbarSlot) // Updating held item
@@ -2178,7 +2180,7 @@ namespace CraftSharp
         /// <param name="entityId">Player Entity Id</param>
         public void OnReceivePlayerEntityId(int entityId)
         {
-            clientEntity.Id = entityId;
+            _clientEntitySpawn.Id = entityId;
             //Debug.Log($"Player entity Id received: {entityId}");
         }
 
@@ -2198,7 +2200,7 @@ namespace CraftSharp
                 // This will disable custom skin for client player
                 uuid = player.UUID;
                 // Also update client entity uuid
-                clientEntity.UUID = uuid;
+                _clientEntitySpawn.UUID = uuid;
                 Debug.Log($"Updated client uuid: {uuid}");
             }
 
@@ -2233,11 +2235,11 @@ namespace CraftSharp
         /// <summary>
         /// Called when an entity spawned
         /// </summary>
-        public void OnSpawnEntity(EntityData entity)
+        public void OnSpawnEntity(EntitySpawnData entitySpawn)
         {
             Loom.QueueOnMainThread(() =>
             {
-                EntityRenderManager.AddEntityRender(entity);
+                EntityRenderManager.AddEntityRender(entitySpawn);
             });
         }
 
@@ -2254,11 +2256,11 @@ namespace CraftSharp
         public void OnEntityEffect(int entityId, int effectId, int amplifier, int duration, byte flags,
             bool hasFactorData, Dictionary<string, object>? factorCodec)
         {
-            if (entityId == clientEntity.Id)
+            if (entityId == _clientEntitySpawn.Id)
             {
-                bool isAmbient = (flags & 0x01) != 0;
-                bool showParticle = (flags & 0x02) != 0;
-                bool showIcon = (flags & 0x04) != 0;
+                var isAmbient = (flags & 0x01) != 0;
+                var showParticle = (flags & 0x02) != 0;
+                var showIcon = (flags & 0x04) != 0;
 
                 var effectInstance = new MobEffectInstance(MobEffectPalette.INSTANCE.GetIdByNumId(effectId),
                     amplifier, duration, isAmbient, showParticle, showIcon);
@@ -2274,7 +2276,7 @@ namespace CraftSharp
         /// <param name="effectId">Effect Id</param>
         public void OnRemoveEntityEffect(int entityId, int effectId)
         {
-            if (entityId == clientEntity.Id)
+            if (entityId == _clientEntitySpawn.Id)
             {
                 EventManager.Instance.BroadcastOnUnityThread(new MobEffectRemovalEvent(effectId));
             }
@@ -2291,8 +2293,8 @@ namespace CraftSharp
                 if (onlinePlayers.TryGetValue(playerUUID, out var player))
                     playerName = player.Name;
             }
-            EntityData playerEntity = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, playerUUID, playerName);
-            OnSpawnEntity(playerEntity);
+            EntitySpawnData playerEntitySpawn = new(entityId, EntityTypePalette.INSTANCE.GetById(EntityType.PLAYER_ID), location, playerUUID, playerName);
+            OnSpawnEntity(playerEntitySpawn);
         }
 
         /// <summary>
@@ -2327,7 +2329,7 @@ namespace CraftSharp
                 {
                     if (onlinePlayers.TryGetValue(playerUUID, out var player)) // Further regular gamemode change events
                     {
-                        string playerName = player.Name;
+                        var playerName = player.Name;
                         if (playerName == username)
                         {
                             Loom.QueueOnMainThread(() =>
@@ -2454,9 +2456,9 @@ namespace CraftSharp
             // calculate server tps
             if (lastAge != 0)
             {
-                DateTime currentTime = DateTime.Now;
-                long tickDiff = worldAge - lastAge;
-                double tps = tickDiff / (currentTime - lastTime).TotalSeconds;
+                var currentTime = DateTime.Now;
+                var tickDiff = worldAge - lastAge;
+                var tps = tickDiff / (currentTime - lastTime).TotalSeconds;
                 lastAge = worldAge;
                 lastTime = currentTime;
                 if (tps is <= 20 and > 0)
@@ -2490,20 +2492,18 @@ namespace CraftSharp
         /// <param name="saturation">Player current saturation</param>
         public void OnUpdateHealth(float health, int hunger, float saturation)
         {
-            bool updateMaxHealth = clientEntity.MaxHealth < health;
+            var updateMaxHealth = maximumHealth < health;
 
             if (updateMaxHealth)
-                clientEntity.MaxHealth = health;
+                maximumHealth = health;
             
-            clientEntity.Health = health;
+            currentHealth = health;
             currentHunger = hunger;
             currentSaturation = saturation;
 
-            EventManager.Instance.BroadcastOnUnityThread
-                    <HealthUpdateEvent>(new(health, updateMaxHealth));
+            EventManager.Instance.BroadcastOnUnityThread(new HealthUpdateEvent(health, updateMaxHealth));
             
-            EventManager.Instance.BroadcastOnUnityThread
-                    <HungerUpdateEvent>(new(hunger, saturation));
+            EventManager.Instance.BroadcastOnUnityThread(new HungerUpdateEvent(hunger, saturation));
         }
 
         /// <summary>
@@ -2517,8 +2517,7 @@ namespace CraftSharp
             experienceLevel = expLevel;
             totalExperience = totalExp;
             
-            EventManager.Instance.BroadcastOnUnityThread
-                    <ExperienceUpdateEvent>(new(expLevel, totalExp, expBar));
+            EventManager.Instance.BroadcastOnUnityThread(new ExperienceUpdateEvent(expLevel, totalExp, expBar));
         }
 
         /// <summary>
@@ -2631,9 +2630,9 @@ namespace CraftSharp
                     entity.UpdateMetadata(metadata);
                 }
 
-                if (entityId == clientEntity.Id)
+                if (entityId == _clientEntitySpawn.Id)
                 {
-                    PlayerController.UpdateMetadataForPlayerRender(clientEntity, metadata);
+                    PlayerController.UpdateMetadataForPlayerRender(_clientEntitySpawn, metadata);
                 }
             });
         }

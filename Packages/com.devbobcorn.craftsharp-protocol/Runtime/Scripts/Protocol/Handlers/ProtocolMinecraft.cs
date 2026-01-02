@@ -1964,11 +1964,11 @@ namespace CraftSharp.Protocol.Handlers
                     break;
                 case PacketTypesIn.SpawnLivingEntity:
                     {
-                        EntityData entity = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, true);
+                        EntitySpawnData entitySpawn = dataTypes.ReadNextEntity(packetData, EntityTypePalette.INSTANCE, true);
                         // packet before 1.15 has metadata at the end
                         // this is not handled in DataTypes.ReadNextEntity()
                         // we are simply ignoring leftover data in packet
-                        handler.OnSpawnEntity(entity);
+                        handler.OnSpawnEntity(entitySpawn);
                     }
                     break;
                 case PacketTypesIn.SpawnPlayer:

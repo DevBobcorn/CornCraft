@@ -240,7 +240,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public void InitializeMaterials(EntityType entityType, Dictionary<string, string>? variables, Dictionary<int, object?>? metadata, Action<EntityMaterialManager, ResourceLocation, Material> callbackForEach)
+        public void InitializeMaterials(EntityType entityType, Dictionary<string, string>? variables, Action<EntityMaterialManager, ResourceLocation, Material> callbackForEach)
         {
             var client = CornApp.CurrentClient!;
             var matManager = client.EntityMaterialManager;
@@ -260,8 +260,9 @@ namespace CraftSharp.Rendering
 
                 if (entry.DynamicTextureId)
                 {
+                    // Metadata is not available during initialization(will be sent afterwards)
                     var vars = entry.TextureIdVariables!.Select(x =>
-                            (object) GetVariableValue(entityType, x.Item1, x.Item2, variables, metadata)).ToArray();
+                            (object) GetVariableValue(entityType, x.Item1, x.Item2, variables, null)).ToArray();
                     var interpolated = string.Format(entry.TextureId, vars);
                     textureId = ResourceLocation.FromString(interpolated);
                 }

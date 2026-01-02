@@ -34,7 +34,7 @@ namespace CraftSharp.Rendering
             }
         }
 
-        public override void Initialize(EntityData source, Vector3Int originOffset)
+        public override void Initialize(EntitySpawnData source, Vector3Int originOffset)
         {
             base.Initialize(source, originOffset);
             
