@@ -7,18 +7,7 @@ namespace CraftSharp.Control
 {
     public class PlayerStatusUpdater : MonoBehaviour
     {
-        // Ground distance check
-        private const float GROUND_RAYCAST_DIST   = PLAYER_HEIGHT;
-
-        // Liquid status and distance check
-        private const float LIQUID_RAYCAST_DIST   = PLAYER_HEIGHT;
         public const float ABOVE_LIQUID_HEIGHT_WHEN_FLOATING = 0.75F;
-
-        // Player dimensions
-        private const float PLAYER_WIDTH = 0.60001F; // Make it slightly wider than 0.6 to account for floating point error
-        private const float PLAYER_HEIGHT = 1.8F;
-        private const float PLAYER_RADIUS = PLAYER_WIDTH * 0.5F; // 0.3
-        private const float PLAYER_CENTER_Y = PLAYER_HEIGHT * 0.5F; // 0.9
         private const float GROUND_CHECK_TOLERANCE = 1E-2F; // Allow slight penetration/float
         private const float MOVEMENT_EPSILON = 1E-4F; // Threshold to consider movement negligible
         private const float MAX_STEP_HEIGHT = 0.125F;
@@ -26,6 +15,29 @@ namespace CraftSharp.Control
         private const float HIGH_STEP_LIFT_AMOUNT = 0.125F;
         private const float FORWARD_STEP_DOT_THRESHOLD = 0.5F;
         private const float STEP_FORWARD_CHECK_OFFSET = 0.125F;
+
+        private float gizmoPlayerWidth = 1F;
+        private float gizmoPlayerHeight = 1F;
+
+        private readonly struct PlayerDimensions
+        {
+            public readonly float Width;
+            public readonly float Height;
+            public readonly float Radius;
+            public readonly float CenterY;
+            public readonly float GroundRaycastDist;
+            public readonly float LiquidRaycastDist;
+
+            public PlayerDimensions(float width, float height)
+            {
+                Width = width + 0.0001F; // Make it slightly wider to account for floating point error
+                Height = height;
+                Radius = Width * 0.5F;
+                CenterY = Height * 0.5F;
+                GroundRaycastDist = Height;
+                LiquidRaycastDist = Height;
+            }
+        }
 
         public readonly PlayerStatus Status = new();
         
@@ -37,17 +49,31 @@ namespace CraftSharp.Control
         private Vector3 blockingAABBMin = Vector3.zero;
         private Vector3 blockingAABBMax = Vector3.zero;
 
-        public void UpdatePlayerStatus(UnityAABB[] terrainAABBs, UnityAABB[] liquidAABBs)
+        private void CachePlayerDimensions(PlayerDimensions dimensions)
         {
-            // Grounded state update
-            CheckGrounded(terrainAABBs);
-            
-            // Liquid status update
-            CheckInLiquid(liquidAABBs);
+            gizmoPlayerWidth = dimensions.Width;
+            gizmoPlayerHeight = dimensions.Height;
         }
 
-        public void UpdatePlayerPosition(ref Vector3 velocity, float deltaTime, UnityAABB[] terrainAABBs)
+        public void UpdatePlayerStatus(UnityAABB[] terrainAABBs, UnityAABB[] liquidAABBs,
+            float playerWidth, float playerHeight)
         {
+            var dimensions = new PlayerDimensions(playerWidth, playerHeight);
+            CachePlayerDimensions(dimensions);
+
+            // Grounded state update
+            CheckGrounded(terrainAABBs, dimensions);
+            
+            // Liquid status update
+            CheckInLiquid(liquidAABBs, dimensions);
+        }
+
+        public void UpdatePlayerPosition(ref Vector3 velocity, float deltaTime, bool isSneaking, UnityAABB[] terrainAABBs,
+            float playerWidth, float playerHeight)
+        {
+            var dimensions = new PlayerDimensions(playerWidth, playerHeight);
+            CachePlayerDimensions(dimensions);
+
             // Update player position
             var offset = velocity * deltaTime;
             lastMovementOffset = offset; // Store for gizmo visualization
@@ -67,13 +93,14 @@ namespace CraftSharp.Control
 
             // Special handling: If player is currently in/above liquid, don't
             // use GroundDistFromFeet (because the liquid can support them)
-            if (Status.LiquidDistFromHead < LIQUID_RAYCAST_DIST)
+            if (Status.LiquidDistFromHead < dimensions.LiquidRaycastDist)
             {
                 steppingLimit = HIGH_STEP_MAX_HEIGHT;
             }
 
-            var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward, steppingLimit,
-                terrainAABBs, out var wasBlockedVertically, out var wasBlockedHorizontally,
+            var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward,
+                steppingLimit, isSneaking, terrainAABBs, dimensions,
+                out var wasBlockedVertically, out var wasBlockedHorizontally,
                 out var duringStepping, out var finishedStepping,
                 out var blockingMin, out var blockingMax);
 
@@ -83,18 +110,6 @@ namespace CraftSharp.Control
                 blockingAABBMin = blockingMin;
                 blockingAABBMax = blockingMax;
             }
-            
-            /*
-            if (wasBlockedHorizontally)
-            {
-                // Kill horizontal movement if no stepping was performed or stepping is not finished
-                if (!finishedStepping)
-                {
-                    velocity.x = 0F;
-                    velocity.z = 0F;
-                }
-            }
-            */
 
             if (wasBlockedVertically)
             {
@@ -112,12 +127,15 @@ namespace CraftSharp.Control
         /// Calculates new player position given current position, movement offset, and a list of AABBs.
         /// If any AABB is in the way, the player moves to the point touching the AABB.
         /// </summary>
-        private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, Vector3 forward, float steppingLimit,
-            UnityAABB[] terrainAABBs, out bool wasBlockedVertically, out bool wasBlockedHorizontally, out bool duringStepping, out bool finishedStepping, out Vector3 blockingMin, out Vector3 blockingMax)
+        private static Vector3 CalculateNewPlayerPosition(Vector3 currentPosition, Vector3 offset, Vector3 forward, float steppingLimit, bool isSneaking,
+            UnityAABB[] terrainAABBs, PlayerDimensions dimensions, out bool wasBlockedVertically, out bool wasBlockedHorizontally, out bool duringStepping, out bool finishedStepping, out Vector3 blockingMin, out Vector3 blockingMax)
         {
             var newPos = currentPosition;
             var blockMin = Vector3.zero;
             var blockMax = Vector3.zero;
+
+            var playerRadius = dimensions.Radius;
+            var playerHeight = dimensions.Height;
 
             var effectiveOffset = offset;
             var adjustedToSurface = false;
@@ -246,15 +264,15 @@ namespace CraftSharp.Control
                 var targetFeet = currentFeet + horizontalOffset;
                 stepLift = 0F;
 
-                var startMinX = currentFeet.x - PLAYER_RADIUS;
-                var startMaxX = currentFeet.x + PLAYER_RADIUS;
-                var startMinZ = currentFeet.z - PLAYER_RADIUS;
-                var startMaxZ = currentFeet.z + PLAYER_RADIUS;
+                var startMinX = currentFeet.x - playerRadius;
+                var startMaxX = currentFeet.x + playerRadius;
+                var startMinZ = currentFeet.z - playerRadius;
+                var startMaxZ = currentFeet.z + playerRadius;
 
-                var endMinX = targetFeet.x - PLAYER_RADIUS;
-                var endMaxX = targetFeet.x + PLAYER_RADIUS;
-                var endMinZ = targetFeet.z - PLAYER_RADIUS;
-                var endMaxZ = targetFeet.z + PLAYER_RADIUS;
+                var endMinX = targetFeet.x - playerRadius;
+                var endMaxX = targetFeet.x + playerRadius;
+                var endMinZ = targetFeet.z - playerRadius;
+                var endMaxZ = targetFeet.z + playerRadius;
 
                 var sweepMinX = Mathf.Min(startMinX, endMinX);
                 var sweepMaxX = Mathf.Max(startMaxX, endMaxX);
@@ -289,7 +307,7 @@ namespace CraftSharp.Control
                     if (Vector3.Dot(toAabb, moveDir) <= 0F)
                         continue;
 
-                    if (WouldOverlapAfterLift(liftAmount, moveDir))
+                    if (WouldOverlapAfterLift(liftAmount, moveDir, playerHeight))
                         continue;
 
                     if (!found || surfaceY < bestSurface)
@@ -304,10 +322,10 @@ namespace CraftSharp.Control
                 return found;
             }
 
-            bool WouldOverlapAfterLift(float lift, Vector3 checkDirection)
+            bool WouldOverlapAfterLift(float lift, Vector3 checkDirection, float playerHeight)
             {
                 var testMinY = newPos.y + lift;
-                var testMaxY = testMinY + PLAYER_HEIGHT;
+                var testMaxY = testMinY + playerHeight;
 
                 var forwardShift = Vector3.zero;
                 var planarDirection = new Vector3(checkDirection.x, 0F, checkDirection.z);
@@ -325,10 +343,10 @@ namespace CraftSharp.Control
                 var shiftedZ = newPos.z + forwardShift.z;
 
                 // Add extra player radius to prevent false-negative
-                var playerMinX = shiftedX - PLAYER_RADIUS - 0.125F;
-                var playerMaxX = shiftedX + PLAYER_RADIUS + 0.125F;
-                var playerMinZ = shiftedZ - PLAYER_RADIUS - 0.125F;
-                var playerMaxZ = shiftedZ + PLAYER_RADIUS + 0.125F;
+                var playerMinX = shiftedX - playerRadius - 0.125F;
+                var playerMaxX = shiftedX + playerRadius + 0.125F;
+                var playerMinZ = shiftedZ - playerRadius - 0.125F;
+                var playerMaxZ = shiftedZ + playerRadius + 0.125F;
 
                 foreach (var aabb in terrainAABBs)
                 {
@@ -356,10 +374,10 @@ namespace CraftSharp.Control
 
             bool TryGetSupportingSurface(Vector3 feetPosition, UnityAABB[] environment, out UnityAABB surface)
             {
-                var playerMinX = feetPosition.x - PLAYER_RADIUS;
-                var playerMaxX = feetPosition.x + PLAYER_RADIUS;
-                var playerMinZ = feetPosition.z - PLAYER_RADIUS;
-                var playerMaxZ = feetPosition.z + PLAYER_RADIUS;
+                var playerMinX = feetPosition.x - playerRadius;
+                var playerMaxX = feetPosition.x + playerRadius;
+                var playerMinZ = feetPosition.z - playerRadius;
+                var playerMaxZ = feetPosition.z + playerRadius;
 
                 foreach (var aabb in environment)
                 {
@@ -389,11 +407,11 @@ namespace CraftSharp.Control
                 if (Mathf.Abs(movement) <= 0F) return;
 
                 var playerMinY = newPos.y;
-                var playerMaxY = newPos.y + PLAYER_HEIGHT;
-                var playerMinZ = newPos.z - PLAYER_RADIUS;
-                var playerMaxZ = newPos.z + PLAYER_RADIUS;
-                var playerMinX = newPos.x - PLAYER_RADIUS;
-                var playerMaxX = newPos.x + PLAYER_RADIUS;
+                var playerMaxY = newPos.y + playerHeight;
+                var playerMinZ = newPos.z - playerRadius;
+                var playerMaxZ = newPos.z + playerRadius;
+                var playerMinX = newPos.x - playerRadius;
+                var playerMaxX = newPos.x + playerRadius;
 
                 var clamped = movement;
 
@@ -445,11 +463,11 @@ namespace CraftSharp.Control
                 if (Mathf.Abs(movement) <= 0F) return;
 
                 var playerMinY = newPos.y;
-                var playerMaxY = newPos.y + PLAYER_HEIGHT;
-                var playerMinX = newPos.x - PLAYER_RADIUS;
-                var playerMaxX = newPos.x + PLAYER_RADIUS;
-                var playerMinZ = newPos.z - PLAYER_RADIUS;
-                var playerMaxZ = newPos.z + PLAYER_RADIUS;
+                var playerMaxY = newPos.y + playerHeight;
+                var playerMinX = newPos.x - playerRadius;
+                var playerMaxX = newPos.x + playerRadius;
+                var playerMinZ = newPos.z - playerRadius;
+                var playerMaxZ = newPos.z + playerRadius;
 
                 var clamped = movement;
 
@@ -500,12 +518,12 @@ namespace CraftSharp.Control
             {
                 if (Mathf.Abs(movement) <= 0F) return;
 
-                var playerMinX = newPos.x - PLAYER_RADIUS;
-                var playerMaxX = newPos.x + PLAYER_RADIUS;
-                var playerMinZ = newPos.z - PLAYER_RADIUS;
-                var playerMaxZ = newPos.z + PLAYER_RADIUS;
+                var playerMinX = newPos.x - playerRadius;
+                var playerMaxX = newPos.x + playerRadius;
+                var playerMinZ = newPos.z - playerRadius;
+                var playerMaxZ = newPos.z + playerRadius;
                 var playerMinY = newPos.y;
-                var playerMaxY = newPos.y + PLAYER_HEIGHT;
+                var playerMaxY = newPos.y + playerHeight;
 
                 var clamped = movement;
 
@@ -553,21 +571,24 @@ namespace CraftSharp.Control
             }
         }
 
-        private void CheckGrounded(UnityAABB[] terrainAABBs)
+        private void CheckGrounded(UnityAABB[] terrainAABBs, PlayerDimensions dimensions)
         {
+            var playerRadius = dimensions.Radius;
+            var groundRaycastDist = dimensions.GroundRaycastDist;
+
             // Player feet position
             var playerPos = transform.position;
             var playerFeetY = playerPos.y;
             
             // Check player's feet area (XZ plane) against terrain AABBs
-            var playerMinX = playerPos.x - PLAYER_RADIUS;
-            var playerMaxX = playerPos.x + PLAYER_RADIUS;
-            var playerMinZ = playerPos.z - PLAYER_RADIUS;
-            var playerMaxZ = playerPos.z + PLAYER_RADIUS;
+            var playerMinX = playerPos.x - playerRadius;
+            var playerMaxX = playerPos.x + playerRadius;
+            var playerMinZ = playerPos.z - playerRadius;
+            var playerMaxZ = playerPos.z + playerRadius;
 
             var isGrounded = false;
-            var closestGroundDist = GROUND_RAYCAST_DIST;
-            var raycastMinY = playerFeetY - GROUND_RAYCAST_DIST;
+            var closestGroundDist = groundRaycastDist;
+            var raycastMinY = playerFeetY - groundRaycastDist;
 
             // Check terrain AABBs (not triggers)
             foreach (var aabb in terrainAABBs)
@@ -609,20 +630,20 @@ namespace CraftSharp.Control
                     break;
             }
 
-            Status.GroundDistFromFeet = Mathf.Clamp(closestGroundDist, 0F, GROUND_RAYCAST_DIST);
+            Status.GroundDistFromFeet = Mathf.Clamp(closestGroundDist, 0F, groundRaycastDist);
             Status.Grounded = isGrounded;
         }
 
-        private void CheckInLiquid(UnityAABB[] liquidAABBs)
+        private void CheckInLiquid(UnityAABB[] liquidAABBs, PlayerDimensions dimensions)
         {
             var playerPos = transform.position;
 
-            var playerMinX = playerPos.x - PLAYER_RADIUS;
-            var playerMaxX = playerPos.x + PLAYER_RADIUS;
+            var playerMinX = playerPos.x - dimensions.Radius;
+            var playerMaxX = playerPos.x + dimensions.Radius;
             var playerMinY = playerPos.y;
-            var playerMaxY = playerPos.y + PLAYER_HEIGHT;
-            var playerMinZ = playerPos.z - PLAYER_RADIUS;
-            var playerMaxZ = playerPos.z + PLAYER_RADIUS;
+            var playerMaxY = playerPos.y + dimensions.Height;
+            var playerMinZ = playerPos.z - dimensions.Radius;
+            var playerMaxZ = playerPos.z + dimensions.Radius;
 
             var inLiquid = false;
             var highestLiquidTop = float.MinValue;
@@ -651,7 +672,7 @@ namespace CraftSharp.Control
             }
             else
             {
-                Status.LiquidDistFromHead = LIQUID_RAYCAST_DIST;
+                Status.LiquidDistFromHead = dimensions.LiquidRaycastDist;
                 Status.Floating = false;
             }
         }
@@ -660,19 +681,20 @@ namespace CraftSharp.Control
         {
             // Draw player AABB
             var playerPos = transform.position;
+            var dimensions = new PlayerDimensions(gizmoPlayerWidth, gizmoPlayerHeight);
             
             // Player AABB center (position is at feet, so center is at half height)
             var center = new Vector3(
                 playerPos.x,
-                playerPos.y + PLAYER_CENTER_Y,
+                playerPos.y + dimensions.CenterY,
                 playerPos.z
             );
             
             // Player AABB size
             var size = new Vector3(
-                PLAYER_WIDTH,
-                PLAYER_HEIGHT,
-                PLAYER_WIDTH
+                dimensions.Width,
+                dimensions.Height,
+                dimensions.Width
             );
             
             // Set gizmo color (cyan / magenta)

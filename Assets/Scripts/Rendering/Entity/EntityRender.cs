@@ -128,6 +128,8 @@ namespace CraftSharp.Rendering
         /// </summary>
         public readonly TrackedValue<EntityPose> Pose = new(EntityPose.Standing);
 
+        protected bool isClientEntity { get; private set; } = false;
+
         /// <summary>
         /// Update entity metadata, validate control variables,
         /// then check for visual/material update
@@ -174,8 +176,8 @@ namespace CraftSharp.Rendering
                 }
             }
 
-            // Update entity pose
-            if (Type.MetaSlotByName.TryGetValue("data_pose", out var metaSlot4)
+            // Update entity pose (Only update for non-client entities)
+            if (!isClientEntity && Type.MetaSlotByName.TryGetValue("data_pose", out var metaSlot4)
                 && Type.MetaEntries[metaSlot4].DataType == EntityMetadataType.Pose)
             {
                 if (Metadata.TryGetValue(metaSlot4, out var value) && value is int pose)
@@ -251,6 +253,11 @@ namespace CraftSharp.Rendering
         /// several mobs of a same type moving synchronisedly, which looks unnatural
         /// </summary>
         protected float _pseudoRandomOffset = 0F;
+
+        public void SetClientEntityFlag()
+        {
+            isClientEntity = true;
+        }
 
         /// <summary>
         /// Initialize this entity render
@@ -347,6 +354,13 @@ namespace CraftSharp.Rendering
         }
         
         #nullable disable
+
+        public void UpdateLocalSneakingStatus(bool sneaking)
+        {
+            // Update local entity pose. Note that metadata stays
+            // unchanged, and is consistent with server-side data
+            Pose.Value = sneaking ? EntityPose.Sneaking : EntityPose.Standing;
+        }
 
         /// <summary>
         /// Finalize this entity render
@@ -585,14 +599,20 @@ namespace CraftSharp.Rendering
                 _fireBillboardTransform.localRotation = Quaternion.LookRotation(directionToTarget);
             }
         }
+
+        public virtual Vector2 GetDimensions()
+        {
+            return new Vector2(Type.Width, Type.Height);
+        }
         
         private void OnDrawGizmos()
         {
             // Draw player AABB
             var entityPos = transform.position;
             
-            var width = Type.Width;
-            var height = Type.Height;
+            var dimensions = GetDimensions();
+            var width = dimensions.x;
+            var height = dimensions.y;
             
             // Player AABB center (position is at feet, so center is at half height)
             var center = new Vector3(entityPos.x, entityPos.y + height / 2F, entityPos.z);

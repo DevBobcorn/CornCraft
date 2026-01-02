@@ -2552,7 +2552,7 @@ namespace CraftSharp
         {
             CurrentHotbarSlot = slot;
             var newItem = inventories[0].GetHotbarItem(slot);
-            // Broad cast hotbar selection change
+            // Broadcast hotbar selection change
             EventManager.Instance.BroadcastOnUnityThread(
                 new HeldItemUpdateEvent(CurrentHotbarSlot, Hand.MainHand, true, newItem,
                     PlayerActionHelper.GetItemActionType(newItem)));

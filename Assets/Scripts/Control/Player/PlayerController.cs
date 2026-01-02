@@ -118,6 +118,9 @@ namespace CraftSharp.Control
 
                 // Initialize player entity render (originOffset not used here)
                 m_PlayerRender.Initialize(entitySpawn, Vector3Int.zero);
+
+                // Set client entity flag to implement special handling
+                m_PlayerRender.SetClientEntityFlag();
                 
                 // Update entity data from previous player render
                 if (prevRender && prevRender.Metadata is not null)
@@ -278,15 +281,22 @@ namespace CraftSharp.Control
             if (wasSprinting != Status.Sprinting)
             {
                 OnPlayerAction?.Invoke(wasSprinting ? EntityActionType.StopSprinting : EntityActionType.StartSprinting);
+                
+                // Update visual sprinting status(client prediction). The server will send it too but that would be too late.
+                
             }
             
             // Check if sneaking status has changed
             if (wasSneaking != Status.Sneaking)
             {
                 OnPlayerAction?.Invoke(wasSneaking ? EntityActionType.StopSneaking : EntityActionType.StartSneaking);
+                
+                // Update visual sprinting status(client prediction). The server will send it too but that would be too late.
+                if (m_PlayerRender)
+                {
+                    m_PlayerRender.UpdateLocalSneakingStatus(Status.Sneaking);
+                }
             }
-            
-            
         }
 
         private void OnDestroy()
@@ -444,9 +454,10 @@ namespace CraftSharp.Control
             }
 
             // Update player status (in water, grounded, etc.)
-            if (!Status.EntityDisabled)
+            if (!status.EntityDisabled)
             {
-                m_StatusUpdater.UpdatePlayerStatus(terrainAABBs, liquidAABBs);
+                var dimensions = m_PlayerRender ? m_PlayerRender.GetDimensions() : Vector2.one;
+                m_StatusUpdater.UpdatePlayerStatus(terrainAABBs, liquidAABBs, dimensions.x, dimensions.y);
             }
 
             // Update current player state
@@ -492,8 +503,9 @@ namespace CraftSharp.Control
             }
             else
             {
+                var dimensions = m_PlayerRender ? m_PlayerRender.GetDimensions() : Vector2.one;
                 // Update player position using calculated velocity
-                m_StatusUpdater.UpdatePlayerPosition(ref currentVelocity, deltaTime, aabbs);
+                m_StatusUpdater.UpdatePlayerPosition(ref currentVelocity, deltaTime, Status.Sneaking, aabbs, dimensions.x, dimensions.y);
             }
 
             // ReSharper disable once CompareOfFloatsByEqualityOperator
