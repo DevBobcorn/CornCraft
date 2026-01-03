@@ -1002,7 +1002,7 @@ namespace CraftSharp.Rendering
 
                     // Set last player location
                     lastPlayerBlockLoc = playerBlockLoc;
-                    lastPlayerChunkLoc = new(playerBlockLoc.GetChunkX(), playerBlockLoc.GetChunkZ());
+                    lastPlayerChunkLoc = new int2(playerBlockLoc.GetChunkX(), playerBlockLoc.GetChunkZ());
 
                     callback?.Invoke();
                 });

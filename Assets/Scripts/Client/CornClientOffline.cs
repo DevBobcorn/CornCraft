@@ -40,6 +40,7 @@ namespace CraftSharp
             return new List<RecipeExtraData>(0);
         }
 
+        public override float CurrentHealth => 20F;
         public override int ExperienceLevel => 42;
         public override bool CheckAddDragged(ItemStack slotItem, Func<ItemStack, bool> slotPredicate) => false;
         #endregion

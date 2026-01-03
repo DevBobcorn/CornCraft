@@ -81,6 +81,7 @@ namespace CraftSharp
         private readonly EntitySpawnData _clientEntitySpawn = new(0, EntityType.DUMMY_ENTITY_TYPE, Location.Zero);
         private float maximumHealth = -0F;
         private float currentHealth = -0F;
+        public override float CurrentHealth => currentHealth;
         private int sequenceId; // User for player block synchronization (Aka. digging, placing blocks, etc..)
         private int currentHunger;
         private float currentSaturation;

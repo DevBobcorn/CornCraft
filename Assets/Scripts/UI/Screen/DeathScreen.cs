@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,8 +11,8 @@ namespace CraftSharp.UI
     public class DeathScreen : BaseScreen
     {
         // UI controls and objects
+        [SerializeField] private Animator screenAnimator;
         [SerializeField] private Button respawnButton, quitButton;
-        private CanvasGroup screenGroup;
 
         private bool isActive = false;
 
@@ -19,12 +20,24 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
-                screenGroup.alpha = value ? 1F : 0F;
-                screenGroup.blocksRaycasts = value;
-                screenGroup.interactable   = value;
+                screenAnimator.SetBool(SHOW_HASH, isActive);
+
+                if (isActive)
+                {
+                    respawnButton.interactable = false;
+                    
+                    StartCoroutine(EnableRespawn());
+                }
             }
 
             get => isActive;
+        }
+
+        private IEnumerator EnableRespawn()
+        {
+            yield return new WaitForSecondsRealtime(0.5F);
+            
+            respawnButton.interactable = true;
         }
 
         public override bool ReleaseCursor()
@@ -37,12 +50,17 @@ namespace CraftSharp.UI
             return true;
         }
 
-        private static void Respawn()
+        private void Respawn()
         {
             var client = CornApp.CurrentClient;
             if (!client) return;
 
             client.SendRespawnPacket();
+
+            if (isActive)
+            {
+                client.ScreenControl.TryPopScreen();
+            }
         }
 
         private static void QuitGame()
@@ -62,8 +80,6 @@ namespace CraftSharp.UI
         protected override void Initialize()
         {
             // Initialize controls and add listeners
-            screenGroup = GetComponent<CanvasGroup>();
-
             respawnButton.onClick.AddListener(Respawn);
             quitButton.onClick.AddListener(QuitGame);
 
@@ -74,10 +90,6 @@ namespace CraftSharp.UI
                 if (e.Health <= 0F && !isActive)
                 {
                     client.ScreenControl.PushScreen<DeathScreen>();
-                }
-                else if (e.Health > 0F && isActive) // Hide death screen
-                {
-                    client.ScreenControl.TryPopScreen();
                 }
             };
 

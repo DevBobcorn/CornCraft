@@ -14,7 +14,14 @@ namespace CraftSharp.UI
         {
             set {
                 isActive = value;
+
                 screenAnimator.SetBool(SHOW_HASH, isActive);
+                
+                // Show the screen immediately
+                if (isActive)
+                {
+                    screenAnimator.Play("Shown");
+                }
             }
 
             get => isActive;
