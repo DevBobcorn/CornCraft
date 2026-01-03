@@ -28,7 +28,17 @@ namespace CraftSharp.Control
             }
             else
             {
-                info.Sneaking = inputData.Locomotion.Descend.IsPressed();
+                bool sneakPressed = inputData.Locomotion.Descend.IsPressed();
+
+                if (sneakPressed)
+                {
+                    info.Sneaking = true;
+                }
+                // When disabling sneaking, check if enough space is free above to stand up
+                else if (info.CeilingDistFromHead >= 0.3F)
+                {
+                    info.Sneaking = false;
+                }
             }
 
             // Movement velocity update
@@ -144,8 +154,11 @@ namespace CraftSharp.Control
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
-            info.Sprinting = false;
-            info.Sneaking = false;
+            if (info.GroundDistFromFeet > 0.6F)
+            {
+                info.Sprinting = false;
+                info.Sneaking = false;
+            }
 
             // Reset request flags
             _jumpRequested = false;
@@ -172,8 +185,11 @@ namespace CraftSharp.Control
 
         public void OnExit(IPlayerState nextState, PlayerStatus info, PlayerController player)
         {
-            info.Sprinting = false;
-            info.Sneaking = false;
+            if (info.GroundDistFromFeet > 0.6F)
+            {
+                info.Sprinting = false;
+                info.Sneaking = false;
+            }
 
             // Unregister input action events
             player.Actions.Locomotion.Jump.performed -= jumpRequestCallback;

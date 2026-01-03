@@ -12,6 +12,7 @@ namespace CraftSharp.Control
         private const float MOVEMENT_EPSILON = 1E-4F; // Threshold to consider movement negligible
         private const float MAX_STEP_HEIGHT = 0.125F;
         private const float HIGH_STEP_MAX_HEIGHT = 1.125F;
+        private const float HIGH_STEP_MAX_HEIGHT_SNEAKING = 0.5F;
         private const float HIGH_STEP_LIFT_AMOUNT = 0.125F;
         private const float FORWARD_STEP_DOT_THRESHOLD = 0.5F;
         private const float STEP_FORWARD_CHECK_OFFSET = 0.125F;
@@ -64,6 +65,9 @@ namespace CraftSharp.Control
             // Grounded state update
             CheckGrounded(terrainAABBs, dimensions);
             
+            // Ceiling distance update
+            CheckCeiling(terrainAABBs, dimensions);
+            
             // Liquid status update
             CheckInLiquid(liquidAABBs, dimensions);
         }
@@ -96,6 +100,12 @@ namespace CraftSharp.Control
             if (Status.LiquidDistFromHead < dimensions.LiquidRaycastDist)
             {
                 steppingLimit = HIGH_STEP_MAX_HEIGHT;
+            }
+
+            // Special handling: If player is sneaking, limit the stepping height
+            if (Status.Sneaking)
+            {
+                steppingLimit = HIGH_STEP_MAX_HEIGHT_SNEAKING - Status.GroundDistFromFeet;
             }
 
             var newPosition = CalculateNewPlayerPosition(transform.position, offset, movementForward,
@@ -632,6 +642,62 @@ namespace CraftSharp.Control
 
             Status.GroundDistFromFeet = Mathf.Clamp(closestGroundDist, 0F, groundRaycastDist);
             Status.Grounded = isGrounded;
+        }
+
+        private void CheckCeiling(UnityAABB[] terrainAABBs, PlayerDimensions dimensions)
+        {
+            var playerRadius = dimensions.Radius;
+            var ceilingRaycastDist = dimensions.Height; // Use same distance as ground check
+
+            // Player head position
+            var playerPos = transform.position;
+            var playerHeadY = playerPos.y + dimensions.Height;
+            
+            // Check player's head area (XZ plane) against terrain AABBs
+            var playerMinX = playerPos.x - playerRadius;
+            var playerMaxX = playerPos.x + playerRadius;
+            var playerMinZ = playerPos.z - playerRadius;
+            var playerMaxZ = playerPos.z + playerRadius;
+
+            var closestCeilingDist = ceilingRaycastDist;
+            var raycastMaxY = playerHeadY + ceilingRaycastDist;
+
+            // Check terrain AABBs (not triggers)
+            foreach (var aabb in terrainAABBs)
+            {
+                // Skip trigger AABBs (NoCollision blocks)
+                if (aabb.IsTrigger) continue;
+                
+                // Check if player's head area overlaps with this AABB in XZ plane
+                var xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
+                var zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
+                
+                if (!xOverlap || !zOverlap)
+                    continue;
+
+                var aabbTopY = aabb.Max.y;
+                var aabbBottomY = aabb.Min.y;
+
+                // If player's head is inside the AABB
+                if (playerHeadY >= aabbBottomY && playerHeadY <= aabbTopY)
+                {
+                    closestCeilingDist = 0F;
+                }
+                // If AABB bottom is above player's head and within raycast range
+                else if (aabbBottomY >= playerHeadY && aabbBottomY <= raycastMaxY)
+                {
+                    var distance = aabbBottomY - playerHeadY;
+                    if (distance < closestCeilingDist)
+                    {
+                        closestCeilingDist = distance;
+                    }
+                }
+
+                if (closestCeilingDist <= 0F)
+                    break;
+            }
+
+            Status.CeilingDistFromHead = Mathf.Clamp(closestCeilingDist, 0F, ceilingRaycastDist);
         }
 
         private void CheckInLiquid(UnityAABB[] liquidAABBs, PlayerDimensions dimensions)

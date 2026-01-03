@@ -144,7 +144,11 @@ namespace CraftSharp.Control
 
         public void OnEnter(IPlayerState prevState, PlayerStatus info, PlayerController player)
         {
-            info.Sprinting = false;
+            if (info.GroundDistFromFeet > 0.6F)
+            {
+                info.Sprinting = false;
+                info.Sneaking = false;
+            }
             info.Gliding = false;
             
             // Reset air time but not jump time
