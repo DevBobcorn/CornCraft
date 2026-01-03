@@ -16,6 +16,7 @@ namespace CraftSharp.Control
         private const float HIGH_STEP_LIFT_AMOUNT = 0.125F;
         private const float FORWARD_STEP_DOT_THRESHOLD = 0.5F;
         private const float STEP_FORWARD_CHECK_OFFSET = 0.125F;
+        private const float SNEAK_FALL_PREVENTION_THRESHOLD = 0.6F;
 
         private float gizmoPlayerWidth = 1F;
         private float gizmoPlayerHeight = 1F;
@@ -146,6 +147,10 @@ namespace CraftSharp.Control
 
             var playerRadius = dimensions.Radius;
             var playerHeight = dimensions.Height;
+            
+            // innerRadius is used for falling prevention during sneaking
+            // Make the radius smaller to prevent falling after sneaking state is stopped
+            var innerRadius = dimensions.Radius - 0.01F;
 
             var effectiveOffset = offset;
             var adjustedToSurface = false;
@@ -159,7 +164,7 @@ namespace CraftSharp.Control
 
             if (terrainAABBs.Length > 0 &&
                 !hasMovement &&
-                TryGetSupportingSurface(currentPosition, terrainAABBs, out supportingSurface))
+                TryGetSupportingSurface(currentPosition, out supportingSurface))
             {
                 if (effectiveOffset.y < 0F)
                 {
@@ -317,7 +322,7 @@ namespace CraftSharp.Control
                     if (Vector3.Dot(toAabb, moveDir) <= 0F)
                         continue;
 
-                    if (WouldOverlapAfterLift(liftAmount, moveDir, playerHeight))
+                    if (WouldOverlapAfterLift(liftAmount, moveDir))
                         continue;
 
                     if (!found || surfaceY < bestSurface)
@@ -332,7 +337,7 @@ namespace CraftSharp.Control
                 return found;
             }
 
-            bool WouldOverlapAfterLift(float lift, Vector3 checkDirection, float playerHeight)
+            bool WouldOverlapAfterLift(float lift, Vector3 checkDirection)
             {
                 var testMinY = newPos.y + lift;
                 var testMaxY = testMinY + playerHeight;
@@ -382,14 +387,134 @@ namespace CraftSharp.Control
                     : maxA > minB && minA < maxB;
             }
 
-            bool TryGetSupportingSurface(Vector3 feetPosition, UnityAABB[] environment, out UnityAABB surface)
+            // Gets the fall distance at a given horizontal position (X, Z) from the current feet Y position.
+            // Returns the distance from feetY to the ground below, or a large value if no ground is found.
+            float GetFallDistanceAtPosition(float testX, float testZ, float feetY)
+            {
+                var playerMinX = testX - innerRadius;
+                var playerMaxX = testX + innerRadius;
+                var playerMinZ = testZ - innerRadius;
+                var playerMaxZ = testZ + innerRadius;
+
+                var closestGroundY = float.MinValue;
+                var foundGround = false;
+
+                foreach (var aabb in terrainAABBs)
+                {
+                    if (aabb.IsTrigger) continue;
+
+                    // Check if player's feet area overlaps with this AABB in XZ plane
+                    var xOverlap = playerMaxX > aabb.Min.x && playerMinX < aabb.Max.x;
+                    var zOverlap = playerMaxZ > aabb.Min.z && playerMinZ < aabb.Max.z;
+
+                    if (!xOverlap || !zOverlap)
+                        continue;
+
+                    var aabbTopY = aabb.Max.y;
+
+                    // Only consider ground that is at or below the current feet position
+                    if (aabbTopY <= feetY && aabbTopY > closestGroundY)
+                    {
+                        closestGroundY = aabbTopY;
+                        foundGround = true;
+                    }
+                }
+
+                if (foundGround)
+                {
+                    return feetY - closestGroundY;
+                }
+
+                // If no ground found, return a large value to indicate unsafe movement
+                return float.MaxValue;
+            }
+
+            // Finds the maximum safe movement distance along X axis that won't cause a fall > threshold.
+            // Uses binary search to find the safe distance.
+            float FindMaxSafeMovementX(float startX, float startZ, float feetY, float movement, float maxFallDistance)
+            {
+                var direction = Mathf.Sign(movement);
+                var absMovement = Mathf.Abs(movement);
+                var minMovement = 0F;
+                var maxMovement = absMovement;
+
+                // Binary search for maximum safe distance
+                const int maxIterations = 10;
+                for (int i = 0; i < maxIterations; i++)
+                {
+                    var testMovement = (minMovement + maxMovement) * 0.5F;
+                    var testX = startX + testMovement * direction;
+                    var testZ = startZ;
+
+                    var fallDistance = GetFallDistanceAtPosition(testX, testZ, feetY);
+
+                    if (fallDistance <= maxFallDistance)
+                    {
+                        // This distance is safe, try to go further
+                        minMovement = testMovement;
+                    }
+                    else
+                    {
+                        // This distance is unsafe, reduce movement
+                        maxMovement = testMovement;
+                    }
+
+                    // Stop if we've converged
+                    if (maxMovement - minMovement < MOVEMENT_EPSILON)
+                        break;
+                }
+
+                // Return the safe movement distance with original sign
+                return minMovement * direction;
+            }
+
+            // Finds the maximum safe movement distance along Z axis that won't cause a fall > threshold.
+            // Uses binary search to find the safe distance.
+            float FindMaxSafeMovementZ(float startX, float startZ, float feetY, float movement, float maxFallDistance)
+            {
+                var direction = Mathf.Sign(movement);
+                var absMovement = Mathf.Abs(movement);
+                var minMovement = 0F;
+                var maxMovement = absMovement;
+
+                // Binary search for maximum safe distance
+                const int maxIterations = 10;
+                for (int i = 0; i < maxIterations; i++)
+                {
+                    var testMovement = (minMovement + maxMovement) * 0.5F;
+                    var testX = startX;
+                    var testZ = startZ + testMovement * direction;
+
+                    var fallDistance = GetFallDistanceAtPosition(testX, testZ, feetY);
+
+                    if (fallDistance <= maxFallDistance)
+                    {
+                        // This distance is safe, try to go further
+                        minMovement = testMovement;
+                    }
+                    else
+                    {
+                        // This distance is unsafe, reduce movement
+                        maxMovement = testMovement;
+                    }
+
+                    // Stop if we've converged
+                    if (maxMovement - minMovement < MOVEMENT_EPSILON)
+                        break;
+                }
+
+                // Return the safe movement distance with original sign
+                return minMovement * direction;
+            }
+
+            bool TryGetSupportingSurface(Vector3 feetPosition, out UnityAABB surface)
             {
                 var playerMinX = feetPosition.x - playerRadius;
                 var playerMaxX = feetPosition.x + playerRadius;
                 var playerMinZ = feetPosition.z - playerRadius;
                 var playerMaxZ = feetPosition.z + playerRadius;
 
-                foreach (var aabb in environment)
+                foreach (var aabb in terrainAABBs)
                 {
                     if (aabb.IsTrigger) continue;
 
@@ -465,6 +590,24 @@ namespace CraftSharp.Control
                         break;
                 }
 
+                // Sneaking fall prevention: check if movement would cause a fall > 0.6 units
+                if (isSneaking && Mathf.Abs(clamped) > MOVEMENT_EPSILON)
+                {
+                    var testX = newPos.x + clamped;
+                    var fallDistance = GetFallDistanceAtPosition(testX, newPos.z, newPos.y);
+                    
+                    if (fallDistance > SNEAK_FALL_PREVENTION_THRESHOLD)
+                    {
+                        // Binary search to find the maximum safe movement distance
+                        var safeMovement = FindMaxSafeMovementX(newPos.x, newPos.z, newPos.y, clamped, SNEAK_FALL_PREVENTION_THRESHOLD);
+                        clamped = safeMovement;
+                        if (Mathf.Abs(clamped) < Mathf.Abs(movement))
+                        {
+                            blocked = true;
+                        }
+                    }
+                }
+
                 newPos.x += clamped;
             }
 
@@ -519,6 +662,24 @@ namespace CraftSharp.Control
 
                     if (Mathf.Abs(clamped) <= 0F)
                         break;
+                }
+
+                // Sneaking fall prevention: check if movement would cause a fall > 0.6 units
+                if (isSneaking && Mathf.Abs(clamped) > MOVEMENT_EPSILON)
+                {
+                    var testZ = newPos.z + clamped;
+                    var fallDistance = GetFallDistanceAtPosition(newPos.x, testZ, newPos.y);
+                    
+                    if (fallDistance > SNEAK_FALL_PREVENTION_THRESHOLD)
+                    {
+                        // Binary search to find the maximum safe movement distance
+                        var safeMovement = FindMaxSafeMovementZ(newPos.x, newPos.z, newPos.y, clamped, SNEAK_FALL_PREVENTION_THRESHOLD);
+                        clamped = safeMovement;
+                        if (Mathf.Abs(clamped) < Mathf.Abs(movement))
+                        {
+                            blocked = true;
+                        }
+                    }
                 }
 
                 newPos.z += clamped;
