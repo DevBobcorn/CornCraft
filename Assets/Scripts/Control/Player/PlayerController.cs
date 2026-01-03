@@ -515,7 +515,8 @@ namespace CraftSharp.Control
             }
 
             // Visual updates... Don't pass the velocity by ref here, just the value
-            OnPlayerUpdate?.Invoke(currentVelocity, deltaTime, Status);
+            var visualVelocity = currentVelocity;
+            OnPlayerUpdate?.Invoke(visualVelocity, deltaTime, Status);
         }
 
         public void AfterCharacterUpdate()
