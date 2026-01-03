@@ -169,15 +169,15 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: com.DevBobcorn.CornCraft
-    Standalone: com.DevBobcorn.CornCraft
+    Android: com.devbobcorn.corncraft
+    Standalone: com.devbobcorn.corncraft
   buildNumber:
     Bratwurst: 0
     Standalone: 0
     VisionOS: 0
     iPhone: 0
     tvOS: 0
-  overrideDefaultApplicationIdentifier: 0
+  overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 25
   AndroidTargetSdkVersion: 0
