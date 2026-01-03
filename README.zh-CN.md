@@ -17,8 +17,6 @@ CornCraft用来解析原版资源包的代码已独立成一个package并开源�
 ## > 服务端搭建
 推荐的服务端版本有<code>1.16.5</code>、<code>1.17.1</code>以及<code>1.18.2</code>，纯净服和插件服均可使用。
 
-搭建服务器时，建议将<code>server.properties</code>中的<code>allow-flight</code>选项设置为<code>true</code>，否则可能会在使用此客户端时被踢出游戏（CornCraft没有模拟原版的物理运算，而是使用Unity内置的物理系统）。
-
 对于<code>1.19.1</code>及更高版本的服务器，还需将<code>enforce-secure-profile</code>设置为<code>false</code>以使CornCraft正确登录（Unity里面系统自带的RSA库好像是被阉割了？暂时用不了）。
 
 ## > 构建与运行

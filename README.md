@@ -17,8 +17,6 @@ The code CornCraft uses to parse vanilla resource packs is also open source as a
 ## > Server Setup
 Recommended server versions for CornCraft are <code>1.16.5</code>, <code>1.17.1</code> and <code>1.18.2</code>, both vanilla servers and plugin servers like Spigot are supported.
 
-When setting up a server for CornCraft, it is recommended to set the <code>allow-flight</code> option to <code>true</code> in <code>server.properties</code> file, otherwise it's likely you'll be kicked from the server when moving around(because CornCraft does not and likely will not simulate vanilla player physics, it uses Unity's physics system).
-
 For <code>1.19.1</code> or higher servers, it is also necessary to set <code>enforce-secure-profile</code> to <code>false</code> so that CornCraft can log in correctly.
 
 ## > Building & Running
